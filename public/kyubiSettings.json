@@ -1,0 +1,59 @@
+{
+    "extId": "61d7ebd121a9b46f04759aa6",
+    "appName": "Friender",
+    "loginURL": "https://dev.kyubi.io/api/end-user/login",
+    "logoutURL": null,
+    "forgotPassURL": "https://dev.kyubi.io/api/end-user/generate-password-token",
+    "changePassURL": "https://dev.kyubi.io/api/end-user/update-password",
+    "checkUserStatusURL": "https://dev.kyubi.io/api/end-user/get-status",
+    "youtubeLink": "",
+    "youtubeLink2": null,
+    "signupURL": "https://dev.kyubi.io/",
+    "description": {
+     "short_description": null,
+     "long_description": "React and Engage with your friend's post on a single click."
+    },
+    "logo": {
+     "small_icon": "./images/16X16.png",
+     "medium_icon": "./images/48X48.png",
+     "large_icon": "./images/128X128.png",
+     "primary_logo": "images/logo.png",
+     "secondary_logo": "images/logo.png",
+     "background_image": null
+    },
+    "loader": {
+     "preLoader": null,
+     "replyLoader": null,
+     "customLoader": null
+    },
+    "footer": {
+     "showFooter": true,
+     "poweredBy": {
+      "label": "Tier5",
+      "url": "https://www.tier5.us/",
+      "willBeDisplayed": true
+     },
+     "partnership": {
+      "label": "Partnership",
+      "url": "https://www.facebook.com/groups/engagementmonster",
+      "willBeDisplayed": true
+     },
+     "chatSupport": {
+      "label": "Support",
+      "url": "https://www.messenger.com/tier5development",
+      "willBeDisplayed": true
+     },
+     "officialGroup": {
+      "label": "Facebook Group",
+      "url": "https://www.facebook.com/groups/engagementmonster",
+      "willBeDisplayed": true
+     }
+    },
+    "isLive": false,
+    "advertisementTextHtml": null,
+    "mailTo": "support@tier5.us",
+    "publicVapidKey": "BHcFkqcSHe3BS6EPkUWzYCXM2v4nSd541MqGyEao2EaSQeaQ_xfZrb8IcSasVN1G5pAwmDpXLNIjR7kTnEePOCA",
+    "clearSubscriptionObjectURL": "https://dev.kyubi.io/api/clear-subscription-object",
+    "registerNotificationView": "https://dev.kyubi.io/api/notification-view",
+    "appBaseBackendUrl": ""
+   }

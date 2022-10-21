@@ -1,0 +1,444 @@
+* {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  text-decoration: none;
+  font-style: normal;
+  outline: none;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+  scroll-behavior: smooth;
+}
+
+:before,
+:after {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+body,
+html {
+  color: #000;
+  font-weight: normal;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  font-size: 14px;
+  line-height: 16px;
+}
+
+/* Lists==================== */
+
+ol,
+ul {
+  list-style: none;
+}
+
+/* Links, inputs and Buttons==================== */
+
+a {
+  color: inherit;
+}
+
+a:hover {
+  color: #ccc;
+}
+
+a,
+a *,
+.btn,
+.button,
+button,
+input[type="button"],
+input[type="button"],
+input[type="submit"],
+input[type="submit"],
+select {
+  user-select: none;
+  outline: none;
+  -webkit-transition: all ease 0.4s;
+  -o-transition: all ease 0.4s;
+  transition: all ease 0.4s;
+  cursor: pointer;
+}
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  display: none;
+}
+
+label {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.d-inline-f {
+  display: inline-flex;
+}
+
+.btn,
+.inline-btn {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  box-shadow: 0px 3px 7px #94c0e37c;
+}
+
+.btn *,
+button * {
+  pointer-events: none;
+}
+
+.btn img,
+button img {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+input,
+textarea,
+select,
+.select-trigger {
+  min-height: 40px;
+  font-size: 16px;
+  padding: 3px 10px;
+  vertical-align: middle;
+  background-color: transparent;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  border: none;
+  width: 100%;
+}
+
+select {
+  -webkit-appearance: none;
+}
+
+input::-ms-clear,
+input:-ms-clear {
+  display: none;
+}
+
+textarea {
+  resize: none;
+  padding: 5px 10px;
+}
+
+:disabled,
+::disabled {
+  cursor: not-allowed;
+}
+
+:readonly,
+::readonly {
+  cursor: default;
+}
+
+::-webkit-input-placeholder {
+  font-size: inherit;
+  color: #bbb9d1;
+}
+
+::-moz-placeholder {
+  font-size: inherit;
+  color: #bbb9d1;
+}
+
+:-ms-input-placeholder {
+  font-size: inherit;
+  color: #bbb9d1;
+}
+
+::-ms-input-placeholder {
+  font-size: inherit;
+  color: #bbb9d1;
+}
+
+::placeholder {
+  font-size: inherit;
+  color: #bbb9d1;
+}
+
+/* Tables==================== */
+
+table {
+  table-layout: fixed;
+  width: 100%;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+td {
+  vertical-align: middle;
+}
+
+/* Headings==================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+}
+
+h2 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+h6 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Other elements==================== */
+
+img {
+  max-height: 100%;
+  max-width: 100%;
+}
+
+blockquote,
+q {
+  quotes: none;
+}
+
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
+  content: "";
+  content: none;
+}
+
+p,
+table,
+blockquote,
+address,
+pre,
+iframe,
+form,
+figure,
+dl {
+  margin: 0;
+}
+
+p + p {
+  margin-top: 15px;
+}
+
+br,
+.clear {
+  clear: both;
+}
+
+audio,
+video {
+  display: block;
+  width: 100%;
+}
+
+/* Custom useful classes */
+.no_shadow {
+  box-shadow: none !important;
+}
+.no_radius {
+  border-radius: 0;
+}
+.no-pointer {
+  pointer-events: none;
+}
+.h-100 {
+  height: 100%;
+  flex: 1 1 auto;
+}
+.btn,
+.btn-skeleton {
+  display: block;
+  width: 100%;
+  flex: 0 0 auto;
+}
+.btn,
+.inline-btn,
+.btn-skeleton{
+  height: 42px;
+  font-weight: 600;
+  font-size: 18px;
+  padding: 0 15px;
+}
+.inline-btn {
+  display: inline-flex;
+  align-items: center;
+}
+.btn-medium {
+  padding: 0 40px;
+}
+.btn-skeleton {
+  background: #fff;
+  border: 1px solid;
+  font-size: 16px;
+}
+.clearfix:after,
+.w-row:after {
+  clear: both;
+}
+
+.clearfix:after,
+.clearfix:before,
+.w-row:after,
+.w-row:before {
+  content: "";
+  display: table;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: end;
+}
+
+.text-left {
+  text-align: start;
+}
+
+.d-flex {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.f-column {
+  flex-direction: column;
+}
+
+.f-row {
+  flex-direction: row;
+}
+
+.f-align-center {
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+
+.f-align-start {
+  -webkit-box-align: start;
+  -ms-flex-align: start;
+  align-items: flex-start;
+}
+
+.f-align-end {
+  -webkit-box-align: end;
+  -ms-flex-align: end;
+  align-items: flex-end;
+}
+
+.f-justify-between {
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+}
+
+.f-justify-around {
+  -ms-flex-pack: distribute;
+  justify-content: space-around;
+}
+
+.f-justify-center {
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+/* COLS AND ROWS */
+.w-row {
+  margin: 0 -15px;
+  display: flex;
+  flex-wrap: wrap;
+}
+.w-row > * {
+  width: 100%;
+  max-width: 100%;
+}
+.w-col {
+  flex: 1 0 0%;
+  padding: 0 15px;
+}
+.w-25 {
+  flex: 0 0 auto;
+  width: 25%;
+}
+.w-33 {
+  flex: 0 0 auto;
+  width: 33.333%;
+}
+.w-50 {
+  flex: 0 0 auto;
+  width: 50%;
+}
+.w-66 {
+  flex: 0 0 auto;
+  width: 66.667%;
+}
+.w-75 {
+  flex: 0 0 auto;
+  width: 75%;
+}
+.w-offset-25 {
+  margin-left: 25%;
+}
+.w-offset-50 {
+  margin-left: 50%;
+}
+.w-offset-75 {
+  margin-left: 75%;
+}
+/* COLS AND ROWS */
+
+/* Border Radius */
+.r-circle {
+  border-radius: 50%;
+}
+.r-side-arc {
+  border-radius: 35px;
+}
+.r-5 {
+  border-radius: 5px;
+}
+.r-8 {
+  border-radius: 8px;
+}
+.r-15 {
+  border-radius: 15px;
+}
+.r-30 {
+  border-radius: 30px;
+}
+/* Border Radius */
+/* Custom useful classes */

@@ -1,0 +1,50 @@
+{
+  "name": "Friender",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "description": "paanchmishali....",
+  "background": {
+    "service_worker": "serviceWorker.js"
+  },
+  
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "images/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "icons": {
+    "16" : "./images/16X16.png",
+    "48" : "./images/48X48.png",
+    "128": "./images/128X128.png"
+  },
+  "action": {
+    "default_title": "Friender"
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.messenger.com/*",
+    "https://*.facebook.com/*",
+    "https://m.facebook.com/*",
+    "https://api.mefnevan.com/api"
+  ],
+  "externally_connectable": {
+    "matches": [
+      "http://localhost:3000/*"
+    ],
+    "accepts_tls_channel_id": true
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'",
+    "content_scripts": "script-src 'self'; object-src 'none'"
+  }
+}

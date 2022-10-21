@@ -1,0 +1,44 @@
+.em_auth {
+  background-image: url("../../../assets/images/auth-background.png");
+  background-position: right top;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.em_auth .em_ext_content {
+  padding: 0 25px;
+}
+
+.auth_form {
+  margin-top: 40px;
+}
+
+.auth_form .form-control {
+  border: none;
+  height: 40px;
+  box-shadow: 0px 3px 7px #94c0e37d;
+}
+
+.auth_form .form-group:last-child .btn {
+  font-size: 14px;
+}
+
+.form-forgot-pass a {
+  color: var(--static-inline-link);
+  font-weight: 600;
+}
+
+.em_auth .innerBodyHeader {
+  display: block;
+}
+
+.em_auth .innerBodyHeader .inline-btn {
+  width: 40px;
+  height: 30px;
+  padding: 0 10px;
+  margin-bottom: 30px;
+}
+
+.em_auth .form-group .error {
+  position: static;
+  text-align: start;
+}

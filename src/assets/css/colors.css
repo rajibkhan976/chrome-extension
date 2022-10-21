@@ -1,0 +1,57 @@
+:root {
+  /* THEME COLORS */
+  --extension-background: #e4f3ff;
+  --placeholder: #b2c2ce;
+  --static-checkbox-2-unchecked: #b2b9ce;
+  --text-check-bg-unchecked: #f0f7ff;
+  --text-check-border-unchecked: #c7e0ff;
+  --hover-listItem-bg: #dbecff;
+  --listItem-border-color: #d9e3ec;
+  --font-color: #305671;
+  --static-radio: #305670;
+  --static-button: #5766f3;
+  --static-tags: #0c5bbc;
+  --static-dropdown-arrow-bg: #414fd8;
+  --static-inline-link: #0776ff;
+  --static-checkbox-checked: #003be0;
+  --static-whiteBackground-font-color: #1777f2;
+  --svg-icon-fillColor: #0066e5;
+  --static-radio-checked: #2b77f1;
+  --scrollbar-background: #86cdff;
+  --static-checkbox-2-checked: #53e7ff;
+  --static-radio-2-checked: #2cceff;
+  --footer-border-color: #81b8ff;
+  --time-log-color: #004fb5;
+  --total-comments-dashboard-color: #4a018c;
+
+  /* GRADIENT COLORS */
+  --gradient-vertical-button: transparent
+    linear-gradient(
+      180deg,
+      var(--static-whiteBackground-font-color) 0%,
+      #0062df 100%
+    )
+    0% 0%;
+  --gradient-horizontal-button: transparent
+    linear-gradient(110deg, #559ff9 0%, #1060c4 100%) 0% 0%;
+  --gradient-horizontal-2-button: transparent
+    linear-gradient(268deg, #096be1 0%, var(--static-radio-2-checked) 100%) 0%
+    0%;
+  --gradient-horizontal-3-button: transparent
+    linear-gradient(95deg, var(--svg-icon-fillColor) 0%, #4b9bff 100%) 0% 0%;
+  --gradient-vertical-cards: transparent
+    linear-gradient(
+      180deg,
+      var(--static-whiteBackground-font-color) 0%,
+      #0251b6 87%,
+      #004fb5 100%
+    )
+    0% 0%;
+  --gradient-horizontal-bg: transparent
+    linear-gradient(90deg, #0a67de 0%, #6598dc 100%) 0% 0%;
+  --gradient-text-checked-bg: transparent
+    linear-gradient(91deg, var(--static-radio-2-checked) 0%, #096be1 100%) 0% 0%;
+  --gradient-modes: transparent
+    linear-gradient(105deg, #559ff9 0%, #1060c4 100%) 0% 0% no-repeat
+    padding-box;
+}

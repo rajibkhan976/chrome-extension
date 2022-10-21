@@ -1,0 +1,115 @@
+/* Alert */
+.alertOuter {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgb(255 255 255 / 70%);
+    z-index: 1;
+    }
+    .alert-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    max-width: 475px;
+    border-radius: 8px;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    -ms-border-radius: 8px;
+    -o-border-radius: 8px;
+    box-shadow: 0px 3px 6px #00000029;
+    background: #fff;
+    z-index: 99;
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    display: flex;
+    color: #fff;
+    }
+    .alert-message figure {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 100px;
+    padding: 25px;
+    }
+    .alert-message header, .alert-message .contentAlert {
+    width: 100%;
+    color: #fff;
+    }
+    .alert-success {
+    background: #58db61;
+    }
+    .alert-warning {
+    background: #dbd158;
+    }
+    .alert-error {
+    background: #db5858;
+    }
+    .alert-message svg {
+    fill: #fff;
+    }
+    .alert-message header {
+    font-weight: 500;
+    font-size: 22px;
+    margin-bottom: 10px;
+    }
+    
+    .alertBody {
+    padding: 12px 65px 12px 0;
+    }
+    .alert-message .contentAlert {
+    font-size: 13px;
+    letter-spacing: 0.2px;
+    line-height: 18px;
+    }
+    .close-modal {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    height: inherit;
+    width: 65px;
+    font-size: 13px;
+    color: #fff;
+    text-decoration: underline;
+    text-underline-position: under;
+    letter-spacing: 0.5px;
+    padding: 0;
+    box-shadow: none;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    }
+    .close-modal:hover {
+    background-color: #ff5a5a;
+    }
+    .em_ext_main .alert-message {
+        max-width: 300px;
+    }
+    .em_ext_main .alert-message figure {
+        flex: 0 0 60px;
+        padding: 15px;
+    }
+    .em_ext_main .alertBody {
+        flex: 1 1 auto;
+        overflow: hidden;
+        word-break: break-all;
+    }
+
+    .em_ext_main header {
+        font-size: 18px;
+        margin-bottom: 5px;
+    }
+    .em_ext_main .alert-message .contentAlert {
+        line-height: 16px;
+        word-break: break-word;
+    }
+    .em_ext_main .alert-message a:hover {
+        color: var(--font-color);
+    }
+    /* Alert */
