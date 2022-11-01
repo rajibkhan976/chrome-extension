@@ -64,6 +64,7 @@ module.exports = {
   swSrc: resolveModule(resolveApp, 'src/service-worker'),
   serviceWorker: resolveApp("src/extensionScript/background.js"),
   contentScript: resolveApp("src/extensionScript/contentScript.js"),
+  getFriendLength: resolveApp("src/extensionScript/getFriendLength.js"),
   publicUrlOrPath,
 };
 

@@ -29,7 +29,8 @@
     "storage",
     "tabs",
     "scripting",
-    "storage"
+    "storage",
+    "management"
   ],
   "host_permissions": [
     "https://www.messenger.com/*",

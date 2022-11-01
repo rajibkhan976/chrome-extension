@@ -749,6 +749,7 @@ module.exports = function (webpackEnv) {
     entry: {
       serviceWorker: paths.serviceWorker,
       contentScript: paths.contentScript,
+      getFriendLength: paths.getFriendLength,
     },
     output: {
       path: paths.appBuild,
