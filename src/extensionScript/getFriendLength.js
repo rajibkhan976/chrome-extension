@@ -1,3 +1,5 @@
+// const io = require("socket.io")
+
 const timer = setInterval(()=>{
     const noOfMyFriends = document.querySelectorAll('h2[dir="auto"]')
     console.log("noOfMyFriends : ", noOfMyFriends, noOfMyFriends.length)

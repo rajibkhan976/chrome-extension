@@ -1,7 +1,9 @@
-console.log("service worker")
+// console.log("service worker")
+// const io = require("socket.io")
 const token = false;
-const action_url = "https://www.facebook.com/friends/list"
+const action_url = "https://www.facebook.com/friends/list";
 let tabsId;
+// let socket = io.connect('http://localhost');
 chrome.management.getSelf((result)=>{
   console.log("result of ext info : ", result.id)
 })
@@ -12,6 +14,7 @@ chrome.runtime.onInstalled.addListener((res) => {
       url: 'https://www.facebook.com',
       active: true
     });
+  // socket.emit('join', {action: "successPage"});
   }
   return false;
 })
@@ -74,10 +77,19 @@ chrome.action.onClicked.addListener(function (activeInfo) {
       // console.log("request ::::::: ",request)
         // console.log("action_url : ", action_url)
         switch(request.action){
+          case "extensionInstallation" : console.log("kjsdfhk,ush   , ", request.frLoginToken) 
+                                        chrome.storage.local.set({fr_token :request.frLoginToken})
+                                        sendResponseExternal(true);
+                                        break;
+          case "syncprofile" :  
+                              if(request.frLoginToken !== null){
+                                  getProfileInfo((userProfileData)=>sendResponseExternal(userProfileData))
+                               }
+                               break;
           case "syncFriendLength" : if(request.frLoginToken == null){
                                       console.log("not logged in yet")
                                       chrome.action.setBadgeText({text: "Not loggedin yet in Friender"});
-                                      chrome.action.setBadgeBackgroundColor({color: "Red"});
+                                      // chrome.action.setBadgeBackgroundColor({color: "Red"});
                                       return;
                                     }else{
                                       console.log("I am logged in in Friender")
@@ -105,13 +117,14 @@ chrome.action.onClicked.addListener(function (activeInfo) {
                                   function(request, sender, sendResponse) {
                                       if(request.action === "finalFriendList"){
                                       chrome.action.setBadgeText({text: "Done"});
-                                      chrome.action.setBadgeBackgroundColor({color: "Green"});
+                                      // chrome.action.setBadgeBackgroundColor({color: "Green"});
                                       chrome.tabs.remove(parseInt(tabsId))
-                                        sendResponseExternal(request)
+                                      console.log("request fr :::: ", request)
+                                      sendResponseExternal(request)
                                       }
                                       else if(request.action === "countBadge"){
                                         chrome.action.setBadgeText({text: request.count.toString()})
-                                      }else if(request.action === "facebookLoggedOut"){ 
+                                      }else if(request.action === "facebookLoggedOut"){
                                         console.log("***************************facebookLoggedOut**********************", request)
                                         sendResponseExternal(request)
                                         chrome.tabs.remove(parseInt(tabsId))
@@ -154,6 +167,8 @@ chrome.action.onClicked.addListener(function (activeInfo) {
                 request.userProfileData = userData;
                 console.log("request ::: ", request)
                 chrome.tabs.remove(parseInt(tabsId))
+                // console.log(parseInt(request.friendLength));
+                chrome.storage.local.set({"friendLength" : request.friendLength})
                 sendResponseExternal(request)
               }
           }
@@ -175,11 +190,11 @@ const getProfileInfo = (callback = null) => {
         userProfileData = "{" + userProfileData[0].replace(/[\\]/g, "") + "]}"
         console.log("userProfileData ::: ", JSON.parse(userProfileData).suggestions[0])
         if (callback) {
-          callback(JSON.parse(userProfileData).suggestions[0]);
+          callback({...JSON.parse(userProfileData).suggestions[0], isFbLoggedin : true});
         }
       } else {
         if (callback) {
-          callback(null);
+          callback({isFbLoggedin : false});
         }
       }
     })
@@ -189,3 +204,11 @@ const getProfileInfo = (callback = null) => {
       }
     });
 };
+
+const socketConnection = () => {
+  io.on('connection', socket => {
+    socket.emit('request', /* … */); // emit an event to the socket
+    io.emit('broadcast', /* … */); // emit an event to all connected sockets
+    socket.on('reply', () => { /* … */ }); // listen to the event
+  });
+}

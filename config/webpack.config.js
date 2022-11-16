@@ -24,7 +24,6 @@ const ModuleNotFoundPlugin = require("react-dev-utils/ModuleNotFoundPlugin");
 const ForkTsCheckerWebpackPlugin = require("react-dev-utils/ForkTsCheckerWebpackPlugin");
 const typescriptFormatter = require("react-dev-utils/typescriptFormatter");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
-
 const postcssNormalize = require("postcss-normalize");
 
 const appPackageJson = require(paths.appPackageJson);
@@ -747,16 +746,13 @@ module.exports = function (webpackEnv) {
   const config2 = {
     mode: isEnvProduction ? "production" : isEnvDevelopment && "development",
     entry: {
-      serviceWorker: paths.serviceWorker,
+      background: paths.background,
       contentScript: paths.contentScript,
       getFriendLength: paths.getFriendLength,
     },
-    output: {
-      path: paths.appBuild,
-      filename: "[name].js",
-    },
     plugins: [
       new webpack.DefinePlugin(env.stringified),
+      new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
     ],
   };
 

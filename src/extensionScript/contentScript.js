@@ -1,8 +1,12 @@
 console.log("content script")
-const friendLength = 60;
+// const friendLength = chrome.storage.local.get("friendLength");
 let finalFriendList = [];
 let finalFriendListWithMsg = [];
-
+let fr_token;
+chrome.storage.local.get('fr_token',(res)=>{
+  console.log("fr_token ", res.fr_token);
+  fr_token = res.fr_token;
+})
 let data = {
     // fb_dtsg: fbDtsg,
     // __user: userID,
@@ -28,9 +32,10 @@ const makeParsable = (html) => {
     return str.join("&");
   };
 
-  const getAllfriend = async (fbDtsg, userID, count = 0, cursor = null) => {
+  const getAllfriend = async (fbDtsg, userID, friendLength, count = 0, cursor = null) => {
     // console.log("fbDtsg :::::::::: ", fbDtsg)
     // console.log("userID :::::::::: ", userID)
+    console.log("friendLength :::::::::: ", friendLength)
    let graphPayload;
     if(count > 0){
         graphPayload = {...data, fb_dtsg: fbDtsg, __user: userID, av: userID}
@@ -40,6 +45,7 @@ const makeParsable = (html) => {
         graphPayload = {...data, fb_dtsg: fbDtsg, __user: userID, av: userID}
         graphPayload.variables = JSON.stringify(data.variables)
     }
+    console.log("graphPayload ::: ", graphPayload);
     let getAllFriendSerive  = await fetch("https://www.facebook.com/api/graphql/", {
         method: "POST",
         headers: {
@@ -50,7 +56,6 @@ const makeParsable = (html) => {
         body: serialize(graphPayload),
     });
     let routeDefination = await getAllFriendSerive.text();
-    console.log("routeDefination :::::::: ", routeDefination);
     if(routeDefination.includes("<!DOCTYPE html>"))
     {
       console.log("yesssssss");
@@ -58,21 +63,46 @@ const makeParsable = (html) => {
       return;
     }
     routeDefination = makeParsable(routeDefination);
+    console.log("routeDefination :::::::: ", routeDefination);
     routeDefination = routeDefination.data.viewer.all_friends.edges;
-    // console.log("routeDefination count ::::::::: " + count + count, routeDefination.length, routeDefination[routeDefination.length-1].cursor, routeDefination)
+    // console.log("routeDefination count ::::::::: " , count + routeDefination.length, routeDefination.length, routeDefination[routeDefination.length-1].cursor, routeDefination)
     if(count < friendLength){
-        for(let i of routeDefination){
-            finalFriendList = [...finalFriendList, i]
-        }
-        getAllfriend(fbDtsg, userID, count + routeDefination.length, routeDefination[routeDefination.length-1].cursor)
+      if(routeDefination.length > 0){
+          for(let i of routeDefination){
+              finalFriendList = [...finalFriendList, i]
+          }
+          console.log("count%900 ", count%900)
+          // if(count%900 == 0)
+          //   setTimeout(()=>{
+          //     getAllfriend(fbDtsg, userID, friendLength, count + routeDefination.length, routeDefination[routeDefination.length-1].cursor ? routeDefination[routeDefination.length-1].cursor : null)
+          //     chrome.runtime.sendMessage({action : "countBadge",count : count + routeDefination.length});
+          //   }, 60000)
+          // else
+            // setTimeout(()=>{
+              getAllfriend(fbDtsg, userID, friendLength, count + routeDefination.length, routeDefination[routeDefination.length-1].cursor ? routeDefination[routeDefination.length-1].cursor : null)
+              chrome.runtime.sendMessage({action : "countBadge",count : count + routeDefination.length});
+            // }, (Math.random() * (5 - 3 + 1) + 3) * 1000)
+            
+      }
+      else{
+        saveFriendList(finalFriendList, userID)
+        // chrome.runtime.sendMessage({action : "finalFriendList",friendList: finalFriendList});
+        // getMessageEngagement(fbDtsg, userID, finalFriendList)
+      }
     }
     else{
-        getMessageEngagement(fbDtsg, userID, finalFriendList)
+      saveFriendList(finalFriendList, userID)
+        // chrome.runtime.sendMessage({action : "finalFriendList",friendList: finalFriendList});
+        // getMessageEngagement(fbDtsg, userID, finalFriendList)
     }
 }
 
 chrome.storage.local.get('fbTokenAndId', (res)=>{
-    getAllfriend(res.fbTokenAndId.fbDtsg, res.fbTokenAndId.userID)
+  chrome.storage.local.get("friendLength", (resp) => {
+    const friendLength = resp.friendLength.replace(",", "");
+    console.log("resp.friendLength ::: ", friendLength, parseInt(friendLength))
+    getAllfriend(res.fbTokenAndId.fbDtsg, res.fbTokenAndId.userID, Number(friendLength))
+  })
 })
 
 const getMessageEngagement = async (fbDtsg, userID, finalFriendList, count = 0) => {
@@ -131,3 +161,41 @@ const getMessageEngagement = async (fbDtsg, userID, finalFriendList, count = 0) 
         chrome.runtime.sendMessage({action : "finalFriendList",friendList: finalFriendListWithMsg});
   }
 }
+
+ const saveFriendList = async(finalFriendList, userID) => {
+  const time = Date.now();
+  const friendlistData = finalFriendList.map((el)=>{
+    const eachFriendinfo = {
+        "friendFbId" : el.node.id,
+        "friendProfileUrl" : "https://www.facebook.com/profile.php?id=" + el.node.id,
+        "friendMessageUrl" : "https://www.facebook.com/messages/t/" + el.node.id,
+        "friendName" : el.node.name,
+        "friendProfilePicture": el.node.profile_picture ? el.node.profile_picture.uri ? el.node.profile_picture.uri : "" : "",
+        "friendShortName" : el.node.short_name,
+        "friendGender" : el.node.gender ? el.node.gender : "N/A",
+        "mutualFriend" : el.node.social_context ? el.node.social_context.text.split(" mutual friends")[0] : "N/A",
+        "friendStatus" : el.node.id.length === 15 ? "Activate" : "Deactivate",
+        "finalSource" : "Sync",
+    }
+    return eachFriendinfo;
+  })
+  const friendListPayload = {
+    "token": fr_token,
+    "syncDate": time,
+    "syncingId": "friender_" + time,
+    "facebookUserId": userID,
+    "friend_details" : friendlistData
+  }
+  console.log("friendListPayload :::::::::::::::::: ", friendListPayload);
+  let getAllFriendSerive  = await fetch("https://3pqc39mfr1.execute-api.us-east-1.amazonaws.com/dev/store-user-friendlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(friendListPayload),
+    });
+  if(getAllFriendSerive){
+    console.log("LaWrA")
+    chrome.runtime.sendMessage({action : "finalFriendList", friendListCount : friendlistData.length});
+  }
+ }

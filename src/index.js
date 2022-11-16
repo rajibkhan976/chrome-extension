@@ -5,6 +5,7 @@ import MainExtension from "./components/MainExtension";
 
 import reportWebVitals from "./reportWebVitals";
 
+
 ReactDOM.render(
   <React.StrictMode>
     <MainExtension />
