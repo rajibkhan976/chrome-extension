@@ -1,0 +1,51 @@
+@use "../../abstract/color" as *;
+@use "../../abstract/mixins" as *;
+
+.fr-ext-checkbox {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    vertical-align: middle;
+
+    input {
+        display: none;
+    }
+
+    input + .fr-ext-checkContent {
+        display: inline-flex;
+
+        .fr-ext-check-ui {
+            display: inline-flex;
+            width: 36px;
+            height: 20px;
+            position: relative;
+            @include theme-aware('background-color', 'checkbox-bg');
+            border: 0.5px solid;
+            @include theme-aware('border-color', 'checkbox-border');
+            @include border-radius(22px);
+
+            &:after {
+                position: absolute;
+                content: '';
+                width: 14px;
+                height: 14px;
+                @include border-radius(50%);
+                @include theme-aware('background-color', 'checkbox-dot');
+                left: 2px;
+                top: 2px;
+            }
+        }
+    }
+    input:checked + .fr-ext-checkContent {
+        .fr-ext-check-ui {
+            background-color: $checkboxCheckedBg;
+            border-color: $themeGreen1;
+
+            &:after {
+                left: calc(100% - 16px);
+                background-color: $themeGreen2;
+            }
+        }
+    }
+}

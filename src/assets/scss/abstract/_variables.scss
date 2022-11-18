@@ -1,0 +1,52 @@
+$lineHeight: 19px;
+$lineHeightSecondary: 16px;
+
+$pointer-cursor: pointer;
+
+$left: left;
+$right: right;
+
+$full-width: 100%;
+$authBox-width: 550px;
+
+$block: block;
+$flex: flex;
+$inline: inline;
+$inline-block: inline-block;
+$none: none;
+
+$alignments: (
+    'left': start,
+    'right': end,
+    'center': center
+);
+
+$displays: (
+    'flex': flex,
+    'block': block,
+    'inline': inline,
+    'inline-block': inline-block,
+    'inline-flex': inline-flex,
+    'none': none
+);
+
+$insets: (
+    'top': top,
+    'bottom': bottom,
+    'left': start,
+    'right': end,
+);
+
+$positions: (
+    'static': static,
+    'relative': relative,
+    'absolute': absolute,
+    'fixed':fixed
+);
+
+$justifications: (
+    'start': flex-start,
+    'center': center,
+    'end': flex-end,
+    'between': space-between
+)

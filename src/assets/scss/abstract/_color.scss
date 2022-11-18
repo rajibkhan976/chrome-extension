@@ -1,0 +1,91 @@
+$themePrimaryWhite: #ffffff;
+$themePrimaryWhiteAlpha: rgba(255, 255, 255, 0.1);
+$transparentColor: transparent;
+
+$themePrimaryBlue1: #605bff;
+$themePrimaryBlue2: #f0efff;
+$themePrimaryBlue3: #f7f7ff;
+$themePrimaryBlue4: #fcfdff;
+$themePrimaryBlue5: #2922ff;
+$themePrimaryBlue6: #e5f5ff;
+$themePrimaryBlue7: #5551ca;
+
+$themeSecondaryDarkBlue1: #030229;
+$themeSecondaryDarkBlue2: #4d4c6a;
+$themeSecondaryDarkBlue3: #9a9aa9;
+$themeSecondaryDarkBlue4: #a2a2b4;
+$themeSecondaryDarkBlue5: #b3b3bf;
+
+$themeTertiaryBlue1: #0094ff;
+$themeTertiaryBlue2: #192834;
+$themeTertiaryBlue3: #79ABFF;
+
+$themeSecondaryRoyalBlue1: #1f3e79;
+$themeSecondaryRoyalBlue2: #8998b8;
+
+$themeSecondaryGrey1: #6b7499;
+$themeSecondaryGrey2: #bac4d8;
+$themeSecondaryGrey3: #f1f2f5;
+$themeSecondaryGrey4: #f4f4f4;
+$themeSecondaryGrey5: #303033;
+$themeSecondaryGrey6: rgba(96, 91, 255, 0.05);
+$themeSecondaryGrey7: #d3d3d3;
+$themeSecondaryGrey8: #dbdbdb;
+$themeSecondaryGrey9: #edf0f9;
+$themeSecondaryGrey10: #bdbdbd;
+$themeSecondaryGrey11: #fafafb;
+$themeSecondaryGrey12: #929292;
+$themeSecondaryGrey13: #28282b;
+
+$themeBlack1: #000000;
+$themeBlack2: #1c1c1e;
+$themeBlack3: #313037;
+$themeBlack4: #131314;
+$themeBlack5: #767485;
+$themeBlack6: #222222;
+$themeBlack5Alpha: rgba(118, 116, 133, 0.2);
+$themeBlack6: #2c2c2e;
+$themeBlack7: #26262a;
+$themeBlack8: #333335;
+$themeBlack9: #1e1e1e;
+
+$themeGreen1: #3a974c;
+$themeGreen2: #49ce56;
+$themeGreen3: #ebf5ed;
+$themeGreen4: #00ca14;
+$themeGreen5: #3A974C;
+$themeGreen6: #49CE56;
+
+$themeYellow1: #feb331;
+$themeYellow2: #F29339;
+$themeYellow3: #F9B200;
+$themeYellow4: #FFD059;
+
+$themeRed1: #ff6a77;
+$themeRed2: #fff0f1;
+$themeRed3: #93000D;
+$themeRed4: #FF4343;
+
+$activeGradientHorizontal: linear-gradient(
+  to right,
+  rgba(0, 148, 255, 0.1) 0.73%,
+  rgba(0, 148, 255, 0) 100%
+);
+$activeGradientVertical: linear-gradient(
+  to top,
+  rgba(0, 148, 255, 0.5) 0%,
+  rgba(0, 148, 255, 0.2) 30%,
+  rgba(0, 148, 255, 0) 100%
+);
+$modalGradient: linear-gradient(90deg, #827eff -1.45%, #52d9bb 101.45%);
+
+$checkboxBg: rgba(179, 179, 191, 0.2);
+$checkboxCheckedBg: rgba(58, 151, 76, 0.2);
+
+
+$listingBgLight: #1C1C1E;
+$themeBlack1: #000000;
+$themeDefaultPrimary3: #BDBDBD;
+
+$dropdownBorder: #4d4d4e;
+$optionHover: #343438;

@@ -1,1170 +1,672 @@
 import React from "react";
 
-const SVGAsset = (props) => {
+export const LogoIcon = () => {
   return (
-    <>
-    {props.type === "warning" && (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 50 50" width="50px" height="50px">    <path d="M25,2C12.297,2,2,12.297,2,25s10.297,23,23,23s23-10.297,23-23S37.703,2,25,2z M25,11c1.657,0,3,1.343,3,3s-1.343,3-3,3 s-3-1.343-3-3S23.343,11,25,11z M29,38h-2h-4h-2v-2h2V23h-2v-2h2h4v2v13h2V38z"/></svg>
-    )}
-    {props.type === "error" && (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 50 50" width="50px" height="50px"><path d="M25,2C12.319,2,2,12.319,2,25s10.319,23,23,23s23-10.319,23-23S37.681,2,25,2z M33.71,32.29c0.39,0.39,0.39,1.03,0,1.42 C33.51,33.9,33.26,34,33,34s-0.51-0.1-0.71-0.29L25,26.42l-7.29,7.29C17.51,33.9,17.26,34,17,34s-0.51-0.1-0.71-0.29 c-0.39-0.39-0.39-1.03,0-1.42L23.58,25l-7.29-7.29c-0.39-0.39-0.39-1.03,0-1.42c0.39-0.39,1.03-0.39,1.42,0L25,23.58l7.29-7.29 c0.39-0.39,1.03-0.39,1.42,0c0.39,0.39,0.39,1.03,0,1.42L26.42,25L33.71,32.29z"/></svg>
-    )}
-    {props.type === "success" && (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 50 50" width="50px" height="50px">    <path d="M43.171,10.925L24.085,33.446l-9.667-9.015l1.363-1.463l8.134,7.585L41.861,9.378C37.657,4.844,31.656,2,25,2 C12.317,2,2,12.317,2,25s10.317,23,23,23s23-10.317,23-23C48,19.701,46.194,14.818,43.171,10.925z"/></svg>
-    )}
-      {props.type === "facebook" && (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="24px"
-          height="24px"
-          className={"ico_svg_" + props.type}
-        >
-          <path d="M19,3H5C3.895,3,3,3.895,3,5v14c0,1.105,0.895,2,2,2h7.621v-6.961h-2.343v-2.725h2.343V9.309 c0-2.324,1.421-3.591,3.495-3.591c0.699-0.002,1.397,0.034,2.092,0.105v2.43h-1.428c-1.13,0-1.35,0.534-1.35,1.322v1.735h2.7 l-0.351,2.725h-2.365V21H19c1.105,0,2-0.895,2-2V5C21,3.895,20.105,3,19,3z" />
-        </svg>
-      )}
-      {props.type === "messenger" && (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="48px"
-          height="48px"
-          className={"ico_svg_" + props.type}
-        >
-          <path d="M12,2C6.486,2,2,6.262,2,11.5c0,2.545,1.088,4.988,3,6.772v4.346l4.08-2.039C10.039,20.858,11.02,21,12,21 c5.514,0,10-4.262,10-9.5S17.514,2,12,2z M13.167,14.417l-2.917-2.333L5,14.417l5.833-5.833l2.917,2.333L19,8.583L13.167,14.417z" />
-        </svg>
-      )}
-      {props.type === "back_arrow" && (
-        <svg
-          height="32px"
-          version="1.1"
-          viewBox="0 0 32 32"
-          width="32px"
-          xmlns="http://www.w3.org/2000/svg"
-          className={"ico_svg_" + props.type}
-        >
-          <path d="M28,14H8.8l4.62-4.62C13.814,8.986,14,8.516,14,8c0-0.984-0.813-2-2-2c-0.531,0-0.994,0.193-1.38,0.58l-7.958,7.958  C2.334,14.866,2,15.271,2,16s0.279,1.08,0.646,1.447l7.974,7.973C11.006,25.807,11.469,26,12,26c1.188,0,2-1.016,2-2  c0-0.516-0.186-0.986-0.58-1.38L8.8,18H28c1.104,0,2-0.896,2-2S29.104,14,28,14z" />
-        </svg>
-      )}
-      {props.type === "reaction_like" && (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="18"
-          height="18"
-          viewBox="0 0 18 18"
-          className={"ico_svg_" + props.type}
-        >
-          <path
-            id="Path_18"
-            data-name="Path 18"
-            d="M9,0a9,9,0,1,0,6.364,2.636A9,9,0,0,0,9,0Z"
-            transform="translate(0 0)"
-            fill="#577aff"
-          />
-          <path
-            id="Path_19"
-            data-name="Path 19"
-            d="M9.9,5.162a.828.828,0,0,1,.365.8.874.874,0,0,1-.512.863.945.945,0,0,1,.1.65,1.139,1.139,0,0,1-.726.821.685.685,0,0,1,.016.738c-.2.351-.374.484-1.143.484H4.862c-1.068,0-1.621-.65-1.621-1.19V5.552c0-1.464,1.585-2.707,1.585-3.725L4.712.559A.582.582,0,0,1,4.775.238.966.966,0,0,1,5.461,0a1.122,1.122,0,0,1,.577.146,2,2,0,0,1,.791,1.835c0,.323-.447,1.289-.508,1.623a9.92,9.92,0,0,1,2.03-.237c1.146-.007,1.89.226,1.89,1a1.655,1.655,0,0,1-.341.793ZM.648,4.76h.864a.62.62,0,0,1,.458.209.752.752,0,0,1,.19.5V10a.753.753,0,0,1-.19.5.62.62,0,0,1-.458.209H.648A.62.62,0,0,1,.19,10.5.753.753,0,0,1,0,10V5.474a.752.752,0,0,1,.19-.5A.62.62,0,0,1,.648,4.76Z"
-            transform="translate(3.57 3.124)"
-            fill="#fff"
-          />
-        </svg>
-      )}
-      {props.type === "reaction_heart" && (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="18"
-          height="18.001"
-          viewBox="0 0 18 18.001"
-          className={"ico_svg_" + props.type}
-        >
-          <path
-            id="Path_20"
-            data-name="Path 20"
-            d="M9,0a9,9,0,1,0,6.364,2.636A9,9,0,0,0,9,0Z"
-            transform="translate(0 0)"
-            fill="#ed001d"
-          />
-          <path
-            id="Path_21"
-            data-name="Path 21"
-            d="M8.186,0A2.593,2.593,0,0,0,5.477,2.142,2.591,2.591,0,0,0,2.769,0C.453,0-.222,2.609.061,4c.745,3.687,5.416,6.27,5.416,6.27S10.149,7.69,10.894,4C11.176,2.609,10.5,0,8.186,0Z"
-            transform="translate(3.523 4.263)"
-            fill="#fff"
-          />
-        </svg>
-      )}
-      {props.type === "reaction_care" && (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="18"
-          height="18"
-          viewBox="0 0 18 18"
-          className={"ico_svg_" + props.type}
-        >
-          <defs>
-            <linearGradient
-              id="linear-gradient"
-              x1="-0.145"
-              y1="1.241"
-              x2="-0.145"
-              y2="1.296"
-              gradientUnits="objectBoundingBox"
-            >
-              <stop offset="0" stopColor="#f28a2d" />
-              <stop offset="1" stopColor="#fde86f" />
-            </linearGradient>
-            <radialGradient
-              id="radial-gradient"
-              cx="0.5"
-              cy="0.5"
-              r="0.5"
-              gradientUnits="objectBoundingBox"
-            >
-              <stop offset="0" stopColor="#f28a2d" stopOpacity="0" />
-              <stop offset="1" stopColor="#f08423" stopOpacity="0.341" />
-            </radialGradient>
-            <radialGradient
-              id="radial-gradient-2"
-              cx="0.108"
-              cy="0.52"
-              r="0.101"
-              gradientUnits="objectBoundingBox"
-            >
-              <stop offset="0" stopColor="#f28a2d" stopOpacity="0.502" />
-              <stop offset="1" stopColor="#f28a2d" stopOpacity="0" />
-            </radialGradient>
-            <radialGradient
-              id="radial-gradient-3"
-              cx="0.742"
-              cy="0.736"
-              r="0.283"
-              xlinkHref="#radial-gradient-2"
-            />
-            <radialGradient
-              id="radial-gradient-4"
-              cx="0.318"
-              cy="0.127"
-              r="0.107"
-              gradientUnits="objectBoundingBox"
-            >
-              <stop offset="0" stopColor="#d45f00" stopOpacity="0.149" />
-              <stop offset="1" stopColor="#f28a2d" stopOpacity="0" />
-            </radialGradient>
-            <radialGradient
-              id="radial-gradient-5"
-              cx="0.681"
-              cy="0.134"
-              r="0.106"
-              gradientUnits="objectBoundingBox"
-            >
-              <stop offset="0" stopColor="#d45f00" stopOpacity="0.149" />
-              <stop offset="1" stopColor="#d45f00" stopOpacity="0" />
-            </radialGradient>
-            <linearGradient
-              id="linear-gradient-2"
-              x1="-2.313"
-              y1="13.541"
-              x2="-2.313"
-              y2="11.898"
-              gradientUnits="objectBoundingBox"
-            >
-              <stop offset="0" stopColor="#482314" />
-              <stop offset="1" stopColor="#9a4111" />
-            </linearGradient>
-            <radialGradient
-              id="radial-gradient-6"
-              cx="0.52"
-              cy="0.65"
-              r="0.769"
-              gradientUnits="objectBoundingBox"
-            >
-              <stop offset="0" stopColor="#3b446b" />
-              <stop offset="0.688" stopColor="#202340" />
-            </radialGradient>
-            <radialGradient
-              id="radial-gradient-7"
-              cx="0.458"
-              cy="0.649"
-              r="0.769"
-              xlinkHref="#radial-gradient-6"
-            />
-            <radialGradient
-              id="radial-gradient-8"
-              cx="0.478"
-              cy="0.399"
-              r="0.301"
-              gradientUnits="objectBoundingBox"
-            >
-              <stop offset="0" stopColor="#e38200" />
-              <stop offset="1" stopColor="#cd6700" />
-            </radialGradient>
-            <radialGradient
-              id="radial-gradient-9"
-              cx="0.501"
-              cy="0.259"
-              r="0.309"
-              xlinkHref="#radial-gradient-8"
-            />
-            <linearGradient
-              id="linear-gradient-3"
-              x1="-0.397"
-              y1="1.478"
-              x2="-0.421"
-              y2="1.4"
-              gradientUnits="objectBoundingBox"
-            >
-              <stop offset="0" stopColor="#f34462" />
-              <stop offset="1" stopColor="#cc0820" />
-            </linearGradient>
-            <radialGradient
-              id="radial-gradient-10"
-              cx="0.736"
-              cy="0.444"
-              r="0.289"
-              gradientUnits="objectBoundingBox"
-            >
-              <stop offset="0" stopColor="#ff7091" stopOpacity="0.702" />
-              <stop offset="1" stopColor="#fe6d8e" stopOpacity="0" />
-            </radialGradient>
-            <radialGradient
-              id="radial-gradient-11"
-              cx="0.266"
-              cy="0.299"
-              r="0.289"
-              xlinkHref="#radial-gradient-10"
-            />
-            <radialGradient
-              id="radial-gradient-12"
-              cx="0.236"
-              cy="0.535"
-              r="0.248"
-              gradientUnits="objectBoundingBox"
-            >
-              <stop offset="0" stopColor="#9c0600" />
-              <stop offset="1" stopColor="#9c0600" stopOpacity="0" />
-            </radialGradient>
-            <radialGradient
-              id="radial-gradient-13"
-              cx="1.001"
-              cy="0.56"
-              r="0.149"
-              gradientUnits="objectBoundingBox"
-            >
-              <stop offset="0" stopColor="#9c0600" stopOpacity="0.502" />
-              <stop offset="1" stopColor="#9c0600" stopOpacity="0" />
-            </radialGradient>
-            <radialGradient
-              id="radial-gradient-14"
-              cx="0.038"
-              cy="0.244"
-              r="0.129"
-              xlinkHref="#radial-gradient-13"
-            />
-            <radialGradient
-              id="radial-gradient-15"
-              cx="0.746"
-              cy="0.771"
-              r="0.174"
-              xlinkHref="#radial-gradient-12"
-            />
-            <radialGradient
-              id="radial-gradient-16"
-              cx="0.02"
-              cy="0.038"
-              r="1.222"
-              gradientUnits="objectBoundingBox"
-            >
-              <stop offset="0" stopColor="#eda83a" />
-              <stop offset="1" stopColor="#ffdc5e" />
-            </radialGradient>
-            <radialGradient
-              id="radial-gradient-17"
-              cx="0.945"
-              cy="0.048"
-              r="1.213"
-              xlinkHref="#radial-gradient-16"
-            />
-          </defs>
-          <path
-            id="Path_30"
-            data-name="Path 30"
-            d="M17.63,9a8.935,8.935,0,0,1-8.815,9A8.935,8.935,0,0,1,0,9,8.935,8.935,0,0,1,8.815,0,8.935,8.935,0,0,1,17.63,9Z"
-            transform="translate(0.252)"
-            fill="url(#linear-gradient)"
-          />
-          <path
-            id="Path_31"
-            data-name="Path 31"
-            d="M17.63,9a8.935,8.935,0,0,1-8.815,9A8.935,8.935,0,0,1,0,9,8.935,8.935,0,0,1,8.815,0,8.935,8.935,0,0,1,17.63,9Z"
-            transform="translate(0.252)"
-            fill="url(#radial-gradient)"
-          />
-          <path
-            id="Path_32"
-            data-name="Path 32"
-            d="M17.63,9a8.935,8.935,0,0,1-8.815,9A8.935,8.935,0,0,1,0,9,8.935,8.935,0,0,1,8.815,0,8.935,8.935,0,0,1,17.63,9Z"
-            transform="translate(0.252)"
-            fill="url(#radial-gradient-2)"
-          />
-          <path
-            id="Path_33"
-            data-name="Path 33"
-            d="M17.63,9a8.935,8.935,0,0,1-8.815,9A8.935,8.935,0,0,1,0,9,8.935,8.935,0,0,1,8.815,0,8.935,8.935,0,0,1,17.63,9Z"
-            transform="translate(0.252)"
-            fill="url(#radial-gradient-3)"
-          />
-          <path
-            id="Path_34"
-            data-name="Path 34"
-            d="M17.63,9a8.935,8.935,0,0,1-8.815,9A8.935,8.935,0,0,1,0,9,8.935,8.935,0,0,1,8.815,0,8.935,8.935,0,0,1,17.63,9Z"
-            transform="translate(0.252)"
-            fill="url(#radial-gradient-4)"
-          />
-          <path
-            id="Path_35"
-            data-name="Path 35"
-            d="M17.63,9a8.935,8.935,0,0,1-8.815,9A8.935,8.935,0,0,1,0,9,8.935,8.935,0,0,1,8.815,0,8.935,8.935,0,0,1,17.63,9Z"
-            transform="translate(0.252)"
-            fill="url(#radial-gradient-5)"
-          />
-          <path
-            id="Path_36"
-            data-name="Path 36"
-            d="M4,.264C3.886-.088.129-.088.011.264s.7.822,2,.822S4.12.616,4,.264Z"
-            transform="translate(7.055 6.367)"
-            fill="url(#linear-gradient-2)"
-          />
-          <path
-            id="Path_37"
-            data-name="Path 37"
-            d="M2.466,1.644c0,.822-.47,1.057-1.174,1.174S0,2.583,0,1.644C0,.939.352,0,1.291,0,2.113,0,2.466.939,2.466,1.644Z"
-            transform="translate(4.497 3.014)"
-            fill="url(#radial-gradient-6)"
-          />
-          <path
-            id="Path_38"
-            data-name="Path 38"
-            d="M.675.088A.409.409,0,0,1,.558.675C.44.793.205.91.088.675a.533.533,0,0,1,0-.587.524.524,0,0,1,.587,0Z"
-            transform="translate(4.996 3.396)"
-            fill="#4e506a"
-          />
-          <path
-            id="Path_39"
-            data-name="Path 39"
-            d="M0,1.644C0,2.466.47,2.7,1.291,2.818c.7.117,1.291-.235,1.291-1.174C2.583.939,2.231,0,1.291,0S0,.939,0,1.644Z"
-            transform="translate(11.157 3.014)"
-            fill="url(#radial-gradient-7)"
-          />
-          <path
-            id="Path_40"
-            data-name="Path 40"
-            d="M.636.176C.753.294.636.528.518.763a.357.357,0,0,1-.47,0C-.069.646.049.411.166.176.4-.059.518-.059.636.176Z"
-            transform="translate(11.748 3.312)"
-            fill="#4e506a"
-          />
-          <path
-            id="Path_41"
-            data-name="Path 41"
-            d="M.095,1.087c-.235.235,0,.587.352.47A6.876,6.876,0,0,1,3.734.97c.352,0,.47,0,.352-.47,0-.352-.47-.587-1.409-.47A4.446,4.446,0,0,0,.095,1.087Z"
-            transform="translate(3.831 1.378)"
-            fill="url(#radial-gradient-8)"
-          />
-          <path
-            id="Path_42"
-            data-name="Path 42"
-            d="M1.453.031C.514-.087.044.148.044.5-.073.97.044.97.4.97a6.336,6.336,0,0,1,3.287.587c.47.235.587-.235.352-.47A4.446,4.446,0,0,0,1.453.031Z"
-            transform="translate(10.162 1.378)"
-            fill="url(#radial-gradient-9)"
-          />
-          <path
-            id="Path_43"
-            data-name="Path 43"
-            d="M9.408,1.9c-2.466-.7-3.287.939-3.287.939S6.355.956,3.89.134C1.541-.57.132,1.661.015,2.952-.22,5.887,2.363,9.175,3.3,10.349c.117.352.47.352.822.352,1.409-.352,5.4-1.644,6.927-4.227C11.638,5.183,11.756,2.6,9.408,1.9Z"
-            transform="translate(2.233 7.299)"
-            fill="url(#linear-gradient-3)"
-          />
-          <path
-            id="Path_44"
-            data-name="Path 44"
-            d="M9.408,1.9c-2.466-.7-3.287.939-3.287.939S6.355.956,3.89.134C1.541-.57.132,1.661.015,2.952-.22,5.887,2.363,9.175,3.3,10.349c.117.352.47.352.822.352,1.409-.352,5.4-1.644,6.927-4.227C11.638,5.183,11.756,2.6,9.408,1.9Z"
-            transform="translate(2.233 7.299)"
-            fill="url(#radial-gradient-10)"
-          />
-          <path
-            id="Path_45"
-            data-name="Path 45"
-            d="M9.408,1.9c-2.466-.7-3.287.939-3.287.939S6.355.956,3.89.134C1.541-.57.132,1.661.015,2.952-.22,5.887,2.363,9.175,3.3,10.349c.117.352.47.352.822.352,1.409-.352,5.4-1.644,6.927-4.227C11.638,5.183,11.756,2.6,9.408,1.9Z"
-            transform="translate(2.233 7.299)"
-            fill="url(#radial-gradient-11)"
-          />
-          <path
-            id="Path_46"
-            data-name="Path 46"
-            d="M9.408,1.9c-2.466-.7-3.287.939-3.287.939S6.355.956,3.89.134C1.541-.57.132,1.661.015,2.952-.22,5.887,2.363,9.175,3.3,10.349c.117.352.47.352.822.352,1.409-.352,5.4-1.644,6.927-4.227C11.638,5.183,11.756,2.6,9.408,1.9Z"
-            transform="translate(2.233 7.299)"
-            fill="url(#radial-gradient-12)"
-          />
-          <path
-            id="Path_47"
-            data-name="Path 47"
-            d="M9.408,1.9c-2.466-.7-3.287.939-3.287.939S6.355.956,3.89.134C1.541-.57.132,1.661.015,2.952-.22,5.887,2.363,9.175,3.3,10.349c.117.352.47.352.822.352,1.409-.352,5.4-1.644,6.927-4.227C11.638,5.183,11.756,2.6,9.408,1.9Z"
-            transform="translate(2.233 7.299)"
-            fill="url(#radial-gradient-13)"
-          />
-          <path
-            id="Path_48"
-            data-name="Path 48"
-            d="M9.408,1.9c-2.466-.7-3.287.939-3.287.939S6.355.956,3.89.134C1.541-.57.132,1.661.015,2.952-.22,5.887,2.363,9.175,3.3,10.349c.117.352.47.352.822.352,1.409-.352,5.4-1.644,6.927-4.227C11.638,5.183,11.756,2.6,9.408,1.9Z"
-            transform="translate(2.233 7.299)"
-            fill="url(#radial-gradient-14)"
-          />
-          <path
-            id="Path_49"
-            data-name="Path 49"
-            d="M9.408,1.9c-2.466-.7-3.287.939-3.287.939S6.355.956,3.89.134C1.541-.57.132,1.661.015,2.952-.22,5.887,2.363,9.175,3.3,10.349c.117.352.47.352.822.352,1.409-.352,5.4-1.644,6.927-4.227C11.638,5.183,11.756,2.6,9.408,1.9Z"
-            transform="translate(2.233 7.299)"
-            fill="url(#radial-gradient-15)"
-          />
-          <path
-            id="Path_50"
-            data-name="Path 50"
-            d="M1.779.514C1.191-.073.135-.425.017.984A4.975,4.975,0,0,0,1.661,4.976C4.949,7.559,7.884,6.15,8,4.271,8.119,2.862,6.357,2.98,5.888,2.98V2.862c.117-.117.352-.235.47-.352.47-.352.235-.939-.352-.822a4.968,4.968,0,0,1-2.466.117C2.6,1.454,2.483,1.1,1.779.514Z"
-            transform="translate(0 7.986)"
-            fill="url(#radial-gradient-16)"
-          />
-          <path
-            id="Path_51"
-            data-name="Path 51"
-            d="M7.446.486c.352-.7.939-.47,1.291-.352a1.076,1.076,0,0,1,.822,1.174A6.7,6.7,0,0,1,7.8,6.356C5.1,9.409.519,8.939.049,7.061-.3,5.652,1.34,5.417,1.928,5.417V5.3c-.235-.117-.352-.235-.587-.352-.47-.352-.352-1.057.235-.939a7.988,7.988,0,0,0,2.348.235c2.231-.235,2.583-2,3.522-3.757Z"
-            transform="translate(8.441 7.887)"
-            fill="url(#radial-gradient-17)"
-          />
-        </svg>
-      )}
-      {props.type === "reaction_laugh" && (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="18"
-          height="18.001"
-          viewBox="0 0 18 18.001"
-          className={"ico_svg_" + props.type}
-        >
-          <path
-            id="Path_52"
-            data-name="Path 52"
-            d="M18,9a9,9,0,1,1-2.636-6.364A9,9,0,0,1,18,9"
-            transform="translate(0 0)"
-            fill="#f8c850"
-          />
-          <path
-            id="Path_53"
-            data-name="Path 53"
-            d="M0,1.183C0,3.549,1.1,8.219,5.478,8.219s5.478-4.669,5.478-7.035C10.955,1,9.192,0,5.478,0S0,1,0,1.183Z"
-            transform="translate(3.522 7.434)"
-            fill="#50000a"
-          />
-          <path
-            id="Path_54"
-            data-name="Path 54"
-            d="M0,1.761A4.857,4.857,0,0,0,4.073,3.522,4.832,4.832,0,0,0,8.134,1.761,5.3,5.3,0,0,0,4.073,0,5.335,5.335,0,0,0,0,1.761Z"
-            transform="translate(4.939 12.13)"
-            fill="#dc2842"
-          />
-          <path
-            id="Path_55"
-            data-name="Path 55"
-            d="M3.52,1.343a.911.911,0,0,1,.449.925c-.078.3-.213.433-.462.436a6.985,6.985,0,0,0-2.745.719.836.836,0,0,1-.364.1.382.382,0,0,1-.358-.278c-.073-.184-.08-.456.3-.7a6.145,6.145,0,0,1,2.091-.709A7.65,7.65,0,0,0,.993.931C.525.7.576.394.639.226.778-.146,1.306,0,1.82.257a9.745,9.745,0,0,1,1.7,1.086Zm3.919,0A9.7,9.7,0,0,1,9.137.257c.515-.261,1.041-.4,1.181-.031.062.168.114.477-.354.7a7.6,7.6,0,0,0-1.438.9,6.116,6.116,0,0,1,2.089.709c.382.247.375.517.3.7a.381.381,0,0,1-.358.278.836.836,0,0,1-.364-.1A7,7,0,0,0,7.452,2.7c-.25,0-.385-.137-.462-.434a.912.912,0,0,1,.449-.925Z"
-            transform="translate(3.522 3.341)"
-            fill="#2a3755"
-          />
-        </svg>
-      )}
-      {props.type === "reaction_amazed" && (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="18"
-          height="18"
-          viewBox="0 0 18 18"
-          className={"ico_svg_" + props.type}
-        >
-          <defs>
-            <clipPath id="clip-path">
-              <rect
-                id="Rectangle_234"
-                data-name="Rectangle 234"
-                width="18"
-                height="18"
-                transform="translate(0 -0.494)"
-                fill="#fff"
-              />
-            </clipPath>
-          </defs>
-          <g id="wow" transform="translate(0 0.494)" clipPath="url(#clip-path)">
-            <path
-              id="Path_606"
-              data-name="Path 606"
-              d="M18,9a9,9,0,1,1-2.636-6.364A9,9,0,0,1,18,9"
-              transform="translate(0 -0.5)"
-              fill="#fdd75a"
-            />
-            <path
-              id="Path_607"
-              data-name="Path 607"
-              d="M.02,3.249c-.178,2.076.817,3.5,2.652,3.5S5.5,5.325,5.324,3.249,4.069,0,2.672,0,.2,1.172.02,3.249Z"
-              transform="translate(6.328 8.5)"
-              fill="#50000a"
-            />
-            <path
-              id="Path_608"
-              data-name="Path 608"
-              d="M0,1.687A1.566,1.566,0,0,1,1.406,0,1.566,1.566,0,0,1,2.813,1.687,1.565,1.565,0,0,1,1.406,3.375,1.565,1.565,0,0,1,0,1.687Zm7.313,0A1.567,1.567,0,0,1,8.719,0a1.566,1.566,0,0,1,1.406,1.687A1.565,1.565,0,0,1,8.719,3.375,1.566,1.566,0,0,1,7.313,1.687Z"
-              transform="translate(3.938 4)"
-              fill="#fff"
-            />
-            <path
-              id="Path_609"
-              data-name="Path 609"
-              d="M0,1.687A1.566,1.566,0,0,1,1.406,0,1.566,1.566,0,0,1,2.813,1.687,1.565,1.565,0,0,1,1.406,3.375,1.565,1.565,0,0,1,0,1.687Zm7.313,0A1.567,1.567,0,0,1,8.719,0a1.566,1.566,0,0,1,1.406,1.687A1.565,1.565,0,0,1,8.719,3.375,1.566,1.566,0,0,1,7.313,1.687Z"
-              transform="translate(3.938 4)"
-            />
-            <path
-              id="Path_610"
-              data-name="Path 610"
-              d="M.513.009A.408.408,0,0,1,.774.536a.445.445,0,0,1-.5.358A.409.409,0,0,1,.018.365.445.445,0,0,1,.513.009ZM8,.079a.454.454,0,0,1,.29.585.5.5,0,0,1-.55.4.454.454,0,0,1-.29-.586A.494.494,0,0,1,8,.079Z"
-              transform="translate(4.529 4.63)"
-              fill="#4e506a"
-            />
-            <path
-              id="Path_611"
-              data-name="Path 611"
-              d="M8.752.008C8.81,0,8.869,0,8.928,0a2.3,2.3,0,0,1,1.543.632.414.414,0,0,1,.025.574.387.387,0,0,1-.558.027A1.494,1.494,0,0,0,8.822.818a.9.9,0,0,0-.664.372.389.389,0,0,1-.552.076A.414.414,0,0,1,7.531.7,1.676,1.676,0,0,1,8.752.008ZM.128.633A2.3,2.3,0,0,1,1.672,0a1.677,1.677,0,0,1,1.4.7.415.415,0,0,1-.074.57.39.39,0,0,1-.554-.076A.9.9,0,0,0,1.778.818a1.5,1.5,0,0,0-1.116.415A.387.387,0,0,1,.1,1.206.414.414,0,0,1,.128.633Z"
-              transform="translate(3.7 1.4)"
-            />
-            <path
-              id="Path_612"
-              data-name="Path 612"
-              d="M8.752.008C8.81,0,8.869,0,8.928,0a2.3,2.3,0,0,1,1.543.632.414.414,0,0,1,.025.574.387.387,0,0,1-.558.027A1.494,1.494,0,0,0,8.822.818a.9.9,0,0,0-.664.372.389.389,0,0,1-.552.076A.414.414,0,0,1,7.531.7,1.676,1.676,0,0,1,8.752.008ZM.128.633A2.3,2.3,0,0,1,1.672,0a1.677,1.677,0,0,1,1.4.7.415.415,0,0,1-.074.57.39.39,0,0,1-.554-.076A.9.9,0,0,0,1.778.818a1.5,1.5,0,0,0-1.116.415A.387.387,0,0,1,.1,1.206.414.414,0,0,1,.128.633Z"
-              transform="translate(3.7 1.4)"
-              fill="#e38200"
-            />
-          </g>
-        </svg>
-      )}
-      {props.type === "reaction_sad" && (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="18"
-          height="18"
-          viewBox="0 0 18 18"
-          className={"ico_svg_" + props.type}
-        >
-          <path
-            id="Path_56"
-            data-name="Path 56"
-            d="M18,9a9,9,0,1,1-2.636-6.364A9,9,0,0,1,18,9"
-            transform="translate(0 0)"
-            fill="#fdd75a"
-          />
-          <path
-            id="Path_57"
-            data-name="Path 57"
-            d="M0,2.072a.268.268,0,0,0,.294.276,7,7,0,0,1,2.838-.734,6.988,6.988,0,0,1,2.838.734.268.268,0,0,0,.294-.276A3.057,3.057,0,0,0,3.131,0,3.057,3.057,0,0,0,0,2.072Z"
-            transform="translate(5.869 12.298)"
-            fill="#50000a"
-          />
-          <path
-            id="Path_58"
-            data-name="Path 58"
-            d="M0,1.721C0,.77.552,0,1.23,0s1.23.77,1.23,1.721A2.186,2.186,0,0,1,2.2,2.776a.54.54,0,0,1-.327.264,2.4,2.4,0,0,1-.645.09,2.41,2.41,0,0,1-.645-.09.538.538,0,0,1-.325-.264A2.175,2.175,0,0,1,0,1.721Zm7.088,0C7.088.77,7.64,0,8.318,0s1.23.77,1.23,1.721A2.186,2.186,0,0,1,9.29,2.776a.562.562,0,0,1-.139.167.515.515,0,0,1-.188.1,2.382,2.382,0,0,1-1.29,0,.515.515,0,0,1-.188-.1.562.562,0,0,1-.139-.167,2.175,2.175,0,0,1-.258-1.054Z"
-            transform="translate(4.225 8.179)"
-            fill="#fff"
-          />
-          <path
-            id="Path_59"
-            data-name="Path 59"
-            d="M0,1.721C0,.77.552,0,1.23,0s1.23.77,1.23,1.721A2.186,2.186,0,0,1,2.2,2.776a.54.54,0,0,1-.327.264,2.4,2.4,0,0,1-.645.09,2.41,2.41,0,0,1-.645-.09.538.538,0,0,1-.325-.264A2.175,2.175,0,0,1,0,1.721Zm7.088,0C7.088.77,7.64,0,8.318,0s1.23.77,1.23,1.721A2.186,2.186,0,0,1,9.29,2.776a.562.562,0,0,1-.139.167.515.515,0,0,1-.188.1,2.382,2.382,0,0,1-1.29,0,.515.515,0,0,1-.188-.1.562.562,0,0,1-.139-.167,2.175,2.175,0,0,1-.258-1.054Z"
-            transform="translate(4.225 8.179)"
-          />
-          <path
-            id="Path_60"
-            data-name="Path 60"
-            d="M.625.084a.532.532,0,0,1,.02.647A.339.339,0,0,1,.119.844.532.532,0,0,1,.1.2.34.34,0,0,1,.625.084Zm7.619,0a.533.533,0,0,1,.021.647.341.341,0,0,1-.528.113A.532.532,0,0,1,7.718.2.338.338,0,0,1,8.243.084Z"
-            transform="translate(4.434 8.883)"
-            fill="#4e506a"
-          />
-          <path
-            id="Path_61"
-            data-name="Path 61"
-            d="M2.241.257A2.109,2.109,0,0,1,3.128,0a.629.629,0,0,1,.609.359c.194.386.106.471-.219.539A6.907,6.907,0,0,0,.53,2.53C.2,2.859-.122,2.495.047,2.208A5.383,5.383,0,0,1,2.241.257Zm7.014.1A.629.629,0,0,1,9.864,0a2.1,2.1,0,0,1,.887.257,5.369,5.369,0,0,1,2.193,1.951c.169.286-.148.65-.482.322A6.912,6.912,0,0,0,9.473.9C9.148.83,9.062.746,9.255.359Z"
-            transform="translate(2.504 5.51)"
-            fill="#e38200"
-          />
-          <path
-            id="Path_62"
-            data-name="Path 62"
-            d="M1.761,6.164A1.87,1.87,0,0,1,0,4.2,5.412,5.412,0,0,1,.755,1.681C1.457.2,1.6,0,1.761,0s.3.2,1.006,1.681A5.412,5.412,0,0,1,3.522,4.2,1.87,1.87,0,0,1,1.761,6.164Z"
-            transform="translate(13.304 11.836)"
-            fill="#1452ff"
-          />
-          <path
-            id="Path_63"
-            data-name="Path 63"
-            d="M.7,2.44A.74.74,0,0,1,0,1.665a2.146,2.146,0,0,1,.3-1C.577.08.632,0,.7,0s.121.08.4.665a2.15,2.15,0,0,1,.3,1,.74.74,0,0,1-.7.776"
-            transform="translate(14.368 12.75)"
-            fill="#7d9fff"
-          />
-        </svg>
-      )}
-      {props.type === "reaction_angry" && (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="18"
-          height="18.001"
-          viewBox="0 0 18 18.001"
-          className={"ico_svg_" + props.type}
-        >
-          <defs>
-            <linearGradient
-              id="linear-gradient"
-              x1="0.5"
-              x2="0.5"
-              y2="1"
-              gradientUnits="objectBoundingBox"
-            >
-              <stop offset="0" stopColor="#f18829" />
-              <stop offset="1" stopColor="#fdd75a" />
-            </linearGradient>
-          </defs>
-          <path
-            id="Path_22"
-            data-name="Path 22"
-            d="M18,9a9,9,0,1,1-2.636-6.364A9,9,0,0,1,18,9"
-            transform="translate(0 0)"
-            fill="url(#linear-gradient)"
-          />
-          <path
-            id="Path_23"
-            data-name="Path 23"
-            d="M0,1.234c0,.62,1.471.521,3.287.521s3.287.1,3.287-.521C6.575.487,5.1,0,3.287,0S0,.487,0,1.234Z"
-            transform="translate(5.713 13.891)"
-          />
-          <path
-            id="Path_24"
-            data-name="Path 24"
-            d="M0,1.234c0,.62,1.471.521,3.287.521s3.287.1,3.287-.521C6.575.487,5.1,0,3.287,0S0,.487,0,1.234Z"
-            transform="translate(5.713 13.891)"
-            fill="#50000a"
-          />
-          <path
-            id="Path_25"
-            data-name="Path 25"
-            d="M0,1.68A1.528,1.528,0,0,1,1.3,0,1.527,1.527,0,0,1,2.6,1.68,1.978,1.978,0,0,1,2.33,2.706a.574.574,0,0,1-.345.258,2.76,2.76,0,0,1-.683.088,2.753,2.753,0,0,1-.683-.088.57.57,0,0,1-.345-.258A1.979,1.979,0,0,1,0,1.68Zm6.943,0A1.527,1.527,0,0,1,8.245,0a1.528,1.528,0,0,1,1.3,1.68,1.989,1.989,0,0,1-.273,1.026.57.57,0,0,1-.345.258,2.752,2.752,0,0,1-.683.088,2.76,2.76,0,0,1-.683-.088.576.576,0,0,1-.346-.258A1.988,1.988,0,0,1,6.943,1.68Z"
-            transform="translate(4.226 9.371)"
-            fill="#fff"
-          />
-          <path
-            id="Path_26"
-            data-name="Path 26"
-            d="M0,1.68A1.528,1.528,0,0,1,1.3,0,1.527,1.527,0,0,1,2.6,1.68,1.978,1.978,0,0,1,2.33,2.706a.574.574,0,0,1-.345.258,2.76,2.76,0,0,1-.683.088,2.753,2.753,0,0,1-.683-.088.57.57,0,0,1-.345-.258A1.979,1.979,0,0,1,0,1.68Zm6.943,0A1.527,1.527,0,0,1,8.245,0a1.528,1.528,0,0,1,1.3,1.68,1.989,1.989,0,0,1-.273,1.026.57.57,0,0,1-.345.258,2.752,2.752,0,0,1-.683.088,2.76,2.76,0,0,1-.683-.088.576.576,0,0,1-.346-.258A1.988,1.988,0,0,1,6.943,1.68Z"
-            transform="translate(4.226 9.371)"
-          />
-          <path
-            id="Path_27"
-            data-name="Path 27"
-            d="M.916.176A.387.387,0,0,1,.924.259a.448.448,0,0,1-.463.43A.447.447,0,0,1,0,.259.409.409,0,0,1,.094,0C.357.062.633.122.916.176ZM7.873.689A.447.447,0,0,1,7.412.281c.3-.045.606-.1.9-.16a.393.393,0,0,1,.023.14.446.446,0,0,1-.461.429Z"
-            transform="translate(4.549 10.314)"
-            fill="#4f4f67"
-          />
-          <path
-            id="Path_28"
-            data-name="Path 28"
-            d="M7.167.7c0-.524.18-.7.491-.7s.457.324.558,1.252A22.932,22.932,0,0,0,11.768.625c.2,0,.305.1.35.313a.4.4,0,0,1-.244.47,11.777,11.777,0,0,1-4.393,1.1c-.185,0-.314-.1-.314-.353Zm-3.254.547C4.014.324,4.162,0,4.471,0s.491.181.491.7V2.152c0,.252-.129.353-.314.353a11.777,11.777,0,0,1-4.393-1.1A.4.4,0,0,1,.011.938C.056.724.165.625.36.625A22.932,22.932,0,0,0,3.913,1.252Z"
-            transform="translate(2.935 7.822)"
-          />
-          <path
-            id="Path_29"
-            data-name="Path 29"
-            d="M7.167.7c0-.524.18-.7.491-.7s.457.324.558,1.252A22.932,22.932,0,0,0,11.768.625c.2,0,.305.1.35.313a.4.4,0,0,1-.244.47,11.777,11.777,0,0,1-4.393,1.1c-.185,0-.314-.1-.314-.353Zm-3.254.547C4.014.324,4.162,0,4.471,0s.491.181.491.7V2.152c0,.252-.129.353-.314.353a11.777,11.777,0,0,1-4.393-1.1A.4.4,0,0,1,.011.938C.056.724.165.625.36.625A22.932,22.932,0,0,0,3.913,1.252Z"
-            transform="translate(2.935 7.822)"
-            fill="#e38200"
-          />
-        </svg>
-      )}
-      {props.type === "comments" && (
-        <svg
-          id="server"
-          xmlns="http://www.w3.org/2000/svg"
-          width="9.977"
-          height="10.392"
-          viewBox="0 0 9.977 10.392"
-          className={"ico_svg_" + props.type}
-        >
-          <rect
-            id="Rectangle_115"
-            data-name="Rectangle 115"
-            width="9.977"
-            height="4.157"
-            rx="1"
-            transform="translate(0 0)"
-            fill="#4a018c"
-          />
-          <rect
-            id="Rectangle_116"
-            data-name="Rectangle 116"
-            width="9.977"
-            height="4.157"
-            rx="1"
-            transform="translate(0 6.235)"
-            fill="#4a018c"
-          />
-        </svg>
-      )}
-      {props.type === "heart" && (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          className={"ico_svg_" + props.type}
-        >
-          <path d="M12 4.248c-3.148-5.402-12-3.825-12 2.944 0 4.661 5.571 9.427 12 15.808 6.43-6.381 12-11.147 12-15.808 0-6.792-8.875-8.306-12-2.944z" />
-        </svg>
-      )}
-      {props.type === "view-stats" && (
-        <svg
-          id="Component_46_1"
-          data-name="Component 46 – 1"
-          xmlns="http://www.w3.org/2000/svg"
-          width="14"
-          height="14"
-          viewBox="0 0 14 14"
-          className={"ico_svg_" + props.type}
-        >
-          <rect
-            id="Rectangle_251"
-            data-name="Rectangle 251"
-            width="14"
-            height="14"
-            fill="rgba(225,225,225,0)"
-          />
-          <g id="Group_533" data-name="Group 533" transform="translate(0.553)">
-            <g
-              id="Rectangle_117"
-              data-name="Rectangle 117"
-              fill="none"
-              stroke="#305670"
-              strokeWidth="1"
-            >
-              <rect width="6" height="8" rx="1.5" stroke="none" />
-              <rect x="0.5" y="0.5" width="5" height="7" rx="1" fill="none" />
-            </g>
-            <g
-              id="Rectangle_119"
-              data-name="Rectangle 119"
-              transform="translate(6.955 5.091)"
-              fill="none"
-              stroke="#305670"
-              strokeWidth="1"
-            >
-              <rect width="5.939" height="8.909" rx="1.5" stroke="none" />
-              <rect
-                x="0.5"
-                y="0.5"
-                width="4.939"
-                height="7.909"
-                rx="1"
-                fill="none"
-              />
-            </g>
-            <g
-              id="Rectangle_118"
-              data-name="Rectangle 118"
-              transform="translate(0 9)"
-              fill="none"
-              stroke="#305670"
-              strokeWidth="1"
-            >
-              <rect width="6" height="5" rx="1.5" stroke="none" />
-              <rect x="0.5" y="0.5" width="5" height="4" rx="1" fill="none" />
-            </g>
-            <g
-              id="Rectangle_120"
-              data-name="Rectangle 120"
-              transform="translate(6.955)"
-              fill="none"
-              stroke="#305670"
-              strokeWidth="1"
-            >
-              <rect width="5.939" height="4.242" rx="1.5" stroke="none" />
-              <rect
-                x="0.5"
-                y="0.5"
-                width="4.939"
-                height="3.242"
-                rx="1"
-                fill="none"
-              />
-            </g>
-          </g>
-        </svg>
-      )}
-
-      {props.type === "modes" && (
-        <svg
-          id="Component_47_1"
-          data-name="Component 47 – 1"
-          xmlns="http://www.w3.org/2000/svg"
-          width="14"
-          height="14"
-          viewBox="0 0 14 14"
-          className={"ico_svg_" + props.type}
-        >
-          <rect
-            id="Rectangle_249"
-            data-name="Rectangle 249"
-            width="14"
-            height="14"
-            fill="rgba(225,225,225,0)"
-          />
-          <g id="grid" transform="translate(0.569 0.569)">
-            <rect
-              id="Rectangle_144"
-              data-name="Rectangle 144"
-              width="5"
-              height="5"
-              rx="1"
-              transform="translate(0.431 0.431)"
-              fill="none"
-              stroke="#305671"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1"
-            />
-            <rect
-              id="Rectangle_145"
-              data-name="Rectangle 145"
-              width="5"
-              height="5"
-              rx="1"
-              transform="translate(7.431 0.431)"
-              fill="#305671"
-              stroke="#305671"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1"
-            />
-            <rect
-              id="Rectangle_146"
-              data-name="Rectangle 146"
-              width="5"
-              height="5"
-              rx="1"
-              transform="translate(7.431 7.431)"
-              fill="none"
-              stroke="#305671"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1"
-            />
-            <rect
-              id="Rectangle_147"
-              data-name="Rectangle 147"
-              width="5"
-              height="5"
-              rx="1"
-              transform="translate(0.431 7.431)"
-              fill="#305671"
-              stroke="#305671"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1"
-            />
-          </g>
-        </svg>
-      )}
-      {props.type === "logout" && (
-        <svg
-          id="Component_54_1"
-          data-name="Component 54 – 1"
-          xmlns="http://www.w3.org/2000/svg"
-          width="14"
-          height="14"
-          viewBox="0 0 14 14"
-          className={"ico_svg_" + props.type}
-        >
-          <rect
-            id="Rectangle_252"
-            data-name="Rectangle 252"
-            width="14"
-            height="14"
-            fill="rgba(225,225,225,0)"
-          />
-          <g id="power" transform="translate(-2.133 -2.182)">
-            <path
-              id="Path_561"
-              data-name="Path 561"
-              d="M13.424,6.64a5.721,5.721,0,0,1,0,8.311,6.281,6.281,0,0,1-8.639,0,5.721,5.721,0,0,1,0-8.311"
-              transform="translate(0 -1.331)"
-              fill="none"
-              stroke="#305670"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.5"
-            />
-            <line
-              id="Line_92"
-              data-name="Line 92"
-              y2="6.144"
-              transform="translate(9.14 3.024)"
-              fill="none"
-              stroke="#305670"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.5"
-            />
-          </g>
-        </svg>
-      )}
-
-      {props.type === "settings" && (
-        <svg
-          id="Component_45_12"
-          data-name="Component 45 – 12"
-          xmlns="http://www.w3.org/2000/svg"
-          width="14"
-          height="14"
-          viewBox="0 0 14 14"
-          className={"ico_svg_" + props.type}
-        >
-          <rect
-            id="Rectangle_249"
-            data-name="Rectangle 249"
-            width="14"
-            height="14"
-            fill="rgba(225,225,225,0)"
-          />
-          <g id="settings" transform="translate(0.538 0.544)">
-            <circle
-              id="Ellipse_23"
-              data-name="Ellipse 23"
-              cx="1.767"
-              cy="1.767"
-              r="1.767"
-              transform="translate(4.695 4.695)"
-              fill="none"
-              stroke="#305671"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1"
-            />
-            <path
-              id="Path_88"
-              data-name="Path 88"
-              d="M11.81,9.225A.969.969,0,0,0,12,10.294l.035.035a1.176,1.176,0,1,1-1.663,1.663l-.035-.035a.977.977,0,0,0-1.657.693v.1a1.175,1.175,0,1,1-2.35,0V12.7A.969.969,0,0,0,5.7,11.81.969.969,0,0,0,4.631,12l-.035.035a1.176,1.176,0,1,1-1.663-1.663l.035-.035a.977.977,0,0,0-.693-1.657h-.1a1.175,1.175,0,1,1,0-2.35h.053A.969.969,0,0,0,3.115,5.7a.969.969,0,0,0-.194-1.069L2.886,4.6A1.176,1.176,0,1,1,4.549,2.933l.035.035a.969.969,0,0,0,1.069.194H5.7a.969.969,0,0,0,.588-.887v-.1a1.175,1.175,0,1,1,2.35,0v.053a.977.977,0,0,0,1.657.693l.035-.035a1.176,1.176,0,1,1,1.663,1.663l-.035.035a.969.969,0,0,0-.194,1.069V5.7a.969.969,0,0,0,.887.588h.1a1.175,1.175,0,1,1,0,2.35H12.7A.969.969,0,0,0,11.81,9.225Z"
-              transform="translate(-1 -1)"
-              fill="none"
-              stroke="#305671"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1"
-            />
-          </g>
-        </svg>
-      )}
-      {props.type === "lock" && (
-        <svg
-          id="Component_44_13"
-          data-name="Component 44 – 13"
-          xmlns="http://www.w3.org/2000/svg"
-          width="14"
-          height="14"
-          viewBox="0 0 14 14"
-          className={"ico_svg_" + props.type}
-        >
-          <rect
-            id="Rectangle_249"
-            data-name="Rectangle 249"
-            width="14"
-            height="14"
-            fill="rgba(225,225,225,0)"
-          />
-          <g id="lock" transform="translate(1.341 0.57)">
-            <rect
-              id="Rectangle_114"
-              data-name="Rectangle 114"
-              width="11.318"
-              height="7.276"
-              rx="2"
-              transform="translate(0 5.556)"
-              fill="none"
-              stroke="#305670"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.1"
-            />
-            <path
-              id="Path_85"
-              data-name="Path 85"
-              d="M7,7.735V5.186a3.186,3.186,0,0,1,6.372,0V7.735"
-              transform="translate(-4.527 -2)"
-              fill="none"
-              stroke="#305670"
-              strokeLinejoin="round"
-              strokeWidth="1.1"
-            />
-          </g>
-        </svg>
-      )}
-      {props.type === "change-password" && (
-        <svg
-          id="Component_43_13"
-          data-name="Component 43 – 13"
-          xmlns="http://www.w3.org/2000/svg"
-          width="14.225"
-          height="14"
-          viewBox="0 0 14.225 14"
-          className={"ico_svg_" + props.type}
-        >
-          <rect
-            id="Rectangle_249"
-            data-name="Rectangle 249"
-            width="14"
-            height="14"
-            fill="rgba(225,225,225,0)"
-          />
-          <g
-            id="Group_531"
-            data-name="Group 531"
-            transform="translate(0.59 0.953)"
-          >
-            <g id="Group_530" data-name="Group 530">
-              <path
-                id="Path_84"
-                data-name="Path 84"
-                d="M11.716,19.375V17.917A2.888,2.888,0,0,0,8.859,15h-5A2.888,2.888,0,0,0,1,17.917v1.458"
-                transform="translate(-1 -7.302)"
-                fill="none"
-                stroke="#305671"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.1"
-              />
-              <circle
-                id="Ellipse_22"
-                data-name="Ellipse 22"
-                cx="2.625"
-                cy="2.625"
-                r="2.625"
-                transform="translate(2.501)"
-                fill="none"
-                stroke="#305671"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.1"
-              />
-            </g>
-            <line
-              id="Line_23"
-              data-name="Line 23"
-              x1="3.658"
-              transform="translate(10.27 3.45) rotate(45)"
-              fill="none"
-              stroke="#305671"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.1"
-            />
-            <line
-              id="Line_112"
-              data-name="Line 112"
-              x1="3.658"
-              transform="translate(10.27 6.036) rotate(-45)"
-              fill="none"
-              stroke="#305671"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.1"
-            />
-          </g>
-        </svg>
-      )}
-      {props.type === "blacklist-user" && (
-        <svg
-          id="Component_40_15"
-          data-name="Component 40 – 15"
-          xmlns="http://www.w3.org/2000/svg"
-          width="14"
-          height="14"
-          viewBox="0 0 14 14"
-          className={"ico_svg_" + props.type}
-        >
-          <rect
-            id="Rectangle_249"
-            data-name="Rectangle 249"
-            width="14"
-            height="14"
-            fill="rgba(225,225,225,0)"
-          />
-          <g
-            id="Group_531"
-            data-name="Group 531"
-            transform="translate(0.59 0.953)"
-          >
-            <g id="Group_530" data-name="Group 530">
-              <path
-                id="Path_84"
-                data-name="Path 84"
-                d="M11.716,19.375V17.917A2.888,2.888,0,0,0,8.859,15h-5A2.888,2.888,0,0,0,1,17.917v1.458"
-                transform="translate(-1 -7.302)"
-                fill="none"
-                stroke="#305671"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.1"
-              />
-              <circle
-                id="Ellipse_22"
-                data-name="Ellipse 22"
-                cx="2.625"
-                cy="2.625"
-                r="2.625"
-                transform="translate(2.501)"
-                fill="none"
-                stroke="#305671"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1.1"
-              />
-            </g>
-            <line
-              id="Line_23"
-              data-name="Line 23"
-              x1="2.558"
-              transform="translate(10.284 4.743)"
-              fill="none"
-              stroke="#305671"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.1"
-            />
-          </g>
-        </svg>
-      )}
-
-        {props.type === "external" && (
-        <svg
-          fill="#305670"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="24px"
-          height="24px"
-        >
-          <path d="M 3 3 L 3 21 L 21 21 L 21 12 L 19 12 L 19 19 L 5 19 L 5 5 L 12 5 L 12 3 L 3 3 z M 14 3 L 14 5 L 17.585938 5 L 8.2929688 14.292969 L 9.7070312 15.707031 L 19 6.4140625 L 19 10 L 21 10 L 21 3 L 14 3 z" />
-        </svg>
-      )}
-    </>
+    <svg
+      width="101"
+      height="20"
+      viewBox="0 0 101 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M4.76186 0H15.2386C16.5014 0.000123349 17.7125 0.501872 18.6054 1.39488C19.4984 2.28789 20 3.49902 20 4.76186V15.2386C19.9999 16.5014 19.4981 17.7125 18.6051 18.6054C17.7121 19.4984 16.501 20 15.2381 20H4.7614C3.49855 19.9999 2.28747 19.4981 1.39455 18.6051C0.501631 17.7121 -6.02406e-09 16.501 0 15.2381V4.7614C0.000123349 3.49855 0.501872 2.28747 1.39488 1.39455C2.28789 0.501631 3.49902 -6.02406e-09 4.76186 0V0Z"
+        fill="#605BFF"
+      />
+      <path
+        d="M4.76562 10.9286L8.40968 14.5728V7.59033H5.17504L4.76562 10.9286Z"
+        fill="#3F3AD5"
+      />
+      <path
+        d="M8.12481 7.57617H4.76562V10.9351L8.12481 7.57617Z"
+        fill="#11E6B4"
+      />
+      <mask
+        id="mask0_7191_4381"
+        style={{
+          maskYype: "alpha",
+        }}
+        maskUnits="userSpaceOnUse"
+        x="0"
+        y="0"
+        width="20"
+        height="20"
+      >
+        <path
+          d="M4.76186 0H15.2386C16.5014 0.000123349 17.7125 0.501872 18.6054 1.39488C19.4984 2.28789 20 3.49902 20 4.76186V15.2386C19.9999 16.5014 19.4981 17.7125 18.6051 18.6054C17.7121 19.4984 16.501 20 15.2381 20H4.7614C3.49855 19.9999 2.28747 19.4981 1.39455 18.6051C0.501631 17.7121 -6.02406e-09 16.501 0 15.2381V4.7614C0.000123349 3.49855 0.501872 2.28747 1.39488 1.39455C2.28789 0.501631 3.49902 -6.02406e-09 4.76186 0V0Z"
+          fill="#605BFF"
+        />
+      </mask>
+      <g mask="url(#mask0_7191_4381)">
+        <path
+          d="M13.7852 2.56299L19.9967 8.77462L19.9269 29.3062L8.11633 17.454V6.91683L13.7852 2.56299Z"
+          fill="#3F3AD5"
+        />
+      </g>
+      <path
+        d="M13.793 5.93689C12.3473 5.81239 11.6243 6.35662 11.6239 7.56957H13.793V10.9286H11.6238V17.4503H8.125V7.56957C8.125 5.89019 8.59922 4.61112 9.54767 3.73236C10.4961 2.8536 11.9112 2.46867 13.7928 2.57759L13.793 5.93689Z"
+        fill="white"
+      />
+      <path
+        d="M96.5266 8.55723V6.51758H93.0013C93.4737 6.51758 93.8075 6.847 93.8502 7.18676C93.8579 7.84176 93.8618 8.59072 93.8618 9.50758V17.5354H96.5262V12.5483C96.5262 9.60642 97.8916 8.5463 100.12 8.56107V6.52269C98.264 6.54781 97.0429 7.22037 96.5262 8.55758"
+        fill="white"
+      />
+      <path
+        d="M37.5164 8.55723V6.51758H33.9912C34.4635 6.51758 34.7974 6.847 34.84 7.18676C34.8477 7.84176 34.8517 8.59072 34.8517 9.50758V17.5354H37.5161V12.5483C37.5161 9.60642 38.8814 8.5463 41.1102 8.56107V6.52269C39.2539 6.54781 38.0327 7.22037 37.5161 8.55758"
+        fill="white"
+      />
+      <path
+        d="M84.5764 12.1603C84.5828 13.8287 85.4206 15.2578 87.0575 15.2578C88.4858 15.2578 88.9169 14.6175 89.227 13.9046H91.8984C91.493 15.2738 90.297 17.3771 86.984 17.3771C83.4105 17.3771 81.8901 14.6298 81.8901 11.7575C81.8901 8.36219 83.6227 5.84521 87.0979 5.84521C90.8047 5.84521 92.0503 8.62091 92.0503 11.2364C92.0574 11.5448 92.0452 11.8534 92.0136 12.1603H84.5764ZM89.373 10.4663C89.3518 9.0051 88.7046 7.79928 87.085 7.79928C85.4636 7.79928 84.7868 8.92208 84.6407 10.4663H89.373Z"
+        fill="white"
+      />
+      <path
+        d="M50.0236 12.1603C50.03 13.8287 50.8677 15.2578 52.5046 15.2578C53.933 15.2578 54.364 14.6175 54.6741 13.9046H57.3455C56.9402 15.2738 55.7441 17.3771 52.4311 17.3771C48.8576 17.3771 47.3373 14.6298 47.3373 11.7575C47.3373 8.36219 49.0698 5.84521 52.5451 5.84521C56.2518 5.84521 57.4974 8.62091 57.4974 11.2364C57.5046 11.5448 57.4923 11.8534 57.4608 12.1603H50.0236ZM54.8202 10.4663C54.7989 9.0051 54.1517 7.79928 52.5322 7.79928C50.9108 7.79928 50.2339 8.92208 50.0879 10.4663H54.8202Z"
+        fill="white"
+      />
+      <path
+        d="M27.9765 17.5406V8.5669H26.5951V6.52283H27.9765C27.9765 6.52283 27.8002 2.80469 31.3879 2.80469C31.8595 2.80469 32.4656 2.85422 32.7385 2.9398V5.08085C32.4905 5.03554 32.239 5.01292 31.987 5.01329C30.4679 5.01329 30.6409 6.52271 30.6409 6.52271H32.6618V8.5669H30.6409V17.5406H27.9765Z"
+        fill="white"
+      />
+      <path
+        d="M65.1326 6.18076C63.1356 6.18076 62.2411 7.20052 61.8449 7.97843C61.8365 7.63297 61.8307 6.43808 61.8307 6.43808H58.318C58.8069 6.43808 59.148 6.79064 59.1718 7.14262C59.1802 7.80401 59.1802 8.52471 59.1802 9.21378V17.4553H61.8447V11.4188C61.8447 9.38308 62.6188 8.37285 64.1778 8.37285C65.6371 8.37285 66.1293 9.34564 66.1293 10.727V17.4552H68.7937V10.4203C68.7937 7.59704 67.2958 6.18018 65.1326 6.18018"
+        fill="white"
+      />
+      <path
+        d="M80.5761 13.9496V2.46729H77.0528C77.5592 2.46729 77.9105 2.84566 77.9105 3.20973V6.90298C77.6494 6.36705 76.7917 5.73136 75.084 5.73136C71.9885 5.73136 70.1066 8.20461 70.1066 11.596C70.1066 15.0061 71.8689 17.2632 74.6703 17.2632C76.3696 17.2632 77.3746 16.6783 77.9105 15.7167L77.9209 17.0061H80.5976C80.5763 15.9798 80.5763 14.9639 80.5763 13.95M75.4053 15.0991C73.8327 15.0991 72.8516 13.8433 72.8516 11.5231C72.8516 9.24403 73.7916 7.89519 75.5082 7.89519C77.6655 7.89519 78.0142 9.36147 78.0142 11.4359C78.0142 13.2986 77.6635 15.0987 75.4052 15.0987"
+        fill="white"
+      />
+      <path
+        d="M42.9223 6.32812H42.0646C42.5697 6.32812 42.9203 6.70452 42.9223 7.06743V17.3465H45.5867V6.32812H42.9223Z"
+        fill="white"
+      />
+      <path
+        d="M45.5813 3.20757L45.5819 2.8042H42.924V5.85978H42.9291C43.6322 5.8591 44.3064 5.57947 44.8036 5.08225C45.3009 4.58504 45.5805 3.91086 45.5812 3.20769"
+        fill="#11E6B4"
+      />
+    </svg>
   );
 };
 
-export default SVGAsset;
+export const ThreeDots = () => {
+  return (
+    <svg
+      width="14"
+      height="4"
+      viewBox="0 0 14 4"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M13.4874 0.512567C12.804 -0.170848 11.696 -0.170848 11.0126 0.512567C10.3291 1.19598 10.3291 2.30402 11.0126 2.98744C11.696 3.67085 12.804 3.67085 13.4874 2.98744C14.1709 2.30405 14.1709 1.19601 13.4874 0.512567Z"
+        fill="#BDBDBD"
+      />
+      <path
+        d="M8.23744 0.512567C7.55402 -0.170848 6.44598 -0.170848 5.76257 0.512567C5.07915 1.19598 5.07915 2.30402 5.76257 2.98744C6.44598 3.67085 7.55402 3.67085 8.23744 2.98744C8.92085 2.30405 8.92085 1.19601 8.23744 0.512567Z"
+        fill="#BDBDBD"
+      />
+      <path
+        d="M2.98744 0.512567C2.30402 -0.170848 1.19598 -0.170848 0.512564 0.512567C-0.170852 1.19598 -0.170852 2.30402 0.512564 2.98744C1.19598 3.67085 2.30402 3.67085 2.98744 2.98744C3.67085 2.30405 3.67085 1.19601 2.98744 0.512567Z"
+        fill="#BDBDBD"
+      />
+    </svg>
+  );
+};
+
+export const DiamondPoints = () => {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M5.99992 10.6668L1.96473 5.62284C1.6799 5.26681 1.53749 5.08879 1.48437 4.87831C1.47283 4.83258 1.46454 4.7861 1.45956 4.73921C1.43664 4.52333 1.50873 4.30706 1.65291 3.87452V3.87452C2.02944 2.74492 2.21771 2.18012 2.633 1.82088C2.72243 1.74353 2.81854 1.67425 2.92021 1.61387C3.39234 1.3335 3.98769 1.3335 5.17839 1.3335H6.82145C8.01215 1.3335 8.6075 1.3335 9.07963 1.61387C9.18129 1.67425 9.27741 1.74353 9.36684 1.82088C9.78213 2.18012 9.97039 2.74492 10.3469 3.87452V3.87452C10.4911 4.30706 10.5632 4.52333 10.5403 4.73921C10.5353 4.7861 10.527 4.83258 10.5155 4.87831C10.4623 5.08879 10.3199 5.26681 10.0351 5.62284L5.99992 10.6668ZM5.99992 10.6668L8.04159 4.25016M5.99992 10.6668L3.95825 4.25016M10.3749 4.8335L8.04159 4.25016M8.04159 4.25016L7.16659 1.91683M8.04159 4.25016H3.95825M4.83325 1.91683L3.95825 4.25016M3.95825 4.25016L1.62492 4.8335"
+        stroke="url(#paint0_linear_7191_4379)"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+      <defs>
+        <linearGradient
+          id="paint0_linear_7191_4379"
+          x1="11.0002"
+          y1="1.00049"
+          x2="1.00024"
+          y2="11.0005"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#FFD80B" />
+          <stop offset="0.0001" stopColor="#FFBB0B" />
+          <stop offset="1" stopColor="#FFD76F" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+};
+
+export const Fire = () => {
+  return (
+    <svg
+      width="10"
+      height="14"
+      viewBox="0 0 10 14"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M2.5 4.52959C2.5 3.73805 1.44722 3.52825 1.16791 4.26887C0.492283 6.06039 0 7.66304 0 8.52951C0 11.2909 2.23858 13.5295 5 13.5295C7.76142 13.5295 10 11.2909 10 8.52951C10 7.5986 9.43178 5.81796 8.67844 3.86628C7.70257 1.33809 7.21464 0.0739882 6.61233 0.00590088C6.4196 -0.0158859 6.20934 0.0232845 6.03739 0.113011C5.5 0.393423 5.5 1.77214 5.5 4.52959C5.5 5.35801 4.82843 6.02959 4 6.02959C3.17157 6.02959 2.5 5.35801 2.5 4.52959Z"
+        fill="url(#paint0_linear_7191_4414)"
+      />
+      <defs>
+        <linearGradient
+          id="paint0_linear_7191_4414"
+          x1="1.5"
+          y1="17"
+          x2="7.5"
+          y2="-3"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#FFE600" />
+          <stop offset="1" stopColor="#FF3D00" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+};
+
+export const HomeIcon = () => {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M3.75 8.56917C3.75 7.55085 3.75 7.0417 3.95585 6.59414C4.16169 6.14659 4.54827 5.81523 5.32144 5.15252L6.07144 4.50966C7.46893 3.31181 8.16767 2.71289 9 2.71289C9.83233 2.71289 10.5311 3.31181 11.9286 4.50966L12.6786 5.15252C13.4517 5.81523 13.8383 6.14659 14.0442 6.59414C14.25 7.0417 14.25 7.55085 14.25 8.56917V11.7495C14.25 13.1637 14.25 13.8708 13.8107 14.3101C13.3713 14.7495 12.6642 14.7495 11.25 14.7495H6.75C5.33579 14.7495 4.62868 14.7495 4.18934 14.3101C3.75 13.8708 3.75 13.1637 3.75 11.7495V8.56917Z"
+        stroke="#B3B3BF"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M10.875 14.75V11.25C10.875 10.6977 10.4273 10.25 9.875 10.25H8.125C7.57272 10.25 7.125 10.6977 7.125 11.25V14.75"
+        stroke="#B3B3BF"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+export const RequestIcon = () => {
+  return (
+    <svg
+      width="19"
+      height="18"
+      viewBox="0 0 19 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M15.2391 15.304C15.6537 15.2176 15.9007 14.7838 15.6946 14.4137C15.2405 13.598 14.5249 12.8812 13.6096 12.3349C12.4308 11.6313 10.9864 11.25 9.50047 11.25C8.01456 11.25 6.57018 11.6313 5.39133 12.3349C4.476 12.8812 3.76049 13.598 3.3063 14.4137C3.10028 14.7838 3.3472 15.2176 3.76181 15.304C7.54692 16.0929 11.454 16.0929 15.2391 15.304Z"
+        fill="#B3B3BF"
+      />
+      <circle cx="9.5" cy="6" r="3.75" fill="#B3B3BF" />
+    </svg>
+  );
+};
+
+export const MessageIcon = () => {
+  return (
+    <svg
+      width="19"
+      height="18"
+      viewBox="0 0 19 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M14.637 4.31546C15.1407 5.06922 15.1407 6.11852 15.1407 8.21711C15.1407 10.3157 15.1407 11.365 14.637 12.1187C14.419 12.4451 14.1388 12.7252 13.8125 12.9433C13.1541 13.3832 12.2701 13.4389 10.658 13.4459V13.4469L9.83207 15.0989C9.55674 15.6495 8.77094 15.6495 8.49561 15.0989L7.66963 13.4469V13.4459C6.05761 13.4389 5.17361 13.3832 4.51515 12.9433C4.18885 12.7252 3.90868 12.4451 3.69065 12.1187C3.18701 11.365 3.18701 10.3157 3.18701 8.21711C3.18701 6.11852 3.18701 5.06922 3.69065 4.31546C3.90868 3.98915 4.18885 3.70898 4.51515 3.49095C5.2689 2.9873 6.31818 2.9873 8.41674 2.9873H9.91094C12.0095 2.9873 13.0588 2.9873 13.8125 3.49095C14.1388 3.70898 14.419 3.98915 14.637 4.31546Z"
+        stroke="#B3B3BF"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M6.92334 6.72314L11.406 6.72314"
+        stroke="#B3B3BF"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M6.92334 9.71143H9.16465"
+        stroke="#B3B3BF"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+export const NoteIcon = () => {
+  return (
+    <svg
+      width="19"
+      height="18"
+      viewBox="0 0 19 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M10.3787 2.25H7.25C5.83579 2.25 5.12868 2.25 4.68934 2.68934C4.25 3.12868 4.25 3.83579 4.25 5.25V12.75C4.25 14.1642 4.25 14.8713 4.68934 15.3107C5.12868 15.75 5.83579 15.75 7.25 15.75H11.75C13.1642 15.75 13.8713 15.75 14.3107 15.3107C14.75 14.8713 14.75 14.1642 14.75 12.75V6.62132C14.75 6.31476 14.75 6.16148 14.6929 6.02365C14.6358 5.88582 14.5274 5.77743 14.3107 5.56066L11.4393 2.68934C11.2226 2.47257 11.1142 2.36418 10.9764 2.30709C10.8385 2.25 10.6852 2.25 10.3787 2.25Z"
+        stroke="#B3B3BF"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M7.25 9.75L11.75 9.75"
+        stroke="#B3B3BF"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M7.25 12.75L10.25 12.75"
+        stroke="#B3B3BF"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M10.25 2.25V5.25C10.25 5.95711 10.25 6.31066 10.4697 6.53033C10.6893 6.75 11.0429 6.75 11.75 6.75H14.75"
+        stroke="#B3B3BF"
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
+};
+
+export const MessengerIcon = () => {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M4.35771 13.5992L4.35564 13.5973C3.05539 12.4342 2.25 10.7482 2.25 8.77507C2.25 5.03603 5.16152 2.25 8.99991 2.25C12.8383 2.25 15.7498 5.03603 15.7498 8.77507C15.7498 12.5141 12.8383 15.3001 8.99991 15.3001C8.30656 15.3001 7.64488 15.2092 7.02791 15.0389L7.02575 15.0383C6.72608 14.9566 6.40939 14.981 6.12619 15.1057L6.12578 15.1059L4.84143 15.6725L4.80748 14.5605L4.80731 14.5558C4.79353 14.1803 4.62435 13.8395 4.35771 13.5992Z"
+        stroke="#B3B3BF"
+        strokeWidth="1.5"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M4.35921 10.903L6.5624 7.40808C6.9125 6.85276 7.664 6.71393 8.18914 7.10778L9.94114 8.42216C10.1026 8.54288 10.3229 8.54137 10.4829 8.42065L12.8491 6.62489C13.1644 6.38496 13.5779 6.76372 13.3651 7.09873L11.1635 10.5922C10.8134 11.1475 10.0619 11.2863 9.53671 10.8924L7.78472 9.57808C7.62326 9.45736 7.40294 9.45886 7.24298 9.57959L4.8753 11.3769C4.55991 11.6168 4.14644 11.238 4.35921 10.903Z"
+        fill="#B3B3BF"
+      />
+    </svg>
+  );
+};
+
+export const QueryIcon = () => {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="9" cy="9" r="6.75" stroke="#BDBDBD" strokeWidth="1.5" />
+      <circle cx="9" cy="12.875" r="0.375" fill="#BDBDBD" stroke="#BDBDBD" />
+      <path
+        d="M9 11V10.5541C9 9.9246 9.40281 9.36573 10 9.16667V9.16667C10.5972 8.9676 11 8.40873 11 7.77924V7.43713C11 6.36728 10.1327 5.5 9.06287 5.5H9C7.89543 5.5 7 6.39543 7 7.5V7.5"
+        stroke="#BDBDBD"
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
+};
+
+export const InfoIcon = () => {
+  return (
+    <svg
+      width="14"
+      height="15"
+      viewBox="0 0 14 15"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g opacity="0.5">
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M12.25 7.5C12.25 10.3995 9.8995 12.75 7 12.75C4.10051 12.75 1.75 10.3995 1.75 7.5C1.75 4.60051 4.10051 2.25 7 2.25C9.8995 2.25 12.25 4.60051 12.25 7.5ZM7.77778 5.16667C7.77778 5.59622 7.42955 5.94444 7 5.94444C6.57045 5.94444 6.22222 5.59622 6.22222 5.16667C6.22222 4.73711 6.57045 4.38889 7 4.38889C7.42955 4.38889 7.77778 4.73711 7.77778 5.16667ZM7.65 10.4167V6.91667H6.35V10.4167H7.65Z"
+          fill="white"
+        />
+      </g>
+    </svg>
+  );
+};
+
+export const Groups = () => {
+  return (
+    <svg
+      width="20"
+      height="15"
+      viewBox="0 0 20 15"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M13.7796 3.82136C13.7796 5.94262 12.0767 7.64353 9.95297 7.64353C7.82923 7.64353 6.12633 5.94262 6.12633 3.82136C6.12633 1.69928 7.82923 0 9.95297 0C12.0767 0 13.7796 1.69928 13.7796 3.82136ZM9.95372 14.4435C6.83445 14.4435 4.17102 13.9524 4.17102 11.9881C4.17102 10.0229 6.81736 9.51393 9.95372 9.51393C13.073 9.51393 15.7364 10.005 15.7364 11.9702C15.7364 13.9345 13.0901 14.4435 9.95372 14.4435ZM15.4156 3.89106C15.4156 4.97242 15.0908 5.97979 14.521 6.81724C14.4624 6.90342 14.5145 7.01969 14.6179 7.03758C14.7603 7.06197 14.9077 7.07579 15.0575 7.07986C16.5512 7.11888 17.8918 6.15866 18.2622 4.71305C18.8108 2.56578 17.1999 0.638023 15.1486 0.638023C14.9256 0.638023 14.7123 0.661602 14.5047 0.703881C14.4763 0.710385 14.4461 0.723394 14.4299 0.748599C14.4103 0.779495 14.425 0.820961 14.4445 0.847791C15.0607 1.71044 15.4156 2.76254 15.4156 3.89106ZM17.8893 8.58715C18.893 8.78309 19.5531 9.18312 19.8266 9.76445C20.0578 10.2417 20.0578 10.7954 19.8266 11.2719C19.4082 12.1735 18.0594 12.463 17.5352 12.5378C17.4269 12.554 17.3398 12.4605 17.3512 12.3524C17.619 9.85389 15.4888 8.66927 14.9377 8.39689C14.9141 8.3847 14.9092 8.366 14.9116 8.35462C14.9133 8.34648 14.923 8.33348 14.941 8.33104C16.1335 8.30908 17.4155 8.47169 17.8893 8.58715ZM4.941 7.07769C5.09077 7.07362 5.23729 7.06061 5.38056 7.03541C5.48394 7.01752 5.53603 6.90125 5.47743 6.81507C4.90762 5.97762 4.58283 4.97025 4.58283 3.88889C4.58283 2.76037 4.93774 1.70827 5.55394 0.845621C5.57348 0.818791 5.58732 0.777325 5.56859 0.746429C5.55231 0.722037 5.52138 0.708215 5.49371 0.701711C5.28532 0.659432 5.07205 0.635853 4.84901 0.635853C2.79772 0.635853 1.1868 2.56361 1.73626 4.71088C2.10663 6.15649 3.4473 7.11671 4.941 7.07769ZM5.08815 8.3538C5.09059 8.366 5.0857 8.38389 5.06291 8.39689C4.51102 8.66927 2.38076 9.85389 2.64857 12.3516C2.65997 12.4605 2.57368 12.5532 2.46542 12.5378C1.9412 12.463 0.592393 12.1735 0.173994 11.2719C-0.0579979 10.7946 -0.0579979 10.2417 0.173994 9.76445C0.4475 9.18312 1.10684 8.78309 2.11051 8.58634C2.58508 8.47169 3.86632 8.30908 5.05966 8.33104C5.07756 8.33348 5.08652 8.34648 5.08815 8.3538Z"
+        fill="#767485"
+      />
+    </svg>
+  );
+};
+
+export const FriendsFriend = () => {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M7.00002 8.00015C5.93916 8.00015 4.92174 7.57872 4.1716 6.82857C3.42145 6.07843 3.00002 5.06101 3.00002 4.00015C3.00002 2.93928 3.42145 1.92187 4.1716 1.17172C4.92174 0.421574 5.93916 0.00014702 7.00002 0.00014702C8.06089 0.00014702 9.07831 0.421574 9.82845 1.17172C10.5786 1.92187 11 2.93928 11 4.00015C11 5.06101 10.5786 6.07843 9.82845 6.82857C9.07831 7.57872 8.06089 8.00015 7.00002 8.00015ZM7.00002 9.00015C9.15002 9.00015 11.2 9.40015 13.1 10.0901L12 16.0001H10.75L10 20.0001H4.00002L3.25002 16.0001H2.00002L0.900024 10.0901C2.85469 9.37554 4.91884 9.0067 7.00002 9.00015ZM15.31 9.17015C16.63 9.35015 17.9 9.65015 19.11 10.0901L18 16.0001H16.75L16 20.0001H12.04L12.41 18.0001H13.66L15.31 9.17015ZM13 0.00014702C13.5854 -0.00487147 14.1647 0.118646 14.6971 0.36198C15.2295 0.605315 15.702 0.962537 16.0812 1.40843C16.4605 1.85433 16.7373 2.37803 16.892 2.94258C17.0468 3.50712 17.0757 4.09876 16.9768 4.67571C16.8779 5.25267 16.6536 5.8009 16.3197 6.28169C15.9858 6.76249 15.5504 7.16413 15.0444 7.45829C14.5383 7.75244 13.9738 7.93193 13.3907 7.98409C12.8077 8.03625 12.2203 7.9598 11.67 7.76015C12.5341 6.69751 13.0057 5.36972 13.0057 4.00015C13.0057 2.63057 12.5341 1.30278 11.67 0.240147C12.1 0.100147 12.53 0.00014702 13 0.00014702Z"
+        fill="#767485"
+      />
+    </svg>
+  );
+};
+
+export const ExternalLink = () => {
+  return (
+    <svg
+      width="10"
+      height="10"
+      viewBox="0 0 10 10"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M8.75 5.83333V5.83333C8.75 6.68705 8.75 7.11391 8.62181 7.4545C8.41894 7.99353 7.99353 8.41894 7.4545 8.62181C7.11391 8.75 6.68705 8.75 5.83333 8.75H4.99999C3.35625 8.75 2.53438 8.75 1.9812 8.29602C1.87994 8.21291 1.78708 8.12005 1.70397 8.01879C1.24999 7.46561 1.24999 6.64374 1.24999 5V4.16667C1.24999 3.31295 1.24999 2.88609 1.37818 2.5455C1.58106 2.00647 2.00646 1.58107 2.54549 1.37819C2.88608 1.25 3.31294 1.25 4.16666 1.25V1.25"
+        stroke="#9A9AA9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8.75 1.25V0.75H9.25V1.25H8.75ZM5.15416 5.76104C4.96397 5.96124 4.64749 5.96936 4.44729 5.77917C4.24708 5.58897 4.23897 5.27249 4.42916 5.07229L5.15416 5.76104ZM8.25 3.75V1.25H9.25V3.75H8.25ZM8.75 1.75H6.25V0.75H8.75V1.75ZM9.1125 1.59437L5.15416 5.76104L4.42916 5.07229L8.3875 0.905625L9.1125 1.59437Z"
+        fill="#9A9AA9"
+      />
+    </svg>
+  );
+};
+
+export const Bolt = () => {
+  return (
+    <svg
+      width="19"
+      height="18"
+      viewBox="0 0 19 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M8.9169 13.2466L9.02543 11.6186C9.0578 11.133 9.07398 10.8903 9.00304 10.6934C8.92057 10.4646 8.75755 10.2737 8.54448 10.1565C8.36118 10.0556 8.11887 10.0335 7.63426 9.98948C6.8333 9.91666 6.43283 9.88026 6.20463 9.7074C5.94015 9.50705 5.79226 9.18855 5.80987 8.85721C5.82506 8.57134 6.05567 8.24191 6.51688 7.58303L8.81119 4.30544C9.39238 3.47517 9.68298 3.06004 9.9336 3.14831C10.1842 3.23658 10.1505 3.7422 10.0831 4.75343L9.97457 6.38142V6.38143C9.9422 6.86696 9.92602 7.10973 9.99696 7.30656C10.0794 7.53537 10.2425 7.72627 10.4555 7.84355C10.6388 7.94444 10.8811 7.96647 11.3657 8.01052H11.3657C12.1667 8.08334 12.5672 8.11974 12.7954 8.2926C13.0599 8.49295 13.2077 8.81145 13.1901 9.14279C13.1749 9.42866 12.9443 9.75809 12.4831 10.417L10.1888 13.6946C9.60762 14.5248 9.31702 14.94 9.0664 14.8517C8.81577 14.7634 8.84948 14.2578 8.9169 13.2466Z"
+        fill="white"
+      />
+      <path
+        d="M14.375 3L13.25 4.5H14.75L13.625 6"
+        stroke="#7E869E"
+        strokeOpacity="0.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5.375 12L4.25 13.5H5.75L4.625 15"
+        stroke="#7E869E"
+        strokeOpacity="0.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+export const EditIcon = () => {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M9.9165 12.8335H2.9165C2.45238 12.8335 2.00726 12.6491 1.67907 12.3209C1.35088 11.9927 1.1665 11.5476 1.1665 11.0835V4.0835C1.1665 3.61937 1.35088 3.17425 1.67907 2.84606C2.00726 2.51787 2.45238 2.3335 2.9165 2.3335H5.24984C5.40455 2.3335 5.55292 2.39495 5.66232 2.50435C5.77171 2.61375 5.83317 2.76212 5.83317 2.91683C5.83317 3.07154 5.77171 3.21991 5.66232 3.32931C5.55292 3.4387 5.40455 3.50016 5.24984 3.50016H2.9165C2.76179 3.50016 2.61342 3.56162 2.50402 3.67102C2.39463 3.78041 2.33317 3.92879 2.33317 4.0835V11.0835C2.33317 11.2382 2.39463 11.3866 2.50402 11.496C2.61342 11.6054 2.76179 11.6668 2.9165 11.6668H9.9165C10.0712 11.6668 10.2196 11.6054 10.329 11.496C10.4384 11.3866 10.4998 11.2382 10.4998 11.0835V8.75016C10.4998 8.59545 10.5613 8.44708 10.6707 8.33768C10.7801 8.22829 10.9285 8.16683 11.0832 8.16683C11.2379 8.16683 11.3863 8.22829 11.4956 8.33768C11.605 8.44708 11.6665 8.59545 11.6665 8.75016V11.0835C11.6665 11.5476 11.4821 11.9927 11.1539 12.3209C10.8258 12.6491 10.3806 12.8335 9.9165 12.8335Z"
+        fill="#BDBDBD"
+      />
+      <path
+        d="M8.51656 3.42432L5.62906 6.34098C5.58967 6.37611 5.56301 6.42329 5.55323 6.47515L4.96989 8.70348C4.95576 8.75263 4.95535 8.80471 4.96872 8.85407C4.98209 8.90343 5.00872 8.94819 5.04572 8.98348C5.07417 9.00629 5.10688 9.0232 5.14193 9.03322C5.17699 9.04323 5.21369 9.04616 5.24989 9.04182C5.2749 9.047 5.30071 9.047 5.32573 9.04182L7.55406 8.45848C7.60592 8.4487 7.6531 8.42204 7.68823 8.38265L10.5757 5.48348L8.51656 3.42432Z"
+        fill="#BDBDBD"
+      />
+      <path
+        d="M12.2502 2.59596L11.4043 1.75013C11.2385 1.58731 11.0155 1.49609 10.7831 1.49609C10.5507 1.49609 10.3276 1.58731 10.1618 1.75013L9.3335 2.59596L11.4043 4.66679L12.2502 3.83846C12.413 3.67266 12.5042 3.44958 12.5042 3.21721C12.5042 2.98484 12.413 2.76175 12.2502 2.59596Z"
+        fill="#BDBDBD"
+      />
+    </svg>
+  );
+};
+
+export const IntervalIcon = () => {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g opacity="0.8">
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M15.75 10.5C15.75 14.2279 12.7279 17.25 9 17.25C5.27208 17.25 2.25 14.2279 2.25 10.5C2.25 6.77208 5.27208 3.75 9 3.75C12.7279 3.75 15.75 6.77208 15.75 10.5ZM9 13.75C10.7949 13.75 12.25 12.2949 12.25 10.5C12.25 8.70507 10.7949 7.25 9 7.25C7.20507 7.25 5.75 8.70507 5.75 10.5C5.75 12.2949 7.20507 13.75 9 13.75ZM9 15.75C11.8995 15.75 14.25 13.3995 14.25 10.5C14.25 7.60051 11.8995 5.25 9 5.25C6.10051 5.25 3.75 7.60051 3.75 10.5C3.75 13.3995 6.10051 15.75 9 15.75ZM9.5 8.25C9.5 7.97386 9.27614 7.75 9 7.75C8.72386 7.75 8.5 7.97386 8.5 8.25V10.5C8.5 10.7761 8.72386 11 9 11C9.27614 11 9.5 10.7761 9.5 10.5V8.25Z"
+          fill="#11E6B4"
+        />
+        <path
+          d="M13.125 5.625L14.25 4.5"
+          stroke="#11E6B4"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <path
+          d="M7.55111 1.77794C7.63657 1.69821 7.82489 1.62775 8.08686 1.57749C8.34882 1.52724 8.6698 1.5 9 1.5C9.3302 1.5 9.65118 1.52724 9.91314 1.57749C10.1751 1.62775 10.3634 1.69821 10.4489 1.77794"
+          stroke="#11E6B4"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+      </g>
+    </svg>
+  );
+};
+
+export const LimitIcon = () => {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g opacity="0.8">
+        <path
+          d="M3.75 3L2.25 4.5"
+          stroke="#11E6B4"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <path
+          d="M14.25 3L15.75 4.5"
+          stroke="#11E6B4"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M9 15C12.3137 15 15 12.3137 15 9C15 5.68629 12.3137 3 9 3C5.68629 3 3 5.68629 3 9C3 12.3137 5.68629 15 9 15ZM10.8904 7.43735C11.0629 7.22172 11.028 6.90707 10.8123 6.73457C10.5967 6.56206 10.2821 6.59702 10.1096 6.81265L8.89593 8.3297L7.02735 7.08397C6.79759 6.9308 6.48715 6.99289 6.33397 7.22265C6.1808 7.45241 6.24289 7.76285 6.47265 7.91603L8.53194 9.28889C8.85563 9.50468 9.29059 9.43715 9.53362 9.13337L10.8904 7.43735Z"
+          fill="#11E6B4"
+        />
+      </g>
+    </svg>
+  );
+};
+
+export const GenderIcon = () => {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g opacity="0.8">
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M1.5 9C1.5 4.85786 4.85786 1.5 9 1.5C13.1421 1.5 16.5 4.85786 16.5 9C16.5 11.3562 15.4135 13.4586 13.7141 14.8336C13.3926 13.924 12.8136 13.1239 12.0438 12.5332C11.1706 11.8632 10.1007 11.5 9 11.5C7.89933 11.5 6.82942 11.8632 5.95619 12.5332C5.1864 13.1239 4.60739 13.924 4.28586 14.8336C2.58652 13.4586 1.5 11.3562 1.5 9ZM11.435 13.3266C12.1253 13.8563 12.6238 14.5964 12.8555 15.4345C11.7288 16.111 10.4098 16.5 9 16.5C7.59016 16.5 6.27118 16.111 5.14453 15.4345C5.37615 14.5964 5.87467 13.8563 6.56495 13.3266C7.26353 12.7905 8.11946 12.5 9 12.5C9.88054 12.5 10.7365 12.7906 11.435 13.3266ZM7.25 6.75C7.25 5.7835 8.0335 5 9 5C9.9665 5 10.75 5.7835 10.75 6.75C10.75 7.7165 9.9665 8.5 9 8.5C8.0335 8.5 7.25 7.7165 7.25 6.75ZM9 4C7.48122 4 6.25 5.23122 6.25 6.75C6.25 8.26878 7.48122 9.5 9 9.5C10.5188 9.5 11.75 8.26878 11.75 6.75C11.75 5.23122 10.5188 4 9 4Z"
+          fill="#11E6B4"
+        />
+        <rect x="2" y="2" width="14" height="14" rx="7" stroke="#11E6B4" />
+      </g>
+    </svg>
+  );
+};
+
+export const TierIcon = () => {
+  return (
+    <svg
+      width="12"
+      height="14"
+      viewBox="0 0 12 14"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M5.5013 0.936035V5.12644C4.37865 5.03207 3.33453 4.6226 2.54797 3.97468C2.14745 3.64475 1.83001 3.26708 1.60107 2.8615C2.59093 1.78009 3.96399 1.06428 5.5013 0.936035ZM6.5013 0.936253V5.12644C7.62395 5.03207 8.66808 4.6226 9.45463 3.97468C9.85457 3.64523 10.1717 3.26817 10.4005 2.86326C9.41112 1.78148 8.03839 1.06516 6.5013 0.936253ZM11.0487 3.71006C10.7872 4.08869 10.4654 4.43769 10.0904 4.74653C9.11332 5.55143 7.84024 6.03306 6.5013 6.12942L6.5013 7.86893C7.08455 7.9109 7.65864 8.02619 8.20374 8.21219C8.90403 8.45113 9.54575 8.80314 10.0904 9.25183C10.4625 9.55834 10.785 9.90648 11.0482 10.2875C11.6505 9.33916 12 8.21016 12 6.99841C12 5.78696 11.6507 4.65822 11.0487 3.71006ZM10.4 11.1342C10.1694 10.7268 9.85097 10.3502 9.45463 10.0237C9.00883 9.65644 8.47467 9.36124 7.88082 9.15861C7.4407 9.00844 6.97582 8.91188 6.5013 8.87195V13.0606C8.0381 12.9317 9.41059 12.2156 10.4 11.1342ZM5.5013 13.0608V8.87195C5.02679 8.91188 4.56191 9.00844 4.12179 9.15861C3.52793 9.36124 2.99377 9.65645 2.54797 10.0237C2.15106 10.3506 1.83227 10.7279 1.60164 11.1359C2.59146 12.217 3.96429 12.9326 5.5013 13.0608ZM0.953049 10.2894C1.21646 9.90767 1.53943 9.55887 1.91216 9.25183C2.45685 8.80314 3.09858 8.45113 3.79886 8.21219C4.34397 8.02619 4.91806 7.9109 5.5013 7.86893L5.5013 6.12942C4.16236 6.03306 2.88928 5.55143 1.91216 4.74653C1.53659 4.43715 1.21428 4.08748 0.952593 3.7081C0.349776 4.65666 0 5.78612 0 6.99841C0 8.211 0.349953 9.34072 0.953049 10.2894Z"
+        fill="#11E6B4"
+      />
+    </svg>
+  );
+};
+
+export const KeywordsIcon = () => {
+  return (
+    <svg
+      width="14"
+      height="10"
+      viewBox="0 0 14 10"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M0.542893 0.792893C0.25 1.08579 0.25 1.55719 0.25 2.5V7.5C0.25 8.44281 0.25 8.91421 0.542893 9.20711C0.835786 9.5 1.30719 9.5 2.25 9.5H8.60927C9.6572 9.5 10.1812 9.5 10.6233 9.26335C11.0655 9.0267 11.3562 8.59073 11.9375 7.7188L12.2708 7.2188C12.9878 6.1433 13.3463 5.60555 13.3463 5C13.3463 4.39445 12.9878 3.8567 12.2708 2.7812L11.9375 2.2812C11.3562 1.40927 11.0655 0.973302 10.6233 0.736651C10.1812 0.5 9.6572 0.5 8.60926 0.5H2.25C1.30719 0.5 0.835786 0.5 0.542893 0.792893ZM9.25 6.5C10.0784 6.5 10.75 5.82843 10.75 5C10.75 4.17157 10.0784 3.5 9.25 3.5C8.42157 3.5 7.75 4.17157 7.75 5C7.75 5.82843 8.42157 6.5 9.25 6.5Z"
+        fill="#11E6B4"
+      />
+    </svg>
+  );
+};
+
+export const Cross = () => {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M16 8L8 16"
+        stroke="#B3B3BF"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 8L16 16"
+        stroke="#B3B3BF"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+export const DownArrowFilled = () => {
+  return (
+    <svg
+      width="6"
+      height="6"
+      viewBox="0 0 6 6"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M2.80794 5.01953L0.343456 2.06215C-0.0907617 1.54109 0.279763 0.75 0.958033 0.75L5.04197 0.75C5.72024 0.75 6.09076 1.54109 5.65654 2.06215L3.19206 5.01953C3.09211 5.13947 2.90789 5.13947 2.80794 5.01953Z"
+        fill="#BDBDBD"
+      />
+    </svg>
+  );
+};
+
+export const CheckIcon = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="13"
+      fill="none"
+      viewBox="0 0 16 13"
+    >
+      <path stroke="#fff" strokeWidth="2" d="M1 7l4 4L15 1"></path>
+    </svg>
+  );
+};
+
+export const XmarkIcon = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="18"
+      height="18"
+      fill="none"
+      viewBox="0 0 18 18"
+    >
+      <path
+        stroke="#FF6A77"
+        strokeLinecap="square"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M13.5 4.5l-9 9M4.5 4.5l9 9"
+      ></path>
+    </svg>
+  );
+};

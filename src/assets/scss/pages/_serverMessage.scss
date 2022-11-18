@@ -1,0 +1,71 @@
+@use "../abstract/mixins" as *;
+@use "../abstract/font" as *;
+
+
+.error {
+  @include theme-aware('background', 'server-background-error');
+  //@include theme-aware('border-color', 'server-border-error');    
+}
+.success {
+  @include theme-aware('background', 'server-background-success');
+  //@include theme-aware('border-color', 'server-border-success');    
+}
+.warning {
+  @include theme-aware('background', 'server-background-warning');
+  //@include theme-aware('border-color', 'server-border-warning');    
+}
+.server-message {
+  width: 100%;
+  display: block;
+  position:fixed;
+  bottom: 0;
+  z-index: 9;
+  left: 0;
+  .server-message-wraper {
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    .close-message {
+      margin-left: auto;
+      cursor: pointer;
+    }
+    .server-message-info {
+      margin-left: 15px;
+      p {
+        font-weight: 600;
+        font-size: 10px;
+        line-height: 14px;
+        @include theme-aware('color', 'text-color');
+      }
+    }
+    .alert-border {
+      position: absolute;
+      border-radius: 100vmax;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 5px;
+      // background: linear-gradient(
+      //   90deg,
+      //   transparent 50%,
+      //   rgba(255, 49, 49, 0.5),
+      //   rgb(255, 49, 49)
+      // );
+      animation: animateTop 5s ease-in-out infinite;
+    }
+  }
+}
+
+
+@keyframes animateTop {
+  25% {
+    width: 100%;
+    opacity: 1;
+  }
+
+  30%,
+  100% {
+    width: 100%;
+    opacity: 0;
+  }
+}

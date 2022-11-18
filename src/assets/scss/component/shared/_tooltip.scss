@@ -1,0 +1,144 @@
+@use '../../abstract/mixins' as *;
+
+.fr-tooltip {
+    position: relative;
+    display: inline-flex;
+    vertical-align: middle;
+
+    .fr-tooltip-content {
+        @include border-radius(10px);
+        padding: 14px 18px;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        position: absolute;
+        font-size: 12px;
+        line-height: 150%;
+        text-align: center;
+        z-index: 99;
+        margin-inline: auto;
+        //white-space: nowrap;
+        white-space: pre-wrap;
+        max-width: 197px;
+        min-width: 150px;
+        -webkit-filter: drop-shadow(0px 2px 20px rgba(0, 0, 0, 0.2));
+                filter: drop-shadow(0px 2px 20px rgba(0, 0, 0, 0.2));
+        transition: all cubic-bezier(0.87, 0.13, 0.25, 1) 0.3s;
+
+        &::after{
+            content: '';
+            position: absolute;
+            transform-origin: 50% 50%;
+        }
+    }
+
+    .fr-tooltip-icon {
+        cursor: pointer;
+    }
+
+    .fr-tooltip-icon:hover ~ .fr-tooltip-content {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    &.fr-tooltip-query,
+    &.fr-tooltip-info {
+        .fr-tooltip-content {
+            @include theme-aware('background-color', 'tooltip-bg');
+            @include theme-aware('color','tooltip-text');
+
+            &::after {
+                width: 32px;
+                height: 32px;
+                @include theme-aware('background-color','tooltip-bg');
+                @include border-radius(10px);
+            }
+        }
+    }
+
+    &.fr-tooltip-bottom {
+        .fr-tooltip-content {
+            top: 100%;
+            margin-top: 17px;
+
+            &::after {
+                bottom: 100%;
+                margin-bottom: -30px;
+                z-index: -1;
+            }
+        }
+    }
+
+    &.fr-tooltip-top {
+        .fr-tooltip-content {
+            bottom: 100%;
+            margin-bottom: 17px;
+
+            &::after {
+                bottom: 100%;
+                margin-bottom: -105px;
+                z-index: -1;
+            }
+        }
+    }
+
+    &.fr-tooltip-bottom,
+    &.fr-tooltip-top {
+        .fr-tooltip-content {
+            left: 50%;
+            transform: translate(-50%);
+            -webkit-transform: translate(-50%);
+            -moz-transform: translate(-50%);
+            -ms-transform: translate(-50%);
+            -o-transform: translate(-50%);
+
+            &::after {
+                left: 46%;
+                transform: translateX(-50%);
+                -webkit-transform: translateX(-50%);
+                -moz-transform: translateX(-50%);
+                -ms-transform: translateX(-50%);
+                -o-transform: translateX(-50%);
+                rotate: 45deg;
+            }
+        }
+    }
+
+    &.fr-tooltip-left {
+        .fr-tooltip-content {
+            right: 100%;
+            margin-right: 17px;
+
+            &::after {
+                left: 100%;
+                margin-left: -10px;
+                top: 45%;
+                z-index: -1;
+                transform: rotate(-45deg) translateY(-50%);
+                -webkit-transform: rotate(-45deg) translateY(-50%);
+                -moz-transform: rotate(-45deg) translateY(-50%);
+                -ms-transform: rotate(-45deg) translateY(-50%);
+                -o-transform: rotate(-45deg) translateY(-50%);
+}
+        }
+    }
+
+    &.fr-tooltip-right {
+        .fr-tooltip-content {
+            left: 100%;
+            margin-left: 17px;
+        }
+    }
+
+    &.fr-tooltip-left,
+    &.fr-tooltip-right {
+        .fr-tooltip-content {
+            top: 50%;
+            transform: translateY(-50%);
+            -webkit-transform: translateY(-50%);
+            -moz-transform: translateY(-50%);
+            -ms-transform: translateY(-50%);
+            -o-transform: translateY(-50%);
+        }
+    }
+}

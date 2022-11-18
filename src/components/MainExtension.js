@@ -1,40 +1,32 @@
-import React, { useState, useEffect } from "react";
-import "../assets/css/style.css";
-import "../components/shared/css/shared.css"
+import { useContext, useState } from "react";
 
 import { BrowserRouter } from "react-router-dom";
 
 import HeaderExtension from "./shared/HeaderExtension.js";
 import FooterExtension from "./shared/FooterExtension.js";
+import ServerMessages from "./shared/ServerMessages.js";
+// import "../assets/scss/pages/_messages.scss";
+// import {EditIcon, DeleteIcon, DragIcon, ServerError, CrossWhite} from "../assets/icons/Icons";
 
 import AppRoutes from "../routes.js";
+import { ModeContext } from "../context/ThemeContext";
+import NotInFacebookAlert from "./shared/NotInFacebookAlert.js";
 
 const MainExtension = () => {
-  const [logState, setLogState] = useState(false);
-  useEffect(()=>{
-    // console.log("I am in main Extension.........");
-    chrome.storage.local.get(["user"], (res)=>{
-      // console.log("res ::: ", res);
-      // console.log("res.user ::: ", res.user);
-      if(res && res.user && res.user.token){
-        setLogState(true)
-      }else{
-        setLogState(false)
-      }
-    })
-  },[]);
-
-  const logDataChange = (data) => {
-    data ? setLogState(true) : setLogState(false)
-  }
+  const { darkMode } = useContext(ModeContext);
+  const [notInFb, setNotInFb] = useState(false)
 
   return (
-    <div className={logState ? "em_ext_main" : "em_ext_main em_auth"}>
-      <BrowserRouter>
-        <HeaderExtension logState={logState } logDataChange={logDataChange} />
-        <AppRoutes logState={logState} logDataChange={logDataChange} />
-        <FooterExtension logState={logState} />
-      </BrowserRouter>
+    <div className={darkMode ? 
+      `fr-main theme-default d-flex d-flex-column ${notInFb && 'outsideFb'}` : 
+      `fr-main d-flex d-flex-colum ${notInFb && 'outsideFb'}`}>
+      {!notInFb ? <BrowserRouter>
+        <HeaderExtension />
+        <AppRoutes />
+        <FooterExtension />
+        {/* <ServerMessages /> */}
+      </BrowserRouter> : 
+      <NotInFacebookAlert />}
     </div>
   );
 };

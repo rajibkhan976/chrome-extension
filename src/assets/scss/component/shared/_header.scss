@@ -1,0 +1,76 @@
+@use '../../abstract/font' as *;
+@use '../../abstract/color' as *;
+@use '../../abstract/color-themes' as *;
+@use '../../abstract/mixins' as *;
+
+.header {
+    flex: 0 0 52px;
+    padding: 14px 20px;
+    @include theme-aware('background-color', 'header-color');
+}
+
+.header-saved-points {
+    @include theme-aware('background-color', 'info-well-bg');
+    padding-inline: 10px;
+    @include border-radius(30px);
+
+    figure {
+        margin-right: 7px;
+    }
+    span {
+        @include theme-aware('color', 'info-well-text');
+        font-weight: $fontWeight;
+        font-size: $smallFontSize;
+
+        strong {
+            @include theme-aware('color', 'info-well-highlight');
+            font-weight: $headingBoldFontWeight;
+            margin-right: 12px;
+            font-size: $fontSize;
+        }
+    }
+}
+
+.header-points {
+    background: linear-gradient(to right, rgba(130, 126, 255, 1),rgba(82, 217, 187, 1));
+    background-repeat: no-repeat;
+    background-size: cover;
+    @include theme-aware('color', 'info-well-tex');
+    @include border-radius(30px);
+    padding: 1px;
+    
+    .btn {
+        width: 100%;
+        height: 100%;
+        @include theme-aware('background-color', 'header-color');
+        @include border-radius(30px);
+        padding-inline: 14px;
+    }
+
+    span {
+        @include theme-aware('color', 'info-well-text');
+        margin-left: 3px;
+        font-size: $smallFontSize;
+    }
+}
+
+.options-header {
+    > * {
+        margin-left: 10px;
+    }
+}
+
+.menu-header {
+    margin-left: 20px;
+
+    > .btn {
+        &:hover {
+            path[fill] {
+                fill: $themePrimaryBlue1;
+            }
+            path[stroke] {
+                stroke: $themePrimaryBlue1;
+            }
+        }
+    }
+}

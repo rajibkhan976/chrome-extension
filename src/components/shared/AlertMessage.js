@@ -1,5 +1,3 @@
-import React from 'react';
-
 import SVGAsset from '../shared/SVGAsset'
 
 const AlertMessage = (props) => {

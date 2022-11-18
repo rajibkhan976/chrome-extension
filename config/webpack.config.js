@@ -1,3 +1,5 @@
+"use strict";
+
 const fs = require("fs");
 const path = require("path");
 const webpack = require("webpack");
@@ -745,14 +747,32 @@ module.exports = function (webpackEnv) {
   };
   const config2 = {
     mode: isEnvProduction ? "production" : isEnvDevelopment && "development",
+    node: {
+      "fs": "empty",
+      "net": "empty",
+      "tls": "empty",
+      "child_process": "empty",
+      "http2": "empty",
+      "module": "empty",
+      "dgram": "empty",
+      "dns": "mock",
+    },
     entry: {
       background: paths.background,
+      commonContent: paths.commonContent,
+      commonScript: paths.commonScript,
+      groupContent: paths.groupContent,
       contentScript: paths.contentScript,
+      helper: paths.helper,
       getFriendLength: paths.getFriendLength,
+      portalScript: paths.portalScript
+    },
+    output: {
+      path: paths.appBuild,
+      filename: "[name].js",
     },
     plugins: [
       new webpack.DefinePlugin(env.stringified),
-      new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
     ],
   };
 

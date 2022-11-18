@@ -1,110 +1,69 @@
-import React, { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { Routes, Route, useNavigate, Navigate, redirect } from "react-router-dom";
 
-import Loader from "./components/shared/Loader";
-import { Routes, Route, Navigate, Outlet } from "react-router-dom";
-
-import Login from "./components/auth/Login";
-import ForgotPassword from "./components/auth/ForgotPassword";
-import NotFound from "./components/shared/NotFound";
-import ChangePassword from "./components/auth/ChangePassword";
-
-const BodyExtension = React.lazy(() =>
-  import("./components/dashboard/BodyExtension")
-);
-const EngagementModes = React.lazy(() =>
-  import("./components/dashboard/EngagementModes")
-);
+import BodyExtension from "./components/dashboard/BodyExtension";
+import Home from "./components/home/home";
+import FriendRequest from "./components/dashboard/FriendRequest";
+import Messages from "./components/dashboard/Messages";
+import Notes from "./components/dashboard/Notes";
+import Messenger from "./components/dashboard/Messenger";
 
 const Approutes = (props) => {
-  const [loader, setLoader] = useState(true);
-
-  useEffect(() => {
-    // console.log('Log state', props.logState);
-    setLoader(false);
-  }, []);
+  const [settingPage, setSettingPage] = useState("")
+  const setPageForSentFR = (settings) => {
+    switch(settings){
+      case "setSettingsForGroup" : 
+                                    setSettingPage(settings);
+                                    break;
+      default : 
+                break;
+    }
+  }
 
   return (
     <>
-      {loader && <Loader text="Loading..." />}
-
       <Routes>
         <Route
           path="/"
-          element={
-            props.logState ? (
-              <>
-                <Outlet logState={props.logState} />
-              </>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
+          element={<BodyExtension setPageForSentFR={setPageForSentFR} />}
         >
+          {/* 
+          --- Commented out this portion as its non-function as of Sprint-3 ---
           <Route
             index
             element={
-              <Suspense fallback={<Loader />}>
-                <BodyExtension logState={props.logState} />
-              </Suspense>
+              <Home />
+            }
+          /> */}
+          <Route
+            // path="friend-request"
+            index
+            element={
+              <FriendRequest settingPage={settingPage} />
+            }
+          />
+          {/* <Route
+            path="messages"
+            element={
+              <Messages />
+            }
+          /> */}
+          {/*
+          --- Commented out this portion as its non-function as of Sprint-3 ---
+          <Route
+            path="notes"
+            element={
+              <Notes />
             }
           />
           <Route
-            exact
-            path="engagement-modes"
+            path="messenger"
             element={
-              props.logState ? (
-                <Suspense fallback={<Loader />}>
-                  <EngagementModes logState={props.logState} />
-                </Suspense>
-              ) : (
-                <Navigate to="login" replace />
-              )
+              <Messenger />
             }
-          />
-          <Route
-            exact
-            path="change-password"
-            element={
-              props.logState ? (
-                <Suspense fallback={<Loader />}>
-                  <ChangePassword logState={props.logState} />
-                </Suspense>
-              ) : (
-                <Navigate to="login" replace />
-              )
-            }
-          />
-          <Route
-            element={
-              props.logState ? (
-                <NotFound logState={props.logState} />
-              ) : (
-                <Navigate to="login" replace />
-              )
-            }
-          />
+          /> */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
-        <Route
-          path="/login"
-          element={
-            !props.logState ? (
-              <>
-                <Login logState={props.logState} logDataChange={props.logDataChange} />
-              </>
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
-        />
-        <Route
-          path="/forgot-password"
-          element={
-              <>
-                <ForgotPassword />
-              </>
-          }
-        />
       </Routes>
     </>
   );

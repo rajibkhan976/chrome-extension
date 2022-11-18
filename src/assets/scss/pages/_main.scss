@@ -1,0 +1,17 @@
+@use "../abstract/mixins" as *;
+
+.main-content {
+    @include theme-aware('background-color', 'body-color');
+    overflow: hidden;
+    height: calc(100% - 86px);
+
+    .fr-view-section {
+        .main-container {
+            .close-modal {
+                path {
+                    fill: #fff;
+                }
+            }
+        }
+    }
+}

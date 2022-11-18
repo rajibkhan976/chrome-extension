@@ -1,0 +1,78 @@
+@use '../abstract/mixins' as *;
+@use '../abstract/variables' as *;
+@use '../abstract/color' as *;
+
+@each $alignment, $value in $alignments {
+  .text-#{$alignment} {
+    text-align: $value;
+  }
+  @if not ($alignment == 'center') {
+    .float-#{$alignment} {
+      float: $value;
+    }
+  }
+};
+
+
+// INSET VALUES
+@each $inset, $value in $insets {
+  .pos-#{$inset} {
+    #{$inset}: 0;
+  }
+  .m-#{$inset}-a {
+    margin-#{$inset}: auto;
+  }
+};
+
+// POSITION
+@each $position, $value in $positions {
+  .position-#{$position} {
+    position: $value;
+  }
+}
+
+// Avater
+
+.avatar {
+  @include circleAvater(100px, $radius: 50%);
+}
+
+// Flex
+
+.d-flex {
+  @include display(flex);
+}
+
+.d-flex-center {
+  @include flexCenter();
+}
+
+.d-flex-column {
+  @include flexDirection(column);
+}
+
+.d-flex-row {
+  @include flexDirection(row);
+}
+
+.f-1 {
+  flex-grow: 1;
+  flex-basis: auto;
+}
+
+@each $justification, $value in $justifications {
+  .f-align-#{$justification} {
+    align-items: $value;
+  }
+  .f-justify-#{$justification} {
+    justify-content: $value;
+  }
+};
+
+.h-100 {
+  height: 100%;
+}
+
+.w-100 {
+  width: 100%;
+}

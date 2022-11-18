@@ -1,0 +1,131 @@
+@use "../../abstract/mixins" as *;
+@use "../../abstract/color" as *;
+@use "../../abstract/color-themes" as *;
+
+.extension-routes {
+    @include theme-aware('background-color', 'header-color');
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+
+    // Only when other Nav links are disabled
+    justify-content: flex-start;
+    padding-inline: 40px;
+    // Only when other Nav links are disabled
+
+    a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 50px;
+        height: 40px;
+        overflow: hidden;
+        position: relative;
+        margin-inline: 10px;
+
+        &:first-child {
+            margin-left: 0;
+        }
+        &:last-child {
+            margin-right: 0;
+        }
+
+        &:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            margin-bottom: -10px;
+            left: 0;
+            height: 3px;
+            width: 100%;
+            @include border-radius(10px 10px 0px 0px);
+            @include theme-aware('background-color', 'active-color');
+            transition: all ease-in-out 0.3s;
+            -webkit-transition: all ease-in-out 0.3s;
+            -moz-transition: all ease-in-out 0.3s;
+            -ms-transition: all ease-in-out 0.3s;
+            -o-transition: all ease-in-out 0.3s;
+        }
+
+        &:hover {
+            //@include theme-aware('background', 'active-gradient-vertical');
+
+
+            &:first-child {
+                path,
+                circle {
+                    @include theme-aware('fill', 'active-color');
+                }
+            }
+            &:nth-child(2) {
+                path {
+                    @include theme-aware('stroke', 'active-color');
+                }
+            }
+
+            // Commenting this out till links are activated again after Sprint 3
+            // &:nth-child(2) {
+            //     path,
+            //     circle {
+            //         @include theme-aware('fill', 'active-color');
+            //     }
+            // }
+            // &:nth-child(1),
+            // &:nth-child(3),
+            // &:nth-child(4) {
+            //     path {
+            //         @include theme-aware('stroke', 'active-color');
+            //     }
+            // }
+            // &:nth-child(5) {
+            //     path:first-child {
+            //         @include theme-aware('stroke', 'active-color');
+            //     }
+            //     path:last-child {
+            //         @include theme-aware('fill', 'active-color');
+            //     }
+            // }
+        }
+
+        &.active {
+            &:after {
+                margin-bottom: 0;
+            }
+            &:first-child {
+              path,
+              circle {
+                  @include theme-aware('fill', 'active-color');
+              }
+          }
+            &:nth-child(2){
+                path[fill] {
+                  @include theme-aware('fill', 'active-color');
+                }
+                path[stroke] {
+                  @include theme-aware('stroke', 'active-color');
+                }
+            }
+            
+            // Commenting this out till links are activated again after Sprint 3
+        //     &:nth-child(2) {
+        //       path,
+        //       circle {
+        //           @include theme-aware('fill', 'active-color');
+        //       }
+        //   }
+        //   &:nth-child(1),
+        //   &:nth-child(3),
+        //   &:nth-child(4) {
+        //       path {
+        //           @include theme-aware('stroke', 'active-color');
+        //       }
+        //   }
+        //   &:nth-child(5) {
+        //       path:first-child {
+        //           @include theme-aware('stroke', 'active-color');
+        //       }
+        //       path:last-child {
+        //           @include theme-aware('fill', 'active-color');
+        //       }
+        //   }
+        }
+    }
+}

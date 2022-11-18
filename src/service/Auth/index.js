@@ -28,7 +28,7 @@ export const adminLogin = async (payload) => {
             }
             )
             .catch(err => {
-                console.log("err : ", err);
+                // console.log("err : ", err);
                 resolve(err);
             });
     })
@@ -53,19 +53,19 @@ export const forgotPassword = async (email) => {
             }
         }
         const body = {
-            email : email,
-            extId : kyubiSettings.extId
+            email: email,
+            extId: kyubiSettings.extId
         };
 
         axios
             .post(kyubiSettings.forgotPassURL, body, config)
             .then(res => {
-                console.log("response in forgot password service : ", res);
+                // console.log("response in forgot password service : ", res);
                 resolve(res && res.data);
             }
             )
             .catch(err => {
-                console.log("err : ", err);
+                // console.log("err : ", err);
                 resolve({status: false})
             });
     })
@@ -98,12 +98,12 @@ export const changePassword = async (payload, token) => {
         axios
             .post(kyubiSettings.changePassURL, body, config)
             .then(res => {
-                console.log("res : ", res);
+                // console.log("res : ", res);
                 resolve(res && res.data);
             }
             )
             .catch(err => {
-                console.log("err : ", err);
+                // console.log("err : ", err);
                 resolve({status: false})
             });
     })
@@ -125,20 +125,20 @@ const checkUserStatus = function (payload) {
         payload.extensionId = kyubiSettings.extId
 
         const body = payload;
-        
+
         axios
             .post(kyubiSettings.checkUserStatusURL, body, config)
             .then(res => {
-                console.log("res : ", res);
+                // console.log("res : ", res);
                 resolve(res && res.data);
             }
             )
             .catch(err => {
-                console.log("err : ", err);
+                // console.log("err : ", err);
                 resolve(false)
             });
     });
-  };
+};
 
 export const getProfileInfo = () => {
     return new Promise((resolve, reject) => {
@@ -146,14 +146,15 @@ export const getProfileInfo = () => {
             method: 'GET',
             mode: "cors", // no-cors, cors, *same-origin
             url: "https://m.facebook.com/composer/ocelot/async_loader/?publisher=feed",
-            headers: {  
+            headers: {
                 "Origin": "https://www.facebook.com",
-                'Content-Type': 'text/html' },
+                'Content-Type': 'text/html'
+            },
             // data: JSON.stringify(payload)
         }
         axios(options)
             .then(res => {
-                // console.log("In Success profile get",res);
+                // console.log("In Success profile get", res);
                 resolve(res.data)
             })
             .catch(err => {
@@ -170,17 +171,17 @@ export const saveFbUserInfoDB = (payload) => {
             mode: "cors", // no-cors, cors, *same-origin
             url: "http://localhost:8080/api/user/create",
             headers: {
-                'Content-Type': 'text/html' 
+                'Content-Type': 'text/html'
             },
             data: payload
         };
         axios(options)
             .then(res => {
-                console.log("In Success profile saeve : ",res);
+                // console.log("In Success profile saeve : ",res);
                 resolve(res.data)
             })
             .catch(err => {
-                console.log("Error In get profile data", err);
+                // console.log("Error In get profile data", err);
                 // reject(err)
             })
     })

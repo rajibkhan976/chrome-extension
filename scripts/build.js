@@ -69,7 +69,7 @@ checkBrowsers(paths.appPath, isInteractive)
     ({ stats, previousFileSizes, warnings }) => {
       if (warnings.length) {
         // console.log(chalk.yellow('Compiled with warnings.\n'));
-       // console.log(warnings.join('\n\n'));
+        // console.log(warnings.join('\n\n'));
         // console.log(
         //  '\nSearch for the ' +
         //    chalk.underline(chalk.yellow('keywords')) +
@@ -92,7 +92,7 @@ checkBrowsers(paths.appPath, isInteractive)
         WARN_AFTER_BUNDLE_GZIP_SIZE,
         WARN_AFTER_CHUNK_GZIP_SIZE
       );
-     // console.log();
+      // console.log();
 
       const appPackage = require(paths.appPackageJson);
       const publicUrl = paths.publicUrlOrPath;

@@ -1,201 +1,726 @@
-console.log("content script")
-// const friendLength = chrome.storage.local.get("friendLength");
-let finalFriendList = [];
-let finalFriendListWithMsg = [];
-let fr_token;
-chrome.storage.local.get('fr_token',(res)=>{
-  console.log("fr_token ", res.fr_token);
-  fr_token = res.fr_token;
-})
+// console.log("content script")
+import { error } from "jquery";
+import helper from "./helper";
+const { async } = require("q");
+let finalFriendList = [], countInterval;
+let finalFriendListWithMsg = [], commentREactionThread = [], finalFriendListWithcountry = [], friendListWithCountryAndtier = [];
+let fr_fbDtsg, fr_userID;
+let dayBackCount = 7;
+let allPendingFriendReqList = []
+let allPendingFriendReqListFromDB = []
+let dayBack = new Date(Date.now() - dayBackCount * 24 * 60 * 60 * 1000);
+dayBack.setHours(0);
+dayBack.setHours(0);
+
+// Overlay
+let overlay = `<div className="overlay-wraper" style="width: 100%;height: 100vh;position: absolute;top:0;left:0;background: rgb(9 124 207 / 64%);pointer-events: none;">
+<p style=" position: absolute; left: 50%;top: 50%;transform: translate(-50%, -50%);color: #fff;font-weight: 700;font-size: 35px; text-align: center;">Friender is using this page.<br/> Please don't reload.</p>
+</div>`;
+
+chrome.runtime.sendMessage({ action: "msgFormExt", content: "hello" });
+
+let fbBody = document.getElementsByTagName("body")[0];
+fbBody.innerHTML += overlay;
+fbBody.style["pointer-events"] = "none";
+
+let fr_token
 let data = {
-    // fb_dtsg: fbDtsg,
-    // __user: userID,
-    variables: {"count":30,"scale":1,"name":null, "cursor":"AQHR--OtnuFHRPHwHSAwexmyb_bTJuAeR1dw1A5QbMIz0JegiaQwxdAarC_hyKOqmPEfoMUlrsBqbnuCNOVq9WeH9w"},
-    doc_id: 4268740419836267,
-    server_timestamps: true,
-    // av: userID,
-    dpr: 1,
-    fb_api_caller_class: "RelayModern",
-    fb_api_req_friendly_name: "FriendingCometFriendsListPaginationQuery"
-    }
-const makeParsable = (html) => {
-    let withoutForLoop = html.replace(/for\s*\(\s*;\s*;\s*\)\s*;\s*/, "");
-    return JSON.parse(withoutForLoop);
-  }
-
-  const serialize = (obj) => {
-    var str = [];
-    for (var p in obj)
-      if (obj.hasOwnProperty(p)) {
-        str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
-      }
-    return str.join("&");
-  };
-
-  const getAllfriend = async (fbDtsg, userID, friendLength, count = 0, cursor = null) => {
-    // console.log("fbDtsg :::::::::: ", fbDtsg)
-    // console.log("userID :::::::::: ", userID)
-    console.log("friendLength :::::::::: ", friendLength)
-   let graphPayload;
-    if(count > 0){
-        graphPayload = {...data, fb_dtsg: fbDtsg, __user: userID, av: userID}
-        graphPayload.variables.cursor = cursor
-        graphPayload.variables = JSON.stringify(graphPayload.variables)
-    }else{
-        graphPayload = {...data, fb_dtsg: fbDtsg, __user: userID, av: userID}
-        graphPayload.variables = JSON.stringify(data.variables)
-    }
-    console.log("graphPayload ::: ", graphPayload);
-    let getAllFriendSerive  = await fetch("https://www.facebook.com/api/graphql/", {
-        method: "POST",
-        headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Accept: "text/html,application/json",
-        "x-fb-friendly-name": "FriendingCometFriendsListPaginationQuery"
-        },
-        body: serialize(graphPayload),
-    });
-    let routeDefination = await getAllFriendSerive.text();
-    if(routeDefination.includes("<!DOCTYPE html>"))
-    {
-      console.log("yesssssss");
-      chrome.runtime.sendMessage({action : "facebookLoggedOut",msg: "you have logged out from facebook. All friend's data got discarded."});
-      return;
-    }
-    routeDefination = makeParsable(routeDefination);
-    console.log("routeDefination :::::::: ", routeDefination);
-    routeDefination = routeDefination.data.viewer.all_friends.edges;
-    // console.log("routeDefination count ::::::::: " , count + routeDefination.length, routeDefination.length, routeDefination[routeDefination.length-1].cursor, routeDefination)
-    if(count < friendLength){
-      if(routeDefination.length > 0){
-          for(let i of routeDefination){
-              finalFriendList = [...finalFriendList, i]
-          }
-          console.log("count%900 ", count%900)
-          // if(count%900 == 0)
-          //   setTimeout(()=>{
-          //     getAllfriend(fbDtsg, userID, friendLength, count + routeDefination.length, routeDefination[routeDefination.length-1].cursor ? routeDefination[routeDefination.length-1].cursor : null)
-          //     chrome.runtime.sendMessage({action : "countBadge",count : count + routeDefination.length});
-          //   }, 60000)
-          // else
-            // setTimeout(()=>{
-              getAllfriend(fbDtsg, userID, friendLength, count + routeDefination.length, routeDefination[routeDefination.length-1].cursor ? routeDefination[routeDefination.length-1].cursor : null)
-              chrome.runtime.sendMessage({action : "countBadge",count : count + routeDefination.length});
-            // }, (Math.random() * (5 - 3 + 1) + 3) * 1000)
-            
-      }
-      else{
-        saveFriendList(finalFriendList, userID)
-        // chrome.runtime.sendMessage({action : "finalFriendList",friendList: finalFriendList});
-        // getMessageEngagement(fbDtsg, userID, finalFriendList)
-      }
-    }
-    else{
-      saveFriendList(finalFriendList, userID)
-        // chrome.runtime.sendMessage({action : "finalFriendList",friendList: finalFriendList});
-        // getMessageEngagement(fbDtsg, userID, finalFriendList)
-    }
+  variables: { "count": 30, "scale": 1, "name": null },
+  doc_id: 4268740419836267,
+  server_timestamps: true,
+  dpr: 1,
+  fb_api_caller_class: "RelayModern",
+  fb_api_req_friendly_name: "FriendingCometFriendsListPaginationQuery"
 }
 
-chrome.storage.local.get('fbTokenAndId', (res)=>{
-  chrome.storage.local.get("friendLength", (resp) => {
-    const friendLength = resp.friendLength.replace(",", "");
-    console.log("resp.friendLength ::: ", friendLength, parseInt(friendLength))
-    getAllfriend(res.fbTokenAndId.fbDtsg, res.fbTokenAndId.userID, Number(friendLength))
-  })
-})
+const getAllfriend = async (
+  fbDtsg,
+  userID,
+  friendLength,
+  count = 0,
+  cursor = null
+) => {
+  // console.log("get all friends");
 
-const getMessageEngagement = async (fbDtsg, userID, finalFriendList, count = 0) => {
-  const friendId = [...finalFriendList].map((el)=>  el.node.id)
-  // console.log("friendId   :  ", friendId)
-  if(count < friendId.length)
-  {
+  let graphPayload = { ...data, fb_dtsg: fbDtsg, __user: userID, av: userID };
+  if (count > 0) {
+    graphPayload.variables.cursor = cursor;
+    graphPayload.variables = JSON.stringify(graphPayload.variables);
+  } else {
+    graphPayload.variables = JSON.stringify(data.variables);
+    chrome.runtime.sendMessage({
+      action: "sendUpdate",
+      isSyncing: "active",
+      update: "Syncing Friends...",
+      content: "Syncing Friends...",
+    });
+    helper.sendDataToPorat("syncing_status", "Syncing Friends...");
+  }
+  // console.log("graphPayload ::: ", graphPayload);
+  let getAllFriendSerive = await fetch(
+    "https://www.facebook.com/api/graphql/",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "text/html,application/json",
+        "x-fb-friendly-name": "FriendingCometFriendsListPaginationQuery",
+      },
+      body: helper.serialize(graphPayload),
+    });
+
+  let routeDefination = await getAllFriendSerive.text();
+  if (routeDefination.includes("<!DOCTYPE html>")) {
+    // console.log("yesssssss", routeDefination);
+    chrome.runtime.sendMessage({
+      action: "facebookLoggedOut",
+      msg: "you have logged out from facebook. All friend's data got discarded.",
+    });
+    return;
+  }
+  routeDefination = helper.makeParsable(routeDefination);
+  // console.log("routeDefination :::::::: ", routeDefination);
+  routeDefination = routeDefination.data.viewer.all_friends.edges;
+  // console.log("routeDefination count ::::::::: ", count + routeDefination.length, routeDefination.length, routeDefination[routeDefination.length - 1].cursor, routeDefination)
+  if (count < friendLength) {
+    if (routeDefination.length > 0) {
+      for (let i of routeDefination) {
+        finalFriendList = [...finalFriendList, i.node];
+      }
+      chrome.runtime.sendMessage({
+        action: "countBadge",
+        count: count + routeDefination.length,
+      });
+      getAllfriend(
+        fbDtsg,
+        userID,
+        friendLength,
+        count + routeDefination.length,
+        routeDefination[routeDefination.length - 1].cursor
+          ? routeDefination[routeDefination.length - 1].cursor
+          : null
+      );
+
+    } else {
+      saveFriendList(finalFriendList, userID, fbDtsg, "friendList");
+
+      chrome.runtime.sendMessage({ action: "finalFriendList", friendList: finalFriendList });
+      chrome.runtime.sendMessage({ action: "countBadge", count: count, content: count })
+    }
+  }
+  else {
+    chrome.runtime.sendMessage({ action: "finalFriendList", friendList: finalFriendList });
+    chrome.runtime.sendMessage({ action: "countBadge", count: count, content: count })
+    saveFriendList(finalFriendList, userID, fbDtsg, "friendList");
+  }
+};
+
+const letsStart = async (callback = null) => {
+  // console.log("lets start")
+  fr_token = await helper.getDatafromStorage("fr_token");
+  // console.log("fr_token ", fr_token);
+  const fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
+  // console.log("fbTokenAndId ::: ", fbTokenAndId)
+  let friendLength = await helper.getDatafromStorage("friendLength");
+  // console.log("friend length", friendLength)
+  friendLength = friendLength.replace(",", "").split(" ")[0];
+  // console.log("fbTokenAndId.fbDtsg, fbTokenAndId.userID, Number(friendLength) :::: ", fbTokenAndId.fbDtsg, fbTokenAndId.userID, Number(friendLength))
+  callback(fbTokenAndId.fbDtsg, fbTokenAndId.userID, Number(friendLength));
+};
+
+const getMessageEngagement = async (
+  fbDtsg,
+  userID,
+  finalFriendList,
+  count = 0
+) => {
+  helper.sendDataToPorat("syncing_status", "Syncing Messages...");
+  console.log("count ::: ", count)
+  if (count % 50 === 0) {
+    chrome.runtime.sendMessage({
+      action: "sendUpdate",
+      isSyncing: "active",
+      update: "Syncing Messages...",
+      content: "Syncing Messages..."
+    });
+  }
+  if (count < finalFriendList.length) {
     const payloadMsg = {
       batch_name: "MessengerGraphQLThreadFetcher",
       __req: "1k",
-      __a:   userID,
+      __a: userID,
       __user: userID,
-      fb_dtsg:fbDtsg,
+      fb_dtsg: fbDtsg,
       queries: JSON.stringify({
-                  "o0": {
-                      "doc_id":"3106009512862081",
-                      "query_params": 
-                          {
-                              "id": friendId[count],
-                              "message_limit":0,
-                              "load_messages":true,
-                              "is_work_teamwork_not_putting_muted_in_unreads":false
-                          }
-                      }
-                })
-      }
-      const url = "https://www.facebook.com/api/graphqlbatch/";
-      // console.log("serialize(payloadMsg) :::: ", serialize(payloadMsg));
-      // return;
-      let getAllFriendMsgSerivice  = await fetch(url, {
-        method: "POST",
-        headers: {
+        o0: {
+          doc_id: "3106009512862081",
+          query_params: {
+            id: finalFriendList[count].id,
+            message_limit: 0,
+            load_messages: true,
+            is_work_teamwork_not_putting_muted_in_unreads: false,
+          },
+        },
+      }),
+    };
+    const url = "https://www.facebook.com/api/graphqlbatch/";
+    let getAllFriendMsgSerivice = await fetch(url, {
+      method: "POST",
+      headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Accept: "text/html,application/json",
-        },
-        body: serialize(payloadMsg),
+      },
+      body: helper.serialize(payloadMsg),
     });
     let msgEngRes = await getAllFriendMsgSerivice.text();
-    console.log("msgEngResv 114 ::: ", msgEngRes)
-    if(msgEngRes.includes("errorSummary"))
-    {
-      console.log("yesssssss");
-      chrome.runtime.sendMessage({action : "facebookLoggedOut",msg: "you have logged out from facebook. All friend's data got discarded."});
+    if (msgEngRes.includes("errorSummary")) {
+      // console.log("yesssssss");
+      chrome.runtime.sendMessage({
+        action: "facebookLoggedOut",
+        msg: "you have logged out from facebook. All friend's data got discarded.",
+      });
       return;
     }
-    msgEngRes = makeParsable(msgEngRes.split('{"successful_results":')[0].trim());
-    console.log("msgEngRes.o0.data :::::::::: ", msgEngRes.o0.data.message_thread)
+    msgEngRes = helper.makeParsable(
+      msgEngRes.split('{"successful_results":')[0].trim()
+    );
     msgEngRes = msgEngRes && msgEngRes.o0.data.message_thread;
-    finalFriendListWithMsg = [...finalFriendListWithMsg, {...finalFriendList[count], message_thread  :  msgEngRes ? msgEngRes.messages_count : 0}];
-    // console.log("finalFriendListWithMsg  :  :  : ", finalFriendListWithMsg)
-    chrome.runtime.sendMessage({action : "countBadge", count: count + 1})
-    await getMessageEngagement(fbDtsg, userID, finalFriendList, count+1)
+    // console.log("msgEngResv 124 ::: ", msgEngRes)
+    finalFriendListWithMsg = [
+      ...finalFriendListWithMsg,
+      {
+        ...finalFriendList[count],
+        message_thread: msgEngRes ? msgEngRes.messages_count : 0,
+      },
+    ];
+    // console.log("count ::: ", count + 1)
+    // console.log("finalFriendListWithMsg ::: ", finalFriendListWithMsg)
+    await getMessageEngagement(fbDtsg, userID, finalFriendList, count + 1);
+  } else {
+    saveFriendList(
+      finalFriendListWithMsg,
+      userID,
+      fbDtsg,
+      "syncPendingFrRequest"
+    );
+
   }
-  else{
-    // console.log("finalFriendListWithMsg ::::: ", finalFriendListWithMsg)
-        chrome.runtime.sendMessage({action : "finalFriendList",friendList: finalFriendListWithMsg});
+};
+
+/**
+ * function to initiate pending fremd request syncing
+ * @param {*} fbDtsg 
+ * @param {*} userID 
+ */
+const initSyncSendFriendRequestStatus = async (fbDtsg, userID) => {
+  try {
+    //console.log("hiiiiiiii gy")
+    const pendingList = await helper.getOutgoingPendingRequestList(userID, false, [])
+    if (pendingList.length > 0) {
+      allPendingFriendReqListFromDB = pendingList;
+      syncSendFriendRequestStatus(fbDtsg, userID, null);
+    } else {
+      saveFriendList(finalFriendListWithMsg, userID, fbDtsg, "syncCompleted");
+    }
+  } catch (error) {
+    console.log("ERROR IN FETCHING PENDING REQUEST LIST", error)
+    saveFriendList(finalFriendListWithMsg, userID, fbDtsg, "syncCompleted");
   }
 }
 
- const saveFriendList = async(finalFriendList, userID) => {
-  const time = Date.now();
-  const friendlistData = finalFriendList.map((el)=>{
+/**
+ * function fetch all pending friend request list from facebook
+ * @param {*} fbDtsg 
+ * @param {*} userID 
+ * @param {String} cursor 
+ */
+const syncSendFriendRequestStatus = async (fbDtsg, userID, cursor = null) => {
+  let outgoingPendingReqPayload = {
+    av: userID,
+    __user: userID,
+    __a: 1,
+    dpr: 1,
+    __comet_req: 15,
+    fb_dtsg: fbDtsg,
+    variables: JSON.stringify(cursor ? { "count": 10, "cursor": cursor, "scale": 1 } : { "scale": 1 }),
+    server_timestamps: true,
+    fb_api_caller_class: "RelayModern",
+    fb_api_req_friendly_name: cursor ? "FriendingCometOutgoingRequestsDialogQuery" : "FriendingCometOutgoingRequestsDialogPaginationQuery",
+    doc_id: cursor ? 4420916318007844 : 7114490868621087
+  }
+  const outgoingPendingRequestSerive = await fetch(
+    "https://www.facebook.com/api/graphql/",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "text/html,application/json",
+        "x-fb-friendly-name": cursor ? "FriendingCometOutgoingRequestsDialogQuery" : "FriendingCometOutgoingRequestsDialogPaginationQuery",
+      },
+      body: helper.serialize(outgoingPendingReqPayload),
+    });
+  let outgoingPendingRequestDefinition = await outgoingPendingRequestSerive.text();
+  outgoingPendingRequestDefinition = helper.makeParsable(outgoingPendingRequestDefinition);
+  outgoingPendingRequestDefinition = outgoingPendingRequestDefinition &&
+    outgoingPendingRequestDefinition.data &&
+    outgoingPendingRequestDefinition.data.viewer &&
+    outgoingPendingRequestDefinition.data.viewer.outgoing_friend_requests_connection &&
+    outgoingPendingRequestDefinition.data.viewer.outgoing_friend_requests_connection.edges ?
+    outgoingPendingRequestDefinition.data.viewer.outgoing_friend_requests_connection.edges : [];
+  // console.log("outgoingPendingRequestDefinition :::: ", outgoingPendingRequestDefinition)
+  if (outgoingPendingRequestDefinition.length > 0) {
+    allPendingFriendReqList = [...allPendingFriendReqList, ...outgoingPendingRequestDefinition]
+    const cursorId = outgoingPendingRequestDefinition[outgoingPendingRequestDefinition.length - 1].cursor;
+    //console.log(cursorId)
+    syncSendFriendRequestStatus(fbDtsg, userID, cursorId)
+  } else {
+    // console.log("data got all going to compare", allPendingFriendReqListFromDB)
+    comparePendingfFrReqList(userID, fbDtsg, allPendingFriendReqList, allPendingFriendReqListFromDB)
+  }
+}
+
+/**
+ * function to check the for DB are in Facebook request list or not if not then send then for soft delete
+ * @param {*} userID 
+ * @param {*} fbDtsg 
+ * @param {Array} arrFromFb 
+ * @param {Array} arrFrmDb 
+ */
+const comparePendingfFrReqList = async (userID, fbDtsg, arrFromFb, arrFrmDb) => {
+  // console.log("all data from fb", arrFromFb);
+  // console.log("all adata from db", arrFrmDb);
+  let currentFbPendingFRlist = [];
+  for (let item of arrFromFb) {
+    currentFbPendingFRlist = [...currentFbPendingFRlist, item.cursor];
+  }
+  // console.log("all ids from fb", currentFbPendingFRlist);
+  const currentFbPendingFrSet = new Set(currentFbPendingFRlist);
+  let allFrIDList = [];
+  for (let item of finalFriendListWithMsg) {
+    if (item.id) {
+      allFrIDList = [...allFrIDList, item.id];
+    }
+  }
+  let allFrIdSet = new Set(allFrIDList);
+  let allFrRejectList = [];
+  for (let item of arrFrmDb) {
+    if (!currentFbPendingFrSet.has(item.friendFbId) && !allFrIdSet.has(item.friendFbId)) {
+      allFrRejectList = [...allFrRejectList, item._id];
+    }
+  }
+  //  console.log("all rejexted list", allFrRejectList);
+  if (allFrRejectList.length > 0) {
+    try {
+      let responseDelFr = await helper.deleteFRFromFriender(
+        allFrRejectList,
+        userID
+      );
+      console.log("REPONSE DELETING FR REQ", responseDelFr);
+    } catch (error) {
+      console.log("ERROR HAPPEND IN DELETE PENDINF FRIEND REQUEST", error);
+    } finally {
+      saveFriendList(finalFriendListWithMsg, userID, fbDtsg, "syncCompleted");
+    }
+  } else {
+    saveFriendList(finalFriendListWithMsg, userID, fbDtsg, "syncCompleted");
+  }
+
+
+};
+
+const saveFriendList = async (
+  finalFriendList,
+  userID,
+  fbDtsg,
+  action,
+  shouldISaveData = true
+) => {
+  let time = Date.now(),
+    syncDate =
+      (new Date().getMonth() + 1).toString() +
+      "-" +
+      new Date().getDate() +
+      "-" +
+      new Date().getFullYear(),
+    syncId;
+  const syncingDateNDTime = await helper.getDatafromStorage("syncingDateNDTime");
+
+  if (syncingDateNDTime && syncingDateNDTime.syncDate) {
+    if (syncingDateNDTime.syncDate === syncDate) {
+      syncDate = syncingDateNDTime.syncDate;
+      syncId = syncingDateNDTime.syncId;
+    } else {
+      // console.log("syncingDateNDTime 2::: ", syncingDateNDTime);
+      syncDate = syncDate;
+      syncId = "friender_" + time;
+      await helper.saveDatainStorage("syncingDateNDTime", {
+        syncDate: syncDate,
+        syncId: syncId,
+      });
+    }
+  } else {
+    syncDate = syncDate;
+    syncId = "friender_" + time;
+    await helper.saveDatainStorage("syncingDateNDTime", {
+      syncDate: syncDate,
+      syncId: syncId,
+    });
+  }
+
+  const friendlistData = finalFriendList.map((el) => {
     const eachFriendinfo = {
-        "friendFbId" : el.node.id,
-        "friendProfileUrl" : "https://www.facebook.com/profile.php?id=" + el.node.id,
-        "friendMessageUrl" : "https://www.facebook.com/messages/t/" + el.node.id,
-        "friendName" : el.node.name,
-        "friendProfilePicture": el.node.profile_picture ? el.node.profile_picture.uri ? el.node.profile_picture.uri : "" : "",
-        "friendShortName" : el.node.short_name,
-        "friendGender" : el.node.gender ? el.node.gender : "N/A",
-        "mutualFriend" : el.node.social_context ? el.node.social_context.text.split(" mutual friends")[0] : "N/A",
-        "friendStatus" : el.node.id.length === 15 ? "Activate" : "Deactivate",
-        "finalSource" : "Sync",
+      "friendFbId": el.id,
+      "friendProfileUrl": "https://www.facebook.com/profile.php?id=" + el.id,
+      "friendMessageUrl": "https://www.facebook.com/messages/t/" + el.id,
+      "friendName": el.name,
+      "friendProfilePicture": el.profile_picture ? el.profile_picture.uri ? el.profile_picture.uri : "" : "",
+      "friendShortName": el.short_name,
+      "friendGender": el.gender ? el.gender : "N/A",
+      "mutualFriend": el.social_context ? el.social_context.text.split(" mutual friends")[0] : "N/A",
+      "friendStatus": el.id && el.id.length > 0 && !isNaN(Number(el.id)) ? "Activate" : "Deactivate",
+      "finalSource": "Sync",
+
+    }
+
+
+    switch (action) {
+      case "syncCompleted": // List with message count
+        eachFriendinfo.commentThread = el.commentThread ? el.commentThread : 0;
+        eachFriendinfo.reactionThread = el.reactionThread ? el.reactionThread : 0;
+        eachFriendinfo.message_thread = el.message_thread ? el.message_thread : 0;
+        break;
+      case "messageEngagement": // List with comment and reactions
+        if (shouldISaveData) {
+          eachFriendinfo.commentThread = el.commentThread ? el.commentThread : 0;
+          eachFriendinfo.reactionThread = el.reactionThread ? el.reactionThread : 0;
+        }
+        break;
+      default: break;
     }
     return eachFriendinfo;
-  })
-  const friendListPayload = {
-    "token": fr_token,
-    "syncDate": time,
-    "syncingId": "friender_" + time,
-    "facebookUserId": userID,
-    "friend_details" : friendlistData
-  }
-  console.log("friendListPayload :::::::::::::::::: ", friendListPayload);
-  let getAllFriendSerive  = await fetch("https://3pqc39mfr1.execute-api.us-east-1.amazonaws.com/dev/store-user-friendlist", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(friendListPayload),
+  });
+  // console.log("friendlistData ::: ", friendlistData)
+  let getAllFriendSerive, friendListPayload;
+  if (shouldISaveData) {
+    friendListPayload = {
+      "syncDate": syncDate,
+      "syncingId": syncId,
+      "facebookUserId": userID,
+      "friend_details": friendlistData
+    }
+    // console.log("friendListPayload :::::::::::::::::: ", friendListPayload);
+    getAllFriendSerive = await fetch(process.env.REACT_APP_SETTING_STORE_FRIEND_LIST, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "authorization": fr_token,
+      },
+      body: JSON.stringify(friendListPayload),
     });
-  if(getAllFriendSerive){
-    console.log("LaWrA")
-    chrome.runtime.sendMessage({action : "finalFriendList", friendListCount : friendlistData.length});
   }
- }
+  if (getAllFriendSerive || !shouldISaveData) {
+    // console.log("Save fr list action= ", action)
+    switch (action) {
+      case "friendList":
+        // console.log("finalFriendList ::: ", finalFriendList)
+        chrome.runtime.sendMessage({
+          action: "finalFriendList",
+          friendListCount: friendlistData && friendlistData.length,
+          content: friendlistData && friendlistData.length,
+        });
+        getReactionComment(fbDtsg, userID, finalFriendList);
+        chrome.runtime.sendMessage({
+          action: "sendUpdate",
+          isSyncing: "active",
+          update: "Syncing Engagements...",
+          content: "Syncing Engagements..."
+        });
+
+        chrome.runtime.sendMessage({
+          action: "updateCountryAndTier",
+          friendList: finalFriendList,
+          fbUserId: userID,
+        });
+        break;
+
+      case "messageEngagement":
+        chrome.runtime.sendMessage({
+          action: "sendUpdate",
+          isSyncing: "active",
+          update: "Syncing Messages...",
+        });
+        getMessageEngagement(fbDtsg, userID, finalFriendList);
+        break;
+      case "syncPendingFrRequest":
+        chrome.runtime.sendMessage({
+          action: "sendUpdate",
+          isSyncing: "active",
+          update: "Syncing Messages...",
+        });
+        initSyncSendFriendRequestStatus(fbDtsg, userID)
+        break;
+      case "syncCompleted":
+        chrome.runtime.sendMessage({
+          action: "sendUpdate",
+          isSyncing: "",
+          update: "Done",
+          friendlist: friendListPayload.friend_details,
+        });
+        break;
+
+      default: break;
+
+    }
+  }
+}
+
+// const getCountryAndTier = async (fbDtsg, userID, friendList) => {
+//   helper.sendDataToPorat("syncing_status", "Syncing Countries...");
+
+//   // console.log("friendList in country ::: ", friendList[0])
+//   if(friendList, friendList.length > 0){
+
+//     // console.log("friendList[0]", friendList[0].name);
+//     finalFriendListWithcountry = friendList;
+//     fr_fbDtsg = fbDtsg, 
+//     fr_userID = userID
+//     chrome.runtime.sendMessage({
+//       "action": "getGenderCountryAndTier",
+//       "from": "fetchFriends",
+//       "name": friendList[0].name
+//     });
+//   }else{
+//     // console.log("friendListWithCountryAndtier ::: ", friendListWithCountryAndtier)
+//     saveFriendList(friendListWithCountryAndtier, userID, fbDtsg, "commentReactionEngagement")
+//   }
+// }
+
+const getReactionComment = async (
+  fbDtsg,
+  userID,
+  finalFriendListWithMsg,
+  cursor = null
+) => {
+  console.log("countInterval ::: ", countInterval)
+  if (countInterval)
+    clearInterval(countInterval)
+  let reactionCommentPayload;
+  if (cursor) {
+    reactionCommentPayload = {
+      fb_dtsg: fbDtsg,
+      q: `node(${userID}){timeline_feed_units.first(250).after(${cursor}){page_info,edges{node{id,creation_time,feedback{reactors{nodes{id,name}},commenters{nodes{id,name}}}}}}}`,
+    };
+  } else {
+    reactionCommentPayload = {
+      fb_dtsg: fbDtsg,
+      q: `node(${userID}){timeline_feed_units.first(250).after(){page_info,edges{node{id,creation_time,feedback{reactors{nodes{id,name}},commenters{nodes{id,name}}}}}}}`,
+    };
+  }
+  let getAllreactionComments = await fetch(
+    "https://www.facebook.com/api/graphql/",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "text/html,application/json",
+      },
+      body: helper.serialize(reactionCommentPayload),
+    }
+  );
+  let routeDefinationCR = await getAllreactionComments.text();
+  let commenters = [],
+    reactors = [],
+    count = 0;
+  // console.log(
+  // "routeDefinationCR ::::::::::::::::: ",
+  //   routeDefinationCR.includes("Sorry, something went wrong.")
+  // );
+  if (routeDefinationCR.includes("Sorry, something went wrong.")) {
+    // console.log(
+    // "commentREactionThread ::::::::::::::::: ",
+    //   commentREactionThread
+    // );
+
+    if (commentREactionThread.length > 0) {
+      commentREactionThread.forEach((element, i) => {
+        const reactorsCommentorsArray = element.node.feedback;
+        commenters = commenters.concat(
+          reactorsCommentorsArray
+            ? reactorsCommentorsArray.commenters
+              ? reactorsCommentorsArray.commenters.nodes
+                ? reactorsCommentorsArray.commenters.nodes
+                : []
+              : []
+            : []
+        );
+        reactors = reactors.concat(
+          reactorsCommentorsArray
+            ? reactorsCommentorsArray.reactors
+              ? reactorsCommentorsArray.reactors.nodes
+                ? reactorsCommentorsArray.reactors.nodes
+                : []
+              : []
+            : []
+        );
+        count = i;
+      });
+    } else {
+      saveFriendList(finalFriendListWithMsg, userID, fbDtsg, "messageEngagement", false)
+    }
+  } else {
+    routeDefinationCR = helper.makeParsable(routeDefinationCR);
+    // console.log("routeDefinationCR :::: ", routeDefinationCR.length )
+    const end_cursor =
+      routeDefinationCR[userID].timeline_feed_units.page_info.end_cursor;
+    routeDefinationCR = routeDefinationCR[userID].timeline_feed_units.edges;
+    if (routeDefinationCR.length === 250) {
+      commentREactionThread = commentREactionThread.concat(routeDefinationCR);
+      getReactionComment(fbDtsg, userID, finalFriendListWithMsg, end_cursor);
+    } else if (routeDefinationCR.length < 250) {
+      commentREactionThread = commentREactionThread.concat(routeDefinationCR);
+      // console.log("commentREactionThread ::::::::::::::::: ", commentREactionThread)
+      commentREactionThread.forEach((element, i) => {
+        const reactorsCommentorsArray = element.node.feedback;
+        commenters = commenters.concat(
+          reactorsCommentorsArray
+            ? reactorsCommentorsArray.commenters
+              ? reactorsCommentorsArray.commenters.nodes
+                ? reactorsCommentorsArray.commenters.nodes
+                : []
+              : []
+            : []
+        );
+        reactors = reactors.concat(
+          reactorsCommentorsArray
+            ? reactorsCommentorsArray.reactors
+              ? reactorsCommentorsArray.reactors.nodes
+                ? reactorsCommentorsArray.reactors.nodes
+                : []
+              : []
+            : []
+        );
+        count = i;
+      });
+    }
+  }
+
+  countInterval = setInterval(() => {
+    // console.log("commentREactionThread len", commentREactionThread.length, count)
+    if (commentREactionThread.length === count + 1) {
+
+      clearInterval(countInterval);
+      console.log("Beak fast")
+      const commentThread = commentReactionCount(commenters);
+      const reactionThread = commentReactionCount(reactors)
+      const PayloadWithReactionComment = getPayloadWithReactionComment(commentThread, reactionThread, finalFriendListWithMsg);
+      // console.log("PayloadWithReactionComment ::: ", PayloadWithReactionComment)
+      saveFriendList(PayloadWithReactionComment, userID, fbDtsg, "messageEngagement")
+    }
+  }, 1000);
+}
+
+const commentReactionCount = (arrayRactionComment) => {
+  for (let i = 0; i < arrayRactionComment.length; ++i) {
+    if (
+      arrayRactionComment[i].isChecked === undefined ||
+      arrayRactionComment[i].isChecked === false
+    ) {
+      arrayRactionComment[i].count = 1;
+      for (let j = i + 1; j < arrayRactionComment.length; ++j) {
+        if (arrayRactionComment[i].id === arrayRactionComment[j].id) {
+          arrayRactionComment[i].count =
+            { ...arrayRactionComment[i] }.count !== undefined
+              ? { ...arrayRactionComment[i] }.count + 1
+              : 2;
+          arrayRactionComment[j].isChecked = true;
+        } else {
+          arrayRactionComment[i].count =
+            { ...arrayRactionComment[i] }.count !== undefined
+              ? { ...arrayRactionComment[i] }.count
+              : 1;
+          arrayRactionComment[j].isChecked = { ...arrayRactionComment[j] }
+            .isChecked
+            ? { ...arrayRactionComment[j] }.isChecked
+            : false;
+        }
+      }
+    }
+  }
+  // console.log("arrayRactionComment  :::::::::::  ", arrayRactionComment.filter((el) => el.isChecked === undefined || el.isChecked === false));
+  return arrayRactionComment.filter(
+    (el) => el.isChecked === undefined || el.isChecked === false
+  );
+};
+
+const getPayloadWithReactionComment = (
+  commentThread,
+  reactionThread,
+  finalFriendListWithMsg
+) => {
+  const finalFriendLists = [...finalFriendListWithMsg];
+  for (let indexI in finalFriendLists) {
+    for (let indexJ in commentThread) {
+      if (commentThread[indexJ].id === finalFriendLists[indexI].id) {
+        finalFriendLists[indexI] = {
+          ...finalFriendLists[indexI],
+          commentThread: commentThread[indexJ].count,
+        };
+      } else {
+        finalFriendLists[indexI] = {
+          ...finalFriendLists[indexI],
+          commentThread:
+            { ...finalFriendLists[indexI] }.commentThread > 0
+              ? { ...finalFriendLists[indexI] }.commentThread
+              : 0,
+        };
+      }
+    }
+    for (let indexk in reactionThread) {
+      if (reactionThread[indexk].id === finalFriendLists[indexI].id) {
+        finalFriendLists[indexI] = {
+          ...finalFriendLists[indexI],
+          reactionThread: reactionThread[indexk].count,
+        };
+      } else {
+        finalFriendLists[indexI] = {
+          ...finalFriendLists[indexI],
+          reactionThread:
+            { ...finalFriendLists[indexI] }.reactionThread > 0
+              ? { ...finalFriendLists[indexI] }.reactionThread
+              : 0,
+        };
+      }
+    }
+    // console.log(finalFriendLists[indexI])
+    if (
+      finalFriendLists[finalFriendLists.length - 1].id ===
+      finalFriendLists[indexI].id
+    ) {
+      // console.log("finalFriendLists :::::  ", finalFriendLists);
+      return finalFriendLists;
+    }
+  }
+};
+// console.log("I am in content script.")
+
+// chrome.runtime.onMessage.addListener((request, sender, sendResponse)=>{
+//   // console.log("country request ...................................................")
+//   switch(request.action){
+//     case "getGenderCountryAndTier" : 
+//       // console.log("finalFriendListWithcountry[0] ::: ",finalFriendListWithcountry[0])
+//       finalFriendListWithcountry[0]["country"] = request.responsePayload ? request.responsePayload.countryName : "N/A"
+//       finalFriendListWithcountry[0]["tier"]= request.responsePayload ? request.responsePayload.Tiers : "N/A"
+//       // console.log("finalFriendListWithcountry[0] ::: ",finalFriendListWithcountry[0])
+//       friendListWithCountryAndtier = [...friendListWithCountryAndtier, finalFriendListWithcountry[0]]
+//       // console.log("friendListWithCountryAndtier :::: ", friendListWithCountryAndtier)
+//       finalFriendListWithcountry.shift();
+//       getCountryAndTier(fr_fbDtsg, fr_userID, finalFriendListWithcountry)
+//       break;
+//     default: break;
+//   }
+// })
+
+letsStart(async (fbDtsg, userID, friendLength) => {
+  // console.log("Lets start")
+  getAllfriend(fbDtsg, userID, Number(friendLength))
+});

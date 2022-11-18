@@ -1,0 +1,74 @@
+.count-badge{
+    color: bisque;
+    background-color: crimson;
+    border: 5px;
+    margin-left: 5px;
+    display: inline-block;
+    border-radius: 50%;
+    padding-inline: 5px;
+    font-size: small;
+}
+
+.fr-list-loader{
+    position: relative;
+}
+
+.fr-list-loader:after {
+    position: absolute;
+      width: 0;
+      height: 0;
+      content: '';
+      border: 0 solid rgb(96, 91, 255);
+      border-top: 40px solid rgb(96, 91, 255);
+      border-bottom: 0px solid transparent;
+      border-left: 80px solid transparent;
+      z-index: -1;
+      right: 0;
+      top: 0;
+   }
+   .fr-list-loader:before {
+    content: '';
+    border: 3px solid #fff;
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    top: 5px;
+    right: 6px;
+    background: transparent;
+    opacity: 1;
+    border-right: none;
+    border-top: none;
+    border-left: none;
+    z-index: 2000;
+    background-color: transparent;
+    border-radius: 100%;
+    transform: rotateZ(0);
+    -webkit-animation: spin 4s linear infinite;
+    animation: spin 4s linear infinite;
+    
+   }
+   @-webkit-keyframes spin {
+    from {
+      transform: rotateZ(0deg);
+    }
+    50% {
+      transform: rotateZ(540deg);
+      border-color: #fff;
+    }
+    to {
+      transform: rotateZ(1080deg);
+    }
+   }
+   
+   @keyframes spin {
+    from {
+      transform: rotateZ(0deg);
+    }
+    50% {
+      transform: rotateZ(540deg);
+      border-color: #fff;
+    }
+    to {
+      transform: rotateZ(1080deg);
+    }
+   }

@@ -1,0 +1,23 @@
+@use "../../abstract/font" as *;
+@use "../../abstract/mixins" as *;
+
+.footer {
+    flex: 0 0 34px;
+    padding-inline: 20px;
+    @include theme-aware('background-color', 'footer-color');
+    @include theme-aware('color', 'footer-text');
+    font-size: $smallFontSize;
+    font-weight: $fontWeight;
+
+    > a {
+        @include theme-aware('color', 'footer-text');
+        
+        svg {
+            margin-left: 3px
+        }
+    }
+
+    p a {
+        @include theme-aware('color', 'active-color');
+    }
+}

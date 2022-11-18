@@ -1,0 +1,107 @@
+@use "../abstract/mixins" as *;
+@use "../abstract/font" as *;
+
+.main-container {
+    margin: 20px;
+    margin-top: 10px;
+    margin-bottom: 0;
+    height: calc(100% - 10px);
+    position: relative;
+}
+
+.request-bordered {
+    @include theme-aware('background-color', 'header-color');
+    border: 1px solid;
+    @include border-radius(10px);
+    @include theme-aware('border-color', 'main-container-bg');
+}
+
+.fr-request-choice {
+    overflow: hidden;
+    li {
+        padding: 19px;
+        padding-right: 30px;
+        height: 88px;
+        cursor: pointer;
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        .text-option-req {
+            h4,
+            p {
+                @include theme-aware('color', 'text-para-color');
+            }
+            p {
+                margin-top: 6px;
+                font-size: $smallFontSize;
+                line-height: 14px;
+            }
+        }
+
+        figure {
+            display: flex;
+            flex: 0 0 50px;
+            height: 50px;
+            align-items: center;
+            justify-content: center;
+            @include theme-aware('background-color', 'main-container-bg');
+            margin-right: 14px;
+            @include border-radius(10px);
+        }
+
+        &:after {
+            position: absolute;
+            content: '';
+            background-image: url('../../svg/arrows-right.svg');
+            background-repeat: no-repeat;
+            width: 6px;
+            height: 12px;
+            background-size: 6px auto;
+            background-position: 0 -57px;
+            pointer-events: none;
+            right: 19px;
+            top: 50%;
+            transform: translateY(-50%);
+            -webkit-transform: translateY(-50%);
+            -moz-transform: translateY(-50%);
+            -ms-transform: translateY(-50%);
+            -o-transform: translateY(-50%);
+                                        }
+
+        &.active,
+        &:hover {
+            @include theme-aware('background-color', 'request-hover-bg');
+
+            figure {
+                path[fill] {
+                  @include theme-aware('fill', 'active-color');
+                }
+                path[stroke] {
+                  @include theme-aware('stroke', 'active-color');
+                }
+            }
+            &:after {
+                background-position: 0 2px;
+            }
+        }
+
+        &:first-child {
+            @include border-radius(10px 10px 0 0)
+        }
+        &:last-child {
+            @include border-radius(0 0 10px 10px)
+        }
+
+        &:hover {
+            .text-option-req {
+                h4 {
+                    @include theme-aware('color', 'text-color');
+                }
+                p {
+                    @include theme-aware('color', 'text-para-color');
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,454 @@
+@use "./color";
+@use "./color-themes" as *;
+@use "./font";
+@use "./variables";
+
+@mixin theme-aware($key, $color) {
+  @each $theme-name, $theme-color in $themes {
+    .theme-#{$theme-name} & {
+      #{$key}: map-get(map-get($themes, $theme-name), $color);
+    }
+  }
+}
+
+@mixin bordered($color, $width, $type) {
+  border: $width $type $color;
+}
+
+@mixin positioned($type) {
+  position: $type;
+}
+
+@mixin margins($marginTop, $marginRight, $marginBottom, $marginLeft) {
+  margin-top: $marginTop;
+  margin-right: $marginRight;
+  margin-bottom: $marginBottom;
+  margin-left: $marginLeft;
+}
+
+@mixin paddings($paddingTop, $paddingRight, $paddingBottom, $paddingLeft) {
+  padding-top: $paddingTop;
+  padding-right: $paddingRight;
+  padding-bottom: $paddingBottom;
+  padding-left: $paddingLeft;
+}
+
+@mixin border-radius(
+  $top-left: 10px,
+  $top-right: null,
+  $bottom-right: null,
+  $bottom-left: null
+) {
+  -webkit-border-radius: $top-left $top-right $bottom-right $bottom-left;
+  -moz-border-radius: $top-left $top-right $bottom-right $bottom-left;
+  -ms-border-radius: $top-left $top-right $bottom-right $bottom-left;
+  border-radius: $top-left $top-right $bottom-right $bottom-left;
+}
+
+// Margin auto
+
+@mixin center--auto {
+  margin: {
+    left: auto;
+    right: auto;
+  }
+}
+
+// Text Ellipse
+
+@mixin ellipsis() {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+// Text alignment
+@mixin textAlignment($textAlignment) {
+  text-align: $textAlignment;
+}
+// Text alignment
+
+// Text alignment
+@mixin display($displayProperty) {
+  display: $displayProperty;
+}
+// Text alignment
+
+// Position alignment
+@mixin textAlign($alignment: variables.$left-alignment) {
+  text-align: $alignment;
+}
+
+// Avater Styling
+@mixin circleAvater($size, $radius: 0) {
+  width: $size;
+  height: $size;
+
+  @if $radius != 0 {
+    border-radius: $radius;
+  }
+}
+// Avater Styling
+
+// Flex
+
+@mixin flexCenter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin flexDirection($direction) {
+  flex-direction: $direction;
+}
+
+// Flex
+
+// ClearFix
+@mixin clearfix {
+  *zoom: 1;
+  &:before,
+  &:after {
+    content: " ";
+    display: table;
+  }
+  &:after {
+    clear: both;
+  }
+}
+// ClearFix
+
+// Gradient
+@mixin background-gradient($start-color, $end-color, $orientation) {
+  background: $start-color;
+
+  @if $orientation == "vertical" {
+    background: -webkit-linear-gradient(top, $start-color, $end-color);
+    background: linear-gradient(to bottom, $start-color, $end-color);
+  } @else if $orientation == "horizontal" {
+    background: -webkit-linear-gradient(left, $start-color, $end-color);
+    background: linear-gradient(to right, $start-color, $end-color);
+  } @else {
+    background: -webkit-radial-gradient(
+      center,
+      ellipse cover,
+      $start-color,
+      $end-color
+    );
+    background: radial-gradient(ellipse at center, $start-color, $end-color);
+  }
+}
+
+// Gradient
+
+// Another Gradient
+
+@mixin gradient($direction, $list) {
+  background: -webkit-linear-gradient($direction, $list);
+  background: -moz-linear-gradient($direction, $list);
+  background: -o-linear-gradient($direction, $list);
+  background: linear-gradient($direction, $list);
+}
+
+// Another Gradient
+
+// variable width
+@mixin width-class($size) {
+  .w#{$size} {
+    width: $size * 1px;
+  }
+}
+
+//width
+
+// Placing Center
+
+@mixin center($horizontal: true, $vertical: true) {
+  position: absolute;
+
+  @if ($horizontal and $vertical) {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  } @else if ($horizontal) {
+    left: 50%;
+    transform: translate(-50%, 0);
+  } @else if ($vertical) {
+    top: 50%;
+    transform: translate(0, -50%);
+  }
+}
+
+// Placeholder
+
+@mixin input-placeholder {
+  &.placeholder {
+    @content;
+  }
+
+  &:-moz-placeholder {
+    @content;
+  }
+
+  &::-moz-placeholder {
+    @content;
+  }
+
+  &:-ms-input-placeholder {
+    @content;
+  }
+
+  &::-webkit-input-placeholder {
+    @content;
+  }
+}
+
+// Transition
+
+@mixin transition($transition) {
+  -moz-transition: $transition;
+  -o-transition: $transition;
+  -webkit-transition: $transition;
+  transition: $transition;
+}
+
+@mixin transition-property($property) {
+  -moz-transition-property: $property;
+  -o-transition-property: $property;
+  -webkit-transition-property: $property;
+  transition-property: $property;
+}
+
+@mixin transition-duration($duration) {
+  -moz-transition-property: $duration;
+  -o-transition-property: $duration;
+  -webkit-transition-property: $duration;
+  transition-property: $duration;
+}
+
+@mixin transition-timing-function($timing) {
+  -moz-transition-timing-function: $timing;
+  -o-transition-timing-function: $timing;
+  -webkit-transition-timing-function: $timing;
+  transition-timing-function: $timing;
+}
+
+@mixin transition-delay($delay) {
+  -moz-transition-delay: $delay;
+  -o-transition-delay: $delay;
+  -webkit-transition-delay: $delay;
+  transition-delay: $delay;
+}
+
+// Transition
+
+// Header Text Styling
+
+@mixin hedadingText(
+  $size: font.$fontSize,
+  $color: color.$themeDefaultPrimary2,
+  $weight: font.$fontWeight
+) {
+  // Standard Auth Page Heading Styles
+  font-size: $size;
+  font-weight: $weight;
+  color: $color;
+  line-height: 21.82px;
+  @include margins(0px, 0, 10px, 0);
+}
+@mixin hedadingPara(
+  $size: font.$smallFontSize,
+  $color: color.$themeDefaultPrimary3,
+  $height: variables.$lineHeight
+) {
+  font-size: $size;
+  color: $color;
+  line-height: $height;
+}
+
+// Header Text Styling
+
+// Button
+
+@mixin authButton(
+  $button-type: "",
+  $width: variables.$full-width,
+  $weight: font.$smallFontWeight
+) {
+  // Standard Auth Button Styles
+  width: $width;
+  background: color.$themeLightPrimary1;
+  font-size: font.$fontSize;
+  font-weight: $weight;
+  color: color.$themeDefaultPrimary2;
+  height: 42px;
+  @include border-radius(5px);
+  @include margins(10px, 0, 30px, 0);
+  @include paddings(14px, 0, 14px, 0);
+  @include transition(0.3s ease-in-out);
+  @include textAlignment(center);
+  cursor: pointer;
+  &:hover {
+    background: color.$themePrimaryBlue6;
+  }
+}
+
+@mixin commonBtn(
+  // $width: variables.$full-width,
+  $weight: font.$smallFontWeight,
+  // $height: 42px,
+  $clr:color.$themeDefaultPrimary2,
+  $clrHvr:color.$themeDefaultPrimary2,
+  $backClr: color.$themeLightPrimary1,
+  $backClrHvr: color.$themePrimaryBlue6,
+  $bordrClr:color.$themeLightPrimary1,
+  $bdrClrHvr:color.$themePrimaryBlue6
+) {
+  
+  background: $backClr;
+  font-size: font.$fontSize;
+  font-weight: $weight;
+  color: $clr;
+ 
+  @include border-radius(5px);
+  @include margins(10px, 3px, 30px, 3px);
+  @include paddings(10px, 20px, 10px, 20px);
+  @include transition(0.3s ease-in-out);
+  @include textAlignment(center);
+  border-color: $bordrClr;
+  cursor: pointer;
+  &:hover {
+    color:$clrHvr;
+    background: $backClrHvr;
+    border-color: $bdrClrHvr;
+  }
+}
+
+// Button
+
+// Input Fields
+
+@mixin inputBox(
+  $background: color.$themeBlack3,
+  $width: variables.$full-width,
+  $color: color.$themeDefaultPrimary2
+) {
+  // Standard Auth InputBox Styles
+  width: $width;
+  @include paddings(12px, 32px, 12px, 20px);
+  color: $color;
+  font-size: 14px;
+  font-weight: 400;
+  position: relative;
+  background: $background;
+  transition: all 0.5s ease-in-out;
+  @include border-radius(5px);
+  @include bordered(color.$themeBlack3, 1px, solid);
+  &:active,
+  &:focus,
+  &:focus-within,
+  &:hover,
+  &:visited,
+  &:focus-visible,
+  &:target {
+    @include bordered(color.$inputBoxBorder, 1px, solid);
+    background: color.$listingPopupBg;
+  }
+}
+
+@mixin ComInputBox(
+  $background: color.$themeBlack3,
+  $width: variables.$full-width,
+  $color: color.$themeDefaultPrimary2,
+  $height: variables.$full-width,
+  $border: color.$themeBlack3,
+  $borderHover: color.$inputBoxBorder
+) {
+  // Standard common InputBox Styles with variable hieght and width and border colors
+  width: $width;
+  height: $height;
+  @include paddings(12px, 32px, 12px, 20px);
+  color: $color;
+  font-size: 14px;
+  font-weight: 400;
+  position: relative;
+  background: $background;
+  transition: all 0.5s ease-in-out;
+  @include border-radius(5px);
+  border: 1px solid $border;
+  &:active,
+  &:focus,
+  &:focus-within,
+  &:hover,
+  &:visited,
+  &:focus-visible,
+  &:target {
+    border: 1px solid $borderHover;
+    background: color.$listingPopupBg;
+  }
+}
+
+// Input Fields
+
+// Input Fields Error Message
+
+@mixin errorMessage($color: color.$themeRed1, $weight: font.$smallFontWeight) {
+  color: $color;
+  font-weight: $weight;
+  font-size: 12px;
+  transition: all 0.5s ease-in-out;
+  @include positioned(relative);
+  margin: 10px 0 0 0;
+  display: block;
+}
+
+// Input Fields Error Message
+
+// Auth Page Input Box
+
+@mixin authBox(
+  $background: color.$themeBlack2,
+  $width: variables.$authBox-width,
+  $border: color.$borderBoxColor,
+  $weight: font.$smallFontWeight
+) {
+  width: $width;
+  overflow-y: auto;
+  @include margins(auto, 0, auto, 0);
+  background: $background;
+  border: 1px solid $border;
+  @include border-radius(10px);
+  @include positioned(relative);
+  @include paddings(78px, 100px, 94px, 100px);
+  font-weight: $weight;
+  z-index: 9;
+}
+
+// Auth Page Input Box
+
+// Media Query Break Points
+@mixin media-query($break-point) {
+  @if $break-point==lg {
+    @media (max-width: 1650px) {
+      @content;
+    }
+  }
+
+  @if $break-point==md {
+    @media (max-width: 1450px) {
+      @content;
+    }
+  }
+
+  @if $break-point==sm {
+    @media (max-width: 1024px) {
+      @content;
+    }
+  }
+
+  @if $break-point==xs {
+    @media (max-width: 991px) {
+      @content;
+    }
+  }
+}

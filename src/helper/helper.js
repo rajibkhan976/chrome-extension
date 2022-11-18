@@ -1,126 +1,268 @@
+export const tier_list = ["Tier1", "Tier2", "Tier3"].map((item) => {
+  return { name: item, active: false };
+});
+export const demo_list = [
+  "demo1",
+  "demo2",
+  "demo3",
+  "demo4",
+  "demo5",
+  "demo6",
+  "demo7",
+  "demo8",
+  "demo9",
+];
 
-import {getProfileInfo} from "../service/Auth";
-
-const loginHelper = {
-    
-    login: function () {
-        return new Promise((resolve, reject) => {
-        
-            getProfileInfo().then(async (result) => {
-                try {
-                    let sugest, dtsg, UserFacebookUsername = "", UserFacebookName = "", UserFacebookid = "", UserFacebookImage = "", UserLoggedInFacebook = false;
-                    const regex3 = /\\"suggestions\\":\[\{[^}]*\}/gm;
-                    const regex4 = /\\"dtsg\\":\{[^}]*\}/gm;
-                    if (result.match(regex4)!= null) {
-                        // console.log("it is true");
-
-                        dtsg = result.match(regex4)[0];
-
-                        dtsg = "{" + dtsg.replace(/[\\]/g, "") + "}";
-
-                        dtsg = JSON.parse(dtsg).dtsg;
-                    }
-                    // console.log("dtsg : ", dtsg);
-                    // chrome.storage.local.set({"dtsg" : dtsg});
-
-                    if (regex3.test(result)) {
-                        sugest = result.match(regex3)[0];
-                        sugest = "{" + sugest.replace(/[\\]/g, "") + "]}"
-                        sugest = JSON.parse(sugest).suggestions[0]
-                        // console.log("sugest in login helper", sugest);
-                        // const kyubiUserInfo = await getData("user");
-                        // console.log("kyubiUserInfo : ", kyubiUserInfo);
-                        setTimeout(()=>{
-                            UserFacebookid = sugest.uid;
-                            UserFacebookUsername = sugest.path;
-                            UserFacebookName = sugest.text;
-                            UserFacebookImage = sugest.photo;
-                            UserLoggedInFacebook = true;
-                            let fbUserInfo={
-                                FacebookId : UserFacebookid,
-                                FacebookUsername : UserFacebookUsername,
-                                FacebookName : UserFacebookName,
-                                FacebookImage  : UserFacebookImage,
-                                LoggedInFacebook  : UserLoggedInFacebook,
-                                // extensionID : kyubiUserInfo.extId,
-                                // kyubiEmail : kyubiUserInfo.email,
-                                // plan : kyubiUserInfo.plan,
-                                dtsg: dtsg
-                            }
-                            console.log("fbUserInfo in helper : ", fbUserInfo);
-
-                            // chrome.storage.local.set({"fbUserInfo" : fbUserInfo});
-                            resolve([true, fbUserInfo]);
-                            // chrome.runtime.sendMessage({type: "storeUserInfoOrQueryThenStore", options: parameters});
-                        },500)
-                    }else {
-                        resolve([false]);
-                        // UserLoggedInFacebook = false;
-                        // let fbUserInfo={
-                        //     FacebookId : UserFacebookid,
-                        //     FacebookUsername : UserFacebookUsername,
-                        //     FacebookName : UserFacebookName,
-                        //     FacebookImage  : UserFacebookImage,
-                        //     LoggedInFacebook  : UserLoggedInFacebook
-                        // }
-                        // console.log("fbUserInfo : ", fbUserInfo);
-                        // chrome.runtime.sendMessage({type: "storeUserInfoOrQueryThenStore", options: parameters});
-                    }
-                }
-                catch (err) {
-                // console.log("err : ", err);
-                }
-            }).catch(error => {
-                // console.log("This I got From backGround EROOOOOO dash1", error);
-            })
-        })
-    },
-    logout: function () {
-    try{
-    }catch(error){
-        return error
-    }
-    }
-}
-
-
-  /** 
- * @getData
- * this function will grab data from local store
- * 
-*/
-const getData = (key) => {
-    return new Promise((resolve, reject) => {
-        try {
-          chrome.storage.local.get([key], function (res) {
-            if (!isEmptyObj(res)) {
-            //   console.log("key in helper : ", key);
-            //   console.log("retieved data in helper : ",res[key]);
-              if(res[key]!=null || res[key]!=undefined)
-                resolve(res[key]);
-              else {
-                  resolve({});
-              }
-            } else {
-              resolve({});
-            }
-          });
-        } catch (e) {
-          resolve({});
-        }
-    });
-}
-
-/** 
- * @isEmptyObj
- * this function will check wheather the @obj is object or not
- * 
-*/
-const isEmptyObj = function (obj) {
-    for (var key in obj) {
-    if (obj.hasOwnProperty(key)) return false;
-    }
-    return true;
-    };
-
-export default loginHelper
+export const country_list = [
+  "Afghanistan",
+  "Åland Islands",
+  "Albania",
+  "Algeria",
+  "American Samoa",
+  "Andorra",
+  "Angola",
+  "Anguilla",
+  "Antarctica",
+  "Antigua and Barbuda",
+  "Argentina",
+  "Armenia",
+  "Aruba",
+  "Australia",
+  "Austria",
+  "Azerbaijan",
+  "Bahamas",
+  "Bahrain",
+  "Bangladesh",
+  "Barbados",
+  "Belarus",
+  "Belgium",
+  "Belize",
+  "Benin",
+  "Bermuda",
+  "Bhutan",
+  "Bolivia",
+  "Bonaire, Sint Eustatius and Saba",
+  "Bosnia and Herzegovina",
+  "Botswana",
+  "Bouvet Island",
+  "Brazil",
+  "British Indian Ocean Territory",
+  "Brunei Darussalam",
+  "Bulgaria",
+  "Burkina Faso",
+  "Burundi",
+  "Cabo Verde",
+  "Cambodia",
+  "Cameroon",
+  "Canada",
+  "Cayman Islands",
+  "Central African Republic",
+  "Chad",
+  "Chile",
+  "China",
+  "Christmas Island",
+  "Cocos (Keeling) Islands",
+  "Colombia",
+  "Comoros  ",
+  "Congo ",
+  "Congo  ",
+  "Cook Islands",
+  "Costa Rica",
+  "Croatia",
+  "Cuba",
+  "Curaçao",
+  "Cyprus",
+  "Czechia",
+  "Côte d'Ivoire",
+  "Denmark",
+  "Djibouti",
+  "Dominica",
+  "Dominican Republic",
+  "Ecuador",
+  "Egypt",
+  "El Salvador",
+  "Equatorial Guinea",
+  "Eritrea",
+  "Estonia",
+  "Eswatini",
+  "Ethiopia",
+  "Falkland Islands",
+  "Faroe Islands  ",
+  "Fiji",
+  "Finland",
+  "France",
+  "French Guiana",
+  "French Polynesia",
+  "French Southern Territories",
+  "Gabon",
+  "Gambia  ",
+  "Georgia",
+  "Germany",
+  "Ghana",
+  "Gibraltar",
+  "Greece",
+  "Greenland",
+  "Grenada",
+  "Guadeloupe",
+  "Guam",
+  "Guatemala",
+  "Guernsey",
+  "Guinea",
+  "Guinea-Bissau",
+  "Guyana",
+  "Haiti",
+  "Heard Island and McDonald Islands",
+  "Holy See  ",
+  "Honduras",
+  "Hong Kong",
+  "Hungary",
+  "Iceland",
+  "India",
+  "Indonesia",
+  "Iran (Islamic Republic of)",
+  "Iraq",
+  "Ireland",
+  "Isle of Man",
+  "Israel",
+  "Italy",
+  "Jamaica",
+  "Japan",
+  "Jersey",
+  "Jordan",
+  "Kazakhstan",
+  "Kenya",
+  "Kiribati",
+  "Korea",
+  "Korea (the Republic of)",
+  "Kuwait",
+  "Kyrgyzstan",
+  "Lao People's Democratic Republic",
+  "Latvia",
+  "Lebanon",
+  "Lesotho",
+  "Liberia",
+  "Libya",
+  "Liechtenstein",
+  "Lithuania",
+  "Luxembourg",
+  "Macao",
+  "Madagascar",
+  "Malawi",
+  "Malaysia",
+  "Maldives",
+  "Mali",
+  "Malta",
+  "Marshall Islands",
+  "Martinique",
+  "Mauritania",
+  "Mauritius",
+  "Mayotte",
+  "Mexico",
+  "Micronesia",
+  "Moldova",
+  "Monaco",
+  "Mongolia",
+  "Montenegro",
+  "Montserrat",
+  "Morocco",
+  "Mozambique",
+  "Myanmar",
+  "Namibia",
+  "Nauru",
+  "Nepal",
+  "Netherlands",
+  "New Caledonia",
+  "New Zealand",
+  "Nicaragua",
+  "Niger  ",
+  "Nigeria",
+  "Niue",
+  "Norfolk Island",
+  "Northern Mariana Islands",
+  "Norway",
+  "Oman",
+  "Pakistan",
+  "Palau",
+  "Palestine, State of",
+  "Panama",
+  "Papua New Guinea",
+  "Paraguay",
+  "Peru",
+  "Philippines  ",
+  "Pitcairn",
+  "Poland",
+  "Portugal",
+  "Puerto Rico",
+  "Qatar",
+  "Republic of North Macedonia",
+  "Romania",
+  "Russian Federation  ",
+  "Rwanda",
+  "Réunion",
+  "Saint Barthélemy",
+  "Saint Helena",
+  "Saint Kitts and Nevis",
+  "Saint Lucia",
+  "Saint Martin (French part)",
+  "Saint Pierre and Miquelon",
+  "Saint Vincent",
+  "Samoa",
+  "San Marino",
+  "Sao Tome and Principe",
+  "Saudi Arabia",
+  "Senegal",
+  "Serbia",
+  "Seychelles",
+  "Sierra Leone",
+  "Singapore",
+  "Sint Maarten",
+  "Slovakia",
+  "Slovenia",
+  "Solomon Islands",
+  "Somalia",
+  "South Africa",
+  "South Georgia",
+  "South Sudan",
+  "Spain",
+  "Sri Lanka",
+  "Sudan",
+  "Suriname",
+  "Svalbard and Jan Mayen",
+  "Sweden",
+  "Switzerland",
+  "Syrian Arab Republic",
+  "Taiwan",
+  "Tajikistan",
+  "Tanzania",
+  "Thailand",
+  "Timor-Leste",
+  "Togo",
+  "Tokelau",
+  "Tonga",
+  "Trinidad and Tobago",
+  "Tunisia",
+  "Turkey",
+  "Turkmenistan",
+  "Turks and Caicos Islands ",
+  "Tuvalu",
+  "Uganda",
+  "Ukraine",
+  "United Arab Emirates ",
+  "United Kingdom",
+  "United States",
+  "United States of America",
+  "Uruguay",
+  "Uzbekistan",
+  "Vanuatu",
+  "Venezuela",
+  "Viet Nam",
+  "Virgin Islands (British)",
+  "Virgin Islands (U.S.)",
+  "Wallis and Futuna",
+  "Western Sahara",
+  "Yemen",
+  "Zambia",
+  "Zimbabwe",
+].map((item) => {
+  return { name: item, active: false };
+});

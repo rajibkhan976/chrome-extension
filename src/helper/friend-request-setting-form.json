@@ -1,0 +1,161 @@
+{
+  "label": "Settings",
+  "uniqueId": "generalSettings",
+  "name": "settings",
+  "method": null,
+  "id": "generalSettings",
+  "action": null,
+  "autocomplete": "off",
+  "fields": [
+    {
+      "label": "Look up interval",
+      "headerCheckbox": false,
+      "fieldOptions": [
+        {
+          "type": "select",
+          "isLabeled": false,
+          "options": [
+            {
+              "selected": true,
+              "name": "30 sec",
+              "value": "0.5"
+            },
+            {
+              "selected": false,
+              "name": "1 min",
+              "value": "1"
+            },
+            {
+              "selected": false,
+              "name": "2 min",
+              "value": "2"
+            },
+            {
+              "selected": false,
+              "name": "3 min",
+              "value": "3"
+            },
+            {
+              "selected": false,
+              "name": "4 min",
+              "value": "4"
+            },
+            {
+              "selected": false,
+              "name": "5 min",
+              "value": "5"
+            },
+            {
+              "selected": false,
+              "name": "6 min",
+              "value": "6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Request Limit",
+      "headerCheckbox": false,
+      "fieldOptions": [
+        {
+          "type": "radio",
+          "isLabeled": false,
+          "name": "request-limit",
+          "options": [
+            {
+              "text": "Limited",
+              "active": true
+            },
+            {
+              "text": "Infinite",
+              "active": false
+            }
+          ],
+          "fieldOptions": [
+            {
+              "type": "select",
+              "isLabeled": true,
+              "inLabel": "Number of Request",
+              "options": [
+                {
+                  "selected": true,
+                  "name": "01",
+                  "value": 1
+                },
+                {
+                  "selected": false,
+                  "name": "02",
+                  "value": 2
+                },
+                {
+                  "selected": false,
+                  "name": "03",
+                  "value": 3
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Gender filter",
+      "headerCheckbox": true,
+      "isActive": false,
+      "fieldOptions": [
+        {
+          "type": "select",
+          "isLabeled": false,
+          "options": [
+            {
+              "selected": true,
+              "name": "Male",
+              "value": "Male"
+            },
+            {
+              "selected": false,
+              "name": "Female",
+              "value": "Female"
+            },
+            {
+              "selected": false,
+              "name": "Others",
+              "value": "Others"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "label": "Country Filter",
+      "headerCheckbox": true,
+      "isActive": false,
+      "fieldOptions": [
+        {
+          "type": "radio",
+          "isLabeled": false,
+          "name": "country-filter",
+          "options": [
+            {
+              "text": "Tier Level",
+              "active": true
+            },
+            {
+              "text": "Country Level",
+              "active": false
+            }
+          ],
+          "fieldOptions": [
+            {
+              "type": "input",
+              "isLabeled": true,
+              "inLabel": "Select Tier",
+              "value": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
