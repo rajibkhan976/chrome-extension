@@ -119,6 +119,33 @@ export const getFrndReqSet = () => {
   });
 }
 
+export const getProfileSettings = () => {
+  return new Promise(async (resolve, reject) => {
+    const token = await helper.getDatafromStorage("fr_token");
+    // console.log("token", token);
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+    };
+    // console.log("fbTokenAndId?.userID :::: ", fbTokenAndId?.userID)
+    const fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
+    const body = { fbUserId: fbTokenAndId?.userID, }
+    //console.log("body :::: ", body)
+    axios
+      .post(process.env.REACT_APP_SETTING_API, body, config)
+      .then((res) => {
+        console.log("res ::: ", res);
+        resolve(res);
+      })
+      .catch((err) => {
+        // console.log("err : ", err);
+        resolve(err);
+      });
+  });
+}
+
 
 
 

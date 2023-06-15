@@ -178,6 +178,15 @@ const deleteFRFromFriender = async (deletedPendingFR, userID) => {
     }
   })
 }
+/**
+ * 
+ * @param {String} str 
+* @return String 
+ */
+const trimSpecialCharacters=(str)=>{
+  // Use a regular expression to match and replace special characters
+  return str.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, '');
+}
 
 const helper =
 {
@@ -194,7 +203,8 @@ const helper =
   getCookie: getCookie,
   deleteCookie: deleteCookie,
   getOutgoingPendingRequestList: getOutgoingPendingRequestList,
-  deleteFRFromFriender: deleteFRFromFriender
+  deleteFRFromFriender: deleteFRFromFriender,
+  trimSpecialCharacters:trimSpecialCharacters
 };
 
 export default helper

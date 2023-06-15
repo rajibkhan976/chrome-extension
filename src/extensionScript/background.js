@@ -561,7 +561,7 @@ const unfriend = async  (friends) => {
     if (!fbDtsg) {
       fbDtsg((fbDtsg, userID) => {
         chrome.storage.local.set({ fbTokenAndId: { fbDtsg: fbDtsg, userID: userID } });
-        fbuserId = userID;
+      //  fbuserId = userID;
       });
     }
 

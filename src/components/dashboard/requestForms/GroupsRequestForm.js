@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import helper from "../../../extensionScript/helper";
-import { getFrndReqSet, getKeyWords } from "../../../service/FriendRequest";
+import { getFrndReqSet,getProfileSettings } from "../../../service/FriendRequest";
 
 import {
   Bolt,
@@ -207,7 +207,8 @@ useEffect(()=>{
       }
       // console.log("resSettings ::: ", resSettings?.data);
       if (resSettings?.data) {
-        // console.log("data :::", resSettings)
+        const profileSettings=await getProfileSettings();
+        //console.log("profile my seetingsss data :::", profileSettings)
         // const isPauedThenRun = await helper.getDatafromStorage("runAction");
         // console.log("isPauedThenRun ::: ", isPauedThenRun);
         if (isPauedThenRun === "pause") {
@@ -216,10 +217,13 @@ useEffect(()=>{
           chrome.runtime.sendMessage({
             action: "reSendFriendRequestInGroup",
             dataPayload: {
-              ...settingApiPayload,
-              fbUserId: fbTokenAndId?.userID,
-              settingsId: settingsID,
-            },
+              friendReqSettings: {
+                ...settingApiPayload,
+                fbUserId: fbTokenAndId?.userID,
+                settingsId: settingsID,
+              },
+              profileSettings: profileSettings.data.data[0]
+            }
           });
         }
         if (isPauedThenRun !== "pause") {
@@ -227,9 +231,12 @@ useEffect(()=>{
           chrome.runtime.sendMessage({
             action: "sendFriendRequestInGroup",
             dataPayload: {
-              ...settingApiPayload,
-              fbUserId: fbTokenAndId?.userID,
-              settingsId: resSettings?.data?.data,
+              friendReqSettings: {
+                ...settingApiPayload,
+                fbUserId: fbTokenAndId?.userID,
+                settingsId: resSettings?.data?.data,
+              },
+              profileSettings: profileSettings.data.data[0]
             },
           });
           await helper.saveDatainStorage("profile_viewed", 0);

@@ -6,9 +6,9 @@ import common from "./commonScript";
 const $ = require("jquery");
 
 let groupSettings = {};
+let profileMysettings={}
 let countMember = 0,
   profile_viewed = 0,
-  counter = 0,
   timeSaved = 0,
   skipCounter = 0,
   previous_memberId = "",
@@ -17,7 +17,7 @@ let countMember = 0,
   memberBlockForPause,
   timeOut,
   msgPayload,
-  requestInfo,
+ // requestInfo,
   friendProfilePicture,
   fr_token;
 
@@ -32,38 +32,45 @@ let countMember = 0,
     }
   },500)
 
+  const sendFriendrequest=(request)=>{
+    groupSettings = request.dataPayload.friendReqSettings;
+     console.log("groupSettings :::>>> ", groupSettings);
+     profileMysettings=request.dataPayload.profileSettings;
+     console.log("profile settingss::::>>",profileMysettings);
+    if (groupSettings.resume_last_search) {
+      const startedViewedMember = document.querySelector(selectors.start_checking);
+      if (startedViewedMember) {
+        const startCountBadge = startedViewedMember.getElementsByClassName("count-badge");
+        if (startCountBadge.length > 0) {
+          startCountBadge[0].remove();
+        }
+      }
+
+      const alreadyViewedMember = document.querySelectorAll(selectors.viewed_group_member_div);
+      if (alreadyViewedMember.length > 0) {
+        for (let i = 0; i < alreadyViewedMember.length; i++) {
+          const countBadge = alreadyViewedMember[i].getElementsByClassName("count-badge");
+          if (countBadge.length) {
+            countBadge[0].remove();
+          }
+          alreadyViewedMember[i].removeAttribute("sentfr")
+        }
+      }
+    }
+    startSearchingEligibleGroupMembers();
+  }
+
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   // console.log("group ext req", request)
   switch (request.action) {
     case "reSendFriendRequestInGroup":
       skipCounter = 0;
       shoudIstop = false;
-    case "sendFriendRequestInGroup":
-      groupSettings = request.dataPayload;
-      // console.log("groupSettings ::: ", groupSettings);
-      if (groupSettings.resume_last_search) {
-        const startedViewedMember = document.querySelector(selectors.start_checking);
-        if (startedViewedMember) {
-          const startCountBadge = startedViewedMember.getElementsByClassName("count-badge");
-          if (startCountBadge.length > 0) {
-            startCountBadge[0].remove();
-          }
-        }
-
-        const alreadyViewedMember = document.querySelectorAll(selectors.viewed_group_member_div);
-        if (alreadyViewedMember.length > 0) {
-          for (let i = 0; i < alreadyViewedMember.length; i++) {
-            const countBadge = alreadyViewedMember[i].getElementsByClassName("count-badge");
-            if (countBadge.length) {
-              countBadge[0].remove();
-            }
-            alreadyViewedMember[i].removeAttribute("sentfr")
-          }
-        }
-      }
-      startSearchingEligibleGroupMembers();
+      sendFriendrequest(request)
       break;
-
+    case "sendFriendRequestInGroup":
+      sendFriendrequest(request)
+      break;
     case "stop":
       shoudIstop = true;
       await helper.saveDatainStorage("updated_Profile_data", { "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved })
@@ -110,7 +117,7 @@ const startSearchingEligibleGroupMembers = (iscontinuing = false) => {
     const eachMemberBlock = document.querySelectorAll(selectors.group_member_div);
     if (eachMemberBlock.length > 0) {
       clearInterval(eachMemberInterval);
-        counter = 0;
+        //counter = 0;
         if (iscontinuing)
           fetchMemberInfo(Object.values(eachMemberBlock));
         else
@@ -242,7 +249,7 @@ const fetchOtherInfosOfMember = async (
 
   if (responsePayload === null) {
 
-    if (groupSettings.gender_filter || groupSettings.country_filter_enabled) {
+    if (groupSettings) {
       msgPayload = {
         "groupMemberInfo": groupMemberInfo,
         "memberBlock": memberBlock,
@@ -269,6 +276,7 @@ const fetchOtherInfosOfMember = async (
     // console.log("responsePayload ::: ", responsePayload);
     friendProfilePicture = memberBlock.querySelector('a[aria-label="' + groupMemberInfo.memberName + '"]').querySelector('image').getAttribute("xlink:href");
     // console.log("friendProfilePicture ::: ", friendProfilePicture);
+    let requestInfo={};
     requestInfo = {
       ...requestInfo,
       "settingsId": groupSettings.settingsId,
@@ -304,6 +312,22 @@ const fetchOtherInfosOfMember = async (
       }
     }
 
+    if (responsePayload && groupMemberInfo.isEligible) {
+      // console.log("frineds gender........>>>", responsePayload)
+      if (responsePayload.gender) {
+        groupMemberInfo.gender = responsePayload.gender;
+      }
+      if (responsePayload.countryName) {
+        groupMemberInfo.country = responsePayload.countryName
+      }
+      if (responsePayload.Tiers) {
+        groupMemberInfo.tier = responsePayload.Tiers
+
+      }
+
+    }
+
+
     if (shoudIstop)
       return;
 
@@ -323,13 +347,13 @@ const fetchOtherInfosOfMember = async (
             memberWorkDesc = [...memberWorkDesc, groupMemberBio[i].textContent]
         }
       }
-
+      //groupMemberInfo.refriending=false;
       let isNegetivekeyWordMatched = false,
         iskeyWordMatched = false;
       if (memberWorkDesc.length > 0) {
-        let keywordCounter = 0
+        //let keywordCounter = 0
+        requestInfo.matchedKeyword=""
         memberWorkDesc.forEach((elem, i) => {
-
           if (groupSettings.negative_keyword) {
             groupSettings.selected_negative_keywords.forEach((el) => {
               // console.log("NegetiveKeywordsParam ::: ", el)
@@ -343,12 +367,14 @@ const fetchOtherInfosOfMember = async (
           if (groupSettings.keyword && !isNegetivekeyWordMatched) {
             // console.log("groupSettings.keyword :::::::::: ", groupSettings.keyword)
             groupSettings.selected_keywords.forEach((el) => {
-              // console.log("KeywordsParam ::: ", el, " <-----> ", elem)
+               //console.log("KeywordsParam ::: ", el, " <-----> ", elem)
               if (elem.toLocaleLowerCase().includes(el.toLocaleLowerCase().trim())) {
                 // console.log("keywordCounter :: ", keywordCounter);
                 iskeyWordMatched = true;
-                requestInfo = {...requestInfo, "matchedKeyword" : keywordCounter === 0 ? el.trim() : requestInfo.matchedKeyword + ", " + el.trim()}
-                keywordCounter = 1;
+                // requestInfo.matchedKeyword = keywordCounter === 0 ? el.trim() : requestInfo.matchedKeyword + ", " + el.trim()
+                requestInfo.matchedKeyword = requestInfo.matchedKeyword.length===0 ? el.trim() : requestInfo.matchedKeyword + "," + el.trim();
+                // console.log(groupMemberInfo.memberName + "'s work decription is matching with keyword.")
+                // keywordCounter = 1;
               }
             });
           }
@@ -360,6 +386,44 @@ const fetchOtherInfosOfMember = async (
         groupMemberInfo = { ...groupMemberInfo, isEligible: false };
       }
     }
+      
+    //check for user re-friending  
+    if (groupMemberInfo.isEligible) {
+      groupMemberInfo.refriending = false;
+      if (profileMysettings && profileMysettings.re_friending) {
+        //console.log("came to matyereddd");
+        if (requestInfo.matchedKeyword && requestInfo.matchedKeyword.length > 0) { //case: if matched keyword is not empty then check for re-friending
+          if ((profileMysettings.re_friending_settings[0] && 
+                profileMysettings.re_friending_settings[0].use_keyword) 
+                && profileMysettings.re_friending_settings[0].keywords.length > 0) {
+            //case: matched keyword is not empty and re_friending_keywords is not empty then check for key match
+            //console.log("started checking of keys for re-fr status:")
+            for (const keyw of profileMysettings.re_friending_settings[0].keywords.split(",")) {
+              console.log("keyw ::: ", keyw)
+              if (keyw.trim().length > 0)
+                if (requestInfo.matchedKeyword.toLocaleLowerCase().includes(helper.trimSpecialCharacters(keyw.toLocaleLowerCase()))) {
+                  groupMemberInfo.refriending = true;
+                  break;
+                }
+            }
+          } else { //case: matched keyword is not empty and re_friending_keywords is empty then check for re-friending
+            groupMemberInfo.refriending = true;
+          }
+        } else { // case: if matched keyword is empty then check for re-friending
+          if ((profileMysettings.re_friending_settings[0] && 
+                profileMysettings.re_friending_settings[0].use_keyword) 
+                && profileMysettings.re_friending_settings[0].keywords.length > 0) {
+            //case: if matched keyword is empty but re_friending_keywords is there
+            groupMemberInfo.refriending = false;
+          } else { //case: if matched keyword is empty and re_friending_keywords is empty
+            groupMemberInfo.refriending = true;
+          }
+        }
+      }
+    }
+    //console.log("re fr status after check",groupMemberInfo.refriending);
+    ///////////////////:end of re-friending check:///////////////////////////
+      
     if (shoudIstop)
       return;
 
@@ -382,7 +446,20 @@ const fetchOtherInfosOfMember = async (
         "friendName": groupMemberInfo.memberName,
         "friendProfilePicture": friendProfilePicture,
         "groupUrl" : window.location.href.replace("/members", ""),
-        "groupName" : groupName
+        "groupName" : groupName,
+        "gender":groupMemberInfo.gender ,
+        "country": groupMemberInfo.country,
+        "tier": groupMemberInfo.tier,
+        "refriending":groupMemberInfo.refriending,
+      }
+      if(groupMemberInfo.refriending&&(profileMysettings&&profileMysettings.re_friending_settings[0])){
+        requestInfo = {
+          ...requestInfo,
+        "refriending_pending_days":profileMysettings.re_friending_settings[0].remove_pending_friend_request_after,
+        "refriending_max_attempts":profileMysettings.re_friending_settings[0].instantly_resend_friend_request,
+        "refriending_attempt":1,
+        }
+
       }
       // console.log("requestInfo ::: ", requestInfo);
       memberBlock.classList.add("fr-list-loader");
