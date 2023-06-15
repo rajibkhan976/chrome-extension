@@ -74,9 +74,7 @@ const fbDtsg = (callback = null) => {
           callback(dtsgData[1], userIdData[1]);
         }
       } else {
-        if (callback) {
-          callback(null);
-        }
+        getFBUserData(callback);
       }
     })
     .catch(() => {
@@ -85,6 +83,45 @@ const fbDtsg = (callback = null) => {
       }
     });
 };
+
+const getFBUserData = (callback, connectProfile = false) => {
+  chrome.tabs.create(
+    { url: 'https://www.facebook.com/me', active: false, pinned: true, selected: false },
+    (tab) => {
+      chrome.tabs.onUpdated.addListener(async function listener(
+        tabId,
+        info
+      ) {
+        if (info.status === "complete" && tabId === tab.id) {
+          chrome.tabs.onUpdated.removeListener(listener);
+          chrome.storage.local.set({ tabsId: tab.id });
+          injectScript(tab.id, ["helper.js", "collectData.js"]);
+          await helper.sleep(2000);
+          const profileData = await chrome.tabs.sendMessage(tab.id, {action : "profileData"});
+          tab && tab.id && chrome.tabs.remove(tab.id);
+          if(profileData && !helper.isEmptyObj(profileData)){
+            if (callback) {
+              if(connectProfile){
+                callback({
+                  "text": profileData.name,
+                  "path": profileData.profileUrl,
+                  "uid": profileData.userId,
+                  "photo": profileData.profilePicture, 
+                  "isFbLoggedin": true},
+                )
+              }
+              else
+                callback(profileData.fbDtsg, profileData.userId);
+            }
+          }else
+            if (callback) 
+              callback(null);
+        }
+      });
+    }
+  );
+
+}
 
 const injectScript = (tabId, contentScript) => {
   // console.log('tabId ', parseInt(tabId));
@@ -319,34 +356,15 @@ const getProfileInfo = (callback = null) => {
       // console.log("userProfileData ::: ", userProfileData)
       if (userProfileData && userProfileData.length > 0) {
         userProfileData = "{" + userProfileData[0].replace(/[\\]/g, "") + "]}";
-        // console.log("userProfileData ::: ", JSON.parse(userProfileData).suggestions[0])
+        // console.log("userProfileData ::: ", {...JSON.parse(userProfileData).suggestions[0], isFbLoggedin: true,})
         if (callback) {
           callback({
             ...JSON.parse(userProfileData).suggestions[0],
             isFbLoggedin: true,
           });
         }
-      }else if(e.match(/"CurrentUserInitialData/gm)){
-        let CurrentUserInitialData = e.replaceAll(/\\/gm, "");
-        // console.log("************************", CurrentUserInitialData.split(' profile picture" role="img"')[1].split(" url(")[1].split(")")[0]);
-        let photo =  CurrentUserInitialData.split(' profile picture" role="img"')[1].split(" url(")[1].split(")")[0];
-        photo = photo.replaceAll('&#039;', '').replaceAll('3a ',':').replaceAll('3d ','=').replaceAll('26 ','&');
-        CurrentUserInitialData = CurrentUserInitialData.split('["CurrentUserInitialData",[],')[1].split(',\"IS_BUSINESS_PERSON_ACCOUNT\"')[0] + "}";
-        CurrentUserInitialData = JSON.parse(CurrentUserInitialData);
-        CurrentUserInitialData = {
-          path: "/profile.php?id=" + CurrentUserInitialData.ACCOUNT_ID,
-          photo: photo,
-          text: CurrentUserInitialData.NAME,
-          uid: CurrentUserInitialData.ACCOUNT_ID
-        }
-        // console.log("CurrentUserInitialData ::: ", {...CurrentUserInitialData, isFbLoggedin : true});
-        if (callback) {
-          callback({...CurrentUserInitialData, isFbLoggedin : true});
-        }
       } else {
-        if (callback) {
-          callback({ isFbLoggedin: false });
-        }
+        getFBUserData(callback, true);
       }
     })
     .catch(() => {
@@ -531,7 +549,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 
     case "updateCountryAndTier": 
                               updateGenderCountryAndTier(request);    
-                            
+                              break;
                           
     default : break;
   }
@@ -552,12 +570,12 @@ const unfriend = async  (friends) => {
   // console.log("Inside unfriend ()")
   let deletedFriends = [];
   
-  for (let i = 0; i < friends.length; i++){ 
+  for (let i = 0; i < friends.length; i++){
     let friend = friends[i];
     // console.log("unfriending = ", friend.friendFbId)
     let fbuserDetails = await helper.getDatafromStorage("fbTokenAndId");
     let fbDtsg = fbuserDetails.fbDtsg;
-
+    
     if (!fbDtsg) {
       fbDtsg((fbDtsg, userID) => {
         chrome.storage.local.set({ fbTokenAndId: { fbDtsg: fbDtsg, userID: userID } });
@@ -581,7 +599,7 @@ const unfriend = async  (friends) => {
     // console.log("unfriendResp", unfriendResp);
     let delay = helper.getRandomInteger(1000 * 30, 1000 * 60 * 2); // 30 secs to 2 mins
 
-    if (i + 1 == friends.length) {
+    if (i + 1 === friends.length) {
       return deletedFriends;
     } else {
       await helper.sleep(delay);
@@ -614,7 +632,7 @@ const checkScheduledSync = async () => {
     "token": frToken,
     "fbUserId": fbuserId
   }
-  let tb = await helper.getDatafromStorage("friendLength");
+  // let tb = await helper.getDatafromStorage("friendLength");
   // console.log("checking scheduled sync", tb)
 
   // Get the settings
@@ -652,7 +670,7 @@ const checkScheduledSync = async () => {
   let lastSyncId = [];
   if (lastSyncDate && !helper.isEmptyObj(lastSyncDate)) {
     lastSyncDate = new Date(lastSyncDate)
-    isAlreadySyncedToday = todayDate.setHours(0,0,0,0) == lastSyncDate.setHours(0,0,0,0);
+    isAlreadySyncedToday = todayDate.setHours(0,0,0,0) === lastSyncDate.setHours(0,0,0,0);
     if(isAlreadySyncedToday){
       lastSyncId = await helper.getDatafromStorage(
         "lastAutoSyncFriendListId"
@@ -718,6 +736,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
       case "pendingFR":
         checkPendingFR();
+        break;
 
     default: break;
   }
@@ -743,7 +762,7 @@ chrome.tabs.onUpdated.addListener(async (tabID, changeInfo, tab) => {
 chrome.tabs.onRemoved.addListener(async (tabID) => {
   
   const CurrentTabId = await helper.getDatafromStorage("tabId");
-  const CurrentTabsId = await helper.getDatafromStorage("tabsId");
+  // const CurrentTabsId = await helper.getDatafromStorage("tabsId");
   if (tabID === Number(CurrentTabId)) {
     stopRunningScript()
   }
@@ -807,7 +826,7 @@ const updateGenderCountryAndTier = async (request) => {
 
       updateFriendPayload.push(friendPayload);
 
-      if (i + 1 == listLen) {
+      if (i + 1 === listLen) {
         // console.log("Country List", updateFriendPayload);
         setTimeout( () => {
           console.log("Update country and Tier")
@@ -832,14 +851,14 @@ const updateFriendList = async (friendList, fbProfileId) => {
     "friend_details" : friendList
   }
   // console.log("friendListPayload :::::::::::::::::: ", friendListPayload);
-  let updateResp  = await fetch(process.env.REACT_APP_SETTING_STORE_FRIEND_LIST, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "authorization": fr_token,
-        },
-        body: JSON.stringify(friendListPayload),
-    });
+  await fetch(process.env.REACT_APP_SETTING_STORE_FRIEND_LIST, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "authorization": fr_token,
+    },
+    body: JSON.stringify(friendListPayload),
+  });
 }
 
 const getGenderCountryAndTiers = async (name) => {

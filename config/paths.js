@@ -64,6 +64,7 @@ module.exports = {
   swSrc: resolveModule(resolveApp, 'src/service-worker'),
   background: resolveApp("src/extensionScript/background.js"),
   contentScript: resolveApp("src/extensionScript/contentScript.js"),
+  collectData: resolveApp("src/extensionScript/collectData.js"),
   commonContent: resolveApp("src/extensionScript/commonContent.js"),
   portalScript: resolveApp("src/extensionScript/portalScript.js"),
   commonScript: resolveApp("src/extensionScript/commonScript.js"),

@@ -1,10 +1,11 @@
 // console.log("content script")
-import { error } from "jquery";
+// import { error } from "jquery";
 import helper from "./helper";
-const { async } = require("q");
+// const { async } = require("q");
 let finalFriendList = [], countInterval;
-let finalFriendListWithMsg = [], commentREactionThread = [], finalFriendListWithcountry = [], friendListWithCountryAndtier = [];
-let fr_fbDtsg, fr_userID;
+let finalFriendListWithMsg = [], commentREactionThread = [];
+//  finalFriendListWithcountry = [], friendListWithCountryAndtier = [];
+// let fr_fbDtsg, fr_userID;
 let dayBackCount = 7;
 let allPendingFriendReqList = []
 let allPendingFriendReqListFromDB = []

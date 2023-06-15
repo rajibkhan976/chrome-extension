@@ -14,7 +14,10 @@ const selectors = {
                         '[aria-label="Account Controls and Settings"][role="navigation"]'],
     profile_btn : ['svg[aria-label="Your profile"][data-visualcompletion="ignore-dynamic"][role="img"'],
     group_name : ['h1[dir="auto"], h2[dir="auto"]'],
-    main_component : ['div[role="main"]']
+    main_component : ['div[role="main"]'],
+    script_contet : ['script#__eqmc'],
+    userName : ['h1:not([dir="auto"])'],
+    profilePicture : ['svg[aria-label="Profile picture actions"]']
 }
 
 export default selectors;

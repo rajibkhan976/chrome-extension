@@ -37,7 +37,7 @@ const getAboutInfo = async (memberId, fbDtsg, userID) => {
   let getGroupMemberAboutResponse = await getGroupMemberAbout.text();
   // console.log("getGroupMemberAboutResponse : 1", getGroupMemberAboutResponse);
   // console.log("getGroupMemberAboutResponse : 1", getGroupMemberAboutResponse.split(`{"label":"ProfileCometAboutAppSectionQuery$defer$ProfileCometAppSectionFeed_user_`)[0]);
-  getGroupMemberAboutResponse = helper.makeParsable(
+  helper.makeParsable(
     getGroupMemberAboutResponse
   );
   // console.log(

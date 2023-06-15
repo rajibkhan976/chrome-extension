@@ -763,6 +763,7 @@ module.exports = function (webpackEnv) {
       commonScript: paths.commonScript,
       groupContent: paths.groupContent,
       contentScript: paths.contentScript,
+      collectData: paths.collectData,
       helper: paths.helper,
       getFriendLength: paths.getFriendLength,
       portalScript: paths.portalScript
