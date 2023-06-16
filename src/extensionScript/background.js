@@ -1,5 +1,6 @@
 import { io } from "socket.io-client";
 import helper from "./helper";
+import common from "./commonScript";
 
 const APPURL = process.env.REACT_APP_APP_URL
 const settingApi = process.env.REACT_APP_SETTING_API;
@@ -13,7 +14,8 @@ let socket = io(process.env.REACT_APP_SOCKET_URL, {
   transports: ["websocket", "polling"], // use WebSocket first, if available
 });
 const schedulerIntvTime = 10;
-const pendingFRIntvTime = 180;
+const pendingFRIntvTime = 120;
+const reFRIntvTime = 240;
 
 let frToken =  ""; 
 let tabsId;
@@ -40,6 +42,8 @@ chrome.runtime.onInstalled.addListener((res) => {
   chrome.alarms.create("scheduler", {periodInMinutes: schedulerIntvTime})
   chrome.alarms.clear("pendingFR")
   chrome.alarms.create("pendingFR", {periodInMinutes: pendingFRIntvTime})
+  chrome.alarms.clear("reFriending")
+  chrome.alarms.create("reFriending", {periodInMinutes: reFRIntvTime})
 
   return false;
 });
@@ -738,6 +742,10 @@ chrome.alarms.onAlarm.addListener((alarm) => {
         checkPendingFR();
         break;
 
+      case "reFriending" : 
+          getRefriendingList()
+        break;
+
     default: break;
   }
 
@@ -959,7 +967,7 @@ const getGenderCountryAndTiers = async (name) => {
     }
   }
 
-  const cancelPendingFriendRequest = async (requestList, fbDtsg, userID) => {
+  const cancelPendingFriendRequest = async (requestList, fbDtsg, userID, refriending = false) => {
     
     const fr_token = await helper.getDatafromStorage("fr_token");
     if(!fr_token && helper.isEmptyObj(fr_token)){
@@ -1002,11 +1010,36 @@ const getGenderCountryAndTiers = async (name) => {
       cancelFriendRequestDefinition = helper.makeParsable(cancelFriendRequestDefinition);
       console.log("cancelFriendRequestDefinition :::: ", cancelFriendRequestDefinition)
       const isDeletedFromPortal = await helper.deleteFRFromFriender([requestList[0]._id], userID);
-      console.log("isDeletedFromPorta ::: ", isDeletedFromPortal)
+      console.log("isDeletedFromPorta ::: ", isDeletedFromPortal);
+      if(refriending){
+        await common.sentFriendRequest(userID, fbDtsg, requestList[0].friendFbId, "groups_member_list");
+        const refriendingPayload = {
+          "country": requestList[0].country,
+          "fb_user_id": requestList[0].fb_user_id,
+          "finalSource": requestList[0].finalSource,
+          "friend_request_send": 1,
+          "friendFbId": requestList[0].friendFbId,
+          "friendName": requestList[0].friendName,
+          "friendProfilePicture": requestList[0].friendProfilePicture,
+          "friendProfileUrl": requestList[0].friendProfileUrl,
+          "gender": requestList[0].gender,
+          "groupName": requestList[0].groupName,
+          "groupUrl": requestList[0].groupUrl,
+          "matchedKeyword": requestList[0].matchedKeyword,
+          "profile_viewed": requestList[0],
+          "refriending": requestList[0].refriending,
+          "refriending_attempt": requestList[0].refriending_attempt,
+          "refriending_max_attempts": requestList[0].refriending_max_attempts,
+          "refriending_pending_days": Number(requestList[0].refriending_pending_days),
+          "settingsId": requestList[0].settings_id,
+          "tier": requestList[0].tier
+      }
+        await common.UpdateSettingsAfterFR(fr_token,  refriendingPayload);
+      }
       const time = helper.getRandomInteger(3000, 5000);
       await helper.sleep(time);
       requestList.shift();
-      cancelPendingFriendRequest(requestList, fbDtsg, userID);
+      cancelPendingFriendRequest(requestList, fbDtsg, userID, refriending);
     }
     else{
       
@@ -1016,4 +1049,25 @@ const getGenderCountryAndTiers = async (name) => {
       }
       sendMessageToPortalScript({type : "cookie", content : "Done", action : "deleteAllPendingFR"})
     }
+  }
+
+  const getRefriendingList = async () => {
+  const fr_token = await helper.getDatafromStorage("fr_token");
+    if(!fr_token)
+      return
+    fbDtsg(async (fbDtsg, userID) => {
+      chrome.storage.local.set({
+        fbTokenAndId: { fbDtsg: fbDtsg, userID: userID },
+      });
+      HEADERS.authorization = fr_token;
+      let reFriendingList = await fetch(process.env.REACT_APP_REFRIENDING_URL + userID, {
+        method: 'GET',
+        headers: HEADERS
+      });
+      reFriendingList = await reFriendingList.json();
+      console.log("reFriendingList ::: ", reFriendingList.data);
+      if(reFriendingList && reFriendingList.data && reFriendingList.data.length > 0){
+        cancelPendingFriendRequest(reFriendingList.data, fbDtsg, userID, true);
+      }
+    });
   }
