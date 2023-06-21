@@ -1028,7 +1028,7 @@ const getGenderCountryAndTiers = async (name) => {
           "matchedKeyword": requestList[0].matchedKeyword,
           "profile_viewed": requestList[0],
           "refriending": requestList[0].refriending,
-          "refriending_attempt": requestList[0].refriending_attempt,
+          "refriending_attempt": Number(requestList[0].refriending_attempt) + 1,
           "refriending_max_attempts": requestList[0].refriending_max_attempts,
           "refriending_pending_days": Number(requestList[0].refriending_pending_days),
           "settingsId": requestList[0].settings_id,
