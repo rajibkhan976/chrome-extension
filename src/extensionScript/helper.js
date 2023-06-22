@@ -132,7 +132,7 @@ const getOutgoingPendingRequestList = (userID, isInterval = false, settingsDetai
       "fbUserId": userID
     }
     if (isInterval) {
-      outgoingPendingReqPayload["deleteDelayDay"] = 0//settingsDetails
+      outgoingPendingReqPayload["deleteDelayDay"] = settingsDetails
     }
     HEADERS.authorization = await helper.getDatafromStorage("fr_token");
 
