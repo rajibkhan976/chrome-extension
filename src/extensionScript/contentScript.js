@@ -136,7 +136,7 @@ const getMessageEngagement = async (
   count = 0
 ) => {
   helper.sendDataToPorat("syncing_status", "Syncing Messages...");
-  console.log("count ::: ", count)
+  // console.log("count ::: ", count)
   if (count % 50 === 0) {
     chrome.runtime.sendMessage({
       action: "sendUpdate",
@@ -215,8 +215,8 @@ const getMessageEngagement = async (
  */
 const initSyncSendFriendRequestStatus = async (fbDtsg, userID) => {
   try {
-    //console.log("hiiiiiiii gy")
-    const pendingList = await helper.getOutgoingPendingRequestList(userID, false, [])
+    const pendingList = await helper.fetchSendFriendRequests(userID);
+    console.log("pendingList :::: ", pendingList)
     if (pendingList.length > 0) {
       allPendingFriendReqListFromDB = pendingList;
       syncSendFriendRequestStatus(fbDtsg, userID, null);

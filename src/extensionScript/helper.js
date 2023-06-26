@@ -152,6 +152,30 @@ const getOutgoingPendingRequestList = (userID, isInterval = false, settingsDetai
   })
 }
 
+const fetchSendFriendRequests = (userID) => {
+  return new Promise(async (resolve, reject) => {
+    let outgoingPendingReqPayload =
+    {
+      "fbUserId": userID
+    }
+    HEADERS.authorization = await helper.getDatafromStorage("fr_token");
+
+    let outgoingPendingRequestSerive = await fetch(process.env.REACT_APP_PENDING_FR_REQUEST_URL, {
+      method: 'POST',
+      headers: HEADERS,
+      body: JSON.stringify(outgoingPendingReqPayload)
+    })
+    let outgoingPendingRequestDefinition = await outgoingPendingRequestSerive.json();
+    outgoingPendingRequestDefinition = outgoingPendingRequestDefinition.data
+    console.log("outgoingPendingRequestSerive :::: ", outgoingPendingRequestDefinition)
+    if(outgoingPendingRequestDefinition && outgoingPendingRequestDefinition.length > 0){
+      resolve(outgoingPendingRequestDefinition);
+    } else {
+      resolve([])
+    }
+  })
+}
+
 const deleteFRFromFriender = async (deletedPendingFR, userID) => {
   return new Promise(async (resolve, reject) => {
     if (deletedPendingFR.length > 0) {
@@ -203,6 +227,7 @@ const helper =
   getCookie: getCookie,
   deleteCookie: deleteCookie,
   getOutgoingPendingRequestList: getOutgoingPendingRequestList,
+  fetchSendFriendRequests : fetchSendFriendRequests,
   deleteFRFromFriender: deleteFRFromFriender,
   trimSpecialCharacters:trimSpecialCharacters
 };
