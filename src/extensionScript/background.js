@@ -1011,7 +1011,8 @@ const getGenderCountryAndTiers = async (name) => {
       console.log("cancelFriendRequestDefinition :::: ", cancelFriendRequestDefinition);
       let isCancelFriendRequest = cancelFriendRequestDefinition && 
                                       cancelFriendRequestDefinition.data && 
-                                      cancelFriendRequestDefinition.data.cancelled_friend_requestee ? true : false;
+                                      cancelFriendRequestDefinition.data.friend_request_cancel && 
+                                      cancelFriendRequestDefinition.data.friend_request_cancel.cancelled_friend_requestee ? true : false;
       console.log("isCancelFriendRequest :::: ", isCancelFriendRequest)
       const isDeletedFromPortal = await helper.deleteFRFromFriender([requestList[0]._id], userID);
       console.log("isDeletedFromPorta ::: ", isDeletedFromPortal);
