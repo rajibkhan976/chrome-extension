@@ -1,6 +1,4 @@
-import { isArray } from "jquery";
 
-const resolve = require("resolve");
 const HEADERS = {
   "Content-Type": "application/json",
 };
@@ -212,6 +210,33 @@ const trimSpecialCharacters=(str)=>{
   return str.replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, '');
 }
 
+const fetchExFriends = async ( userID, friend_uid ) => {
+  return new Promise(async (resolve, reject) => {
+      const reqBody = {
+        "fbUserId": userID
+      }
+      HEADERS.authorization = await helper.getDatafromStorage("fr_token");
+
+      let exFriends = await fetch(process.env.REACT_APP_FETCH_EX_FRIENDS, {
+        method: 'POST',
+        headers: HEADERS,
+        body: JSON.stringify(reqBody)
+      })
+
+      exFriends = await exFriends.json();
+      exFriends = exFriends && exFriends.data.length && exFriends.data[0] && exFriends.data[0].friend_details
+      if (exFriends && exFriends.length){
+        exFriends = exFriends.filter((el) => {return el.friendStatus === "Lost" || (el.deleted_status && el.deleted_status === 1)})
+        exFriends = exFriends.filter(el => el.friendFbId === friend_uid)
+        // console.log("exFriends ::: ", exFriends)
+        if(exFriends.length > 0)
+          resolve(true)
+        else resolve(false)
+        }
+      else resolve(false)
+  })
+}
+
 const helper =
 {
   getDatafromStorage: getDatafromStorage,
@@ -229,7 +254,8 @@ const helper =
   getOutgoingPendingRequestList: getOutgoingPendingRequestList,
   fetchSendFriendRequests : fetchSendFriendRequests,
   deleteFRFromFriender: deleteFRFromFriender,
-  trimSpecialCharacters:trimSpecialCharacters
+  trimSpecialCharacters:trimSpecialCharacters,
+  fetchExFriends:fetchExFriends
 };
 
 export default helper

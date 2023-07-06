@@ -34,9 +34,9 @@ let countMember = 0,
 
   const sendFriendrequest=(request)=>{
     groupSettings = request.dataPayload.friendReqSettings;
-     console.log("groupSettings :::>>> ", groupSettings);
+    //  console.log("groupSettings :::>>> ", groupSettings);
      profileMysettings=request.dataPayload.profileSettings;
-     console.log("profile settingss::::>>",profileMysettings);
+    //  console.log("profile settingss::::>>",profileMysettings);
     if (groupSettings.resume_last_search) {
       const startedViewedMember = document.querySelector(selectors.start_checking);
       if (startedViewedMember) {
@@ -181,8 +181,8 @@ const fetchMemberInfo = async (eachMemberBlock) => {
   if (eachMemberBlock.length > 0) {
     
     let memberBlock = eachMemberBlock[0].querySelector(selectors.add_friend_btn)
-    console.log("eachMemberBlock[0] ::: ", eachMemberBlock[0])
-    console.log("memberBlock ::: ", memberBlock)
+    // console.log("eachMemberBlock[0] ::: ", eachMemberBlock[0])
+    // console.log("memberBlock ::: ", memberBlock)
     if (memberBlock === null) {
       if(eachMemberBlock.length === 1){
         scrollToPos(eachMemberBlock[0])
@@ -385,6 +385,15 @@ const fetchOtherInfosOfMember = async (
       } else {
         groupMemberInfo = { ...groupMemberInfo, isEligible: false };
       }
+    }
+
+    // console.log("profileMysettings ::: ", profileMysettings.dont_send_friend_requests_prople_ive_been_friends_with_before)
+
+    if (groupMemberInfo.isEligible && profileMysettings && profileMysettings.dont_send_friend_requests_prople_ive_been_friends_with_before){
+      const isExFriends = await helper.fetchExFriends(userID, groupMemberInfo.memberId)
+      // console.log("isExFriends ::: ", isExFriends)
+      if(isExFriends)
+        groupMemberInfo = { ...groupMemberInfo, isEligible: false };
     }
       
     //check for user re-friending  
