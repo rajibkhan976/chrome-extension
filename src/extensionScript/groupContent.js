@@ -395,6 +395,13 @@ const fetchOtherInfosOfMember = async (
       if(isExFriends)
         groupMemberInfo = { ...groupMemberInfo, isEligible: false };
     }
+
+    if (groupMemberInfo.isEligible && profileMysettings && profileMysettings.dont_send_friend_requests_prople_i_sent_friend_requests_they_rejected ){
+      const isRejectedFriends = await helper.fetchRejectedFriends(userID, groupMemberInfo.memberId)
+      // console.log("isRejectedFriends ::: ", isRejectedFriends)
+      if(isRejectedFriends)
+        groupMemberInfo = { ...groupMemberInfo, isEligible: false };
+    }
       
     //check for user re-friending  
     if (groupMemberInfo.isEligible) {

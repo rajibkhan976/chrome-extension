@@ -237,6 +237,32 @@ const fetchExFriends = async ( userID, friend_uid ) => {
   })
 }
 
+const fetchRejectedFriends = async ( userID, friend_uid ) => {
+  return new Promise(async (resolve, reject) => {
+
+      HEADERS.authorization = await helper.getDatafromStorage("fr_token");
+
+      let rejectedFriends = await fetch(process.env.REACT_APP_FETCH_REJECTED_FRIENDS + userID, {
+        method: 'GET',
+        headers: HEADERS
+      })
+
+      rejectedFriends = await rejectedFriends.json();
+      rejectedFriends = rejectedFriends && rejectedFriends.data.length && rejectedFriends.data
+      // console.log("rejectedFriends 1 :::: ", rejectedFriends)
+      if(rejectedFriends.length > 0)
+      {
+        rejectedFriends = rejectedFriends.filter(el => el.friendFbId === friend_uid)
+        // console.log("rejectedFriends 2 :::: ", rejectedFriends)
+        if(rejectedFriends.length > 0)
+          resolve(true)
+        else resolve(false)
+      }
+      else
+        resolve(false)
+  })
+}
+
 const helper =
 {
   getDatafromStorage: getDatafromStorage,
@@ -255,7 +281,8 @@ const helper =
   fetchSendFriendRequests : fetchSendFriendRequests,
   deleteFRFromFriender: deleteFRFromFriender,
   trimSpecialCharacters:trimSpecialCharacters,
-  fetchExFriends:fetchExFriends
+  fetchExFriends:fetchExFriends,
+  fetchRejectedFriends:fetchRejectedFriends
 };
 
 export default helper
