@@ -380,12 +380,24 @@ const saveFriendList = async (
 
     switch (action) {
       case "syncCompleted": // List with message count
+        if(el.last_engagement_date){
+          var resultFormat = el.last_engagement_date.toISOString().slice(0, 19).replace("T", " ");
+          // console.log("resultFormat ::: ", resultFormat);
+          if(resultFormat) 
+            eachFriendinfo.last_engagement_date = resultFormat
+        }
         eachFriendinfo.commentThread = el.commentThread ? el.commentThread : 0;
         eachFriendinfo.reactionThread = el.reactionThread ? el.reactionThread : 0;
         eachFriendinfo.message_thread = el.message_thread ? el.message_thread : 0;
         break;
       case "messageEngagement": // List with comment and reactions
         if (shouldISaveData) {
+          if(el.last_engagement_date){
+            resultFormat = el.last_engagement_date.toISOString().slice(0, 19).replace("T", " ");
+            console.log("resultFormat ::: ", resultFormat);
+            if(resultFormat) 
+              eachFriendinfo.last_engagement_date = resultFormat
+          }
           eachFriendinfo.commentThread = el.commentThread ? el.commentThread : 0;
           eachFriendinfo.reactionThread = el.reactionThread ? el.reactionThread : 0;
         }
@@ -469,34 +481,13 @@ const saveFriendList = async (
   }
 }
 
-// const getCountryAndTier = async (fbDtsg, userID, friendList) => {
-//   helper.sendDataToPorat("syncing_status", "Syncing Countries...");
-
-//   // console.log("friendList in country ::: ", friendList[0])
-//   if(friendList, friendList.length > 0){
-
-//     // console.log("friendList[0]", friendList[0].name);
-//     finalFriendListWithcountry = friendList;
-//     fr_fbDtsg = fbDtsg, 
-//     fr_userID = userID
-//     chrome.runtime.sendMessage({
-//       "action": "getGenderCountryAndTier",
-//       "from": "fetchFriends",
-//       "name": friendList[0].name
-//     });
-//   }else{
-//     // console.log("friendListWithCountryAndtier ::: ", friendListWithCountryAndtier)
-//     saveFriendList(friendListWithCountryAndtier, userID, fbDtsg, "commentReactionEngagement")
-//   }
-// }
-
 const getReactionComment = async (
   fbDtsg,
   userID,
   finalFriendListWithMsg,
   cursor = null
 ) => {
-  console.log("countInterval ::: ", countInterval)
+  // console.log("countInterval ::: ", countInterval)
   if (countInterval)
     clearInterval(countInterval)
   let reactionCommentPayload;
@@ -540,18 +531,14 @@ const getReactionComment = async (
         commenters = commenters.concat(
           reactorsCommentorsArray
             ? reactorsCommentorsArray.commenters
-              ? reactorsCommentorsArray.commenters.nodes
-                ? reactorsCommentorsArray.commenters.nodes
-                : []
+              ? reactorsCommentorsArray.commenters
               : []
             : []
         );
         reactors = reactors.concat(
           reactorsCommentorsArray
             ? reactorsCommentorsArray.reactors
-              ? reactorsCommentorsArray.reactors.nodes
-                ? reactorsCommentorsArray.reactors.nodes
-                : []
+              ? reactorsCommentorsArray.reactors
               : []
             : []
         );
@@ -562,40 +549,47 @@ const getReactionComment = async (
     }
   } else {
     routeDefinationCR = helper.makeParsable(routeDefinationCR);
-    if(routeDefinationCR[userID] && routeDefinationCR[userID].timeline_feed_units){
-      // console.log("routeDefinationCR :::: ", routeDefinationCR )
-      const end_cursor =
-        routeDefinationCR[userID].timeline_feed_units.page_info.end_cursor;
-      routeDefinationCR = routeDefinationCR[userID].timeline_feed_units.edges;
-      if (routeDefinationCR.length === 250) {
-        commentREactionThread = commentREactionThread.concat(routeDefinationCR);
-        getReactionComment(fbDtsg, userID, finalFriendListWithMsg, end_cursor);
-      } else if (routeDefinationCR.length < 250) {
-        commentREactionThread = commentREactionThread.concat(routeDefinationCR);
-        commentREactionThread.forEach((element, i) => {
-          const reactorsCommentorsArray = element.node.feedback;
-          commenters = commenters.concat(
-            reactorsCommentorsArray
+    // console.log("routeDefinationCR :::: ", routeDefinationCR )
+    const end_cursor =
+      routeDefinationCR[userID].timeline_feed_units.page_info.end_cursor;
+    routeDefinationCR = routeDefinationCR[userID].timeline_feed_units.edges;
+    if (routeDefinationCR.length === 250) {
+      commentREactionThread = commentREactionThread.concat(routeDefinationCR);
+      getReactionComment(fbDtsg, userID, finalFriendListWithMsg, end_cursor);
+    } else if (routeDefinationCR.length < 250) {
+      commentREactionThread = commentREactionThread.concat(routeDefinationCR);
+      commentREactionThread.forEach((element, i) => {
+        const engagementTime = element.node.creation_time;
+        var date = new Date(engagementTime*1000); 
+        let resultFormat = date;
+        let reactorsCommentorsArray = element.node.feedback;
+        if(reactorsCommentorsArray){
+          reactorsCommentorsArray = {...reactorsCommentorsArray,
+            commenters : reactorsCommentorsArray.commenters.nodes.map((elem) => {
+              return {...elem, engagementDAte : elem.engagementDAte ? [...elem.engagementDAte, resultFormat] : [resultFormat]}
+            }),
+            reactors : reactorsCommentorsArray.reactors.nodes.map((elem) => {
+              return {...elem, engagementDAte : elem.engagementDAte ? [...elem.engagementDAte, resultFormat] : [resultFormat]}
+            })
+          }
+        }
+        commenters = commenters.concat(
+          reactorsCommentorsArray
+            ? reactorsCommentorsArray.commenters
               ? reactorsCommentorsArray.commenters
-                ? reactorsCommentorsArray.commenters.nodes
-                  ? reactorsCommentorsArray.commenters.nodes
-                  : []
-                : []
               : []
-          );
-          reactors = reactors.concat(
-            reactorsCommentorsArray
+            : []
+        );
+
+        reactors = reactors.concat(
+          reactorsCommentorsArray
+            ? reactorsCommentorsArray.reactors
               ? reactorsCommentorsArray.reactors
-                ? reactorsCommentorsArray.reactors.nodes
-                  ? reactorsCommentorsArray.reactors.nodes
-                  : []
-                : []
               : []
           );
           count = i;
         });
-      }
-    }else{
+      } else{
       if (commentREactionThread.length > 0) {
         commentREactionThread.forEach((element, i) => {
           const reactorsCommentorsArray = element.node.feedback;
@@ -624,6 +618,7 @@ const getReactionComment = async (
       }
     }
   }
+}
 
   countInterval = setInterval(() => {
     // console.log("commentREactionThread len", commentREactionThread.length, count)
@@ -638,9 +633,11 @@ const getReactionComment = async (
       saveFriendList(PayloadWithReactionComment, userID, fbDtsg, "messageEngagement")
     }
   }, 1000);
-}
+
 
 const commentReactionCount = (arrayRactionComment) => {
+  // const arrayRactionComment = [...arrayRactionCommentors]
+  // console.log(arrayRactionComment)
   for (let i = 0; i < arrayRactionComment.length; ++i) {
     if (
       arrayRactionComment[i].isChecked === undefined ||
@@ -653,12 +650,81 @@ const commentReactionCount = (arrayRactionComment) => {
             { ...arrayRactionComment[i] }.count !== undefined
               ? { ...arrayRactionComment[i] }.count + 1
               : 2;
+          let engagementDAte;
+          if(arrayRactionComment){
+            if(arrayRactionComment[i] && arrayRactionComment[j]){
+              if(arrayRactionComment[i].engagementDAte && arrayRactionComment[j].engagementDAte){
+                if(arrayRactionComment[i].engagementDAte[0] && arrayRactionComment[i].engagementDAte[0]){
+                  if(arrayRactionComment[i].engagementDAte[0].setHours(0,0,0,0) === arrayRactionComment[j].engagementDAte[0].setHours(0,0,0,0)){
+                    engagementDAte = arrayRactionComment[i].engagementDAte
+                  }
+                  else if(arrayRactionComment[i].engagementDAte[0].setHours(0,0,0,0) > arrayRactionComment[j].engagementDAte[0].setHours(0,0,0,0)){
+                    engagementDAte = arrayRactionComment[i].engagementDAte
+                  }
+                  else{
+                    engagementDAte = arrayRactionComment[j].engagementDAte
+                  }
+                }
+                else if(arrayRactionComment[i].engagementDAte[0] && !arrayRactionComment[j].engagementDAte[0]){
+                  engagementDAte = arrayRactionComment[i].engagementDAte
+                }
+                else if(!arrayRactionComment[i].engagementDAte[0] && arrayRactionComment[j].engagementDAte[0]){
+                  engagementDAte = arrayRactionComment[j].engagementDAte
+                }
+                else{
+                  engagementDAte = null
+                }
+              }
+              else if(arrayRactionComment[i].engagementDAte && !arrayRactionComment[j].engagementDAte){
+                if(arrayRactionComment[i].engagementDAte[0]){
+                  engagementDAte = arrayRactionComment[i].engagementDAte
+                }
+                else{
+                  engagementDAte = null
+                }
+              }
+              else if(!arrayRactionComment[i].engagementDAte && arrayRactionComment[j].engagementDAte){
+                if(arrayRactionComment[j].engagementDAte[0]){
+                  engagementDAte = arrayRactionComment[j].engagementDAte
+                }
+                else{
+                  engagementDAte = null
+                }
+              }
+              else{
+                engagementDAte = null
+              }
+            }
+            else if(arrayRactionComment[i] && !arrayRactionComment[j]){
+              if(arrayRactionComment[i].engagementDAte && arrayRactionComment[i].engagementDAte[0]){
+                engagementDAte = arrayRactionComment[i].engagementDAte
+              }
+              else{
+                engagementDAte = null
+              }
+            }
+            else if(!arrayRactionComment[i] && arrayRactionComment[j]){
+              if(arrayRactionComment[j].engagementDAte && arrayRactionComment[j].engagementDAte[0]){
+                engagementDAte = arrayRactionComment[j].engagementDAte
+              }
+              else{
+                engagementDAte = null
+              }
+            }
+            else{
+              engagementDAte = null
+            }
+          }else{
+            engagementDAte = null
+          }
+          arrayRactionComment[i] = {...arrayRactionComment[i], engagementDAte : engagementDAte}
           arrayRactionComment[j].isChecked = true;
         } else {
           arrayRactionComment[i].count =
             { ...arrayRactionComment[i] }.count !== undefined
               ? { ...arrayRactionComment[i] }.count
               : 1;
+          // arrayRactionComment[i] = {...arrayRactionComment[i], engagementDAte : arrayRactionComment[i].engagementDAte}
           arrayRactionComment[j].isChecked = { ...arrayRactionComment[j] }
             .isChecked
             ? { ...arrayRactionComment[j] }.isChecked
@@ -679,9 +745,25 @@ const getPayloadWithReactionComment = (
   finalFriendListWithMsg
 ) => {
   const finalFriendLists = [...finalFriendListWithMsg];
+  // console.log(commentThread)
+  // console.log(reactionThread)
   for (let indexI in finalFriendLists) {
+    // console.log("finalFriendLists[" + indexI + "] ::: ", finalFriendLists[indexI])
+    
     for (let indexJ in commentThread) {
       if (commentThread[indexJ].id === finalFriendLists[indexI].id) {
+        if(finalFriendLists[indexI].last_engagement_date === undefined || finalFriendLists[indexI].last_engagement_date === null || 
+          finalFriendLists[indexI].last_engagement_date === "N/A" || finalFriendLists[indexI].last_engagement_date == ""){
+          finalFriendLists[indexI].last_engagement_date = commentThread[indexJ].engagementDAte[0] ? commentThread[indexJ].engagementDAte[0] : ""
+        }
+        else{
+          finalFriendLists[indexI].last_engagement_date = commentThread[indexJ].engagementDAte[0] ? 
+                                  commentThread[indexJ].engagementDAte[0].setHours(0, 0, 0, 0) > finalFriendLists[indexI].last_engagement_date.setHours(0, 0, 0, 0) ? 
+                                    commentThread[indexJ].engagementDAte[0] : finalFriendLists[indexI].last_engagement_date
+                                :
+                                ""
+        }
+
         finalFriendLists[indexI] = {
           ...finalFriendLists[indexI],
           commentThread: commentThread[indexJ].count,
@@ -697,7 +779,23 @@ const getPayloadWithReactionComment = (
       }
     }
     for (let indexk in reactionThread) {
+      
       if (reactionThread[indexk].id === finalFriendLists[indexI].id) {
+
+        if(finalFriendLists[indexI].last_engagement_date === undefined || finalFriendLists[indexI].last_engagement_date === null || 
+          finalFriendLists[indexI].last_engagement_date === "N/A" || finalFriendLists[indexI].last_engagement_date == ""){
+          finalFriendLists[indexI].last_engagement_date = reactionThread[indexk].engagementDAte[0] ? 
+                                                            reactionThread[indexk].engagementDAte[0] : 
+                                                          "";
+        }
+        else{
+          finalFriendLists[indexI].last_engagement_date = reactionThread[indexk].engagementDAte[0] ? 
+                                                            reactionThread[indexk].engagementDAte[0].setHours(0, 0, 0, 0) > finalFriendLists[indexI].last_engagement_date.setHours(0, 0, 0, 0) ? 
+                                                              reactionThread[indexk].engagementDAte[0] : finalFriendLists[indexI].last_engagement_date
+                                                          :
+                                                          ""
+        }
+
         finalFriendLists[indexI] = {
           ...finalFriendLists[indexI],
           reactionThread: reactionThread[indexk].count,
@@ -722,24 +820,6 @@ const getPayloadWithReactionComment = (
     }
   }
 };
-// console.log("I am in content script.")
-
-// chrome.runtime.onMessage.addListener((request, sender, sendResponse)=>{
-//   // console.log("country request ...................................................")
-//   switch(request.action){
-//     case "getGenderCountryAndTier" : 
-//       // console.log("finalFriendListWithcountry[0] ::: ",finalFriendListWithcountry[0])
-//       finalFriendListWithcountry[0]["country"] = request.responsePayload ? request.responsePayload.countryName : "N/A"
-//       finalFriendListWithcountry[0]["tier"]= request.responsePayload ? request.responsePayload.Tiers : "N/A"
-//       // console.log("finalFriendListWithcountry[0] ::: ",finalFriendListWithcountry[0])
-//       friendListWithCountryAndtier = [...friendListWithCountryAndtier, finalFriendListWithcountry[0]]
-//       // console.log("friendListWithCountryAndtier :::: ", friendListWithCountryAndtier)
-//       finalFriendListWithcountry.shift();
-//       getCountryAndTier(fr_fbDtsg, fr_userID, finalFriendListWithcountry)
-//       break;
-//     default: break;
-//   }
-// })
 
 letsStart(async (fbDtsg, userID, friendLength) => {
   // console.log("Lets start")
