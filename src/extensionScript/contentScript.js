@@ -570,38 +570,72 @@ const getReactionComment = async (
     }
   } else {
     routeDefinationCR = helper.makeParsable(routeDefinationCR);
-    // console.log("routeDefinationCR :::: ", routeDefinationCR.length )
-    const end_cursor =
-      routeDefinationCR[userID].timeline_feed_units.page_info.end_cursor;
-    routeDefinationCR = routeDefinationCR[userID].timeline_feed_units.edges;
-    if (routeDefinationCR.length === 250) {
-      commentREactionThread = commentREactionThread.concat(routeDefinationCR);
-      getReactionComment(fbDtsg, userID, finalFriendListWithMsg, end_cursor);
-    } else if (routeDefinationCR.length < 250) {
-      commentREactionThread = commentREactionThread.concat(routeDefinationCR);
-      // console.log("commentREactionThread ::::::::::::::::: ", commentREactionThread)
-      commentREactionThread.forEach((element, i) => {
-        const reactorsCommentorsArray = element.node.feedback;
-        commenters = commenters.concat(
-          reactorsCommentorsArray
-            ? reactorsCommentorsArray.commenters
-              ? reactorsCommentorsArray.commenters.nodes
-                ? reactorsCommentorsArray.commenters.nodes
+    if(routeDefinationCR[userID] && routeDefinationCR[userID].timeline_feed_units){
+      // console.log("routeDefinationCR :::: ", routeDefinationCR )
+      const end_cursor =
+        routeDefinationCR[userID].timeline_feed_units.page_info.end_cursor;
+      routeDefinationCR = routeDefinationCR[userID].timeline_feed_units.edges;
+      if (routeDefinationCR.length === 250) {
+        commentREactionThread = commentREactionThread.concat(routeDefinationCR);
+        getReactionComment(fbDtsg, userID, finalFriendListWithMsg, end_cursor);
+      } else if (routeDefinationCR.length < 250) {
+        commentREactionThread = commentREactionThread.concat(routeDefinationCR);
+        commentREactionThread.forEach((element, i) => {
+          const engagementTime = element.node.creation_time;
+          var date = new Date(engagementTime*1000); 
+          let resultFormat = date;
+          let reactorsCommentorsArray = element.node.feedback;
+          if(reactorsCommentorsArray){
+            reactorsCommentorsArray = {...reactorsCommentorsArray,
+              commenters : reactorsCommentorsArray.commenters.nodes.map((elem) => {
+                return {...elem, engagementDAte : elem.engagementDAte ? [...elem.engagementDAte, resultFormat] : [resultFormat]}
+              }),
+              reactors : reactorsCommentorsArray.reactors.nodes.map((elem) => {
+                return {...elem, engagementDAte : elem.engagementDAte ? [...elem.engagementDAte, resultFormat] : [resultFormat]}
+              })
+            }
+          }
+          commenters = commenters.concat(
+            reactorsCommentorsArray
+              ? reactorsCommentorsArray.commenters
+                ? reactorsCommentorsArray.commenters
                 : []
               : []
-            : []
-        );
-        reactors = reactors.concat(
-          reactorsCommentorsArray
-            ? reactorsCommentorsArray.reactors
-              ? reactorsCommentorsArray.reactors.nodes
-                ? reactorsCommentorsArray.reactors.nodes
+          );
+
+          reactors = reactors.concat(
+            reactorsCommentorsArray
+              ? reactorsCommentorsArray.reactors
+                ? reactorsCommentorsArray.reactors
                 : []
               : []
-            : []
-        );
-        count = i;
-      });
+          );
+          count = i;
+        });
+      }
+    }else{
+      if (commentREactionThread.length > 0) {
+        commentREactionThread.forEach((element, i) => {
+          const reactorsCommentorsArray = element.node.feedback;
+          commenters = commenters.concat(
+            reactorsCommentorsArray
+              ? reactorsCommentorsArray.commenters
+                ? reactorsCommentorsArray.commenters
+                : []
+              : []
+          );
+          reactors = reactors.concat(
+            reactorsCommentorsArray
+              ? reactorsCommentorsArray.reactors
+                ? reactorsCommentorsArray.reactors
+                : []
+              : []
+          );
+          count = i;
+        });
+      } else {
+        saveFriendList(finalFriendListWithMsg, userID, fbDtsg, "messageEngagement", false)
+      }
     }
   }
 
