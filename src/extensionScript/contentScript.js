@@ -646,7 +646,6 @@ const getReactionComment = async (
       }
     }
   }
-}
 
   countInterval = setInterval(() => {
     // console.log("commentREactionThread len", commentREactionThread.length, count)
@@ -661,6 +660,7 @@ const getReactionComment = async (
       saveFriendList(PayloadWithReactionComment, userID, fbDtsg, "messageEngagement")
     }
   }, 1000);
+}
 
 
 const commentReactionCount = (arrayRactionComment) => {
