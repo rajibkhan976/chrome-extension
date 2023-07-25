@@ -1,16 +1,27 @@
-@use '../../abstract/font' as *;
-@use '../../abstract/color' as *;
-@use '../../abstract/color-themes' as *;
-@use '../../abstract/mixins' as *;
+@use "../../abstract/font" as *;
+@use "../../abstract/color" as *;
+@use "../../abstract/color-themes" as *;
+@use "../../abstract/mixins" as *;
 
 .header {
     flex: 0 0 52px;
     padding: 14px 20px;
-    @include theme-aware('background-color', 'header-color');
+    @include theme-aware("background-color", "header-color");
+
+    .logo-header {
+        a {
+            flex-direction: column;
+            .logoText {
+                @include theme-aware("color", "text-para-color");
+                font-size: 6.6px;
+                line-height: 9px;
+            }
+        }
+    }
 }
 
 .header-saved-points {
-    @include theme-aware('background-color', 'info-well-bg');
+    @include theme-aware("background-color", "info-well-bg");
     padding-inline: 10px;
     @include border-radius(30px);
 
@@ -18,12 +29,12 @@
         margin-right: 7px;
     }
     span {
-        @include theme-aware('color', 'info-well-text');
+        @include theme-aware("color", "info-well-text");
         font-weight: $fontWeight;
         font-size: $smallFontSize;
 
         strong {
-            @include theme-aware('color', 'info-well-highlight');
+            @include theme-aware("color", "info-well-highlight");
             font-weight: $headingBoldFontWeight;
             margin-right: 12px;
             font-size: $fontSize;
@@ -32,23 +43,23 @@
 }
 
 .header-points {
-    background: linear-gradient(to right, rgba(130, 126, 255, 1),rgba(82, 217, 187, 1));
+    background: linear-gradient(to right, rgba(130, 126, 255, 1), rgba(82, 217, 187, 1));
     background-repeat: no-repeat;
     background-size: cover;
-    @include theme-aware('color', 'info-well-tex');
+    @include theme-aware("color", "info-well-tex");
     @include border-radius(30px);
     padding: 1px;
-    
+
     .btn {
         width: 100%;
         height: 100%;
-        @include theme-aware('background-color', 'header-color');
+        @include theme-aware("background-color", "header-color");
         @include border-radius(30px);
         padding-inline: 14px;
     }
 
     span {
-        @include theme-aware('color', 'info-well-text');
+        @include theme-aware("color", "info-well-text");
         margin-left: 3px;
         font-size: $smallFontSize;
     }

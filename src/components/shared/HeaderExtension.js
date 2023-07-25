@@ -13,6 +13,7 @@ const HeaderExtension = (props) => {
           to="/"
         >
           <LogoIcon />
+          <span class="logoText">Your organic marketing best friend</span>
         </NavLink>
       </figure>
 
