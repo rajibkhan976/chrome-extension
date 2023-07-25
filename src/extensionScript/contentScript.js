@@ -36,8 +36,6 @@ const getAllfriend = async (
   count = 0,
   cursor = null
 ) => {
-  // console.log("get all friends");
-
   let graphPayload = { ...data, fb_dtsg: fbDtsg, __user: userID, av: userID };
   if (count > 0) {
     graphPayload.variables.cursor = cursor;
@@ -52,7 +50,6 @@ const getAllfriend = async (
     });
     helper.sendDataToPorat("syncing_status", "Syncing Friends...");
   }
-  // console.log("graphPayload ::: ", graphPayload);
   let getAllFriendSerive = await fetch(
     "https://www.facebook.com/api/graphql/",
     {
@@ -67,7 +64,6 @@ const getAllfriend = async (
 
   let routeDefination = await getAllFriendSerive.text();
   if (routeDefination.includes("<!DOCTYPE html>")) {
-    // console.log("yesssssss", routeDefination);
     chrome.runtime.sendMessage({
       action: "facebookLoggedOut",
       msg: "you have logged out from facebook. All friend's data got discarded.",
@@ -75,9 +71,7 @@ const getAllfriend = async (
     return;
   }
   routeDefination = helper.makeParsable(routeDefination);
-  // console.log("routeDefination :::::::: ", routeDefination);
   routeDefination = routeDefination.data.viewer.all_friends.edges;
-  // console.log("routeDefination count ::::::::: ", count + routeDefination.length, routeDefination.length, routeDefination[routeDefination.length - 1].cursor, routeDefination)
   if (count < friendLength) {
     if (routeDefination.length > 0) {
       for (let i of routeDefination) {
@@ -486,23 +480,26 @@ const getReactionComment = async (
   fbDtsg,
   userID,
   finalFriendListWithMsg,
-  cursor = null
+  cursor = null,
+  nextPage = true,
+  amount = 500
 ) => {
   // console.log("countInterval ::: ", countInterval)
   if (countInterval)
     clearInterval(countInterval)
   let reactionCommentPayload;
-  if (cursor) {
+  console.log("nextPage ::: ", nextPage)
+  // if (nextPage && nextPage === "default") {
+  //   reactionCommentPayload = {
+  //     fb_dtsg: fbDtsg,
+  //     q: `node(${userID}){timeline_feed_units.first(500).after(){page_info,edges{node{id,creation_time,feedback{reactors{nodes{id,name}},commenters{nodes{id,name}}}}}}}`,
+  //   };
+  // } else if(nextPage === true && nextPage != "default" ) {
     reactionCommentPayload = {
       fb_dtsg: fbDtsg,
-      q: `node(${userID}){timeline_feed_units.first(250).after(${cursor}){page_info,edges{node{id,creation_time,feedback{reactors{nodes{id,name}},commenters{nodes{id,name}}}}}}}`,
+      q: `node(${userID}){timeline_feed_units.first(${amount}).after(){page_info,edges{node{id,creation_time,feedback{reactors{nodes{id,name}},commenters{nodes{id,name}}}}}}}`,
     };
-  } else {
-    reactionCommentPayload = {
-      fb_dtsg: fbDtsg,
-      q: `node(${userID}){timeline_feed_units.first(250).after(){page_info,edges{node{id,creation_time,feedback{reactors{nodes{id,name}},commenters{nodes{id,name}}}}}}}`,
-    };
-  }
+  // }
   let getAllreactionComments = await fetch(
     "https://www.facebook.com/api/graphql/",
     {
@@ -516,47 +513,10 @@ const getReactionComment = async (
   );
   let routeDefinationCR = await getAllreactionComments.text();
   let count = 0;
-  // console.log(
-  // "routeDefinationCR ::::::::::::::::: ",
-  //   routeDefinationCR.includes("Sorry, something went wrong.")
-  // );
-  if (routeDefinationCR.includes("Sorry, something went wrong.")) {
-    // console.log(
-    // "commentREactionThread ::::::::::::::::: ",
-    //   commentREactionThread
-    // );
-
+  if (routeDefinationCR.includes("Sorry, something went wrong.") || !nextPage) {
     if (commentREactionThread.length > 0) {
       commentREactionThread.forEach((element, i) => {
-        // const reactorsCommentorsArray = element.node.feedback;
-        const engagementTime = element.node.creation_time;
-        var date = new Date(engagementTime*1000); 
-        let resultFormat = date;
-        let reactorsCommentorsArray = element.node.feedback;
-        if(reactorsCommentorsArray){
-          reactorsCommentorsArray = {...reactorsCommentorsArray,
-            commenters : reactorsCommentorsArray.commenters.nodes.map((elem) => {
-              return {...elem, engagementDAte : elem.engagementDAte ? [...elem.engagementDAte, resultFormat] : [resultFormat]}
-            }),
-            reactors : reactorsCommentorsArray.reactors.nodes.map((elem) => {
-              return {...elem, engagementDAte : elem.engagementDAte ? [...elem.engagementDAte, resultFormat] : [resultFormat]}
-            })
-          }
-        }
-        commenters = commenters.concat(
-          reactorsCommentorsArray
-            ? reactorsCommentorsArray.commenters
-              ? reactorsCommentorsArray.commenters
-              : []
-            : []
-        );
-        reactors = reactors.concat(
-          reactorsCommentorsArray
-            ? reactorsCommentorsArray.reactors
-              ? reactorsCommentorsArray.reactors
-              : []
-            : []
-        );
+        getIndividualEngagements(element)
         count = i;
       });
     } else {
@@ -566,79 +526,24 @@ const getReactionComment = async (
     routeDefinationCR = helper.makeParsable(routeDefinationCR);
     // console.log("routeDefinationCR :::: ", routeDefinationCR )
     if(routeDefinationCR && routeDefinationCR[userID] && routeDefinationCR[userID].timeline_feed_units){
-      const end_cursor =
-        routeDefinationCR[userID].timeline_feed_units.page_info.end_cursor;
+      const end_cursor = routeDefinationCR[userID].timeline_feed_units.page_info.end_cursor;
+      const nextPage = routeDefinationCR[userID].timeline_feed_units.page_info.has_next_page;
       routeDefinationCR = routeDefinationCR[userID].timeline_feed_units.edges;
-      if (routeDefinationCR.length === 250) {
-        commentREactionThread = commentREactionThread.concat(routeDefinationCR);
-        getReactionComment(fbDtsg, userID, finalFriendListWithMsg, end_cursor);
-      } else if (routeDefinationCR.length < 250) {
-        commentREactionThread = commentREactionThread.concat(routeDefinationCR);
-        commentREactionThread.forEach((element, i) => {
-          const engagementTime = element.node.creation_time;
-          var date = new Date(engagementTime*1000); 
-          let resultFormat = date;
-          let reactorsCommentorsArray = element.node.feedback;
-          if(reactorsCommentorsArray){
-            reactorsCommentorsArray = {...reactorsCommentorsArray,
-              commenters : reactorsCommentorsArray.commenters.nodes.map((elem) => {
-                return {...elem, engagementDAte : elem.engagementDAte ? [...elem.engagementDAte, resultFormat] : [resultFormat]}
-              }),
-              reactors : reactorsCommentorsArray.reactors.nodes.map((elem) => {
-                return {...elem, engagementDAte : elem.engagementDAte ? [...elem.engagementDAte, resultFormat] : [resultFormat]}
-              })
-            }
-          }
-          commenters = commenters.concat(
-            reactorsCommentorsArray
-              ? reactorsCommentorsArray.commenters
-                ? reactorsCommentorsArray.commenters
-                : []
-              : []
-          );
-
-          reactors = reactors.concat(
-            reactorsCommentorsArray
-              ? reactorsCommentorsArray.reactors
-                ? reactorsCommentorsArray.reactors
-                : []
-              : []
-          );
-          count = i;
-        });
-      }
+ 
+        if (routeDefinationCR.length === amount) {
+          commentREactionThread = routeDefinationCR;
+          getReactionComment(fbDtsg, userID, finalFriendListWithMsg, end_cursor, nextPage, amount + 10);
+        } else if (routeDefinationCR.length < amount) {
+          commentREactionThread = routeDefinationCR;
+          commentREactionThread.forEach((element, i) => {
+            getIndividualEngagements(element)
+            count = i;
+          });
+        }
     }else{
       if (commentREactionThread.length > 0) {
         commentREactionThread.forEach((element, i) => {
-          // const reactorsCommentorsArray = element.node.feedback;
-          const engagementTime = element.node.creation_time;
-          var date = new Date(engagementTime*1000); 
-          let resultFormat = date;
-          let reactorsCommentorsArray = element.node.feedback;
-          if(reactorsCommentorsArray){
-            reactorsCommentorsArray = {...reactorsCommentorsArray,
-              commenters : reactorsCommentorsArray.commenters.nodes.map((elem) => {
-                return {...elem, engagementDAte : elem.engagementDAte ? [...elem.engagementDAte, resultFormat] : [resultFormat]}
-              }),
-              reactors : reactorsCommentorsArray.reactors.nodes.map((elem) => {
-                return {...elem, engagementDAte : elem.engagementDAte ? [...elem.engagementDAte, resultFormat] : [resultFormat]}
-              })
-            }
-          }
-          commenters = commenters.concat(
-            reactorsCommentorsArray
-              ? reactorsCommentorsArray.commenters
-                ? reactorsCommentorsArray.commenters
-                : []
-              : []
-          );
-          reactors = reactors.concat(
-            reactorsCommentorsArray
-              ? reactorsCommentorsArray.reactors
-                ? reactorsCommentorsArray.reactors
-                : []
-              : []
-          );
+          getIndividualEngagements(element)
           count = i;
         });
       } else {
@@ -664,8 +569,6 @@ const getReactionComment = async (
 
 
 const commentReactionCount = (arrayRactionComment) => {
-  // const arrayRactionComment = [...arrayRactionCommentors]
-  // console.log(arrayRactionComment)
   for (let i = 0; i < arrayRactionComment.length; ++i) {
     if (
       arrayRactionComment[i].isChecked === undefined ||
@@ -752,7 +655,6 @@ const commentReactionCount = (arrayRactionComment) => {
             { ...arrayRactionComment[i] }.count !== undefined
               ? { ...arrayRactionComment[i] }.count
               : 1;
-          // arrayRactionComment[i] = {...arrayRactionComment[i], engagementDAte : arrayRactionComment[i].engagementDAte}
           arrayRactionComment[j].isChecked = { ...arrayRactionComment[j] }
             .isChecked
             ? { ...arrayRactionComment[j] }.isChecked
@@ -761,7 +663,6 @@ const commentReactionCount = (arrayRactionComment) => {
       }
     }
   }
-  // console.log("arrayRactionComment  :::::::::::  ", arrayRactionComment.filter((el) => el.isChecked === undefined || el.isChecked === false));
   return arrayRactionComment.filter(
     (el) => el.isChecked === undefined || el.isChecked === false
   );
@@ -773,11 +674,7 @@ const getPayloadWithReactionComment = (
   finalFriendListWithMsg
 ) => {
   const finalFriendLists = [...finalFriendListWithMsg];
-  // console.log(commentThread)
-  // console.log(reactionThread)
   for (let indexI in finalFriendLists) {
-    // console.log("finalFriendLists[" + indexI + "] ::: ", finalFriendLists[indexI])
-    
     for (let indexJ in commentThread) {
       if (commentThread[indexJ].id === finalFriendLists[indexI].id) {
         if(finalFriendLists[indexI].last_engagement_date === undefined || finalFriendLists[indexI].last_engagement_date === null || 
@@ -838,18 +735,47 @@ const getPayloadWithReactionComment = (
         };
       }
     }
-    // console.log(finalFriendLists[indexI])
     if (
       finalFriendLists[finalFriendLists.length - 1].id ===
       finalFriendLists[indexI].id
     ) {
-      // console.log("finalFriendLists :::::  ", finalFriendLists);
       return finalFriendLists;
     }
   }
 };
 
 letsStart(async (fbDtsg, userID, friendLength) => {
-  // console.log("Lets start")
   getAllfriend(fbDtsg, userID, Number(friendLength))
 });
+
+const getIndividualEngagements = (element) => {
+  const engagementTime = element.node.creation_time;
+  var date = new Date(engagementTime*1000); 
+  let resultFormat = date;
+  let reactorsCommentorsArray = element.node.feedback;
+  if(reactorsCommentorsArray){
+    reactorsCommentorsArray = {...reactorsCommentorsArray,
+      commenters : reactorsCommentorsArray.commenters.nodes.map((elem) => {
+        return {...elem, engagementDAte : elem.engagementDAte ? [...elem.engagementDAte, resultFormat] : [resultFormat]}
+      }),
+      reactors : reactorsCommentorsArray.reactors.nodes.map((elem) => {
+        return {...elem, engagementDAte : elem.engagementDAte ? [...elem.engagementDAte, resultFormat] : [resultFormat]}
+      })
+    }
+  }
+  commenters = commenters.concat(
+    reactorsCommentorsArray
+      ? reactorsCommentorsArray.commenters
+        ? reactorsCommentorsArray.commenters
+        : []
+      : []
+  );
+
+  reactors = reactors.concat(
+    reactorsCommentorsArray
+      ? reactorsCommentorsArray.reactors
+        ? reactorsCommentorsArray.reactors
+        : []
+      : []
+  );
+}
