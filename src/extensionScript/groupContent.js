@@ -354,6 +354,7 @@ const fetchOtherInfosOfMember = async (
         //let keywordCounter = 0
         requestInfo.matchedKeyword=""
         memberWorkDesc.forEach((elem, i) => {
+          let changedText = ``;
           if (groupSettings.negative_keyword) {
             groupSettings.selected_negative_keywords.forEach((el) => {
               // console.log("NegetiveKeywordsParam ::: ", el)
@@ -365,16 +366,22 @@ const fetchOtherInfosOfMember = async (
             });
           }
           if (groupSettings.keyword && !isNegetivekeyWordMatched) {
-            // console.log("groupSettings.keyword :::::::::: ", groupSettings.keyword)
             groupSettings.selected_keywords.forEach((el) => {
-               //console.log("KeywordsParam ::: ", el, " <-----> ", elem)
               if (elem.toLocaleLowerCase().includes(el.toLocaleLowerCase().trim())) {
-                // console.log("keywordCounter :: ", keywordCounter);
                 iskeyWordMatched = true;
-                // requestInfo.matchedKeyword = keywordCounter === 0 ? el.trim() : requestInfo.matchedKeyword + ", " + el.trim()
-                requestInfo.matchedKeyword = requestInfo.matchedKeyword.length===0 ? el.trim() : requestInfo.matchedKeyword + "," + el.trim();
-                // console.log(groupMemberInfo.memberName + "'s work decription is matching with keyword.")
-                // keywordCounter = 1;
+                changedText = changedText === `` ? elem : changedText;
+                const theHighlightedSentences = changedText.toLocaleLowerCase().indexOf(el.toLocaleLowerCase())
+                if (theHighlightedSentences !== -1) {
+                  const matchedSubstring =  changedText.substr(theHighlightedSentences, el.length);
+                  changedText = changedText.replace(new RegExp(matchedSubstring, 'i'), `<span class="fr-highlight">${matchedSubstring}</span>`) 
+                  // console.log("changedText ::: 2 ::: ", changedText);
+                  
+                  if(groupMemberBio[i].querySelector('div'))
+                    groupMemberBio[i].querySelector('div').innerHTML =  changedText;
+                  else if(groupMemberBio[i].querySelector('a'))
+                    groupMemberBio[i].querySelector('a').innerHTML = changedText
+                  requestInfo.matchedKeyword = requestInfo.matchedKeyword.length===0 ? el.trim() : requestInfo.matchedKeyword + "," + el.trim();
+                }
               }
             });
           }
