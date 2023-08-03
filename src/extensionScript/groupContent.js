@@ -380,6 +380,9 @@ const fetchOtherInfosOfMember = async (
                     groupMemberBio[i].querySelector('div').innerHTML =  changedText;
                   else if(groupMemberBio[i].querySelector('a'))
                     groupMemberBio[i].querySelector('a').innerHTML = changedText
+                  else
+                    groupMemberBio[i].innerHTML = changedText;
+
                   requestInfo.matchedKeyword = requestInfo.matchedKeyword.length===0 ? el.trim() : requestInfo.matchedKeyword + "," + el.trim();
                 }
               }
