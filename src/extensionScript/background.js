@@ -65,19 +65,28 @@ const setPopup = async () => {
 };
 
 const fbDtsg = (callback = null) => {
-  fetch("https://m.facebook.com/composer/ocelot/async_loader/?publisher=feed", {
-    method: "GET",
-  })
+  const headers = {
+    Accept : 'text/html,application/xhtml+xml,application/xml'
+  };
+  
+  const requestOptions = {
+    method: 'GET',
+    headers: headers
+  };
+  fetch("https://www.facebook.com/", requestOptions)
     .then((e) => e.text())
-    .then((e) => {
-      // console.log(e.text().match(/{\\"dtsg\\":{\\"token\\":\\"(.*?)\\"/));
-      let dtsgData = e.match(/{\\"dtsg\\":{\\"token\\":\\"(.*?)\\"/);
-      let userIdData = e.match(/\\"USER_ID\\":\\"(.*?)\\"/);
-      if (dtsgData.length > 1) {
+    .then(async (e) => {
+      // console.log("e ::: ", e)
+      let userProfileData = e.match(/\{"u":"\\\/ajax\\\/qm\\\/\?[^}]*\}/gm);
+      userProfileData =  userProfileData[0];
+      userProfileData = JSON.parse(userProfileData);
+      if(userProfileData && userProfileData.f && userProfileData.u){
+        const fbDtsg = userProfileData.f;
+        const userId = userProfileData.u.split("__user=")[1].split("&")[0];
         if (callback) {
-          callback(dtsgData[1], userIdData[1]);
+          callback(fbDtsg,userId);
         }
-      } else {
+      }else{
         getFBUserData(callback);
       }
     })
@@ -110,7 +119,7 @@ const getFBUserData = (callback, connectProfile = false) => {
                   "text": profileData.name,
                   "path": profileData.profileUrl,
                   "uid": profileData.userId,
-                  "photo": profileData.profilePicture, 
+                  "photo": profileData.profilePicture,
                   "isFbLoggedin": true},
                 )
               }
@@ -119,7 +128,7 @@ const getFBUserData = (callback, connectProfile = false) => {
             }
           }else
             if (callback) 
-              callback(null);
+              callback({"isFbLoggedin": false});
         }
       });
     }
@@ -128,7 +137,6 @@ const getFBUserData = (callback, connectProfile = false) => {
 }
 
 const injectScript = (tabId, contentScript) => {
-  // console.log('tabId ', parseInt(tabId));
 
   chrome.scripting.executeScript(
     {
@@ -194,8 +202,6 @@ chrome.runtime.onMessageExternal.addListener(async function (
   chrome.storage.local.set({ senExternalResponse: sendResponseExternal });
   switch (request.action) {
     case "extensionInstallation":
-      // console.log("kjsdfhk,ush   , ", request.frLoginToken)
-      // chrome.storage.local.set({ fr_token: request.frLoginToken });
       await helper.saveDatainStorage("fr_token", request.frLoginToken)
       sendResponseExternal(true);
       break;
@@ -213,9 +219,7 @@ chrome.runtime.onMessageExternal.addListener(async function (
       break;
     case "syncFriendLength":
       if (request.frLoginToken == null) {
-        // console.log("not logged in yet")
         chrome.action.setBadgeText({ text: "Not loggedin yet in Friender" });
-        // chrome.action.setBadgeBackgroundColor({color: "Red"});
         return;
       } else {
         chrome.action.setBadgeText({ text: "loggedin" });
@@ -229,7 +233,6 @@ chrome.runtime.onMessageExternal.addListener(async function (
         chrome.storage.local.set({
           fbTokenAndId: { fbDtsg: fbDtsg, userID: userID },
         });
-        // getAllfriend(fbDtsg, userID)
       });
       chrome.tabs.create(
         { url: action_url, active: false, pinned: true, selected: false },
@@ -349,25 +352,35 @@ const syncFriendLength = async (sendResponseExternal = null) => {
 };
 
 const getProfileInfo = (callback = null) => {
-  fetch("https://m.facebook.com/composer/ocelot/async_loader/?publisher=feed", {
-    method: "GET",
-  })
+  const headers = {
+    Accept : 'text/html,application/xhtml+xml,application/xml'
+  };
+  
+  const requestOptions = {
+    method: 'GET',
+    headers: headers
+  };
+  fetch("https://www.facebook.com/", requestOptions)
     .then((e) => e.text())
-    .then((e) => {
-      // let p = e.replaceAll(/\\/gm, "")
-      // console.log("e ::: ", e, p)
-      let userProfileData = e.match(/\\"suggestions\\":\[\{[^}]*\}/gm);
-      // console.log("userProfileData ::: ", userProfileData)
-      if (userProfileData && userProfileData.length > 0) {
-        userProfileData = "{" + userProfileData[0].replace(/[\\]/g, "") + "]}";
-        // console.log("userProfileData ::: ", {...JSON.parse(userProfileData).suggestions[0], isFbLoggedin: true,})
+    .then(async (e) => {
+      // console.log("e ::: ", e) 
+      let userProfileData = e.match(/\{"u":"\\\/ajax\\\/qm\\\/\?[^}]*\}/gm);
+      userProfileData =  userProfileData[0];
+      userProfileData = JSON.parse(userProfileData);
+      if(userProfileData && userProfileData.f && userProfileData.u){
+        const userId = userProfileData.u.split("__user=")[1].split("&")[0];
+        // console.log("userId ::: ", userId);
         if (callback) {
-          callback({
-            ...JSON.parse(userProfileData).suggestions[0],
-            isFbLoggedin: true,
-          });
+          let profileUpdate = {
+            uid: userId.toString(),
+            path: "https://www.facebook.com/" + userId,
+            // text: "QA",
+            // photo: "https://scontent.fccu4-2.fna.fbcdn.net/v/t39.30808-1/338406062_1666813803741387_5998259819332854273_n.jpg?stp=c156.0.200.200a_dst-jpg_p200x200&_nc_cat=111&ccb=1-7&_nc_sid=7206a8&_nc_ohc=LkWnNXapLKMAX_s41HX&_nc_oc=AQkriMbxaPC3Q4oFZRUuIkmMKQtJjKJR0Jjyhv2KzhVsUSrvana2L_xMRXmlZNe8hA0&_nc_ht=scontent.fccu4-2.fna&oh=00_AfBj6cS-9KjTPBxCsJxWT4Nfflm8sevSwvbCUhURCGjKtg&oe=64D1E75F",
+            isFbLoggedin: true
+          };
+          callback(profileUpdate);
         }
-      } else {
+      }else{
         getFBUserData(callback, true);
       }
     })
