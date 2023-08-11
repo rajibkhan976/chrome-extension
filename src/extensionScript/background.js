@@ -112,23 +112,28 @@ const getFBUserData = (callback, connectProfile = false) => {
           await helper.sleep(2000);
           const profileData = await chrome.tabs.sendMessage(tab.id, {action : "profileData"});
           tab && tab.id && chrome.tabs.remove(tab.id);
+          // console.log("profileData :: ", profileData)
           if(profileData && !helper.isEmptyObj(profileData)){
             if (callback) {
-              if(connectProfile){
-                callback({
-                  "text": profileData.name,
-                  "path": profileData.profileUrl,
-                  "uid": profileData.userId,
-                  "photo": profileData.profilePicture,
-                  "isFbLoggedin": true},
-                )
-              }
-              else
-                callback(profileData.fbDtsg, profileData.userId);
+              if(profileData.status && profileData.isFbLoggedin){
+                if(connectProfile){
+                  callback({
+                    "text": profileData.name,
+                    "path": profileData.profileUrl,
+                    "uid": profileData.userId,
+                    "photo": profileData.profilePicture,
+                    "isFbLoggedin": true},
+                  )
+                }
+                else
+                  callback(profileData.fbDtsg, profileData.userId);
+              }else
+                callback(profileData)
             }
-          }else
-            if (callback) 
-              callback({"isFbLoggedin": false});
+          }else{
+              if (callback) 
+                callback({"status"  : false});
+          }
         }
       });
     }
@@ -286,6 +291,12 @@ chrome.runtime.onMessageExternal.addListener(async function (
         }
       });
       break;
+
+    case "getUidForThisUrl" : 
+      if(request && request.url)
+        getprofileDataofURL(request.url, sendResponseExternal)
+      break;
+
     default:
       break;
   }
@@ -365,26 +376,42 @@ const getProfileInfo = (callback = null) => {
     .then(async (e) => {
       // console.log("e ::: ", e) 
       let userProfileData = e.match(/\{"u":"\\\/ajax\\\/qm\\\/\?[^}]*\}/gm);
-      userProfileData =  userProfileData[0];
-      userProfileData = JSON.parse(userProfileData);
-      if(userProfileData && userProfileData.f && userProfileData.u){
-        const userId = userProfileData.u.split("__user=")[1].split("&")[0];
-        // console.log("userId ::: ", userId);
-        if (callback) {
-          let profileUpdate = {
-            uid: userId.toString(),
-            path: "https://www.facebook.com/" + userId,
-            // text: "QA",
-            // photo: "https://scontent.fccu4-2.fna.fbcdn.net/v/t39.30808-1/338406062_1666813803741387_5998259819332854273_n.jpg?stp=c156.0.200.200a_dst-jpg_p200x200&_nc_cat=111&ccb=1-7&_nc_sid=7206a8&_nc_ohc=LkWnNXapLKMAX_s41HX&_nc_oc=AQkriMbxaPC3Q4oFZRUuIkmMKQtJjKJR0Jjyhv2KzhVsUSrvana2L_xMRXmlZNe8hA0&_nc_ht=scontent.fccu4-2.fna&oh=00_AfBj6cS-9KjTPBxCsJxWT4Nfflm8sevSwvbCUhURCGjKtg&oe=64D1E75F",
-            isFbLoggedin: true
-          };
-          callback(profileUpdate);
+      // console.log("userProfileData ::: ", userProfileData)
+      if(userProfileData){
+        userProfileData =  userProfileData[0];
+        userProfileData = JSON.parse(userProfileData);
+        // console.log("userProfileData :: ", userProfileData)
+        if(userProfileData && userProfileData.f && userProfileData.u){
+          let profileUrls = e.split(`xlink:href="`)[1].split(`"></image>`)[0];
+          profileUrls = profileUrls.replaceAll("amp;", "")
+          console.log("profile pic ::: ", profileUrls);
+          const userId = userProfileData.u.split("__user=")[1].split("&")[0];
+          if (callback) {
+            let profileUpdate = {
+              uid: userId.toString(),
+              path: "/" + userId,
+              text: e.split(`"__isActor":"User","name":"`)[1].split(`",`)[0],
+              photo: profileUrls,
+              isFbLoggedin: true,
+              status : true
+            };
+            callback(profileUpdate);
+          }
+        }else{
+          if(e.indexOf(`Log in`) > -1)
+            callback({status: true, isFbLoggedin : false})
+          else
+            getFBUserData(callback, true);
         }
       }else{
-        getFBUserData(callback, true);
+        if(e.indexOf(`Log in`) < -1)
+          callback({status: true, isFbLoggedin : false})
+        else
+          getFBUserData(callback, true);
       }
     })
-    .catch(() => {
+    .catch((e) => {
+      // console.log(e)
       if (callback) {
         callback(null);
       }
@@ -1087,4 +1114,27 @@ const getGenderCountryAndTiers = async (name) => {
         cancelPendingFriendRequest(reFriendingList.data, fbDtsg, userID, true);
       }
     });
+  }
+
+  const getprofileDataofURL = (url, sendResponseExternal) => {
+    chrome.tabs.create(
+      { url: url, active: false, pinned: true, selected: false },
+      (tab) => {
+        chrome.tabs.onUpdated.addListener(async function listener(
+          tabId,
+          info
+        ) {
+          if (info.status === "complete" && tabId === tab.id) {
+            chrome.tabs.onUpdated.removeListener(listener);
+            chrome.storage.local.set({ tabsId: tab.id });
+            injectScript(tab.id, ["helper.js", "collectData.js"]);
+            await helper.sleep(2000);
+            const userId = await chrome.tabs.sendMessage(tab.id, {action : "getUserId"});
+            tab && tab.id && chrome.tabs.remove(tab.id);
+            // console.log("userId ::: ", userId);
+            sendResponseExternal(userId)
+          }
+        });
+      }
+    );
   }
