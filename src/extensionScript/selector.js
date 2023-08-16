@@ -17,7 +17,9 @@ const selectors = {
     main_component : ['div[role="main"]'],
     script_contet : ['script#__eqmc'],
     userName : ['h1:not([dir="auto"])'],
-    profilePicture : ['svg[aria-label="Profile picture actions"]']
+    profilePicture : ['svg[aria-label="Profile picture actions"]'],
+    loginBtn : ['button[data-testid="royal_login_button"][name="login"]', 'div[aria-label="Accessible login button"][role="button"]'],
+    fbScripts : ['script[type="application/json"][data-sjs]']
 }
 
 export default selectors;

@@ -35,7 +35,7 @@ const getProfileData = (sendResponse, getUID = false) => {
             status : true
         };
     }else{
-        const loginBtn = document.querySelector('button[data-testid="royal_login_button"][name="login"]');
+        const loginBtn = document.querySelector(selectors.loginBtn);
         console.log("loginBtn ::: ", loginBtn)
         if(loginBtn){
             userData = {
@@ -56,25 +56,33 @@ const getProfileData = (sendResponse, getUID = false) => {
 }
 
 const getprofileDataofURL = (sendResponse) => {
-    let allScripts = document.querySelectorAll('script[type="application/json"][data-sjs]')
-    if(allScripts && allScripts.length > 0){
-        allScripts = Object.values(allScripts);
-        // console.log("all scripts ::: ", allScripts)
-        const profileOwnerScripts = allScripts.filter((el)=>{
-            return (el.innerHTML.indexOf(`{"require":[["ScheduledServerJS",`) > -1 && el.innerHTML.indexOf(`"profile_owner"`) > -1)
-        })
-        // console.log("profileOwnerScripts ::: ", profileOwnerScripts);
-        if(profileOwnerScripts && profileOwnerScripts.length > 0){
-            const profileOwner  = profileOwnerScripts[0].innerHTML.split(`"profile_owner":`)[1].split('}')[0].split(`"id":"`)[1].split(`"`)[0];
-            console.log("profileOwner ::: ", profileOwner);
-            const userId = getProfileData(sendResponse, true)
-            console.log("userId ::: ", userId)
-            if(userId === profileOwner)
-                sendResponse({"uid" : profileOwner, status : true});
-            else
-                sendResponse({status : false});
+    const loginBtn = document.querySelector(selectors.loginBtn);
+    console.log("loginBtn ::: ", loginBtn)
+    if(loginBtn){
+        sendResponse({ isFbLoggedin : false })
+    }
+    else{
+        
+        let allScripts = document.querySelectorAll(selectors.fbScripts)
+        if(allScripts && allScripts.length > 0){
+            allScripts = Object.values(allScripts);
+            // console.log("all scripts ::: ", allScripts)
+            const profileOwnerScripts = allScripts.filter((el)=>{
+                return (el.innerHTML.indexOf(`{"require":[["ScheduledServerJS",`) > -1 && el.innerHTML.indexOf(`"profile_owner"`) > -1)
+            })
+            // console.log("profileOwnerScripts ::: ", profileOwnerScripts);
+            if(profileOwnerScripts && profileOwnerScripts.length > 0){
+                const profileOwner  = profileOwnerScripts[0].innerHTML.split(`"profile_owner":`)[1].split('}')[0].split(`"id":"`)[1].split(`"`)[0];
+                console.log("profileOwner ::: ", profileOwner);
+                const userId = getProfileData(sendResponse, true)
+                console.log("userId ::: ", userId)
+                if(userId === profileOwner)
+                    sendResponse({"uid" : profileOwner, status : true, isFbLoggedin : true});
+                else
+                    sendResponse({status : false,  isFbLoggedin : true});
+            }else
+                sendResponse({status : false,  isFbLoggedin : true}); 
         }else
-            sendResponse({status : false}); 
-    }else
-        sendResponse({status : false}); 
+            sendResponse({status : false,  isFbLoggedin : true}); 
+    }
 }
