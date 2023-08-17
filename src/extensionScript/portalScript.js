@@ -3,6 +3,7 @@
  * with web portal using localstorage, cookie, etc.
  */
 import helper from "./helper"
+console.log("****************************Portal content script is injected******************************************")
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse)=>{
     console.log("ACTION", request)
