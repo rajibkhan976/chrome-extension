@@ -380,21 +380,25 @@ const getProfileInfo = (callback = null) => {
       if(userProfileData){
         userProfileData =  userProfileData[0];
         userProfileData = JSON.parse(userProfileData);
-        // console.log("userProfileData :: ", userProfileData)
         if(userProfileData && userProfileData.f && userProfileData.u){
-          let profileUrls = e.split(`xlink:href="`)[1].split(`"></image>`)[0];
-          profileUrls = profileUrls.replaceAll("amp;", "")
-          console.log("profile pic ::: ", profileUrls);
+          console.log("inside if block......................")
           const userId = userProfileData.u.split("__user=")[1].split("&")[0];
+          let profileUrls = e.split(`"profile_picture":{"uri":"`)
+          profileUrls = profileUrls && profileUrls.length > 1 && profileUrls[1];
+          profileUrls = profileUrls && profileUrls.split(`"},`)[0]
+          profileUrls = profileUrls && profileUrls.replaceAll("\\", "")
+          console.log("profile pic :3333333333333333333333:: ", profileUrls);
           if (callback) {
+            console.log("callback is here")
             let profileUpdate = {
               uid: userId.toString(),
               path: "/" + userId,
-              text: e.split(`"__isActor":"User","name":"`)[1].split(`",`)[0],
-              photo: profileUrls,
+              text: e.split('"NAME":"') && e.split('"NAME":"').length > 1 ? e.split('"NAME":"')[1].split('",')[0] : "",
+              photo: profileUrls && profileUrls.length > 0 ? profileUrls : '',
               isFbLoggedin: true,
               status : true
             };
+            console.log("profileUpdate ::: ", profileUpdate)
             callback(profileUpdate);
           }
         }else{
