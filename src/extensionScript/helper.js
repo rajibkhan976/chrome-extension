@@ -224,7 +224,7 @@ const fetchExFriends = async ( userID, friend_uid ) => {
       })
 
       exFriends = await exFriends.json();
-      exFriends = exFriends && exFriends.data.length && exFriends.data[0] && exFriends.data[0].friend_details
+      exFriends = exFriends && exFriends.dat && exFriends.data.length && exFriends.data[0] && exFriends.data[0].friend_details
       if (exFriends && exFriends.length){
         exFriends = exFriends.filter((el) => {return el.friendStatus === "Lost" || (el.deleted_status && el.deleted_status === 1)})
         exFriends = exFriends.filter(el => el.friendFbId === friend_uid)
@@ -248,7 +248,7 @@ const fetchRejectedFriends = async ( userID, friend_uid ) => {
       })
 
       rejectedFriends = await rejectedFriends.json();
-      rejectedFriends = rejectedFriends && rejectedFriends.data.length && rejectedFriends.data
+      rejectedFriends = rejectedFriends && rejectedFriends.data && rejectedFriends.data.length && rejectedFriends.data
       // console.log("rejectedFriends 1 :::: ", rejectedFriends)
       if(rejectedFriends.length > 0)
       {
