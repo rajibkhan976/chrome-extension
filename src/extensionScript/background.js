@@ -240,7 +240,7 @@ chrome.runtime.onMessageExternal.addListener(async function (
         });
       });
       chrome.tabs.create(
-        { url: action_url, active: false, pinned: true, selected: false },
+        { url: "https://www.facebook.com/me?opener=fr_sync", active: false, pinned: true, selected: false },
         (tab) => {
           console.log("Syncing tab ::::::::::::", tab)
           chrome.tabs.onUpdated.addListener(async function listener(
