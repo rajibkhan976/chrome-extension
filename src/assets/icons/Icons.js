@@ -195,3 +195,89 @@ export const CrossWhite = () => {
   </svg>
   );
 };
+
+export const ChevronUpArrowIcon = ({ size = 24 }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      fill="none"
+      viewBox="0 0 10 10"
+    >
+      <path
+        fill="#fff"
+        d="M5 3.172l2.829 2.828-.707.707-2.122-2.121-2.122 2.121-.707-.707L5 3.172z"
+      ></path>
+    </svg>
+  );
+};
+export const ChevronDownArrowIcon = ({ size = 24 }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      fill="none"
+      viewBox="0 0 10 10"
+    >
+      <path
+        fill="#fff"
+        d="M5 6.828L7.829 4l-.707-.707L5 6.243 2.464 3.707l-.707.707L5 6.828z"
+      ></path>
+    </svg>
+  );
+};
+
+
+
+
+
+export const BoxOutIcon=()=>{
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="10"
+      height="11"
+      fill="none"
+      viewBox="0 0 10 11"
+    >
+      <path
+        stroke="#0094FF"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8.499 6.863v.916c0 .943 0 1.415-.293 1.707-.293.293-.764.293-1.707.293h-3.5c-.943 0-1.414 0-1.707-.293C.999 9.194.999 8.722.999 7.78v-3.5c0-.943 0-1.414.293-1.707.293-.293.764-.293 1.707-.293h.917"
+      ></path>
+      <path
+        fill="#0094FF"
+        d="M8.75 2.03v-.5h.5v.5h-.5zM5.154 6.54a.5.5 0 01-.725-.688l.725.688zM8.25 4.53v-2.5h1v2.5h-1zm.5-2h-2.5v-1h2.5v1zm.363-.156L5.154 6.54l-.725-.688 3.958-4.167.726.689z"
+      ></path>
+    </svg>
+  );
+}
+
+
+export const  InfoIcon=({color="#F2BA2A"})=>{
+  
+    return (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="14"
+        height="15"
+        fill="none"
+        viewBox="0 0 14 15"
+      >
+        <g>
+          <path
+            fill={color}
+            fillRule="evenodd"
+            d="M12.25 7.51c0 2.788-2.35 5.048-5.25 5.048s-5.25-2.26-5.25-5.048C1.75 4.722 4.1 2.462 7 2.462s5.25 2.26 5.25 5.048zM7.778 5.266c0 .413-.348.748-.778.748-.43 0-.778-.335-.778-.748S6.57 4.52 7 4.52c.43 0 .778.334.778.747zm-.128 5.049V6.949h-1.3v3.366h1.3z"
+            clipRule="evenodd"
+          ></path>
+        </g>
+      </svg>
+    );
+  
+}
+
+

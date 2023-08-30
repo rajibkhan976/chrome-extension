@@ -4,6 +4,7 @@ $themes: (
   default: (
     body-color: $themeBlack1,
     text-color: $themePrimaryWhite,
+    text-icon-color:$themeTertiaryBlue1, 
     text-para-color: $themeSecondaryGrey10,
     button-bg: $themePrimaryBlue1,
     button-bg-hover: $themePrimaryBlue7,
@@ -50,10 +51,12 @@ $themes: (
     border-color: $themeBlack3,
     drop-background: $themeSecondaryGrey13,
     drop-option-background: $optionHover,
+    input-hover-button-background:$themePrimaryBlue8,
   ),
   light: (
     body-color: $themePrimaryWhite,
     text-color: $themeBlack1,
+    text-icon-color:$themeTertiaryBlue1,
     text-para-color: $themeSecondaryDarkBlue1,
     button-bg: $themePrimaryBlue1,
     button-bg-hover: $themePrimaryBlue7,
@@ -100,5 +103,6 @@ $themes: (
     border-color: $themeBlack3,
     drop-background: $themeSecondaryGrey13,
     drop-option-background: $optionHover,
+    input-hover-button-background:$themePrimaryBlue8,
   ),
 );

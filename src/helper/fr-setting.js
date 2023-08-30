@@ -14,6 +14,8 @@ import { country_list, demo_list, tier_list } from "./helper";
 //     });
 // };
 
+//::::::Never Delete any comment from this file:::::::
+
 export const requestFormSettings = {
   label: "Settings",
   uniqueId: "generalSettings",
@@ -82,20 +84,21 @@ export const requestFormSettings = {
           value: "Infinite",
           options: [
             {
-              text: "Limited",
-            },
-            {
               text: "Infinite",
             },
+            {
+              text: "Limited",
+            },
+           
           ],
 
           fieldOptions: [
             {
-              type: "input",
+              type: "stepInput",
               name: "request_limit",
               isLabeled: true,
               valid: true,
-              inLabel: "up to",
+              inLabel: "Number of request",
               value: 50,
             },
           ],
@@ -104,7 +107,7 @@ export const requestFormSettings = {
     },
     // {
     //   label: "Look Up for Mutual friends?",
-    //   headerCheckbox: false,
+    //   headerCheckbox: true,
     //   recursive: true,
     //   valid: true,
     //   fieldOptions: [
@@ -220,14 +223,14 @@ export const requestFormSettings = {
           ],
         },
         {
-          type: "fillinputCF",
+          type: "stepInput",
           isLabeled: true,
           inLabel: "Select Tier",
           valid: true,
           name: "tier_filter_value",
-          sggArray: tier_list,
-          valueArr: [],
-          value: "",
+        //sggArray: tier_list,
+        //valueArr: [],
+          value:1,
         },
         {
           type: "fillinputCF",
@@ -321,6 +324,41 @@ export const requestFormSettings = {
           name: "resume_last_search_position",
           valid: true,
           value: "",
+        },
+      ],
+    },
+    {
+      label: "Send message",
+      headerCheckbox: true,
+      name: "send_message",
+      recursive: false,
+      isActive: false,
+      valid: true,
+      fieldOptions: [
+        {
+          type: "select",
+          isLabeled: false,
+          valid: true,
+          name: "send_message_value",
+          value: "Please select the message",
+          
+          options: [
+            // {
+            //   selected: true,
+            //   label: "message 1",
+            //   value: "message_1",
+            // },
+            // {
+            //   selected: false,
+            //   label: "message 2",
+            //   value: "message_2",
+            // },
+            // {
+            //   selected: false,
+            //   label: "message 3",
+            //   value: "message_3",
+            // },
+          ],
         },
       ],
     },

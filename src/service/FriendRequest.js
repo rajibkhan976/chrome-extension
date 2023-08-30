@@ -65,6 +65,33 @@ export const getKeyWords = () => {
 
 
 
+
+export const getAllMessageGroup = () => {
+  return new Promise(async (resolve, reject) => {
+    const token = await helper.getDatafromStorage("fr_token");
+    // console.log("token", token);
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+    };
+    const fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
+    const body = { fbUserId: fbTokenAndId?.userID, }
+    axios
+      .post(process.env.REACT_APP_FETCH_ALL_MESSAGE_GROUPS, body, config)
+      .then((res) => {
+        // console.log("res : ", res);
+        resolve(res);
+      })
+      .catch((err) => {
+        // console.log("err : ", err);
+        resolve(err);
+      });
+  });
+}
+
+
 export const saveKeyWords = (data) => {
   return new Promise(async (resolve, reject) => {
     const token = await helper.getDatafromStorage("fr_token");

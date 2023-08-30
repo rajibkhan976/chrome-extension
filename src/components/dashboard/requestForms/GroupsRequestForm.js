@@ -39,9 +39,9 @@ import {
   requestFormSettings,
 } from "../../../helper/fr-setting";
 import AutomationStats from "../../shared/AutomationStats";
-import { ServerError, ServerSuccess } from "../../../assets/icons/Icons";
+import { BoxOutIcon, ChevronDownArrowIcon, ChevronUpArrowIcon, InfoIcon, ServerError, ServerSuccess } from "../../../assets/icons/Icons";
 
-///Zone crusial funtion to change value
+///Zone crusial funtion to change input box value
 export const findData = (child, parent, level) => {
   if (!parent.fieldOptions) {
     return false;
@@ -554,6 +554,32 @@ useEffect(()=>{
     setFormSetup(newObj);
     generateFormElements();
   };
+
+  const fillInputChangeStepwise = (ele,type) => {
+    let formSetPlaceholder = { ...formSetup };
+  
+    const numericValue = parseFloat(ele.value);
+    const newObj = {
+      ...formSetPlaceholder,
+      fields: formSetPlaceholder.fields.map((item) => {
+        return {
+          ...item,
+          fieldOptions: item.fieldOptions.map((itemCh) => {
+            if (ele.type === itemCh.type && ele.name === itemCh.name) {
+              itemCh.value = type==="+"?numericValue+1:numericValue-1;
+              //if (ele.type !== "fillinput" && ele.type !== "fillinputCF") {
+                itemCh.valid = !isNaN(numericValue);
+              
+            }
+            return itemCh;
+          }),
+        };
+      }),
+    };
+    // console.log("new ::: formSetPlaceholder :::", newObj);
+    setFormSetup(newObj);
+    generateFormElements();
+  };
   const removeTag = (idx, ele) => {
     // console.log("current ele", ele);
     // console.log("curent idx", idx);
@@ -685,6 +711,31 @@ useEffect(()=>{
     setFormSetup(formSetPlaceholder);
     generateFormElements();
   };
+
+  const inputValueChangeStepWise = (ele,type) => {
+    let formSetPlaceholder = { ...formSetup };
+    formSetPlaceholder.fields.forEach((formItem, idx) => {
+      //Recursive function to find the object
+      const found = findData(ele, formItem, 1);
+
+      if (found) {
+        //Recursive function to change the value of object
+        const newObj = changeData(formItem, found, type==="+"?ele.value+1:ele.value-1);
+
+        setSettingApiPayload((prevState) => ({
+          ...prevState,
+          [ele.name]: type==="+"?ele.value+1:ele.value-1,
+        }));
+
+        formSetPlaceholder.fields[idx] = newObj;
+      }
+    });
+
+    setFormSetup(formSetPlaceholder);
+    generateFormElements();
+  };
+
+  
   useEffect(() => {}, [settingApiPayload]);
 
   const syncKeyWord = (ele) => {
@@ -985,6 +1036,8 @@ useEffect(()=>{
                     : "fr-select-basic"
                 }
                 value={element.value}
+                // {element&&element.option.length>0?disabled}
+                disabled={element&&element.options&&element.options.length<=0?true:false}
                 onChange={(e) => selectValueChange(e.target.value, element)}
               >
                 {element.options.map((item, idx) => (
@@ -993,6 +1046,8 @@ useEffect(()=>{
                   </option>
                 ))}
               </select>
+              {element.name==="send_message_value"&&<div className="fr-req-nomessage-text">
+<InfoIcon/> You haven’t created any message group yet. <span>Create group <BoxOutIcon/></span> </div>}
               {element?.fieldOptions &&
                 generateElements(
                   element?.fieldOptions && element?.fieldOptions[0]
@@ -1059,7 +1114,6 @@ useEffect(()=>{
               </div>
             </>
           );
-
         case "input":
           return (
             <div
@@ -1087,6 +1141,65 @@ useEffect(()=>{
               )}
             </div>
           );
+          case "stepInput":
+            return (
+              <div
+                className={`fr-req-element fr-req-el-${element.type} ${
+                  element.isLabeled ? "fr-req-lebel" : ""
+                }  ${!element.valid ? "not_valid" : ""}`}
+              >
+                {element.isLabeled ? <label>{element.inLabel}</label> : ""}
+                <input
+                  type="number"
+                  maxlength="6"
+                  min={1}
+                  max={9999}
+                  step="1"
+                  className={
+                    element.isLabeled
+                      ? "fr-input-basic fr-input-basic-labeled"
+                      : "fr-input-basic"
+                  }
+                  value={element.value}
+                  onChange={(e) => {
+                   
+                    if(element.name==="tier_filter_value"){
+                      fillInputChange(e.target.value,element)
+                    }else{
+                      inputValueChange(element, e.target.value)
+                    }}}
+                  onKeyPress={handleKeyPress}
+                />
+                 <div className="input-arrows">
+                  <button className="btn inline-btn btn-transparent"
+
+                      onClick={(e) => {
+                      if(element.name==="tier_filter_value"){
+                        fillInputChangeStepwise(element,"+")
+                      }else{
+                        inputValueChangeStepWise(element,"+")
+                      }}}
+                    // onClick={() => inputValueChangeStepWise(element,"+")}
+                  >
+                    <ChevronUpArrowIcon size={15} />
+                  </button>
+
+                  <button className="btn inline-btn btn-transparent"
+                     onClick={(e) => {
+                      if(element.name==="tier_filter_value"){
+                        fillInputChangeStepwise(element,"-")
+                      }else{
+                        inputValueChangeStepWise(element,"-")
+                      }}}
+                  >
+                    <ChevronDownArrowIcon size={15} />
+                  </button>
+                </div>
+                {!element.valid && (
+                  <p className="error-msg">Field can't be empty or '0'!</p>
+                )}
+              </div>
+            );
         case "fillinputCF":
           return (
             <div
@@ -1389,12 +1502,12 @@ useEffect(()=>{
                       direction="bottom"
                       type="info"
                     />
-                  </h4>
+                  </h4> <p> {friendReqSet&&friendReqSet.settings_name&&  "Version:"+friendReqSet.settings_name.split("-")[1]}</p>
                   {/* <span className="req-setting-version">Default</span> */}
                 </div>
 
                 <button
-                  className="btn inline-btn"
+                  className="btn inline-btn "
                   onClick={() => {
                     onEditChange("basic");
                   }}
