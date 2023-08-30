@@ -9,7 +9,7 @@ dayBack.setHours(0);
 dayBack.setHours(0);
 
 // Overlay
-let overlay = `<div className="overlay-wraper" style="width: 100%;height: 100vh;position: absolute;top:0;left:0;background: rgb(9 124 207 / 64%);pointer-events: none;">
+let overlay = `<div className="overlay-wraper" style="width: 100%;height: 100vh;position: fixed;top:0;left:0;background: rgb(9 124 207 / 64%);pointer-events: none;">
 <p style=" position: absolute; left: 50%;top: 50%;transform: translate(-50%, -50%);color: #fff;font-weight: 700;font-size: 35px; text-align: center;">Friender is using this page.<br/> Please don't reload.</p>
 </div>`;
 
