@@ -38,7 +38,7 @@
     {
       "matches": [
         "https://*.friender.io/*",
-         "http://localhost:3000/*"
+         "https://localhost:3000/*"
       ],
       "js": [
         "portalScript.js"
@@ -62,7 +62,7 @@
   ],
   "externally_connectable": {
     "matches": [
-      "http://localhost:3000/*",
+      "https://localhost:3000/*",
       "https://beta.friender.io/*",
       "https://dev.friender.io/*"
     ],

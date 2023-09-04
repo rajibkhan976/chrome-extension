@@ -187,6 +187,9 @@ useEffect(()=>{
       if (isPauedThenRun !== "pause") {
         resSettings = await PostFriendResSet({
           ...settingApiPayload,
+          friend_request_send: 0,
+          profile_viewed: 0,
+          time_saved: 0,
           fbUserId: fbTokenAndId?.userID,
           is_settings_stop : false
         });

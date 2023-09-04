@@ -202,7 +202,7 @@ chrome.runtime.onMessageExternal.addListener(async function (
   sender,
   sendResponseExternal
 ) {
-  // console.log("request ::::::: ", request)
+  console.log("request ::::::: ", request)
   // console.log("sendResponseExternal : ", sendResponseExternal)
   chrome.storage.local.set({ senExternalResponse: sendResponseExternal });
   switch (request.action) {
