@@ -75,7 +75,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       shoudIstop = true;
       await helper.saveDatainStorage("updated_Profile_data", { "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved })
       fr_token = await helper.getDatafromStorage("fr_token");
-      await common.UpdateSettingsAfterFR(fr_token, { "settingsId" : groupSettings.settingsId, "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved });
+      await common.UpdateSettingsAfterFR(fr_token, { "settingsId" : groupSettings.settingsId, "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved, is_settings_stop: true });
       window.location.reload();
       break;
 
@@ -91,7 +91,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       await helper.saveDatainStorage("updated_Profile_data", { "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved })
       // console.log("runningSettings ::: ", runningSettings);
       fr_token = await helper.getDatafromStorage("fr_token");
-      await common.UpdateSettingsAfterFR(fr_token, { "settingsId" : groupSettings.settingsId, "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved, "resume_last_search_position": skipCounter });
+      await common.UpdateSettingsAfterFR(fr_token, { "settingsId" : groupSettings.settingsId, "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved, "resume_last_search_position": skipCounter, is_settings_stop : false });
       clearTimeout(timeOut)
       if (memberBlockForPause.classList.contains("fr-list-loader"))
         memberBlockForPause.classList.remove("fr-list-loader")
@@ -515,7 +515,7 @@ const fetchOtherInfosOfMember = async (
         countMember = countMember + 1;
         fr_token = await helper.getDatafromStorage("fr_token");
         await helper.saveDatainStorage("updated_Profile_data", { "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved })
-        await common.UpdateSettingsAfterFR(fr_token, { ...requestInfo, "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved });
+        await common.UpdateSettingsAfterFR(fr_token, { ...requestInfo, "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved, is_settings_stop : false });
         await helper.saveDatainStorage("FRSendCount", countMember);
         chrome.runtime.sendMessage({ "action": "FRSendCount", "FriendRequestCount": countMember });
 

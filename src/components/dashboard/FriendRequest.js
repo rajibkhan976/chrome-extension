@@ -163,7 +163,8 @@ const FriendRequest = (props) => {
         
       if (runningStatus === "pause" || runningStatus === "running") {
         if (runningSettings) {
-          const curr_settingObj = JSON.parse(runningSettings);
+          let curr_settingObj = JSON.parse(runningSettings);
+          curr_settingObj = {...curr_settingObj, is_settings_stop : false}
           setSettingApiPayload(curr_settingObj);
 
           syncFromApi(curr_settingObj, formSetup, setFormSetup);
@@ -177,7 +178,7 @@ const FriendRequest = (props) => {
             // console.log("The api of friend req set>>>///||||\\\\:::", apiObj);
             setFriendReqSet(apiObj[0]);
             if (apiObj?.length > 0) {
-              syncPayload(apiObj[0], settingApiPayload, setSettingApiPayload);
+              syncPayload(apiObj[0], {...settingApiPayload, is_settings_stop : false}, setSettingApiPayload);
               removeEle(apiObj[0], removeforBasic).then((response) => {
                 // console.log("[[[[[[[[[[_____>>>>after rrrreeemove", response);
                 syncFromApi(response, formSetup, setFormSetup);
@@ -213,7 +214,7 @@ const FriendRequest = (props) => {
     // console.log("request", request)
     if(request.action === "curr_reqSettings"){
       // console.log("request", request)
-      setSettingApiPayload(JSON.parse(request.curr_reqSettings));
+      setSettingApiPayload({...JSON.parse(request.curr_reqSettings), is_settings_stop : false});
 
       syncFromApi(JSON.parse(request.curr_reqSettings), formSetup, setFormSetup);
 

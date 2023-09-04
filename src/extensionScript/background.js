@@ -1080,7 +1080,8 @@ const getGenderCountryAndTiers = async (name) => {
           "refriending_max_attempts": requestList[0].refriending_max_attempts,
           "refriending_pending_days": Number(requestList[0].refriending_pending_days),
           "settingsId": requestList[0].settings_id,
-          "tier": requestList[0].tier
+          "tier": requestList[0].tier,
+          "is_settings_stop" : false
       }
         await common.UpdateSettingsAfterFR(fr_token,  refriendingPayload);
       }

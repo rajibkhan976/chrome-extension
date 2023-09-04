@@ -188,6 +188,7 @@ useEffect(()=>{
         resSettings = await PostFriendResSet({
           ...settingApiPayload,
           fbUserId: fbTokenAndId?.userID,
+          is_settings_stop : false
         });
       } else {
         settingsID = await helper.getDatafromStorage("settingsId");
