@@ -246,14 +246,14 @@ const fetchRejectedFriends = async ( userID, friend_uid ) => {
         method: 'GET',
         headers: HEADERS
       })
-
+      console.log("rejectedFriends::: ", rejectedFriends)
       rejectedFriends = await rejectedFriends.json();
-      rejectedFriends = rejectedFriends && rejectedFriends.data && rejectedFriends.data.length && rejectedFriends.data
-      // console.log("rejectedFriends 1 :::: ", rejectedFriends)
-      if(rejectedFriends.length > 0)
+      rejectedFriends = rejectedFriends && rejectedFriends.data
+      console.log("rejectedFriends 1 :::: ", rejectedFriends)
+      if(rejectedFriends && rejectedFriends.length > 0)
       {
         rejectedFriends = rejectedFriends.filter(el => el.friendFbId === friend_uid)
-        // console.log("rejectedFriends 2 :::: ", rejectedFriends)
+        console.log("rejectedFriends 2 :::: ", rejectedFriends)
         if(rejectedFriends.length > 0)
           resolve(true)
         else resolve(false)
