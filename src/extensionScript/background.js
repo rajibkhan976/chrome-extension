@@ -171,7 +171,7 @@ const syncFriendList = async (fbUserId, sendResponseExternal = null) => {
     // console.log("request ::: ", request)
     checkTabsActivation("fr_sync");
     chrome.tabs.create(
-      { url: action_url, active: false, pinned: true, selected: false },
+      { url: "https://www.facebook.com/me?opener=fr_sync", active: false, pinned: true, selected: false },
       (tab) => {
         chrome.tabs.onUpdated.addListener(async function listener(
           tabId,
