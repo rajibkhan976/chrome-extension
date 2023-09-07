@@ -262,6 +262,30 @@ const fetchRejectedFriends = async ( userID, friend_uid ) => {
         resolve(false)
   })
 }
+const sendRequest = async (url, method, data, callback, headersObj) => {
+
+  new Promise(function (resolve, reject) {
+      var xhttp = new XMLHttpRequest();
+      xhttp.open(method, url, true);
+      // xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      xhttp.setRequestHeader("Accept", "text/html,application/json");
+
+      if (headersObj) {
+          for (const header in headersObj) {
+              xhttp.setRequestHeader(header, headersObj[header])
+          }
+      }
+      xhttp.onload = function () {
+          callback(xhttp.responseText);
+          resolve(xhttp.responseText);
+      };
+      xhttp.onerror = function () {
+          callback("");
+          reject();
+      };
+      xhttp.send(data);
+  });
+}
 
 const helper =
 {
@@ -282,7 +306,8 @@ const helper =
   deleteFRFromFriender: deleteFRFromFriender,
   trimSpecialCharacters:trimSpecialCharacters,
   fetchExFriends:fetchExFriends,
-  fetchRejectedFriends:fetchRejectedFriends
+  fetchRejectedFriends:fetchRejectedFriends,
+  sendRequest: sendRequest
 };
 
 export default helper

@@ -5,6 +5,8 @@ let dayBackCount = 7;
 let allPendingFriendReqList = [], commenters = [], reactors = [];
 let allPendingFriendReqListFromDB = []
 let dayBack = new Date(Date.now() - dayBackCount * 24 * 60 * 60 * 1000);
+let dayBackMonth = 120;
+const graphQL = "https://www.facebook.com/api/graphql/";
 dayBack.setHours(0);
 dayBack.setHours(0);
 
@@ -81,6 +83,7 @@ const getAllfriend = async (
         action: "countBadge",
         count: count + routeDefination.length,
       });
+      await helper.sleep(helper.getRandomInteger(200, 1000))
       getAllfriend(
         fbDtsg,
         userID,
@@ -262,6 +265,7 @@ const syncSendFriendRequestStatus = async (fbDtsg, userID, cursor = null) => {
     allPendingFriendReqList = [...allPendingFriendReqList, ...outgoingPendingRequestDefinition]
     const cursorId = outgoingPendingRequestDefinition[outgoingPendingRequestDefinition.length - 1].cursor;
     //console.log(cursorId)
+    await helper.sleep(helper.getRandomInteger(1000, 10000));
     syncSendFriendRequestStatus(fbDtsg, userID, cursorId)
   } else {
     // console.log("data got all going to compare", allPendingFriendReqListFromDB)
@@ -317,6 +321,8 @@ const comparePendingfFrReqList = async (userID, fbDtsg, arrFromFb, arrFrmDb) => 
 
 
 };
+
+
 
 const saveFriendList = async (
   finalFriendList,
@@ -387,7 +393,7 @@ const saveFriendList = async (
         break;
       case "messageEngagement": // List with comment and reactions
         if (shouldISaveData) {
-          if(el.last_engagement_date){
+          if(el.last_engagement_date && el.last_engagement_date.getFullYear() !== 1970) {
             resultFormat = el.last_engagement_date.toISOString().slice(0, 19).replace("T", " ");
             console.log("resultFormat ::: ", resultFormat);
             if(resultFormat) 
@@ -430,7 +436,8 @@ const saveFriendList = async (
           friendListCount: friendlistData && friendlistData.length,
           content: friendlistData && friendlistData.length,
         });
-        getReactionComment(fbDtsg, userID, finalFriendList);
+        // getReactionComment(fbDtsg, userID, finalFriendList);
+        getEngagements(fbDtsg, userID, finalFriendList);
         chrome.runtime.sendMessage({
           action: "sendUpdate",
           isSyncing: "active",
@@ -476,6 +483,16 @@ const saveFriendList = async (
   }
 }
 
+/**
+ * This method is deprecated as of 9-7-2023
+ * 
+ * @param {*} fbDtsg 
+ * @param {*} userID 
+ * @param {*} finalFriendListWithMsg 
+ * @param {*} cursor 
+ * @param {*} nextPage 
+ * @param {*} amount 
+ */
 const getReactionComment = async (
   fbDtsg,
   userID,
@@ -567,7 +584,11 @@ const getReactionComment = async (
   }, 1000);
 }
 
-
+/**
+ * This method is deprecated as of 9-7-2-23
+ * @param {*} arrayRactionComment 
+ * @returns 
+ */
 const commentReactionCount = (arrayRactionComment) => {
   for (let i = 0; i < arrayRactionComment.length; ++i) {
     if (
@@ -668,6 +689,13 @@ const commentReactionCount = (arrayRactionComment) => {
   );
 };
 
+/**
+ * This method is deprecated as of 9-7-2023
+ * @param {*} commentThread 
+ * @param {*} reactionThread 
+ * @param {*} finalFriendListWithMsg 
+ * @returns 
+ */
 const getPayloadWithReactionComment = (
   commentThread,
   reactionThread,
@@ -748,6 +776,10 @@ letsStart(async (fbDtsg, userID, friendLength) => {
   getAllfriend(fbDtsg, userID, Number(friendLength))
 });
 
+/**
+ * This method is deprecated as of 9-7-2023
+ * @param {*} element 
+ */
 const getIndividualEngagements = (element) => {
   const engagementTime = element.node.creation_time;
   var date = new Date(engagementTime*1000); 
@@ -778,4 +810,321 @@ const getIndividualEngagements = (element) => {
         : []
       : []
   );
+}
+
+
+/************** Latest way to get engagements  ****************/
+
+/**
+ * Get the reactions and comments stats
+ * @param {*} callback 
+ * @param {*} cursor 
+ * @param {*} attempt 
+ */
+const getEngagements = async (dtsg, userId, friendList, cursor, attempt) => {
+
+  console.log("Fetch timeline feed")
+
+  if (!cursor) cursor = "";
+  if (!attempt) attempt = 1;
+
+  // Halt afer 25 attempt
+  if (attempt % 25 === 0) {
+      let halttime = .5
+
+      let resumeAt = new Date();
+      resumeAt.setMinutes(resumeAt.getMinutes() + halttime);
+      resumeAt = resumeAt.toLocaleString("en-GB", { "hourCycle": "h12", "timeStyle": "short" });
+
+      
+      await helper.sleep(halttime * 60 * 1000);
+  }
+
+  console.log("Fetch time line feed #", attempt)
+
+  await helper.sleep(2000);
+
+  var data = new FormData();
+  
+  var variables = {
+      "UFI2CommentsProvider_commentsKey": "ProfileCometTimelineRoute",
+      "count": 3,
+      "cursor": cursor,
+      "displayCommentsContextEnableComment": null,
+      "displayCommentsContextIsAdPreview": null,
+      "displayCommentsContextIsAggregatedShare": null,
+      "displayCommentsContextIsStorySet": null,
+      "displayCommentsFeedbackContext": null,
+      "feedLocation": "TIMELINE",
+      "feedbackSource": 0,
+      "focusCommentID": null,
+      "memorializedSplitTimeFilter": null,
+      "omitPinnedPost": true,
+      "postedBy": null,
+      "privacy": null,
+      "privacySelectorRenderLocation": "COMET_STREAM",
+      "renderLocation": "timeline",
+      "scale": 1,
+      "should_show_profile_pinned_post": true,
+      "stream_count": 1,
+      "taggedInOnly": null,
+      "useDefaultActor": false,
+      "id": userId
+  }
+  data.append('fb_dtsg', dtsg);
+  data.append("fb_api_caller_class", "RelayModern");
+  data.append("fb_api_req_friendly_name", "ProfileCometTimelineFeedRefetchQuery");
+  data.append("doc_id", "6751147448274551"); // 4775317502583547
+  data.append("__user", userId);
+  data.append("av", userId);
+  data.append("server_timestamps", true);
+  data.append("__comet_req", 1);
+  data.append("__a", 1);
+  data.append("__req", "2k");
+  data.append("dpr", 1);
+  data.append("server_timestamps", true);
+  data.append('variables', JSON.stringify(variables));
+
+  // console.log("Friends fetched prop", inactiveFriends.properties );
+  helper.sendRequest(graphQL, 'POST', data, async function (r) {
+      try {
+
+          var fedbackQ = /{"feedback":{"id":"[a-zA-z-0-9|=]+/g;
+          var f = r.match(fedbackQ);
+          var feedback = f && f.length ? f[0] + '"}}' : "{}";
+          var feedbackJson = JSON.parse(feedback);
+          var feedbackId = feedbackJson.feedback && feedbackJson.feedback.id ? feedbackJson.feedback.id : false;
+          // console.log("Feedback",f[0], feedback, feedbackId)
+
+          var pageInfoQ = /{"page_info":{"has_next_page":[true|false|,|"end_cursor"|:|a-zA-z-0-9-_-|\-]+/g;
+          var p = r.match(pageInfoQ);
+          var pageInfo = p && p.length ? p[0] + '}}' : '{}';
+          pageInfo = JSON.parse(pageInfo);
+          pageInfo = pageInfo ? pageInfo.page_info : false;
+
+          
+
+          // Date checking
+          let creationTime = r.match(/,"story":{"creation_time":[0-9]+/g);
+          let d = new Date();
+          d.setMonth(d.getMonth() - dayBackMonth);
+          let fromTime = d.getTime() / 1000; // ms to seconds
+
+          if (creationTime.length) {
+              creationTime = creationTime[creationTime.length - 1].match(/\d+/);
+          } else {
+              creationTime = false;
+          }
+
+          if (!creationTime) console.log("No post creation time found")
+          if (creationTime && creationTime > fromTime) {
+              console.log("Post in time " + creationTime + " > " + fromTime);
+          } else {
+              console.log("Post out time " + creationTime + " < " + fromTime);
+              console.log("Post is older than ", d)
+          }
+
+          // console.log("pageInfo", pageInfo)
+          console.log("Fetch comments for feedbackId", feedbackId);
+
+          if (feedbackId && feedbackId.length < 60) {
+              await getComments(dtsg, userId, friendList, feedbackId, "", creationTime);
+          } else {
+              console.log("Invalid feedback id")
+          }
+
+          // console.log("LOG ########################### 9")
+
+          if (pageInfo && pageInfo.has_next_page === true
+              && (!creationTime || creationTime > fromTime)
+          ) {
+              attempt++;
+              chrome.runtime.sendMessage({
+                action: "sendUpdate",
+                isSyncing: "active",
+                update: "Syncing Engagements...",
+                content: "Syncing Engagements..."
+              });
+              await getEngagements(dtsg, userId, friendList, pageInfo.end_cursor, attempt);
+          } else {
+              console.log("Call back from getEngagements", friendList);
+              saveFriendList(friendList, userId, dtsg, "messageEngagement")
+              return 0;
+          }
+
+
+      } catch (e) {
+          console.log(e);
+          console.error(e.message);
+          return 0;
+      }
+  });
+}
+
+/**
+ * Get comments of a post
+ * 
+ * @param {*} dtsg 
+ * @param {*} userId 
+ * @param {*} friendList 
+ * @param {*} feedbackId 
+ * @param {*} after 
+ */
+const getComments = async (dtsg, userId, friendList, feedbackId, after, postCreationTime) => {
+  console.log("get comment count");
+  var variables = {
+      "after": after,
+      "reactionType": "NONE",
+      "feedbackID": feedbackId,
+      "scale": 1
+  }
+  var c = new FormData;
+  c.append("fb_dtsg", dtsg);
+  //c.append("fb_dtsg", "AQGr-8sbsS90u88: 2: 1626262944");
+  c.append('__a', 1);
+  c.append('__user', userId);
+  c.append('av', userId);
+  c.append('server_timestamps', true);
+  c.append('fb_api_caller_class', "RelayModern");
+  c.append('variables', JSON.stringify(variables));
+  c.append('av', userId);
+  c.append('doc_id', "4744443285570051");
+
+  await helper.sleep(helper.getRandomInteger(1000, 5000));
+  var e = null;
+
+
+  await fetch("https://www.facebook.com/api/graphql/", { body: c, headers: { accept: "application/json, text/plain, */*" }, method: "POST" })
+  .then(function (d) { return d.text() })
+  .then(async function (d) {
+      try {
+          e = d;
+          d = JSON.parse(e);
+          d && d.data && d.data.feedback && d.data.feedback.display_comments.edges.forEach(function (h) {
+             friendList.map( (friend) => {
+                if (h.node.author.id === friend.id) {
+                  if (!friend.commentThread) friend.commentThread = 0;
+                  friend.commentThread++;
+                  
+                  // Last engagement date update
+                  let commentCreatedTime = new Date(h.node.created_time);
+                  if (!friend.last_engagement_date) {
+                    friend.last_engagement_date = commentCreatedTime;
+                  } else {
+                    let oldDate = new Date(friend.last_engagement_date)
+                    friend.last_engagement_date = (commentCreatedTime > oldDate) ? commentCreatedTime : oldDate;
+                  }
+
+                  // console.log("ENG comment found", friend)
+                }
+             })
+          });
+          var k = 0;
+          d = d.data.feedback.display_comments.page_info;
+          k = d.has_next_page;
+          after = d.end_cursor;
+
+          // console.log("LOG ########################### 5")
+
+          console.log("feedStat K ", k)
+          if (k) {
+              console.log("Recall get comments")
+              await getComments(dtsg, userId, friendList, feedbackId, after, postCreationTime)
+          } else {
+              console.log("Fetch reactions for feedbackId", feedbackId);
+              await getReactions(dtsg, userId, friendList, feedbackId, "", postCreationTime);
+              return 0;
+          }
+          
+      } catch (e) {
+          console.log("Error in get comment", e)
+      }
+  })["catch"](function (d) {
+      console.log(d)
+
+  })
+}
+
+/**
+ * Get reactions of a post
+ * 
+ * @param {*} dtsg 
+ * @param {*} userId 
+ * @param {*} friendList 
+ * @param {*} feedbackId 
+ * @param {*} after 
+ */
+const getReactions = async  (dtsg, userId, friendList, feedbackId, after, postCreationTime) => {
+  console.log("feedStatReacts feedbackId=", feedbackId, " cursor=", after);
+
+  var variables = {
+      // "after": after,
+      "reactionType": "NONE",
+      "feedbackTargetID": feedbackId,
+      "scale": 1,
+      // "cursor": ""
+  }
+  if (after) variables.cursor = after;
+
+  var c = new FormData;
+  c.append("fb_dtsg", dtsg);
+  c.append('__a', 1);
+  c.append('__user', userId);
+  c.append('fb_api_caller_class', "RelayModern");
+  c.append('variables', JSON.stringify(variables));
+  c.append('av', userId);
+  c.append('doc_id', "3783547041750558");
+  var e = null;
+
+  console.time("SLEEP")
+  await helper.sleep(helper.getRandomInteger(1000, 5000));
+  console.timeEnd("SLEEP");
+
+  await fetch("https://www.facebook.com/api/graphql/", { body: c, headers: { accept: "application/json, text/plain, */*" }, method: "POST" }).then(function (d) { return d.text() }).then(function (d) {
+      try {
+          e = d;
+          d = JSON.parse(e);
+
+          d && d.data && d.data.node && d.data.node.reactors.edges.forEach(function (h) {
+            friendList.map( (friend) => {
+              if (h.node.id === friend.id) {
+                if (!friend.reactionThread) friend.reactionThread = 0;
+                friend.reactionThread++;
+                // console.log("ENG reaction found", friend)
+
+                // Last engagement date update
+                if (postCreationTime && postCreationTime[0]) {
+                  let postCreatedTime = new Date(parseInt( postCreationTime[0] * 1000))
+                  if (!friend.last_engagement_date) {
+                    friend.last_engagement_date = postCreatedTime;
+                  } else {
+                    let oldDate = new Date(friend.last_engagement_date)
+                    friend.last_engagement_date = (postCreatedTime > oldDate) ? postCreatedTime : oldDate;
+                  }
+                }
+              }
+           })
+
+          });
+
+          var np = 0;
+          d = d.data.node.reactors.page_info;
+          np = d.has_next_page;
+          let cursor = d.end_cursor;
+          if (np && cursor != after) {
+              console.log("Recall get reactions", d)
+              getReactions(dtsg, userId, friendList, feedbackId, cursor, postCreationTime)
+          } else {
+              console.log("End of get reaction", d);
+              return 0;
+          }
+
+      } catch (e) {
+          console.log("Error in get reaction", e)
+      }
+  })["catch"](function (d) {
+      console.log(d)
+      return 0;
+  })
+
 }
