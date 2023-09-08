@@ -821,12 +821,16 @@ const getIndividualEngagements = (element) => {
  * @param {*} cursor 
  * @param {*} attempt 
  */
-const getEngagements = async (dtsg, userId, friendList, cursor, attempt) => {
+const getEngagements = async (dtsg, userId, friendList, cursor = "", attempt = "") => {
 
   console.log("Fetch timeline feed")
 
   if (!cursor) cursor = "";
   if (!attempt) attempt = 1;
+
+  let d = new Date();
+  d.setMonth(d.getMonth() - dayBackMonth);
+  let fromTime = d.getTime() / 1000; // ms to seconds
 
   // Halt afer 25 attempt
   if (attempt % 25 === 0) {
@@ -888,56 +892,73 @@ const getEngagements = async (dtsg, userId, friendList, cursor, attempt) => {
   // console.log("Friends fetched prop", inactiveFriends.properties );
   helper.sendRequest(graphQL, 'POST', data, async function (r) {
       try {
+          let resp = r.split("\n").filter(Boolean).map((e=>JSON.parse(e)));
 
-          var fedbackQ = /{"feedback":{"id":"[a-zA-z-0-9|=]+/g;
-          var f = r.match(fedbackQ);
-          var feedback = f && f.length ? f[0] + '"}}' : "{}";
-          var feedbackJson = JSON.parse(feedback);
-          var feedbackId = feedbackJson.feedback && feedbackJson.feedback.id ? feedbackJson.feedback.id : false;
-          // console.log("Feedback",f[0], feedback, feedbackId)
+          let feedbacks = [];
+          let pageInfo = {};
 
-          var pageInfoQ = /{"page_info":{"has_next_page":[true|false|,|"end_cursor"|:|a-zA-z-0-9-_-|\-]+/g;
-          var p = r.match(pageInfoQ);
-          var pageInfo = p && p.length ? p[0] + '}}' : '{}';
-          pageInfo = JSON.parse(pageInfo);
-          pageInfo = pageInfo ? pageInfo.page_info : false;
+          // Day back to limit to fetch post
+          let dayBackReached = false;
+         
 
+          for (const item of resp) {
+            if (item.data && item.data.node) {
+              
+              let creationTime = null;
+              if (item.data.node.feedback) {
+                try {
+                  creationTime = item.data.node.comet_sections.content.story.comet_sections.context_layout.story
+                    .comet_sections.metadata[0].story.creation_time;
+                } catch (e) {
+                  creationTime = null
+                }
+
+                feedbacks.push({
+                  id: item.data.node.feedback.id,
+                  creationTime: creationTime
+                });
+              }
+
+              if (item.data.node.timeline_list_feed_units && item.data.node.timeline_list_feed_units.edges) {
+                for (const edge of item.data.node.timeline_list_feed_units.edges) {
+                  if (edge.node.feedback) {
+                    try {
+                      creationTime = edge.node.comet_sections.content.story.comet_sections.context_layout.
+                      story.comet_sections.metadata[0].story.creation_time;
+                    } catch (e) {
+                      creationTime = null;
+                    }
+
+                    feedbacks.push({
+                      id: edge.node.feedback.id,
+                      creationTime: creationTime
+                    });
+                  }
+                }
+              }
+              dayBackReached = !creationTime || creationTime > fromTime ? false : true;
+              
+            }
+            if (item.data && item.data.page_info) {
+              pageInfo = item.data.page_info;
+            }
+          }
           
+          pageInfo = pageInfo ? pageInfo : false;
 
-          // Date checking
-          let creationTime = r.match(/,"story":{"creation_time":[0-9]+/g);
-          let d = new Date();
-          d.setMonth(d.getMonth() - dayBackMonth);
-          let fromTime = d.getTime() / 1000; // ms to seconds
-
-          if (creationTime.length) {
-              creationTime = creationTime[creationTime.length - 1].match(/\d+/);
-          } else {
-              creationTime = false;
+          feedbacks.forEach( async (feedback, i) => {
+            try {
+              await getComments(dtsg, userId, friendList, feedback.id, "", feedback.creationTime);
+            } catch (e){
+              console.log("Get comments failed", e)
+            }
+          })  
+          
+          if (dayBackReached) {
+            console.log("Day back limit reached, post is older than", fromTime)
           }
 
-          if (!creationTime) console.log("No post creation time found")
-          if (creationTime && creationTime > fromTime) {
-              console.log("Post in time " + creationTime + " > " + fromTime);
-          } else {
-              console.log("Post out time " + creationTime + " < " + fromTime);
-              console.log("Post is older than ", d)
-          }
-
-          // console.log("pageInfo", pageInfo)
-          console.log("Fetch comments for feedbackId", feedbackId);
-
-          if (feedbackId && feedbackId.length < 60) {
-              await getComments(dtsg, userId, friendList, feedbackId, "", creationTime);
-          } else {
-              console.log("Invalid feedback id")
-          }
-
-          // console.log("LOG ########################### 9")
-
-          if (pageInfo && pageInfo.has_next_page === true
-              && (!creationTime || creationTime > fromTime)
-          ) {
+          if (pageInfo && pageInfo.has_next_page === true && !dayBackReached) {
               attempt++;
               chrome.runtime.sendMessage({
                 action: "sendUpdate",
@@ -1026,7 +1047,7 @@ const getComments = async (dtsg, userId, friendList, feedbackId, after, postCrea
 
           // console.log("LOG ########################### 5")
 
-          console.log("feedStat K ", k)
+          console.log("More comments page? ", k)
           if (k) {
               console.log("Recall get comments")
               await getComments(dtsg, userId, friendList, feedbackId, after, postCreationTime)
@@ -1089,6 +1110,7 @@ const getReactions = async  (dtsg, userId, friendList, feedbackId, after, postCr
             friendList.map( (friend) => {
               if (h.node.id === friend.id) {
                 if (!friend.reactionThread) friend.reactionThread = 0;
+
                 friend.reactionThread++;
                 // console.log("ENG reaction found", friend)
 
@@ -1112,10 +1134,10 @@ const getReactions = async  (dtsg, userId, friendList, feedbackId, after, postCr
           np = d.has_next_page;
           let cursor = d.end_cursor;
           if (np && cursor != after) {
-              console.log("Recall get reactions", d)
+              console.log("Recall get reactions",)
               getReactions(dtsg, userId, friendList, feedbackId, cursor, postCreationTime)
           } else {
-              console.log("End of get reaction", d);
+              console.log("End of get reaction");
               return 0;
           }
 
