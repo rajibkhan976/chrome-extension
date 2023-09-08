@@ -398,6 +398,8 @@ const saveFriendList = async (
             console.log("resultFormat ::: ", resultFormat);
             if(resultFormat) 
               eachFriendinfo.last_engagement_date = resultFormat
+          } else {
+            delete eachFriendinfo.last_engagement_date;
           }
           eachFriendinfo.commentThread = el.commentThread ? el.commentThread : 0;
           eachFriendinfo.reactionThread = el.reactionThread ? el.reactionThread : 0;
@@ -1026,9 +1028,8 @@ const getComments = async (dtsg, userId, friendList, feedbackId, after, postCrea
                 if (h.node.author.id === friend.id) {
                   if (!friend.commentThread) friend.commentThread = 0;
                   friend.commentThread++;
-                  
                   // Last engagement date update
-                  let commentCreatedTime = new Date(h.node.created_time);
+                  let commentCreatedTime = new Date(h.node.created_time * 1000);
                   if (!friend.last_engagement_date) {
                     friend.last_engagement_date = commentCreatedTime;
                   } else {
@@ -1101,7 +1102,7 @@ const getReactions = async  (dtsg, userId, friendList, feedbackId, after, postCr
   await helper.sleep(helper.getRandomInteger(1000, 5000));
   console.timeEnd("SLEEP");
 
-  await fetch("https://www.facebook.com/api/graphql/", { body: c, headers: { accept: "application/json, text/plain, */*" }, method: "POST" }).then(function (d) { return d.text() }).then(function (d) {
+  await fetch("https://www.facebook.com/api/graphql/", { body: c, headers: { accept: "application/json, text/plain, */*" }, method: "POST" }).then(async function (d) { return d.text() }).then(function (d) {
       try {
           e = d;
           d = JSON.parse(e);
@@ -1115,14 +1116,15 @@ const getReactions = async  (dtsg, userId, friendList, feedbackId, after, postCr
                 // console.log("ENG reaction found", friend)
 
                 // Last engagement date update
-                if (postCreationTime && postCreationTime[0]) {
-                  let postCreatedTime = new Date(parseInt( postCreationTime[0] * 1000))
+                if (postCreationTime) {
+                  let postCreatedTime = new Date(parseInt( postCreationTime * 1000))
                   if (!friend.last_engagement_date) {
                     friend.last_engagement_date = postCreatedTime;
                   } else {
                     let oldDate = new Date(friend.last_engagement_date)
                     friend.last_engagement_date = (postCreatedTime > oldDate) ? postCreatedTime : oldDate;
                   }
+                  // console.log("Reaction time ", postCreatedTime, friend.last_engagement_date)
                 }
               }
            })
@@ -1134,8 +1136,8 @@ const getReactions = async  (dtsg, userId, friendList, feedbackId, after, postCr
           np = d.has_next_page;
           let cursor = d.end_cursor;
           if (np && cursor != after) {
-              console.log("Recall get reactions",)
-              getReactions(dtsg, userId, friendList, feedbackId, cursor, postCreationTime)
+              console.log("Recall get reactions")
+               getReactions(dtsg, userId, friendList, feedbackId, cursor, postCreationTime)
           } else {
               console.log("End of get reaction");
               return 0;
