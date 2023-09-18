@@ -6,6 +6,7 @@ let allPendingFriendReqList = [], commenters = [], reactors = [];
 let allPendingFriendReqListFromDB = []
 let dayBack = new Date(Date.now() - dayBackCount * 24 * 60 * 60 * 1000);
 let dayBackMonth = 120;
+let scannedPostIds = {};
 const graphQL = "https://www.facebook.com/api/graphql/";
 dayBack.setHours(0);
 dayBack.setHours(0);
@@ -386,6 +387,8 @@ const saveFriendList = async (
           // console.log("resultFormat ::: ", resultFormat);
           if(resultFormat) 
             eachFriendinfo.last_engagement_date = resultFormat
+        }  else {
+          delete eachFriendinfo.last_engagement_date;
         }
         eachFriendinfo.commentThread = el.commentThread ? el.commentThread : 0;
         eachFriendinfo.reactionThread = el.reactionThread ? el.reactionThread : 0;
@@ -439,7 +442,10 @@ const saveFriendList = async (
           content: friendlistData && friendlistData.length,
         });
         // getReactionComment(fbDtsg, userID, finalFriendList);
-        getEngagements(fbDtsg, userID, finalFriendList);
+
+        // Reset scanned post to blank
+        scannedPostIds = {};
+         getEngagements(fbDtsg, userID, finalFriendList);
         chrome.runtime.sendMessage({
           action: "sendUpdate",
           isSyncing: "active",
@@ -823,9 +829,9 @@ const getIndividualEngagements = (element) => {
  * @param {*} cursor 
  * @param {*} attempt 
  */
-const getEngagements = async (dtsg, userId, friendList, cursor = "", attempt = "") => {
+const getEngagements = async (dtsg, userId, friendList, cursor = "", attempt = "", onErrorAttempt = 0) => {
 
-  console.log("Fetch timeline feed")
+  console.log("Fetch timeline feed cursor=", cursor)
 
   if (!cursor) cursor = "";
   if (!attempt) attempt = 1;
@@ -848,7 +854,7 @@ const getEngagements = async (dtsg, userId, friendList, cursor = "", attempt = "
 
   console.log("Fetch time line feed #", attempt)
 
-  await helper.sleep(2000);
+  await helper.sleep(await helper.getRandomInteger(100, 700));
 
   var data = new FormData();
   
@@ -880,7 +886,7 @@ const getEngagements = async (dtsg, userId, friendList, cursor = "", attempt = "
   data.append('fb_dtsg', dtsg);
   data.append("fb_api_caller_class", "RelayModern");
   data.append("fb_api_req_friendly_name", "ProfileCometTimelineFeedRefetchQuery");
-  data.append("doc_id", "6751147448274551"); // 4775317502583547
+  data.append("doc_id", "6628533110600769"); // 4775317502583547
   data.append("__user", userId);
   data.append("av", userId);
   data.append("server_timestamps", true);
@@ -888,100 +894,150 @@ const getEngagements = async (dtsg, userId, friendList, cursor = "", attempt = "
   data.append("__a", 1);
   data.append("__req", "2k");
   data.append("dpr", 1);
+  data.append("__ccg:", "EXCELLENT");
   data.append("server_timestamps", true);
   data.append('variables', JSON.stringify(variables));
 
   // console.log("Friends fetched prop", inactiveFriends.properties );
-  helper.sendRequest(graphQL, 'POST', data, async function (r) {
-      try {
-          let resp = r.split("\n").filter(Boolean).map((e=>JSON.parse(e)));
+  
+  try {
+    let r = await helper.sendRequest(graphQL, 'POST', data);
 
-          let feedbacks = [];
-          let pageInfo = {};
+    try {
+      let respCheck = JSON.parse(r);
 
-          // Day back to limit to fetch post
-          let dayBackReached = false;
-         
-
-          for (const item of resp) {
-            if (item.data && item.data.node) {
-              
-              let creationTime = null;
-              if (item.data.node.feedback) {
-                try {
-                  creationTime = item.data.node.comet_sections.content.story.comet_sections.context_layout.story
-                    .comet_sections.metadata[0].story.creation_time;
-                } catch (e) {
-                  creationTime = null
-                }
-
-                feedbacks.push({
-                  id: item.data.node.feedback.id,
-                  creationTime: creationTime
-                });
-              }
-
-              if (item.data.node.timeline_list_feed_units && item.data.node.timeline_list_feed_units.edges) {
-                for (const edge of item.data.node.timeline_list_feed_units.edges) {
-                  if (edge.node.feedback) {
-                    try {
-                      creationTime = edge.node.comet_sections.content.story.comet_sections.context_layout.
-                      story.comet_sections.metadata[0].story.creation_time;
-                    } catch (e) {
-                      creationTime = null;
-                    }
-
-                    feedbacks.push({
-                      id: edge.node.feedback.id,
-                      creationTime: creationTime
-                    });
-                  }
-                }
-              }
-              dayBackReached = !creationTime || creationTime > fromTime ? false : true;
-              
-            }
-            if (item.data && item.data.page_info) {
-              pageInfo = item.data.page_info;
-            }
-          }
-          
-          pageInfo = pageInfo ? pageInfo : false;
-
-          feedbacks.forEach( async (feedback, i) => {
-            try {
-              await getComments(dtsg, userId, friendList, feedback.id, "", feedback.creationTime);
-            } catch (e){
-              console.log("Get comments failed", e)
-            }
-          })  
-          
-          if (dayBackReached) {
-            console.log("Day back limit reached, post is older than", fromTime)
-          }
-
-          if (pageInfo && pageInfo.has_next_page === true && !dayBackReached) {
-              attempt++;
-              chrome.runtime.sendMessage({
-                action: "sendUpdate",
-                isSyncing: "active",
-                update: "Syncing Engagements...",
-                content: "Syncing Engagements..."
-              });
-              await getEngagements(dtsg, userId, friendList, pageInfo.end_cursor, attempt);
-          } else {
-              console.log("Call back from getEngagements", friendList);
-              saveFriendList(friendList, userId, dtsg, "messageEngagement")
-              return 0;
-          }
-
-
-      } catch (e) {
-          console.log(e);
-          console.error(e.message);
-          return 0;
+      // If error found
+      if (respCheck.errors && onErrorAttempt < 3) {
+        console.error("POST Fetching error 1 =====")
+        onErrorAttempt++;
+        await helper.sleep( helper.getRandomInteger(60000, 120000)); // 30 to 60 secs
+        await getEngagements(dtsg, userId, friendList, cursor, attempt, onErrorAttempt);
+        return true;
+      } else if (respCheck.errors && onErrorAttempt > 3) {
+        saveFriendList(friendList, userId, dtsg, "messageEngagement")
       }
-  });
+    } catch (e) {
+      // Nothing to do for now
+    }
+
+    let resp = r.split("\n").filter(Boolean).map((e=>JSON.parse(e)));
+
+    if (resp.errors) {
+      console.log("POST FETCHING Errors 2 ===========", resp.errors)
+    }
+
+    let feedbacks = [];
+    let pageInfo = {};
+
+    // Day back to limit to fetch post
+    let dayBackReached = false;
+    let feedbackId = null;
+
+    for (const item of resp) {
+      if (item.data && item.data.node) {
+        
+        let creationTime = null;
+        let postId = null;
+        
+        if (item.data.node.feedback) {
+          try {
+            creationTime = item.data.node.comet_sections.content.story.comet_sections.context_layout.story
+              .comet_sections.metadata[0].story.creation_time;
+          } catch (e) {
+            creationTime = null
+          }
+          feedbackId = item.data.node.feedback.id;
+          postId = item.data.node.post_id ? item.data.node.post_id : null;
+          
+        }
+
+        if (item.data.node.timeline_list_feed_units && item.data.node.timeline_list_feed_units.edges) {
+          for (const edge of item.data.node.timeline_list_feed_units.edges) {
+            if (edge.node.feedback) {
+              try {
+                creationTime = edge.node.comet_sections.content.story.comet_sections.context_layout.
+                story.comet_sections.metadata[0].story.creation_time;
+              } catch (e) {
+                creationTime = null;
+              }
+              feedbackId = edge.node.feedback.id;
+              postId = edge.node.post_id ? edge.node.post_id : null;
+            }
+          }
+        }
+        dayBackReached = !creationTime || creationTime > fromTime ? false : true;
+        
+        if (postId && scannedPostIds[postId]) {
+          console.log("Duplicate - Already scanned post, continue  post id", postId);
+          continue;
+        } 
+
+        scannedPostIds[postId] = true;
+
+        if (!feedbackId) {
+          console.error("FeedbackId did not find, continue")
+          continue;
+        }
+
+        console.log("POST ID = ", postId)
+        console.log("Get comments for feedbackId=", feedbackId);
+        await getComments(dtsg, userId, friendList, feedbackId, "", creationTime);
+
+        console.log("Get reactions for feedbackId=", feedbackId);
+        await getReactions(dtsg, userId, friendList, feedbackId, "", creationTime);
+        
+      }
+      if (item.data && item.data.page_info) {
+        pageInfo = item.data.page_info;
+      }
+    }
+
+    pageInfo = pageInfo ? pageInfo : false;
+    
+    if ((!feedbackId || !pageInfo) && onErrorAttempt < 3) {
+      console.error("POST Fetching error 4 =====")
+      onErrorAttempt++;
+      await helper.sleep( helper.getRandomInteger(30000, 60000)); // 30 to 60 secs
+      await getEngagements(dtsg, userId, friendList, cursor, attempt, onErrorAttempt);
+      return true;
+    } else if ((!feedbackId || !pageInfo) && onErrorAttempt < 3) {
+      saveFriendList(friendList, userId, dtsg, "messageEngagement")
+    }
+    
+    if (dayBackReached) {
+      console.log("Day back limit reached, post is older than", fromTime)
+    }
+
+    if (pageInfo && pageInfo.has_next_page === true && !dayBackReached) {
+        attempt++;
+        chrome.runtime.sendMessage({
+          action: "sendUpdate",
+          isSyncing: "active",
+          update: "Syncing Engagements...",
+          content: "Syncing Engagements..."
+        });
+        await getEngagements(dtsg, userId, friendList, pageInfo.end_cursor, attempt);
+    } else {
+        console.log("No more post feed", pageInfo)
+        console.log("Call back from getEngagements", friendList);
+        saveFriendList(friendList, userId, dtsg, "messageEngagement")
+        return 0;
+    }
+
+    return true;
+  } catch (e) {
+    console.log(e);
+    console.log(e.message);
+    if (onErrorAttempt < 3) {
+      console.error("POST Fetching error 5 =====")
+      onErrorAttempt++;
+      await helper.sleep( helper.getRandomInteger(60000, 120000)); // 30 to 60 secs
+      await getEngagements(dtsg, userId, friendList, cursor, attempt, onErrorAttempt);
+    } else {
+      saveFriendList(friendList, userId, dtsg, "messageEngagement")
+    }
+  }
+  return true;
 }
 
 /**
@@ -993,15 +1049,15 @@ const getEngagements = async (dtsg, userId, friendList, cursor = "", attempt = "
  * @param {*} feedbackId 
  * @param {*} after 
  */
-const getComments = async (dtsg, userId, friendList, feedbackId, after, postCreationTime) => {
-  console.log("get comment count");
-  var variables = {
+const getComments = async (dtsg, userId, friendList, feedbackId, after, postCreationTime, onErrorAttempt = 0) => {
+  console.log("get comments");
+  let variables = {
       "after": after,
       "reactionType": "NONE",
       "feedbackID": feedbackId,
       "scale": 1
   }
-  var c = new FormData;
+  let c = new FormData;
   c.append("fb_dtsg", dtsg);
   //c.append("fb_dtsg", "AQGr-8sbsS90u88: 2: 1626262944");
   c.append('__a', 1);
@@ -1013,8 +1069,8 @@ const getComments = async (dtsg, userId, friendList, feedbackId, after, postCrea
   c.append('av', userId);
   c.append('doc_id', "4744443285570051");
 
-  await helper.sleep(helper.getRandomInteger(1000, 5000));
-  var e = null;
+  await helper.sleep(helper.getRandomInteger(200, 500));
+  let e = null;
 
 
   await fetch("https://www.facebook.com/api/graphql/", { body: c, headers: { accept: "application/json, text/plain, */*" }, method: "POST" })
@@ -1023,6 +1079,16 @@ const getComments = async (dtsg, userId, friendList, feedbackId, after, postCrea
       try {
           e = d;
           d = JSON.parse(e);
+
+          // Error handling
+          if (d.erros && onErrorAttempt < 3) {
+            console.error("Comment Fetching error 1 =====")
+            onErrorAttempt++;
+            await helper.sleep( helper.getRandomInteger(30000, 60000)); // 30 to 60 secs
+            await getComments(dtsg, userId, friendList, feedbackId, after, postCreationTime, onErrorAttempt);
+            return true;
+          }
+
           d && d.data && d.data.feedback && d.data.feedback.display_comments.edges.forEach(function (h) {
              friendList.map( (friend) => {
                 if (h.node.author.id === friend.id) {
@@ -1036,12 +1102,11 @@ const getComments = async (dtsg, userId, friendList, feedbackId, after, postCrea
                     let oldDate = new Date(friend.last_engagement_date)
                     friend.last_engagement_date = (commentCreatedTime > oldDate) ? commentCreatedTime : oldDate;
                   }
-
                   // console.log("ENG comment found", friend)
                 }
              })
           });
-          var k = 0;
+          let k = 0;
           d = d.data.feedback.display_comments.page_info;
           k = d.has_next_page;
           after = d.end_cursor;
@@ -1052,19 +1117,28 @@ const getComments = async (dtsg, userId, friendList, feedbackId, after, postCrea
           if (k) {
               console.log("Recall get comments")
               await getComments(dtsg, userId, friendList, feedbackId, after, postCreationTime)
-          } else {
-              console.log("Fetch reactions for feedbackId", feedbackId);
-              await getReactions(dtsg, userId, friendList, feedbackId, "", postCreationTime);
-              return 0;
           }
-          
+          return true;
       } catch (e) {
           console.log("Error in get comment", e)
+          if (onErrorAttempt < 3) {
+            console.error("Comment Fetching error 2 =====")
+            onErrorAttempt++;
+            await helper.sleep( helper.getRandomInteger(30000, 60000)); // 30 to 60 secs
+            await getComments(dtsg, userId, friendList, feedbackId, after, postCreationTime, onErrorAttempt);
+          }
       }
-  })["catch"](function (d) {
-      console.log(d)
+  })["catch"]( async function (d) {
+    if (onErrorAttempt < 3) {
+      console.error("Comments Fetching error 3 =====")
+      onErrorAttempt++;
+      await helper.sleep( helper.getRandomInteger(30000, 60000)); // 30 to 60 secs
+      await getComments(dtsg, userId, friendList, feedbackId, after, postCreationTime, onErrorAttempt);
+      return true;
+    }
 
   })
+  return true;
 }
 
 /**
@@ -1076,10 +1150,10 @@ const getComments = async (dtsg, userId, friendList, feedbackId, after, postCrea
  * @param {*} feedbackId 
  * @param {*} after 
  */
-const getReactions = async  (dtsg, userId, friendList, feedbackId, after, postCreationTime) => {
-  console.log("feedStatReacts feedbackId=", feedbackId, " cursor=", after);
+const getReactions = async  (dtsg, userId, friendList, feedbackId, after, postCreationTime, onErrorAttempt = 0) => {
+  console.log("get reactions");
 
-  var variables = {
+  let variables = {
       // "after": after,
       "reactionType": "NONE",
       "feedbackTargetID": feedbackId,
@@ -1088,7 +1162,7 @@ const getReactions = async  (dtsg, userId, friendList, feedbackId, after, postCr
   }
   if (after) variables.cursor = after;
 
-  var c = new FormData;
+  let c = new FormData;
   c.append("fb_dtsg", dtsg);
   c.append('__a', 1);
   c.append('__user', userId);
@@ -1096,16 +1170,25 @@ const getReactions = async  (dtsg, userId, friendList, feedbackId, after, postCr
   c.append('variables', JSON.stringify(variables));
   c.append('av', userId);
   c.append('doc_id', "3783547041750558");
-  var e = null;
+  let e = null;
 
   console.time("SLEEP")
-  await helper.sleep(helper.getRandomInteger(1000, 5000));
+  await helper.sleep(helper.getRandomInteger(100, 500));
   console.timeEnd("SLEEP");
 
-  await fetch("https://www.facebook.com/api/graphql/", { body: c, headers: { accept: "application/json, text/plain, */*" }, method: "POST" }).then(async function (d) { return d.text() }).then(function (d) {
+  await fetch("https://www.facebook.com/api/graphql/", { body: c, headers: { accept: "application/json, text/plain, */*" }, method: "POST" }).then(async function (d) { return d.text() }).then(async function (d) {
       try {
           e = d;
           d = JSON.parse(e);
+
+          // Error handling
+          if (d.erros && onErrorAttempt < 3) {
+            console.error("Reaction Fetching error 1 =====")
+            onErrorAttempt++;
+            await helper.sleep( helper.getRandomInteger(30000, 60000)); // 30 to 60 secs
+            await getReactions(dtsg, userId, friendList, feedbackId, after, postCreationTime, onErrorAttempt);
+            return true
+          }
 
           d && d.data && d.data.node && d.data.node.reactors.edges.forEach(function (h) {
             friendList.map( (friend) => {
@@ -1131,23 +1214,37 @@ const getReactions = async  (dtsg, userId, friendList, feedbackId, after, postCr
 
           });
 
-          var np = 0;
+          let np = 0;
           d = d.data.node.reactors.page_info;
           np = d.has_next_page;
           let cursor = d.end_cursor;
           if (np && cursor != after) {
               console.log("Recall get reactions")
-               getReactions(dtsg, userId, friendList, feedbackId, cursor, postCreationTime)
+              await getReactions(dtsg, userId, friendList, feedbackId, cursor, postCreationTime)
           } else {
               console.log("End of get reaction");
               return 0;
           }
-
+          return true
       } catch (e) {
           console.log("Error in get reaction", e)
+          if (onErrorAttempt < 3) {
+            console.error("Reaction Fetching error 2 =====")
+            onErrorAttempt++;
+            await helper.sleep( helper.getRandomInteger(30000, 60000)); // 30 to 60 secs
+            await getReactions(dtsg, userId, friendList, feedbackId, after, postCreationTime, onErrorAttempt);
+            return true
+          }
       }
-  })["catch"](function (d) {
+  })["catch"]( async function (d) {
       console.log(d)
+      if (onErrorAttempt < 3) {
+        console.error("Reactions Fetching error 3 =====")
+        onErrorAttempt++;
+        await helper.sleep( helper.getRandomInteger(30000, 60000)); // 30 to 60 secs
+        await getReactions(dtsg, userId, friendList, feedbackId, after, postCreationTime, onErrorAttempt);
+        return true
+      }
       return 0;
   })
 

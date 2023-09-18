@@ -77,7 +77,7 @@ const makeParsable = (html) => {
 };
 
 const sleep = (ms) => {
-  // console.log("SLEEP for ", ms / 1000 + " Second(s)")
+  console.log("SLEEP for ", ms / 1000 + " Second(s)")
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 const getRandomInteger = (min, max) => {
@@ -262,9 +262,9 @@ const fetchRejectedFriends = async ( userID, friend_uid ) => {
         resolve(false)
   })
 }
-const sendRequest = async (url, method, data, callback, headersObj) => {
+const sendRequest = async (url, method, data, callback = () => {}, headersObj) => {
 
-  new Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
       var xhttp = new XMLHttpRequest();
       xhttp.open(method, url, true);
       // xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
