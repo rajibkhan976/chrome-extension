@@ -596,6 +596,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                               break;
 
     case "updateCountryAndTier": 
+                              console.log(" UPDATE GENDER COUNTRY AND TIER CALLED",request)
                               updateGenderCountryAndTier(request);    
                               break;
                           
@@ -838,60 +839,171 @@ const stopRunningScript = async (action = "sendFR") => {
 // checkScheduledSync();
 
 const updateGenderCountryAndTier = async (request) => {
-   let friendList = request.friendList;
-   let fbUserId = request.fbUserId;
-   let listLen = friendList.length;
 
-   if (!listLen) return false;
-
-   let updateFriendPayload = [];
-
-   for (let i = 0; i < listLen; i++) {
-    let friend = friendList[i];
-    if (i % 500 === 0) {
-      console.log("lets sleep")
-      await helper.sleep(1000*5)
+  async function proceedToUpdateGenderCountryAndTier (exFriendList = []){
+    /**
+     * 
+     * @param {
+     * *0 : no match and no data found (P.S :  currentData field always comes empty in this state)
+     * *1 : both match and data found (P.S : currentData field has all the required info hence we can use this and skip calling gender API)
+     * *2 : perfect match not found but data found (P.S : you can use the currentData field here as per your need, if required) 
+     * } status 
+     * @returns 
+     */
+    async function checkExsistingData (currFriend){
+      return new Promise(async (resolve,reject)=>{
+        // console.log("inside check exsisting data",exFriendList)
+        if(exFriendList.length){
+          const foundFriend = await exFriendList.find(exFriendList => exFriendList.friendFbId == currFriend.id);
+          // console.log("foundFriend",foundFriend)
+          if(foundFriend){
+            if(foundFriend.tier!=undefined && foundFriend.tier!="NA" && foundFriend.country!= undefined && foundFriend.country != "NA" && foundFriend.friendGender!= undefined && foundFriend.friendGender!= "NA"){
+              // console.log("** Local match found - No gender API call required",foundFriend)
+              resolve({
+                status : 1,
+                currentData : foundFriend
+              })
+            }else{
+              // console.log("** Data found but didnt match with criteria, hence API call is required",foundFriend)
+              resolve({
+                status : 2,
+                currentData : foundFriend
+              })  
+            }
+          }else{
+            // console.log("** No match and no data found, hence API call is required")
+            resolve({
+              status : 0,
+              currentData : []
+            })
+          }
+        }else{
+          // console.log("** No match and no data found, hence API call is required")
+          resolve({
+            status : 0,
+            currentData : []
+          })
+        }
+      })
     }
-    fetch(process.env.REACT_APP_GENDER_COUNTRY_AND_TIER_URL, {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        "name": friend.name,
-      }),
-    })
-    .then((response) => response.json())
-    .then((res) => {
-      const resp = res.data ? res.data : res;
+    async function fetchGenderCountryTier (friend){
+      return new Promise((resolve,reject)=>{
+        fetch(process.env.REACT_APP_GENDER_COUNTRY_AND_TIER_URL, {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            "name": friend.name,
+          }),
+        })
+        .then((response) => response.json())
+        .then((res) => {
+          const resp = res.data ? res.data : res;
+  
+          if (!resp.errorType) {
+            
+            resolve({
+              status : true,
+              country : res.body.countryName,
+              tier : res.body.Tiers
+            })
+          }  
+        })
+        .catch((err) => {
+          resolve({
+            status : false,
+            country : "",
+            tier : ""
+          })
+          console.log("err ::: ", err);
+        });
+      })
+    }
+
+    let friendList = request.friendList;
+    let fbUserId = request.fbUserId;
+    let listLen = friendList.length;
+
+    if (!listLen) return false;
+    let updateFriendPayload = [];
+    let totalGenderAPIHits = 0
+    let totalLocalfetchs = 0
+    for (let i = 0; i < listLen; i++) {
+      let friend = friendList[i];
       let friendPayload = {
         friendFbId: friend.id,
         country: "N/A",
         tier: "N/A"
-      }
+      } 
+      if (i % 500 === 0) {
+        console.log("lets sleep")
+        await helper.sleep(1000*5)
+     }
+     
+     let exFriendData = await checkExsistingData(friend)
+     if(exFriendData.status != 1){
+       let fetchGenderAPI = await fetchGenderCountryTier(friend)
+       if(fetchGenderAPI.status){
+         friendPayload.country = fetchGenderAPI.country 
+         friendPayload.tier = fetchGenderAPI.tier
+         totalGenderAPIHits++
+         console.log("payload from Gender API",friendPayload)
+         updateFriendPayload.push(friendPayload);
+       }
 
-      if (!resp.errorType) {
-        friendPayload.country = res.body.countryName;
-        friendPayload.tier = res.body.Tiers
-      }
+     }else{
+      totalLocalfetchs++
+       friendPayload.country = exFriendData.currentData.country;
+       friendPayload.tier = exFriendData.currentData.tier
+       // friendPayload.friendGender = exFriendData.friendGender
+       console.log("payload from local data",friendPayload)
+       updateFriendPayload.push(friendPayload);
+     }
 
-      updateFriendPayload.push(friendPayload);
-
-      if (i + 1 === listLen) {
-        // console.log("Country List", updateFriendPayload);
-        setTimeout( () => {
-          console.log("Update country and Tier")
-          updateFriendList(updateFriendPayload, fbUserId)
-        },2000)
-      }
-
-    })
-    .catch((err) => {
-      console.log("err ::: ", err);
-    });
+     if (i + 1 === listLen) {
+      // console.log("Country List", updateFriendPayload);
+      setTimeout( () => {
+        console.log("totalGenderAPIhits ::",totalGenderAPIHits)
+        console.log("totalLocalfetchs ::",totalLocalfetchs)
+        console.log("Update country and Tier",updateFriendPayload)
+        updateFriendList(updateFriendPayload, fbUserId)
+      },2000)
+    }
+   }
   }
+
+
+  let fr_token = await helper.getDatafromStorage("fr_token");
+   fetch(process.env.REACT_APP_FETCH_EX_FRIENDS,{
+    method : "POST",
+    mode :"cors",
+    headers : {
+      "Content-Type" : "application/json",
+      "authorization": fr_token,
+    },
+    body : JSON.stringify({
+      fbUserId : request.fbUserId
+    })
+   })
+   .then((response) => response.json())
+   .then((res) => { 
+    if(res && res.data!=undefined && res.data.length && res.data[0].friend_details!=undefined && res.data[0].friend_details.length){
+      console.log("friend list present***",res.data[0].friend_details)
+      proceedToUpdateGenderCountryAndTier(res.data[0].friend_details)
+    }else{
+      console.log("Else block : friend list not present")
+      proceedToUpdateGenderCountryAndTier()      
+    }
+   })
+   .catch(error=>{
+     console.log("error block so directly fetching gender country and tier",error)
+     proceedToUpdateGenderCountryAndTier()
+   })
 }
+
+
 
 const updateFriendList = async (friendList, fbProfileId) => {
   let fr_token = await helper.getDatafromStorage("fr_token");
