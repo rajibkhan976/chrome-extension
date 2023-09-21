@@ -56,6 +56,29 @@ export const prioritySubDMFValue = (updatePrioritySubDmf) => {
   });
 }
 
+/**
+ * fetching all message groups
+ */
+export const fetchMesssageGroups = () => {
+  return new Promise(async (resolve, reject) => {
+    const token = await helper.getDatafromStorage("fr_token");
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+    };
+    axios
+      .get(process.env.REACT_APP_FETCH_MESSAGE_GROUPS, config)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        resolve(err);
+      });
+  });
+}
+
 
 
 

@@ -89,7 +89,7 @@ export const requestFormSettings = {
             {
               text: "Limited",
             },
-           
+
           ],
 
           fieldOptions: [
@@ -223,14 +223,32 @@ export const requestFormSettings = {
           ],
         },
         {
-          type: "stepInput",
+          type: "select",
           isLabeled: true,
           inLabel: "Select Tier",
           valid: true,
           name: "tier_filter_value",
-        //sggArray: tier_list,
-        //valueArr: [],
-          value:1,
+          value: "1",
+          //sggArray: tier_list,
+          //valueArr: [],
+          options: [
+            {
+              selected: true,
+              label: "Tier 1",
+              value: "1",
+            },
+            {
+              selected: false,
+              label: "Tier 2",
+              value: "2",
+            },
+            {
+              selected: false,
+              label: "Tier 3",
+              value: "3",
+            },
+          ],
+
         },
         {
           type: "fillinputCF",
@@ -327,21 +345,23 @@ export const requestFormSettings = {
         },
       ],
     },
+    //send_message -> true / false
+    // message_group_id -> objectId
     {
       label: "Send message",
       headerCheckbox: true,
       name: "send_message",
-      recursive: false,
+      recursive: true,
       isActive: false,
       valid: true,
       fieldOptions: [
         {
-          type: "select",
+          type: "customSelect",
           isLabeled: false,
           valid: true,
-          name: "send_message_value",
-          value: "Please select the message",
-          
+          name: "message_group_id",
+          value: "Select",
+
           options: [
             // {
             //   selected: true,
@@ -483,6 +503,8 @@ export const fr_Req_Payload = {
   resume_last_search: false,
   resume_last_search_position: "",
   advanced_settings: false,
+  send_message: false,
+  message_group_id: "",
   dont_send_friend_requests_prople_ive_been_friends_with_before: false,
   dont_send_friend_requests_prople_who_send_me_friend_request_i_rejected: false,
   dont_send_friend_requests_prople_i_sent_friend_requests_they_rejected: false,

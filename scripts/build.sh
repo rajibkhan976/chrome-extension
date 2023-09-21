@@ -7,7 +7,8 @@ build() {
     appVersion=$(jq .version public/manifest.json)
     appVersion="${appVersion%\"}"
     appVersion="${appVersion#\"}"
-    echo "Building your awesome ${appName} V${appVersion} extension"
+    current_date=$(date)=$(date)
+    echo "Building your awesome ${appName} V${appVersion} extension T: ${current_date}"
 
     # rm -rf src/images
     # mkdir -p src/images

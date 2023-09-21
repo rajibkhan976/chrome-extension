@@ -21,7 +21,7 @@ const FindData = (child, parent, level) => {
 };
 
 export const syncFromApi = (apiObj, uiObj, setUiObj) => {
-  var startTime = performance.now();
+  // var startTime = performance.now();
   // console.log("sycning started......before obj", uiObj);
   const newFromObj = { ...uiObj };
   Object.entries(apiObj).forEach(([apiKey, apiValue]) => {
@@ -79,7 +79,7 @@ export const syncFromApi = (apiObj, uiObj, setUiObj) => {
   });
   // console.log(">>>>+++=====---=========;;;;newFromObj end ????", newFromObj);
   setUiObj(newFromObj);
-  var endTime = performance.now();
+  // var endTime = performance.now();
   // console.log(
   //   `Total execution time of sycing  function:::[${
   //     endTime - startTime
@@ -88,13 +88,13 @@ export const syncFromApi = (apiObj, uiObj, setUiObj) => {
 };
 
 export const syncPayload = (apiObj, payloadObj, setPayload) => {
-  // console.log("payload sync started", payloadObj);
+  console.log("payload sync started", payloadObj);
   const newObj = { ...payloadObj };
   Object.entries(newObj).forEach(([key]) => {
     newObj[key] = apiObj[key];
   });
 
-  // console.log("payload sync ended", apiObj);
+  console.log("payload sync ended", newObj);
   setPayload(newObj);
 };
 const FindInValid = (data) => {
@@ -122,6 +122,7 @@ const FindValidInRec = (data) => {
   }
 };
 export const checkValidity = (dataObj, setdata) => {
+  console.log("direct data obj:____>>", dataObj);
   let valid = true;
   let data = { ...dataObj };
   for (const fidx in data.fields) {
@@ -144,8 +145,8 @@ export const checkValidity = (dataObj, setdata) => {
               if (data.fields[fidx].fieldOptions[0].value === "Tier Level") {
                 if (
                   data.fields[fidx].fieldOptions[chidx].name ===
-                    "tier_filter_value" &&
-                  data.fields[fidx].fieldOptions[chidx].valueArr.length === 0
+                  "tier_filter_value" &&
+                  data.fields[fidx].fieldOptions[chidx]?.value.length === 0
                 ) {
                   valid = false;
                   data.fields[fidx].fieldOptions[chidx].valid = false;
@@ -155,7 +156,7 @@ export const checkValidity = (dataObj, setdata) => {
               ) {
                 if (
                   data.fields[fidx].fieldOptions[chidx].name ===
-                    "country_filter_value" &&
+                  "country_filter_value" &&
                   data.fields[fidx].fieldOptions[chidx].valueArr.length === 0
                 ) {
                   valid = false;
@@ -209,7 +210,7 @@ export const removeEle = (mainObj, removeArr) => {
     resolve(newObj);
   });
 };
-export const createApiPayload = (apiObj, uiObj) => {};
+export const createApiPayload = (apiObj, uiObj) => { };
 
 export function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);

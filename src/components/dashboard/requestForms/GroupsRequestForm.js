@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import helper from "../../../extensionScript/helper";
-import { getFrndReqSet,getProfileSettings } from "../../../service/FriendRequest";
+import { getFrndReqSet, getProfileSettings } from "../../../service/FriendRequest";
 
 import {
   Bolt,
@@ -40,7 +40,8 @@ import {
 } from "../../../helper/fr-setting";
 import AutomationStats from "../../shared/AutomationStats";
 import { BoxOutIcon, ChevronDownArrowIcon, ChevronUpArrowIcon, InfoIcon, ServerError, ServerSuccess } from "../../../assets/icons/Icons";
-
+import CustomSelectBox from "../../shared/CustomSelectBox";
+const Webview_URL = process.env.REACT_APP_APP_URL;
 ///Zone crusial funtion to change input box value
 export const findData = (child, parent, level) => {
   if (!parent.fieldOptions) {
@@ -103,17 +104,17 @@ const GroupsRequestForm = ({
       // console.log("isPauedThenRun ::: ", isPauedThenRun)
       setIsPaused(isPauedThenRun === "pause" ? true : false);
       // if(isPauedThenRun !== "pause" )
-        resetToDefaultSetting()
+      resetToDefaultSetting()
     })();
   }, []);
 
-useEffect(()=>{
-  // console.log("paused ??? ", isPaused)
-  // if(isPaused === false){
+  useEffect(() => {
+    // console.log("paused ??? ", isPaused)
+    // if(isPaused === false){
     // console.log("paused nope")
     resetToDefaultSetting()
-  // }
-},[isPaused])
+    // }
+  }, [isPaused])
 
   // const displayServerMessageFn = () => {
   //   setOpenNotification(true);
@@ -170,10 +171,10 @@ useEffect(()=>{
     const currentProfilesFromDatabase =
       getCurrentFbProfile.length > 0
         ? getCurrentFbProfile.filter(
-            (el) =>
-              el &&
-              el?.fb_user_id?.toString() === fbTokenAndId?.userID?.toString()
-          )
+          (el) =>
+            el &&
+            el?.fb_user_id?.toString() === fbTokenAndId?.userID?.toString()
+        )
         : [];
     // console.log("currentProfilesFromDatabase::: ", currentProfilesFromDatabase)
     if (currentProfilesFromDatabase.length > 0) {
@@ -211,7 +212,7 @@ useEffect(()=>{
       }
       // console.log("resSettings ::: ", resSettings?.data);
       if (resSettings?.data) {
-        const profileSettings=await getProfileSettings();
+        const profileSettings = await getProfileSettings();
         //console.log("profile my seetingsss data :::", profileSettings)
         // const isPauedThenRun = await helper.getDatafromStorage("runAction");
         // console.log("isPauedThenRun ::: ", isPauedThenRun);
@@ -277,30 +278,30 @@ useEffect(()=>{
 
   const resetToDefaultSetting = async () => {
     const isPauedThenRun = await helper.getDatafromStorage("runAction");
-    if(isPauedThenRun !== "pause" ){
-        getFrndReqSet()
-          .then((res) => {
-            const apiObj = res.data.data;
-            // console.log("The api of friend req set>>>///||||\\\\:::", apiObj);
-            // setFriendReqSet(apiObj[0]);
-            if (apiObj?.length > 0) {
-              syncPayload(apiObj[0], settingApiPayload, setSettingApiPayload);
-              removeEle(apiObj[0], removeforBasic).then((response) => {
-                // console.log("[[[[[[[[[[_____>>>>after rrrreeemove", response);
-                syncFromApi(response, formSetup, setFormSetup);
-                setIsLoding(false);
-              });
-              // generateFormElements();
-            } else {
+    if (isPauedThenRun !== "pause") {
+      getFrndReqSet()
+        .then((res) => {
+          const apiObj = res.data.data;
+          // console.log("The api of friend req set>>>///||||\\\\:::", apiObj);
+          // setFriendReqSet(apiObj[0]);
+          if (apiObj?.length > 0) {
+            syncPayload(apiObj[0], settingApiPayload, setSettingApiPayload);
+            removeEle(apiObj[0], removeforBasic).then((response) => {
+              // console.log("[[[[[[[[[[_____>>>>after rrrreeemove", response);
+              syncFromApi(response, formSetup, setFormSetup);
               setIsLoding(false);
-              
-              setSettingApiPayload(fr_Req_Payload);
-              setFormSetup(requestFormSettings);
-            }
-          })
-          .catch((err) => {
-            // console.log("Error happened in Setting api call:::", err);
-          });
+            });
+            // generateFormElements();
+          } else {
+            setIsLoding(false);
+
+            setSettingApiPayload(fr_Req_Payload);
+            setFormSetup(requestFormSettings);
+          }
+        })
+        .catch((err) => {
+          // console.log("Error happened in Setting api call:::", err);
+        });
       // if (friendReqSet) {
       //   syncPayload(friendReqSet, settingApiPayload, setSettingApiPayload);
       //   removeEle(friendReqSet, removeforBasic).then((response) => {
@@ -311,7 +312,7 @@ useEffect(()=>{
       //   setSettingApiPayload(fr_Req_Payload);
       //   setFormSetup(requestFormSettings);
       // }
-    }else{
+    } else {
       const runningSettings = await helper.getDatafromStorage(
         "curr_reqSettings"
       );
@@ -522,6 +523,49 @@ useEffect(()=>{
     setFormSetup(newObj);
     generateFormElements();
   };
+
+  /**
+   * fuction to handle custon select click
+   * @param {{label: string,value: string}} value 
+   * @param {*} ele 
+   */
+  const handleCustomSelectClick = (value, ele) => {
+    // console.log("valuw,.,.,.,.,<><><>", value);
+
+    //const optionObj = JSON.parse(value);
+
+    let formSetPlaceholder = { ...formSetup };
+    const newObj = {
+      ...formSetPlaceholder,
+      fields: formSetPlaceholder?.fields?.map((item) => {
+        return {
+          ...item,
+          fieldOptions: item.fieldOptions?.map((itemCh) => {
+            if (ele.name === itemCh.name) {
+              if (ele.type === itemCh.type) {
+                itemCh.value = value.value;
+              }
+              // itemCh.valueArr = value.keys;
+              if (itemCh.value?.length >= 0) {
+                itemCh.valid = true;
+              } else if (itemCh.value?.length === 0) {
+                itemCh.valid = false;
+              }
+              setSettingApiPayload((prevState) => ({
+                ...prevState,
+                [ele.name]: value.value,
+              }));
+            }
+
+            return itemCh;
+          }),
+        };
+      }),
+    };
+
+    setFormSetup(newObj);
+    generateFormElements();
+  };
   const fillInputChange = (value, ele) => {
     let formSetPlaceholder = { ...formSetup };
     // console.log("e keke ke", e);
@@ -555,9 +599,9 @@ useEffect(()=>{
     generateFormElements();
   };
 
-  const fillInputChangeStepwise = (ele,type) => {
+  const fillInputChangeStepwise = (ele, type) => {
     let formSetPlaceholder = { ...formSetup };
-  
+
     const numericValue = parseFloat(ele.value);
     const newObj = {
       ...formSetPlaceholder,
@@ -566,10 +610,10 @@ useEffect(()=>{
           ...item,
           fieldOptions: item.fieldOptions.map((itemCh) => {
             if (ele.type === itemCh.type && ele.name === itemCh.name) {
-              itemCh.value = type==="+"?numericValue+1:numericValue-1;
+              itemCh.value = type === "+" ? numericValue + 1 : numericValue - 1;
               //if (ele.type !== "fillinput" && ele.type !== "fillinputCF") {
-                itemCh.valid = !isNaN(numericValue);
-              
+              itemCh.valid = !isNaN(numericValue);
+
             }
             return itemCh;
           }),
@@ -712,7 +756,7 @@ useEffect(()=>{
     generateFormElements();
   };
 
-  const inputValueChangeStepWise = (ele,type) => {
+  const inputValueChangeStepWise = (ele, type) => {
     let formSetPlaceholder = { ...formSetup };
     formSetPlaceholder.fields.forEach((formItem, idx) => {
       //Recursive function to find the object
@@ -720,11 +764,11 @@ useEffect(()=>{
 
       if (found) {
         //Recursive function to change the value of object
-        const newObj = changeData(formItem, found, type==="+"?ele.value+1:ele.value-1);
+        const newObj = changeData(formItem, found, type === "+" ? ele.value + 1 : ele.value - 1);
 
         setSettingApiPayload((prevState) => ({
           ...prevState,
-          [ele.name]: type==="+"?ele.value+1:ele.value-1,
+          [ele.name]: type === "+" ? ele.value + 1 : ele.value - 1,
         }));
 
         formSetPlaceholder.fields[idx] = newObj;
@@ -735,8 +779,8 @@ useEffect(()=>{
     generateFormElements();
   };
 
-  
-  useEffect(() => {}, [settingApiPayload]);
+
+  useEffect(() => { }, [settingApiPayload]);
 
   const syncKeyWord = (ele) => {
     let formSetPlaceholder = { ...formSetup };
@@ -1024,20 +1068,19 @@ useEffect(()=>{
         case "select":
           return (
             <div
-              className={`fr-req-element fr-req-el-${element.type} ${
-                element.isLabeled ? "fr-req-fieldset" : ""
-              }`}
+              className={`fr-req-element fr-req-el-${element.type} ${element.isLabeled ? "fr-req-fieldset" : ""
+                }`}
             >
               {element.isLabeled ? <label>{element.inLabel}</label> : ""}
               <select
                 className={
-                  element.isLabeled
+                  ` ${element.isLabeled
                     ? "fr-select-basic fr-select-basic-labeled"
-                    : "fr-select-basic"
+                    : "fr-select-basic"}`
                 }
                 value={element.value}
                 // {element&&element.option.length>0?disabled}
-                disabled={element&&element.options&&element.options.length<=0?true:false}
+                disabled={element && element.options && element.options.length <= 0 ? true : false}
                 onChange={(e) => selectValueChange(e.target.value, element)}
               >
                 {element.options.map((item, idx) => (
@@ -1046,8 +1089,64 @@ useEffect(()=>{
                   </option>
                 ))}
               </select>
-              {element.name==="send_message_value"&&<div className="fr-req-nomessage-text">
-<InfoIcon/> You haven’t created any message group yet. <span>Create group <BoxOutIcon/></span> </div>}
+              {element.name === "message_group_id" && element && element.options && element.options.length <= 0 && <div className="fr-req-nomessage-text">
+                <InfoIcon /> You haven’t created any message group yet. <span><a
+                  href={`${Webview_URL}/messages/groups`}
+                  target="_blank">Create group<BoxOutIcon /></a></span> </div>}
+              {element?.fieldOptions &&
+                generateElements(
+                  element?.fieldOptions && element?.fieldOptions[0]
+                )}
+            </div>
+          );
+
+        case "customSelect":
+          return (
+            <div
+              className={`fr-req-element fr-req-el-${element.type} ${element.isLabeled ? "fr-req-fieldset" : ""
+                }${!element.valid ? "not_valid" : ""}`}
+            >
+              {element.isLabeled ? <label>{element.inLabel}</label> : ""}
+              <div className={`${element.isLabeled
+                  ? "fr-customSelect-basic fr-customSelect-basic-labeled"
+                  : "fr-customSelect-basic"
+
+                } ${element && element.options && element.options.length === 0 ? "disable" : ""}`}
+                disabled={element && element.options && element.options.length <= 0 ? true : false}
+
+              >
+
+                <CustomSelectBox
+                  needSearchBar={true}
+                  element={element}
+                  onClickOption={handleCustomSelectClick}
+                />
+              </div>
+              {!element.valid && (
+                <p className="error-msg">Field can't be empty or '0'!</p>
+              )}
+
+              {/* <select
+                className={
+                  element.isLabeled
+                    ? "fr-customSelect-basic fr-customSelect-basic-labeled"
+                    : "fr-customSelect-basic"
+                }
+                value={element.value}
+                // {element&&element.option.length>0?disabled}
+                disabled={element && element.options && element.options.length <= 0 ? true : false}
+                onChange={(e) => selectValueChange(e.target.value, element)}
+              >
+                {element.options.map((item, idx) => (
+                  <option value={item.value} key={idx}>
+                    {item.label}
+                  </option>
+                ))}
+              </select> */}
+              {element.name === "message_group_id" && element && element.options && element.options.length <= 0 && <div className="fr-req-nomessage-text">
+                <InfoIcon /> You haven’t created any message group yet. <span><a
+                  href={`${Webview_URL}/messages/groups`}
+                  target="_blank">Create group<BoxOutIcon /></a></span> </div>}
               {element?.fieldOptions &&
                 generateElements(
                   element?.fieldOptions && element?.fieldOptions[0]
@@ -1076,7 +1175,7 @@ useEffect(()=>{
                   </>
                 ))}
                 {element?.options?.length > 0 &&
-                  element?.options[0]?.text === element.value &&
+                  element?.options[1]?.text === element.value &&
                   element?.fieldOptions &&
                   generateElements(
                     element?.fieldOptions && element?.fieldOptions[0]
@@ -1117,9 +1216,8 @@ useEffect(()=>{
         case "input":
           return (
             <div
-              className={`fr-req-element fr-req-el-${element.type} ${
-                element.isLabeled ? "fr-req-fieldset" : ""
-              }  ${!element.valid ? "not_valid" : ""}`}
+              className={`fr-req-element fr-req-el-${element.type} ${element.isLabeled ? "fr-req-fieldset" : ""
+                }  ${!element.valid ? "not_valid" : ""}`}
             >
               {element.isLabeled ? <label>{element.inLabel}</label> : ""}
               <input
@@ -1141,71 +1239,72 @@ useEffect(()=>{
               )}
             </div>
           );
-          case "stepInput":
-            return (
-              <div
-                className={`fr-req-element fr-req-el-${element.type} ${
-                  element.isLabeled ? "fr-req-lebel" : ""
+        case "stepInput":
+          return (
+            <div
+              className={`fr-req-element fr-req-el-${element.type} ${element.isLabeled ? "fr-req-lebel" : ""
                 }  ${!element.valid ? "not_valid" : ""}`}
-              >
-                {element.isLabeled ? <label>{element.inLabel}</label> : ""}
-                <input
-                  type="number"
-                  maxlength="6"
-                  min={1}
-                  max={9999}
-                  step="1"
-                  className={
-                    element.isLabeled
-                      ? "fr-input-basic fr-input-basic-labeled"
-                      : "fr-input-basic"
+            >
+              {element.isLabeled ? <label>{element.inLabel}</label> : ""}
+              <input
+                type="number"
+                maxlength="6"
+                min={1}
+                max={9999}
+                step="1"
+                className={
+                  element.isLabeled
+                    ? "fr-input-basic fr-input-basic-labeled"
+                    : "fr-input-basic"
+                }
+                value={element.value}
+                onChange={(e) => {
+
+                  if (element.name === "tier_filter_value") {
+                    fillInputChange(e.target.value, element)
+                  } else {
+                    inputValueChange(element, e.target.value)
                   }
-                  value={element.value}
-                  onChange={(e) => {
-                   
-                    if(element.name==="tier_filter_value"){
-                      fillInputChange(e.target.value,element)
-                    }else{
-                      inputValueChange(element, e.target.value)
-                    }}}
-                  onKeyPress={handleKeyPress}
-                />
-                 <div className="input-arrows">
-                  <button className="btn inline-btn btn-transparent"
+                }}
+                onKeyPress={handleKeyPress}
+              />
+              <div className="input-arrows">
+                <button className="btn inline-btn btn-transparent"
 
-                      onClick={(e) => {
-                      if(element.name==="tier_filter_value"){
-                        fillInputChangeStepwise(element,"+")
-                      }else{
-                        inputValueChangeStepWise(element,"+")
-                      }}}
-                    // onClick={() => inputValueChangeStepWise(element,"+")}
-                  >
-                    <ChevronUpArrowIcon size={15} />
-                  </button>
+                  onClick={(e) => {
+                    if (element.name === "tier_filter_value") {
+                      fillInputChangeStepwise(element, "+")
+                    } else {
+                      inputValueChangeStepWise(element, "+")
+                    }
+                  }}
+                // onClick={() => inputValueChangeStepWise(element,"+")}
+                >
+                  <ChevronUpArrowIcon size={15} />
+                </button>
 
-                  <button className="btn inline-btn btn-transparent"
-                     onClick={(e) => {
-                      if(element.name==="tier_filter_value"){
-                        fillInputChangeStepwise(element,"-")
-                      }else{
-                        inputValueChangeStepWise(element,"-")
-                      }}}
-                  >
-                    <ChevronDownArrowIcon size={15} />
-                  </button>
-                </div>
-                {!element.valid && (
-                  <p className="error-msg">Field can't be empty or '0'!</p>
-                )}
+                <button className="btn inline-btn btn-transparent"
+                  onClick={(e) => {
+                    if (element.name === "tier_filter_value") {
+                      fillInputChangeStepwise(element, "-")
+                    } else {
+                      inputValueChangeStepWise(element, "-")
+                    }
+                  }}
+                >
+                  <ChevronDownArrowIcon size={15} />
+                </button>
               </div>
-            );
+              {!element.valid && (
+                <p className="error-msg">Field can't be empty or '0'!</p>
+              )}
+            </div>
+          );
         case "fillinputCF":
           return (
             <div
-              className={`fr-req-element fr-req-el-${element.type} ${
-                element.isLabeled ? "fr-req-fieldset" : ""
-              } ${!element.valid ? "not_valid" : ""}`}
+              className={`fr-req-element fr-req-el-${element.type} ${element.isLabeled ? "fr-req-fieldset" : ""
+                } ${!element.valid ? "not_valid" : ""}`}
             >
               {element.isLabeled ? <label>{element.inLabel}</label> : ""}
 
@@ -1248,9 +1347,8 @@ useEffect(()=>{
         case "fillinput":
           return (
             <div
-              className={`fr-req-element fr-req-el-${element.type} ${
-                element.isLabeled ? "fr-req-fieldset" : ""
-              } ${!element.valid ? "not_valid" : ""}`}
+              className={`fr-req-element fr-req-el-${element.type} ${element.isLabeled ? "fr-req-fieldset" : ""
+                } ${!element.valid ? "not_valid" : ""}`}
             >
               {element.isLabeled ? <label>{element.inLabel}</label> : ""}
 
@@ -1300,9 +1398,8 @@ useEffect(()=>{
         case "selectInput":
           return (
             <div
-              className={`fr-req-element fr-req-el-${element.type} ${
-                element.isLabeled ? "fr-req-fieldset" : ""
-              }`}
+              className={`fr-req-element fr-req-el-${element.type} ${element.isLabeled ? "fr-req-fieldset" : ""
+                }`}
             >
               {element.isLabeled ? <label>{element.inLabel}</label> : ""}
 
@@ -1358,15 +1455,14 @@ useEffect(()=>{
                 }
               </div>
               <span
-                className={`btn-selectInput btn-right ${
-                  element.value.length === 0 ||
+                className={`btn-selectInput btn-right ${element.value.length === 0 ||
                   element.valueArr.length === 0 ||
                   !element.valid ||
                   element.options.filter((el) => el.label === element.value)
                     .length > 0
-                    ? "disable"
-                    : ""
-                }`}
+                  ? "disable"
+                  : ""
+                  }`}
                 onClick={() => {
                   if (
                     element.value.length === 0 ||
@@ -1420,7 +1516,7 @@ useEffect(()=>{
             </h5>
           </header>
           {(formCell.headerCheckbox && formCell.isActive) ||
-          !formCell.headerCheckbox ? (
+            !formCell.headerCheckbox ? (
             <div className="fr-cell-content">
               {formCell.fieldOptions.map((item, idx) => {
                 if (item.name === "tier_filter_value") {
@@ -1475,7 +1571,7 @@ useEffect(()=>{
         btnText={"Save"}
         cancelBtnTxt={"Don't Save"}
         resetFn={() => {
-            resetToDefaultSetting()
+          resetToDefaultSetting()
         }}
       />
       {openSuccessNotification && (
@@ -1502,7 +1598,7 @@ useEffect(()=>{
                       direction="bottom"
                       type="info"
                     />
-                  </h4> <p> {friendReqSet&&friendReqSet.settings_name&&  "Version:"+friendReqSet.settings_name.split("-")[1]}</p>
+                  </h4> <p> {friendReqSet && friendReqSet.settings_name && "Version:" + friendReqSet.settings_name.split("-")[1]}</p>
                   {/* <span className="req-setting-version">Default</span> */}
                 </div>
 
@@ -1526,8 +1622,8 @@ useEffect(()=>{
                       {settingApiPayload.look_up_interval === "auto"
                         ? settingApiPayload.look_up_interval
                         : settingApiPayload.look_up_interval === ".5"
-                        ? "30 sec"
-                        : settingApiPayload.look_up_interval + " min"}{" "}
+                          ? "30 sec"
+                          : settingApiPayload.look_up_interval + " min"}{" "}
                     </h4>
                     <p>Lookup interval</p>
                   </div>
@@ -1568,10 +1664,10 @@ useEffect(()=>{
 
                     {settingApiPayload.tier_filter && (
                       <div className="req-setting-text">
-                        {settingApiPayload.tier_filter_value?.length > 0
-                          ? settingApiPayload.tier_filter_value.map((item) => (
-                              <h4>{item}</h4>
-                            ))
+                        {settingApiPayload?.tier_filter_value
+                          ? <h4> {settingApiPayload.tier_filter_value}
+                          </h4>
+
                           : "N/A"}
                         <p>Tier level</p>
                       </div>
@@ -1580,8 +1676,8 @@ useEffect(()=>{
                       <div className="req-setting-text">
                         {settingApiPayload.country_filter_value?.length > 0
                           ? settingApiPayload.country_filter_value.map(
-                              (item) => <h4>{item}</h4>
-                            )
+                            (item) => <h4>{item}</h4>
+                          )
                           : "N/A"}
                         <p>Country level</p>
                       </div>
@@ -1596,8 +1692,8 @@ useEffect(()=>{
                     <div className="req-setting-text">
                       {settingApiPayload.selected_keywords?.length > 0
                         ? settingApiPayload.selected_keywords.map((item) => (
-                            <h4>{item}</h4>
-                          ))
+                          <h4>{item}</h4>
+                        ))
                         : "N/A"}
                       <p>Keywords</p>
                     </div>
@@ -1611,10 +1707,10 @@ useEffect(()=>{
                     <div className="req-setting-text">
                       {settingApiPayload.selected_negative_keywords?.length > 0
                         ? settingApiPayload.selected_negative_keywords.map(
-                            (item, index) => (
-                              <h4 key={index}>{item ? item : "Keywords"}</h4>
-                            )
+                          (item, index) => (
+                            <h4 key={index}>{item ? item : "Keywords"}</h4>
                           )
+                        )
                         : "N/A"}
                       <p>Negative keywords</p>
                     </div>
@@ -1672,7 +1768,7 @@ useEffect(()=>{
           </footer>
         )}
       </div>
-      
+
       {isEditing && (
         <>
           {/* {editType === "basic" && 

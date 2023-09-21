@@ -327,6 +327,75 @@
     }
   }
 
+//   .fr-req-nomessage-text{
+//     background: linear-gradient(90deg, rgba(255, 230, 0, 0.15) 0%, rgba(255, 230, 0, 0.00) 100%);
+//     margin-top: 10px;
+//     border-radius: 5px;
+//     padding:  5px 10px;
+//     font-size: 10px;
+//     display: flex;
+//       align-items: center;
+      
+// color: var(--foundation-color-yellow-yellow-6, #F2BA2A);
+//     span{
+//       color: var(--dark-primary-blue, #0094FF);
+//       margin-left: 10px;
+//       display: flex;
+//       align-items: center;
+//       svg{
+//         margin-left: 5px;
+//       }
+//     }
+//   }
+}
+
+//custom select
+.fr-req-el-customSelect {
+  position: relative;
+
+  .fr-customSelect-basic {
+    height: 30px;
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: #bdbdbd;
+    // padding-inline: 12px;
+    // padding-right: 25px;
+    -webkit-appearance: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    @include theme-aware("background-color", "main-container-bg");
+    @include border-radius(5px);
+    // background-image: url("../../../svg/arrow-down-filled.svg");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+
+    
+  }
+
+  .fr-customSelect-basic:not(.disable) {
+      /* Styles for when "disabled" class is not present */
+        &:hover,
+        &:focus {
+          @include theme-aware("border-color", "active-color");
+          @include theme-aware("background-color", "select-basic-hover-bg");
+        }
+    }
+
+  .fr-customSelect-basic-labeled {
+    height: 40px;
+    @include theme-aware("background-color", "labeled-select-bg");
+    border: 1px solid;
+    // @include theme-aware('border-color', 'labeled-select-border');
+    border-color: rgba($themeSecondaryGrey10, 0.3);
+    @include border-radius(10px);
+    &:hover,
+    &:focus {
+      @include theme-aware("border-color", "active-color");
+      @include theme-aware("background-color", "select-basic-hover-bg");
+    }
+  }
+
   .fr-req-nomessage-text{
     background: linear-gradient(90deg, rgba(255, 230, 0, 0.15) 0%, rgba(255, 230, 0, 0.00) 100%);
     margin-top: 10px;
@@ -342,12 +411,18 @@ color: var(--foundation-color-yellow-yellow-6, #F2BA2A);
       margin-left: 10px;
       display: flex;
       align-items: center;
+      a{
+        color: var(--dark-primary-blue, #0094FF);
+      }
       svg{
         margin-left: 5px;
       }
     }
   }
 }
+
+//custom select end
+
 
 .fr-req-el-input {
   position: relative;
@@ -1146,6 +1221,13 @@ color: var(--foundation-color-yellow-yellow-6, #F2BA2A);
       border-color: #ff6a77;
     }
   }
+  .fr-customSelect-basic{
+     border-color: #ff6a77;
+    &:hover,
+    &:focus {
+      border-color: #ff6a77;
+    }
+  }
   p {
     margin-top: 5px;
     color: #ff6a77;
@@ -1357,3 +1439,196 @@ color: var(--foundation-color-yellow-yellow-6, #F2BA2A);
   }
 }
 //custom select dropdown style end
+
+//custom selectBox start
+.custom-selectBox {
+  height: 100%;
+  width:100%;
+  background-color: transparent;
+  border: none;
+  
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  @include theme-aware("color", "text-color");
+ // background-image: url("../../../svg/arrow-down-filled.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  position: relative;
+  &::-ms-expand {
+    display: none;
+  }
+  .custom-selectBox-text{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding-inline: 12px;
+    justify-content: space-between;
+    background-color: transparent;
+    border: none;
+    
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+      .custom-selectBox-drop{
+        height: 100%;
+        display: flex;
+       align-items: center;
+      }
+  }
+  ul {
+    z-index: 9;
+    position: absolute;
+    top: -203px;
+    left: -2px;
+    width: 344px;
+    padding: 5px;
+    height: 200px;
+    overflow-y: auto;
+    border-radius: 5px;
+    border: 1px solid var(--foundation-color-black-black-7, #1A1A1A);
+    background: var(--dark-secondary-iab, #131314);
+
+    
+    //@include theme-aware("border-color", "$themeBlack3");
+   // @include theme-aware("background-color", "drop-background");
+    // @include border-radius(5px);
+    // background-image: url("../../../svg/arrow-down-filled.svg");
+    // background-repeat: no-repeat;
+    // background-position: right 15px center;
+
+    &:hover,
+    &:focus {
+      // @include theme-aware("border-color", "active-color");
+      // @include theme-aware("background-color", "select-basic-hover-bg");
+    }
+    .custom-select-list-search{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+        height: 32px;
+        width: 100%;
+        border-radius: 5px;
+        border: 1px dashed #313037;
+        background: #1C1C1E;
+        padding-inline: 11px 6px;
+        input {
+          color: var(--text-headings, #F0F1F2);
+          height: 100%;
+          width: 100%;
+          padding-left: 5px;
+          background-color: transparent;
+          border: none;
+          
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          appearance: none;
+        }
+    }
+
+    li {
+      @include theme-aware("color", "checkbox-border");
+      font-weight: 500;
+      font-size: 12px;
+      line-height: 16px;
+      letter-spacing: 0.01em;
+      margin: 2px 0;
+      padding: 7px 12px;
+      color: #bdbdbd;
+      border-radius: 5px;
+
+      &:hover,
+      &:focus {
+        @include theme-aware("background-color", "drop-option-background");
+        @include theme-aware("color", "info-well-text");
+      }
+    }
+
+    .not-found{
+      width: 100%;
+      height: 93%;
+      display:flex;
+      flex-direction: column;
+      justify-content:center;
+      align-items: center;
+      color: var(--dark-primary-it-100, #767485);
+    }
+  }
+}
+//custom selectBox end
+
+// tooltip css start 
+.full_text_tooltip {
+  position: relative;
+
+  &:before {
+    content: attr(data-text);
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    line-height: 15px;
+    min-width: 148px;
+    max-width: 300px;
+    width: auto;
+    overflow: auto;
+    font-size: 12px;
+    padding: 10px;
+    pointer-events: none;
+    background: #313037;
+    color: #fff;
+    justify-content: center;
+    display: flex;
+    opacity: 0;
+    transition: 0.5s;
+    visibility: hidden;
+    align-items: center;
+    flex-wrap: wrap;
+    box-shadow: 0 1px 6px 4px rgb(0 0 0 / 30%);
+    z-index: 100;
+    border-radius: 2px;
+    overflow-wrap: break-word;
+  }
+  &:after {
+    content: "";
+    left: 45%;
+    background: #313037;
+    rotate: 45deg;
+    opacity: 0;
+    transition: 0.5s;
+    visibility: hidden;
+    width: 13px;
+    height: 13px;
+    bottom: 27px;
+    position: absolute;
+    z-index: 101;
+  }
+  &:hover:before {
+    opacity: 1;
+    visibility: visible;
+    transition: 0.5s;
+  }
+  
+  &:hover:after {
+    opacity: 1;
+    visibility: visible;
+    transition: 0.5s;
+  }
+  &.small{
+    &:before {
+       width: 115px;
+    }
+  }
+  &.ageTooltip{
+    &:before {
+       width: 130px;
+       overflow-wrap: break-word;
+       content: 'Synced on \A' attr(data-text);
+       text-align: center;
+       letter-spacing: -0.3px;
+    }
+  }
+}
+//tooltip css end

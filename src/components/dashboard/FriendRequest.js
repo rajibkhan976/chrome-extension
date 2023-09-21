@@ -18,6 +18,7 @@ import helper from "../../extensionScript/helper";
 import AutomationRunner from "../shared/AutomationRunner";
 import { getFrndReqSet, getKeyWords } from "../../service/FriendRequest";
 import { removeEle, syncFromApi, syncPayload } from "../../helper/syncData";
+import { fetchMesssageGroups } from "../../service/messages/MessagesServices";
 export const removeforBasic = [
   "_id",
   "user_id",
@@ -83,11 +84,61 @@ const FriendRequest = (props) => {
   useEffect(() => {
     setRequestActive(null);
   }, [location.pathname]);
+  /**
+   * 
+   * @param {*} groupsArr 
+   */
+  const injectAGroupsOptionToFormSettings = (groupsArr) => {
+    if (groupsArr.length > 0) {
+      // console.log("hii data respwWWW>>>:", resdata);
+      let formSetPlaceholder = { ...formSetup };
+
+      const newObj = {
+        ...formSetPlaceholder,
+        fields: formSetPlaceholder.fields.map((item) => {
+          return {
+            ...item,
+            fieldOptions: item.name !== "send_message" ? item.fieldOptions : item.fieldOptions.map((itemCh) => {
+              if (
+                "message_group_id" === itemCh.name
+              ) {
+                // console.log("Got itemch name....>", itemCh.name);
+                // console.log("groups array", groupsArr);
+                itemCh.options = [];
+                groupsArr.forEach((item) => {
+                  itemCh.options.push({
+                    //selected: false,
+                    label: item.group_name,
+                    value: item._id,
+                    id: item._id,
+                  });
+
+                });
+              }
+              console.log("Final item-->>>>>", itemCh);
+              return itemCh;
+            }),
+          };
+        }),
+      };
+      setFormSetup(newObj);
+    }
+  }
+  useEffect(() => {
+    //console.log("form setup_____>", formSetup);
+  }, [formSetup])
 
   useEffect(() => {
     // console.log("i am re rendered......");
+    (async () => {
+      const allGroups = await fetchMesssageGroups();
+      injectAGroupsOptionToFormSettings(allGroups.data.data)
+    })()
+
+    // console.log("all groups", allGroups.data);
     getKeyWords()
       .then((res) => {
+        console.log("inside key_____>>", res);
         const resdata = res.data.data;
         // console.log("ressssssssssss", resdata.length);
         if (resdata.length > 0) {
@@ -160,7 +211,7 @@ const FriendRequest = (props) => {
       const runningSettings = await helper.getDatafromStorage(
         "curr_reqSettings"
       );
-        
+
       if (runningStatus === "pause" || runningStatus === "running") {
         if (runningSettings) {
           let curr_settingObj = JSON.parse(runningSettings);
@@ -209,10 +260,10 @@ const FriendRequest = (props) => {
     })();
   }, []);
 
-  
-  chrome.runtime.onMessage.addListener((request)=>{
+
+  chrome.runtime.onMessage.addListener((request) => {
     // console.log("request", request)
-    if(request.action === "curr_reqSettings"){
+    if (request.action === "curr_reqSettings") {
       // console.log("request", request)
       setSettingApiPayload({...JSON.parse(request.curr_reqSettings), is_settings_stop : false});
 
@@ -237,7 +288,7 @@ const FriendRequest = (props) => {
             marginLeft: requestActive && requestActive != null ? "10px" : 0,
           }}
         >
-          {requestActive === 'groups' ? 'Facebook groups' : requestActive === 'friendsfriend' ? 'Friends Friends': 'Sent Friend Request from'}
+          {requestActive === 'groups' ? 'Facebook groups' : requestActive === 'friendsfriend' ? 'Friends Friends' : 'Sent Friend Request from'}
         </p>
 
         <Tooltip textContent={setActiveText()} direction="left" />
