@@ -478,9 +478,13 @@ const saveFriendList = async (
         break;
       case "syncCompleted":
         chrome.runtime.sendMessage({
+          action: "sendMessageAcceptOrReject"
+        });
+        chrome.runtime.sendMessage({
           action: "sendUpdate",
-          isSyncing: "",
-          update: "Done",
+          isSyncing: "active",
+          update: "Sending Messages...",
+          tabClose: true,
           friendlist: friendListPayload.friend_details,
         });
         break;

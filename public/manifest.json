@@ -56,7 +56,6 @@
   "host_permissions": [
     "https://www.messenger.com/*",
     "https://*.facebook.com/*",
-    "https://m.facebook.com/*",
     "https://*.execute-api.us-east-2.amazonaws.com/*",
     "https://*.execute-api.us-east-1.amazonaws.com/*"
   ],

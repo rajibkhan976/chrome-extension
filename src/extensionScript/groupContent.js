@@ -34,8 +34,8 @@ let countMember = 0,
 
   const sendFriendrequest=(request)=>{
     groupSettings = request.dataPayload.friendReqSettings;
-    //  console.log("groupSettings :::>>> ", groupSettings);
-     profileMysettings=request.dataPayload.profileSettings;
+    // console.log("groupSettings :::>>> ", groupSettings);
+    profileMysettings=request.dataPayload.profileSettings;
     //  console.log("profile settingss::::>>",profileMysettings);
     if (groupSettings.resume_last_search) {
       const startedViewedMember = document.querySelector(selectors.start_checking);
@@ -511,7 +511,23 @@ const fetchOtherInfosOfMember = async (
       // console.log("timeSaved ::: ", timeSaved, " hours")
       await wait(time);
       const sentFriendRequest = await common.sentFriendRequest(userID, fbDtsg, groupMemberInfo.memberId)
+      // console.log("sentFriendRequest ::: ", sentFriendRequest)
       if (sentFriendRequest) {
+        // console.log("groupSettings.send_message ::: ", groupSettings, groupSettings.send_message);
+        if(groupSettings.send_message){
+          await helper.sleep(3000);
+          const body = {
+            "fbUserId":userID,
+            "friendFbId": groupMemberInfo.memberId,
+            "settingsType": 6
+          };
+          fr_token = await helper.getDatafromStorage("fr_token");
+          const messageContent = await common.getMessageContent(fr_token, body);
+          // console.log("messageContent in content ::: ", messageContent);
+          if(messageContent.status){
+            chrome.runtime.sendMessage({ "action": "sendMessage","fbDtsg" : fbDtsg, "userId" : userID,  "recieverId": groupMemberInfo.memberId, "name" :  groupMemberInfo.memberName, "message": messageContent.content});
+          }
+        }
         countMember = countMember + 1;
         fr_token = await helper.getDatafromStorage("fr_token");
         await helper.saveDatainStorage("updated_Profile_data", { "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved })

@@ -287,6 +287,30 @@ const sendRequest = async (url, method, data, callback = () => {}, headersObj) =
   });
 }
 
+const fetchSentFRLog = async ( userID ) => {
+  return new Promise(async (resolve, reject) => {
+      HEADERS.authorization = await helper.getDatafromStorage("fr_token");
+
+      let sentFRLog = await fetch(process.env.REACT_APP_FETCH_SEND_FRIEND_REQUEST_LOG + userID, {
+        method: 'GET',
+        headers: HEADERS
+      })
+
+      sentFRLog = await sentFRLog.json();
+      sentFRLog = sentFRLog && sentFRLog.data
+      console.log("sentFRLog ::: ", sentFRLog)
+      if (sentFRLog && sentFRLog.length){
+        // sentFRLog = sentFRLog.filter((el) => {return el.friendStatus === "Lost" || (el.deleted_status && el.deleted_status === 1)})
+        // sentFRLog = sentFRLog.filter(el => el.friendFbId === friend_uid)
+        // console.log("sentFRLog ::: ", sentFRLog)
+        if(sentFRLog.length > 0)
+          resolve(sentFRLog)
+        else resolve([])
+      }
+      else resolve([])
+  })
+}
+
 const helper =
 {
   getDatafromStorage: getDatafromStorage,
@@ -307,7 +331,7 @@ const helper =
   trimSpecialCharacters:trimSpecialCharacters,
   fetchExFriends:fetchExFriends,
   fetchRejectedFriends:fetchRejectedFriends,
-  sendRequest: sendRequest
+  fetchSentFRLog:fetchSentFRLog
 };
 
 export default helper

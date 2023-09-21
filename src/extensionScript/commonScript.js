@@ -35,15 +35,9 @@ const getAboutInfo = async (memberId, fbDtsg, userID) => {
     }
   );
   let getGroupMemberAboutResponse = await getGroupMemberAbout.text();
-  // console.log("getGroupMemberAboutResponse : 1", getGroupMemberAboutResponse);
-  // console.log("getGroupMemberAboutResponse : 1", getGroupMemberAboutResponse.split(`{"label":"ProfileCometAboutAppSectionQuery$defer$ProfileCometAppSectionFeed_user_`)[0]);
   helper.makeParsable(
     getGroupMemberAboutResponse
   );
-  // console.log(
-  // "getGroupMemberAboutResponse : 2 : ",
-  //   getGroupMemberAboutResponse
-  // );
 };
 
 const getMemberGender = async (memberId, fbDtsg, userID, groupId) => {
@@ -115,8 +109,6 @@ const getMemberGender = async (memberId, fbDtsg, userID, groupId) => {
         )[0]
         : "0",
   };
-  // console.log("getGroupMemberGenderResponse : 3 : ", getGroupMemberGenderResponse.data.contextual_profile_view.profile.gender);
-  // console.log("getGroupMemberGenderResponsePayload :  : ", getGroupMemberGenderResponsePayload);
   return getGroupMemberGenderResponsePayload;
 };
 
@@ -138,7 +130,7 @@ const getMemberCountry = async (memberId, fbDtsg, userID) => {
       userID: memberId,
     }),
     server_timestamps: true,
-    doc_id: 8843904325634561, // 6419142938116382
+    doc_id: 8843904325634561,
   };
 
   const getGroupMemberEntityId = await fetch(
@@ -159,26 +151,16 @@ const getMemberCountry = async (memberId, fbDtsg, userID) => {
       `{"label":"ProfileCometAboutAppSectionQuery$defer$ProfileCometAppSectionFeed_user_`
     )[0]
   );
-  // console.log("getGroupMemberEntityIdResponse : 1", getGroupMemberEntityIdResponse);
   getGroupMemberEntityIdResponse =
     getGroupMemberEntityIdResponse.data.user.about_app_sections.nodes[0]
-      .activeCollections.nodes[0].style_renderer.profile_field_sections; //[0].profile_fields
-  // console.log("getGroupMemberEntityIdResponse : 1", getGroupMemberEntityIdResponse);
+      .activeCollections.nodes[0].style_renderer.profile_field_sections;
   getGroupMemberEntityIdResponse = getGroupMemberEntityIdResponse
     ? getGroupMemberEntityIdResponse[0].profile_fields.nodes
     : [];
-  // console.log(
-  // "getGroupMemberEntityIdResponse : 1",
-  //   getGroupMemberEntityIdResponse.length
-  // );
   getGroupMemberEntityIdResponse =
     getGroupMemberEntityIdResponse.length > 0
       ? Object.values(getGroupMemberEntityIdResponse)
       : [];
-  // console.log(
-  // "getGroupMemberEntityIdResponse : 2",
-  //   getGroupMemberEntityIdResponse
-  //   );
   const homeTownOfMember =
     getGroupMemberEntityIdResponse &&
     getGroupMemberEntityIdResponse.filter((el) => el.field_type === "hometown");
@@ -188,8 +170,6 @@ const getMemberCountry = async (memberId, fbDtsg, userID) => {
       (el) => el.field_type === "current_city"
     );
   let countryArr = [];
-  // console.log("homeTownOfMember ::: ", homeTownOfMember)
-  // console.log("currentCityOfMember ::: ", currentCityOfMember)
   if (homeTownOfMember.length > 0) {
     countryArr = [
       ...countryArr,
@@ -452,13 +432,54 @@ const UpdateSettingsAfterFR = async (token, payload) => {
   );
   updateSettings = await updateSettings.text()
   updateSettings = helper.makeParsable(updateSettings);
-  // console.log("updateSettings ::: ", updateSettings)
-  // if(updateSettings.message === "Friend request send setting updated successfully.")
   return updateSettings;
 }
 
+const getMessageContent = (fr_token, body) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let messageContent = await fetch(
+        process.env.REACT_APP_FETCH_MESSAGE_CONTENT_LOG,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            Authorization: fr_token,
+          },
+          body: JSON.stringify(body),
+        }
+      );
+      messageContent = await messageContent.json();
+      if(messageContent && messageContent.data){
+        resolve({status : true, content : messageContent.data});
+      }else{
+        resolve({status : false});
+      }
+      } catch (error) {
+      console.log("Send Message Error", error);
+      resolve({status : false});
+    }
+  });
+}
 
+const confirmSentMessage = async (token, payload) => {
 
+  let updateSendMessageStatus = await fetch(
+    process.env.REACT_APP_UPDATE_SEND_MESSAGE_STATUS,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: token,
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+  updateSendMessageStatus = await updateSendMessageStatus.json();
+  // console.log("updateSendMessageStatus :::  ", updateSendMessageStatus)
+}
 
 const common = {
   getAboutInfo: getAboutInfo,
@@ -467,7 +488,8 @@ const common = {
   getWorkDescription: getWorkDescription,
   sentFriendRequest: sentFriendRequest,
   UpdateSettingsAfterFR: UpdateSettingsAfterFR,
-  // getGenderCountryAndTier: getGenderCountryAndTier
+  getMessageContent: getMessageContent,
+  confirmSentMessage: confirmSentMessage
 };
 
 export default common;

@@ -19,7 +19,7 @@ const reFRIntvTime = 240;
 
 let frToken =  ""; 
 let tabsId;
-
+let payload;
 
 chrome.runtime.onInstalled.addListener((res) => {
   chrome.storage.local.remove(['lastAutoSyncFriendListDate']);
@@ -520,7 +520,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 
     case "sendUpdate":
       console.log("request.isSyncing ::: ", request.isSyncing , request);
-      if (request.isSyncing === "") {
+      if (request.tabClose !== undefined && request.tabClose) {
         checkTabsActivation("fr_sync");
         removeTab("tabsId");
       }
@@ -599,6 +599,14 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                               console.log(" UPDATE GENDER COUNTRY AND TIER CALLED",request)
                               updateGenderCountryAndTier(request);    
                               break;
+          
+    case "sendMessage":
+        sendMessage(request.fbDtsg, request.userId, request.recieverId, request.name, request.message);
+      break;
+
+    case "sendMessageAcceptOrReject":
+      sendMessageAcceptOrReject()
+      break;
                           
     default : break;
   }
@@ -767,7 +775,7 @@ const checkScheduledSync = async () => {
 };
 
 
-chrome.alarms.onAlarm.addListener((alarm) => {
+chrome.alarms.onAlarm.addListener(async(alarm) => {
   // console.log("alarm ::: ", alarm)
   switch (alarm.name) {
     case "setSettingsForGroup":
@@ -790,6 +798,12 @@ chrome.alarms.onAlarm.addListener((alarm) => {
       case "reFriending" : 
           getRefriendingList()
         break;
+      
+      case "InitiateSendMessages" :
+          const payload = await helper.getDatafromStorage("payload");
+          console.log("payload ::: ", payload)
+          InitiateSendMessages(payload.fbDtsg, payload.userId, payload.sentFRLogForAccept, payload.sentFRLogForReject);
+          break;
 
     default: break;
   }
@@ -1255,3 +1269,157 @@ const getGenderCountryAndTiers = async (name) => {
       }
     );
   }
+
+
+const sendMessage = async (dtsg, fbId, receiverId, name, message="good afternoon", alt = false) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+          let Ids = `ids[${receiverId}]`;
+          let text_ids = `text_ids[${receiverId}]`;
+          // console.log("alt :: ", alt)
+          if (alt) {
+            var tids = `cid.c.${fbId}:${receiverId}`;
+          } else {
+            var tids = `cid.c.${receiverId}:${fbId}`;
+          }
+
+          let data = {
+            // __user: fbId,
+            fb_dtsg: dtsg,
+            body: message,
+            send: "Send",
+            // [text_ids]: name,
+            [Ids]: receiverId,
+            tids: tids,
+            // waterfall_source: "message",
+            // server_timestamps: true,
+          };
+
+          let a = await fetch(
+            "https://m.facebook.com/messages/send/?icm=1&refid=12&ref=dbl",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Accept: "text/html,application/json",
+              },
+              body: helper.serialize(data),
+            }
+          );
+
+          const response = await a.text();
+          // console.log("response :::: ", response)
+          // if (response.includes("You cannot perform that action")) {
+          //   console.log("Executing alternate message sending");
+          //   resolve(true);
+          //   // asynchronously it will resolve the send message in alt way
+          //   sendMessage(dtsg, fbId, receiverId,name, message, true);
+          // } else {
+            // console.log("Successfully resolved the alternate message sending technique");
+            const fr_token = await helper.getDatafromStorage("fr_token");
+            await common.confirmSentMessage(fr_token, {
+              "fbUserId":fbId,
+              "friendFbId":receiverId
+            });
+            resolve(true);
+          // }
+    } catch (error) {
+      console.log("Send Message Error", error);
+      resolve(false);
+    }
+  });
+};
+
+const sendMessageAcceptOrReject= async() => {
+  // console.log("orre oreewaaa.......................");
+  fbDtsg(async(fbDtsg, userId)=>{
+    if (!frToken || frToken === "") {
+      frToken = await helper.getDatafromStorage("fr_token"); 
+    }
+    let reqBody = {
+      // "token": frToken,
+      "fbUserId": userId
+    }
+    HEADERS.authorization = frToken; 
+    let settingResp = await fetch(settingApi, {
+      method: 'POST',
+      headers: HEADERS,
+      body: JSON.stringify(reqBody)
+    })
+    let settings = await settingResp.json();
+    settings = settings && settings.data ? settings.data[0] : {};
+    console.log("settings ::: ", settings);
+    if(settings.send_message_when_someone_accept_new_friend_request || settings.send_message_when_reject_friend_request){
+      // console.log("fbDtsg, userId ::::::::::::::::: ", fbDtsg, userId);
+      const fetchSentFRLog = await helper.fetchSentFRLog(userId);
+      // console.log("fetchSentFRLog ::: ", fetchSentFRLog)
+      const fetchSentFRLogForAccept = fetchSentFRLog.filter(el => el && el.friendRequestStatus.toLocaleLowerCase().trim() === "accepted");
+      const fetchSentFRLogForReject = fetchSentFRLog.filter(el => el && el.friendRequestStatus.toLocaleLowerCase().trim() === "rejected");
+      console.log("fetchSentFRLogForAccept ::: ", fetchSentFRLogForAccept);
+      console.log("fetchSentFRLogForReject ::: ", fetchSentFRLogForReject);
+      console.log("settings.send_message_when_reject_friend_request && settings.send_message_when_someone_accept_new_friend_request : ",
+      settings.send_message_when_reject_friend_request, settings.send_message_when_someone_accept_new_friend_request);
+      if(settings.send_message_when_reject_friend_request  && settings.send_message_when_someone_accept_new_friend_request)
+        InitiateSendMessages(fbDtsg, userId, fetchSentFRLogForAccept, fetchSentFRLogForReject);
+      else if(settings.send_message_when_someone_accept_new_friend_request && !settings.send_message_when_reject_friend_request)
+        InitiateSendMessages(fbDtsg, userId, fetchSentFRLogForAccept);
+      else if(!settings.send_message_when_someone_accept_new_friend_request && settings.send_message_when_reject_friend_request)
+        InitiateSendMessages(fbDtsg, userId, [], fetchSentFRLogForReject);
+    }
+  })
+}
+
+const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sentFRLogForReject = []) => {
+  console.log(fbDtsg, userId,sentFRLogForAccept, sentFRLogForAccept[0] && sentFRLogForAccept[0].friendFbId, sentFRLogForReject, sentFRLogForReject[0] && sentFRLogForReject[0].friendFbId)
+  if(sentFRLogForAccept && sentFRLogForAccept.length > 0){
+    const fr_token = await helper.getDatafromStorage("fr_token");
+    const body = {
+      "fbUserId":userId,
+      "friendFbId": sentFRLogForAccept[0].friendFbId,
+      "settingsType": 1
+    };
+    const messageContent = await common.getMessageContent(fr_token, body);
+    console.log("messageContent ::: ", messageContent);
+    if(messageContent.status){
+      sendMessage(fbDtsg, userId, sentFRLogForAccept[0].friendFbId, sentFRLogForAccept[0].friendName,  messageContent.content );
+      // await common.confirmSentMessage(fr_token, {"fbUserId":userId, "friendFbId": sentFRLogForAccept[0].friendFbId,});
+    }
+    sentFRLogForAccept.shift();
+    payload = {
+      fbDtsg : fbDtsg,
+      userId : userId,
+      sentFRLogForAccept : sentFRLogForAccept,
+      sentFRLogForReject : sentFRLogForReject
+    }
+    await helper.saveDatainStorage("payload", payload);
+    const time = (Math.random() * (61) + 30) * 1000
+    chrome.alarms.create("InitiateSendMessages", {when: Date.now() + time});
+  }else if(sentFRLogForReject && sentFRLogForReject.length > 0){
+    const fr_token = await helper.getDatafromStorage("fr_token");
+    const body = {
+      "fbUserId":userId,
+      "friendFbId": sentFRLogForAccept[0].friendFbId,
+      "settingsType": 2
+    };
+    const messageContent = await common.getMessageContent(fr_token, body);
+    console.log("messageContent ::: ", messageContent);
+    if(messageContent.status){
+      sendMessage(fbDtsg, userId, sentFRLogForReject[0].friendFbId, sentFRLogForReject[0].friendName, messageContent.content );
+      // await common.confirmSentMessage(fr_token, {"fbUserId":userId, "friendFbId": sentFRLogForAccept[0].friendFbId,});
+    }
+    sentFRLogForReject.shift();
+    payload = {
+      fbDtsg : fbDtsg,
+      userId : userId,
+      sentFRLogForAccept : sentFRLogForAccept,
+      sentFRLogForReject : sentFRLogForReject
+    }
+    await helper.saveDatainStorage("payload", payload)
+    const time = (Math.random() * (61) + 30) * 1000
+    chrome.alarms.create("InitiateSendMessages", {when: Date.now() + time});
+  }else{
+    chrome.storage.local.remove("payload");
+    sendMessageToPortalScript({action: "fr_update", content: "Done"});
+    sendMessageToPortalScript({action: "fr_isSyncing", content: "", type: "cookie"});
+  }
+}
