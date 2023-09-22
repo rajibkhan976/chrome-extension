@@ -298,11 +298,8 @@ const fetchSentFRLog = async ( userID ) => {
 
       sentFRLog = await sentFRLog.json();
       sentFRLog = sentFRLog && sentFRLog.data
-      console.log("sentFRLog ::: ", sentFRLog)
+      // console.log("sentFRLog ::: ", sentFRLog)
       if (sentFRLog && sentFRLog.length){
-        // sentFRLog = sentFRLog.filter((el) => {return el.friendStatus === "Lost" || (el.deleted_status && el.deleted_status === 1)})
-        // sentFRLog = sentFRLog.filter(el => el.friendFbId === friend_uid)
-        // console.log("sentFRLog ::: ", sentFRLog)
         if(sentFRLog.length > 0)
           resolve(sentFRLog)
         else resolve([])

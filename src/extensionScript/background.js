@@ -424,11 +424,11 @@ const getProfileInfo = (callback = null) => {
 
 const sendMessageToPortalScript = async (request) => {
   const [tab] = await chrome.tabs.query({title: "Friender", url: process.env.REACT_APP_APP_URL + "/*" });
-  console.log("send msg",request.action, request.content)
+  // console.log("send msg",request.action, request.content)
   // console.log("send msg to the tab :: ",tab)
   
   if (tab) {
-    console.log("Req to portal", request.action)
+    // console.log("Req to portal", request.action)
     chrome.tabs.sendMessage(tab.id, request);
   }
 }
@@ -801,7 +801,7 @@ chrome.alarms.onAlarm.addListener(async(alarm) => {
       
       case "InitiateSendMessages" :
           const payload = await helper.getDatafromStorage("payload");
-          console.log("payload ::: ", payload)
+          // console.log("payload ::: ", payload)
           InitiateSendMessages(payload.fbDtsg, payload.userId, payload.sentFRLogForAccept, payload.sentFRLogForReject);
           break;
 
@@ -1355,7 +1355,7 @@ const sendMessageAcceptOrReject= async() => {
     })
     let settings = await settingResp.json();
     settings = settings && settings.data ? settings.data[0] : {};
-    console.log("settings ::: ", settings);
+    // console.log("settings ::: ", settings);
     if(settings.send_message_when_someone_accept_new_friend_request || settings.send_message_when_reject_friend_request){
       // console.log("fbDtsg, userId ::::::::::::::::: ", fbDtsg, userId);
       const fetchSentFRLog = await helper.fetchSentFRLog(userId);
@@ -1377,7 +1377,9 @@ const sendMessageAcceptOrReject= async() => {
 }
 
 const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sentFRLogForReject = []) => {
-  console.log(fbDtsg, userId,sentFRLogForAccept, sentFRLogForAccept[0] && sentFRLogForAccept[0].friendFbId, sentFRLogForReject, sentFRLogForReject[0] && sentFRLogForReject[0].friendFbId)
+  sendMessageToPortalScript({action: "fr_update", content: "Sending Messages..."});
+  sendMessageToPortalScript({action: "fr_isSyncing", content: "active", type: "cookie"});
+  // console.log(fbDtsg, userId,sentFRLogForAccept, sentFRLogForAccept[0] && sentFRLogForAccept[0].friendFbId, sentFRLogForReject, sentFRLogForReject[0] && sentFRLogForReject[0].friendFbId)
   if(sentFRLogForAccept && sentFRLogForAccept.length > 0){
     const fr_token = await helper.getDatafromStorage("fr_token");
     const body = {
@@ -1386,10 +1388,9 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
       "settingsType": 1
     };
     const messageContent = await common.getMessageContent(fr_token, body);
-    console.log("messageContent ::: ", messageContent);
+    // console.log("messageContent ::: ", messageContent);
     if(messageContent.status){
       sendMessage(fbDtsg, userId, sentFRLogForAccept[0].friendFbId, sentFRLogForAccept[0].friendName,  messageContent.content );
-      // await common.confirmSentMessage(fr_token, {"fbUserId":userId, "friendFbId": sentFRLogForAccept[0].friendFbId,});
     }
     sentFRLogForAccept.shift();
     payload = {
@@ -1399,20 +1400,19 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
       sentFRLogForReject : sentFRLogForReject
     }
     await helper.saveDatainStorage("payload", payload);
-    const time = (Math.random() * (61) + 30) * 1000
+    const time = ((Math.random() * 91) + 30) * 1000
     chrome.alarms.create("InitiateSendMessages", {when: Date.now() + time});
   }else if(sentFRLogForReject && sentFRLogForReject.length > 0){
     const fr_token = await helper.getDatafromStorage("fr_token");
     const body = {
       "fbUserId":userId,
-      "friendFbId": sentFRLogForAccept[0].friendFbId,
+      "friendFbId": sentFRLogForReject[0].friendFbId,
       "settingsType": 2
     };
     const messageContent = await common.getMessageContent(fr_token, body);
     console.log("messageContent ::: ", messageContent);
     if(messageContent.status){
       sendMessage(fbDtsg, userId, sentFRLogForReject[0].friendFbId, sentFRLogForReject[0].friendName, messageContent.content );
-      // await common.confirmSentMessage(fr_token, {"fbUserId":userId, "friendFbId": sentFRLogForAccept[0].friendFbId,});
     }
     sentFRLogForReject.shift();
     payload = {
@@ -1422,7 +1422,7 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
       sentFRLogForReject : sentFRLogForReject
     }
     await helper.saveDatainStorage("payload", payload)
-    const time = (Math.random() * (61) + 30) * 1000
+    const time = ((Math.random() * 91) + 30) * 1000
     chrome.alarms.create("InitiateSendMessages", {when: Date.now() + time});
   }else{
     chrome.storage.local.remove("payload");
