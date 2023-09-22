@@ -1187,6 +1187,7 @@ const getGenderCountryAndTiers = async (name) => {
       const isDeletedFromPortal = await helper.deleteFRFromFriender([requestList[0]._id], userID);
       console.log("isDeletedFromPorta ::: ", isDeletedFromPortal);
       if(refriending && isCancelFriendRequest){
+        await helper.sleep(((Math.random * 241) + 60) *1000);
         await common.sentFriendRequest(userID, fbDtsg, requestList[0].friendFbId, "groups_member_list");
         const refriendingPayload = {
           "country": requestList[0].country,
