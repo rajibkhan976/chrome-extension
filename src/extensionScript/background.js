@@ -871,7 +871,7 @@ const updateGenderCountryAndTier = async (request) => {
           const foundFriend = await exFriendList.find(exFriendList => exFriendList.friendFbId == currFriend.id);
           // console.log("foundFriend",foundFriend)
           if(foundFriend){
-            if(foundFriend.tier!=undefined && foundFriend.tier!="NA" && foundFriend.country!= undefined && foundFriend.country != "NA" && foundFriend.friendGender!= undefined && foundFriend.friendGender!= "NA"){
+            if(foundFriend.tier!=undefined && foundFriend.tier!="NA" && foundFriend.country!= undefined && foundFriend.country != "NA" && foundFriend.friendGender!= undefined && foundFriend.friendGender!= "NA" && foundFriend.friendGender != "UNKNOWN"){
               // console.log("** Local match found - No gender API call required",foundFriend)
               resolve({
                 status : 1,
@@ -921,7 +921,8 @@ const updateGenderCountryAndTier = async (request) => {
             resolve({
               status : true,
               country : res.body.countryName,
-              tier : res.body.Tiers
+              tier : res.body.Tiers,
+              gender : res.body.gender
             })
           }  
         })
@@ -929,7 +930,8 @@ const updateGenderCountryAndTier = async (request) => {
           resolve({
             status : false,
             country : "",
-            tier : ""
+            tier : "",
+            gender : ""
           })
           console.log("err ::: ", err);
         });
@@ -960,8 +962,12 @@ const updateGenderCountryAndTier = async (request) => {
      if(exFriendData.status != 1){
        let fetchGenderAPI = await fetchGenderCountryTier(friend)
        if(fetchGenderAPI.status){
+        console.log("actual friend object",friend)
+        console.log("GENDER from gender API",fetchGenderAPI.gender)
+        console.log("conditioned final gender",friend.gender!=undefined && friend.gender!="UNKNOWN"?friend.gender:fetchGenderAPI.gender)
          friendPayload.country = fetchGenderAPI.country 
          friendPayload.tier = fetchGenderAPI.tier
+         friendPayload["friendGender"] = friend.gender!=undefined && friend.gender!="UNKNOWN"?friend.gender:fetchGenderAPI.gender
          totalGenderAPIHits++
          console.log("payload from Gender API",friendPayload)
          updateFriendPayload.push(friendPayload);
