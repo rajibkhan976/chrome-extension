@@ -936,6 +936,7 @@ const getEngagements = async (dtsg, userId, friendList, cursor = "", attempt = "
     // Day back to limit to fetch post
     let dayBackReached = false;
     let feedbackId = null;
+    let consucetiveDuplicateCount = 0;
 
     for (const item of resp) {
       if (item.data && item.data.node) {
@@ -973,9 +974,16 @@ const getEngagements = async (dtsg, userId, friendList, cursor = "", attempt = "
         
         if (postId && scannedPostIds[postId]) {
           console.log("Duplicate - Already scanned post, continue  post id", postId);
+          ++consucetiveDuplicateCount;
+
+          // If 3 consecutive duplicate
+          if (consucetiveDuplicateCount >= 3) {
+            saveFriendList(friendList, userId, dtsg, "messageEngagement");
+            return;
+          }
           continue;
         } 
-
+// aa?
         scannedPostIds[postId] = true;
 
         if (!feedbackId) {
