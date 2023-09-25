@@ -519,7 +519,8 @@ const fetchOtherInfosOfMember = async (
           const body = {
             "fbUserId":userID,
             "friendFbId": groupMemberInfo.memberId,
-            "settingsType": 6
+            "settingsType": 6,
+            "settings_id" : groupSettings.settingsId
           };
           fr_token = await helper.getDatafromStorage("fr_token");
           const messageContent = await common.getMessageContent(fr_token, body);
