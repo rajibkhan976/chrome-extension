@@ -1,12 +1,16 @@
 import { memo, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import helper from "../../../extensionScript/helper";
-import { getFrndReqSet, getProfileSettings } from "../../../service/FriendRequest";
+import {
+  getFrndReqSet,
+  getProfileSettings,
+} from "../../../service/FriendRequest";
 
 import {
   Bolt,
   CheckIcon,
   EditIcon,
+  ExternalLink,
   GenderIcon,
   IntervalIcon,
   KeywordsIcon,
@@ -39,8 +43,16 @@ import {
   requestFormSettings,
 } from "../../../helper/fr-setting";
 import AutomationStats from "../../shared/AutomationStats";
-import { BoxOutIcon, ChevronDownArrowIcon, ChevronUpArrowIcon, InfoIcon, ServerError, ServerSuccess } from "../../../assets/icons/Icons";
+import {
+  BoxOutIcon,
+  ChevronDownArrowIcon,
+  ChevronUpArrowIcon,
+  InfoIcon,
+  ServerError,
+  ServerSuccess,
+} from "../../../assets/icons/Icons";
 import CustomSelectBox from "../../shared/CustomSelectBox";
+import { utils } from "../../../helper/utils";
 const Webview_URL = process.env.REACT_APP_APP_URL;
 ///Zone crusial funtion to change input box value
 export const findData = (child, parent, level) => {
@@ -104,7 +116,7 @@ const GroupsRequestForm = ({
       // console.log("isPauedThenRun ::: ", isPauedThenRun)
       setIsPaused(isPauedThenRun === "pause" ? true : false);
       // if(isPauedThenRun !== "pause" )
-      resetToDefaultSetting()
+      resetToDefaultSetting();
     })();
   }, []);
 
@@ -112,9 +124,9 @@ const GroupsRequestForm = ({
     // console.log("paused ??? ", isPaused)
     // if(isPaused === false){
     // console.log("paused nope")
-    resetToDefaultSetting()
+    resetToDefaultSetting();
     // }
-  }, [isPaused])
+  }, [isPaused]);
 
   // const displayServerMessageFn = () => {
   //   setOpenNotification(true);
@@ -171,10 +183,10 @@ const GroupsRequestForm = ({
     const currentProfilesFromDatabase =
       getCurrentFbProfile.length > 0
         ? getCurrentFbProfile.filter(
-          (el) =>
-            el &&
-            el?.fb_user_id?.toString() === fbTokenAndId?.userID?.toString()
-        )
+            (el) =>
+              el &&
+              el?.fb_user_id?.toString() === fbTokenAndId?.userID?.toString()
+          )
         : [];
     // console.log("currentProfilesFromDatabase::: ", currentProfilesFromDatabase)
     if (currentProfilesFromDatabase.length > 0) {
@@ -192,7 +204,7 @@ const GroupsRequestForm = ({
           profile_viewed: 0,
           time_saved: 0,
           fbUserId: fbTokenAndId?.userID,
-          is_settings_stop : false
+          is_settings_stop: false,
         });
       } else {
         settingsID = await helper.getDatafromStorage("settingsId");
@@ -227,8 +239,8 @@ const GroupsRequestForm = ({
                 fbUserId: fbTokenAndId?.userID,
                 settingsId: settingsID,
               },
-              profileSettings: profileSettings.data.data[0]
-            }
+              profileSettings: profileSettings.data.data[0],
+            },
           });
         }
         if (isPauedThenRun !== "pause") {
@@ -241,7 +253,7 @@ const GroupsRequestForm = ({
                 fbUserId: fbTokenAndId?.userID,
                 settingsId: resSettings?.data?.data,
               },
-              profileSettings: profileSettings.data.data[0]
+              profileSettings: profileSettings.data.data[0],
             },
           });
           await helper.saveDatainStorage("profile_viewed", 0);
@@ -526,8 +538,8 @@ const GroupsRequestForm = ({
 
   /**
    * fuction to handle custon select click
-   * @param {{label: string,value: string}} value 
-   * @param {*} ele 
+   * @param {{label: string,value: string}} value
+   * @param {*} ele
    */
   const handleCustomSelectClick = (value, ele) => {
     // console.log("valuw,.,.,.,.,<><><>", value);
@@ -613,7 +625,6 @@ const GroupsRequestForm = ({
               itemCh.value = type === "+" ? numericValue + 1 : numericValue - 1;
               //if (ele.type !== "fillinput" && ele.type !== "fillinputCF") {
               itemCh.valid = !isNaN(numericValue);
-
             }
             return itemCh;
           }),
@@ -764,7 +775,11 @@ const GroupsRequestForm = ({
 
       if (found) {
         //Recursive function to change the value of object
-        const newObj = changeData(formItem, found, type === "+" ? ele.value + 1 : ele.value - 1);
+        const newObj = changeData(
+          formItem,
+          found,
+          type === "+" ? ele.value + 1 : ele.value - 1
+        );
 
         setSettingApiPayload((prevState) => ({
           ...prevState,
@@ -779,8 +794,7 @@ const GroupsRequestForm = ({
     generateFormElements();
   };
 
-
-  useEffect(() => { }, [settingApiPayload]);
+  useEffect(() => {}, [settingApiPayload]);
 
   const syncKeyWord = (ele) => {
     let formSetPlaceholder = { ...formSetup };
@@ -1068,19 +1082,24 @@ const GroupsRequestForm = ({
         case "select":
           return (
             <div
-              className={`fr-req-element fr-req-el-${element.type} ${element.isLabeled ? "fr-req-fieldset" : ""
-                }`}
+              className={`fr-req-element fr-req-el-${element.type} ${
+                element.isLabeled ? "fr-req-fieldset" : ""
+              }`}
             >
               {element.isLabeled ? <label>{element.inLabel}</label> : ""}
               <select
-                className={
-                  ` ${element.isLabeled
+                className={` ${
+                  element.isLabeled
                     ? "fr-select-basic fr-select-basic-labeled"
-                    : "fr-select-basic"}`
-                }
+                    : "fr-select-basic"
+                }`}
                 value={element.value}
                 // {element&&element.option.length>0?disabled}
-                disabled={element && element.options && element.options.length <= 0 ? true : false}
+                disabled={
+                  element && element.options && element.options.length <= 0
+                    ? true
+                    : false
+                }
                 onChange={(e) => selectValueChange(e.target.value, element)}
               >
                 {element.options.map((item, idx) => (
@@ -1089,10 +1108,23 @@ const GroupsRequestForm = ({
                   </option>
                 ))}
               </select>
-              {element.name === "message_group_id" && element && element.options && element.options.length <= 0 && <div className="fr-req-nomessage-text">
-                <InfoIcon /> You haven’t created any message group yet. <span><a
-                  href={`${Webview_URL}/messages/groups`}
-                  target="_blank">Create group<BoxOutIcon /></a></span> </div>}
+              {element.name === "message_group_id" &&
+                element &&
+                element.options &&
+                element.options.length <= 0 && (
+                  <div className="fr-req-nomessage-text">
+                    <InfoIcon /> You haven’t created any message group yet.{" "}
+                    <span>
+                      <a
+                        href={`${Webview_URL}/messages/groups`}
+                        target="_blank"
+                      >
+                        Create group
+                        <BoxOutIcon />
+                      </a>
+                    </span>{" "}
+                  </div>
+                )}
               {element?.fieldOptions &&
                 generateElements(
                   element?.fieldOptions && element?.fieldOptions[0]
@@ -1103,19 +1135,27 @@ const GroupsRequestForm = ({
         case "customSelect":
           return (
             <div
-              className={`fr-req-element fr-req-el-${element.type} ${element.isLabeled ? "fr-req-fieldset" : ""
-                }${!element.valid ? "not_valid" : ""}`}
+              className={`fr-req-element fr-req-el-${element.type} ${
+                element.isLabeled ? "fr-req-fieldset" : ""
+              }${!element.valid ? "not_valid" : ""}`}
             >
               {element.isLabeled ? <label>{element.inLabel}</label> : ""}
-              <div className={`${element.isLabeled
-                  ? "fr-customSelect-basic fr-customSelect-basic-labeled"
-                  : "fr-customSelect-basic"
-
-                } ${element && element.options && element.options.length === 0 ? "disable" : ""}`}
-                disabled={element && element.options && element.options.length <= 0 ? true : false}
-
+              <div
+                className={`${
+                  element.isLabeled
+                    ? "fr-customSelect-basic fr-customSelect-basic-labeled"
+                    : "fr-customSelect-basic"
+                } ${
+                  element && element.options && element.options.length === 0
+                    ? "disable"
+                    : ""
+                }`}
+                disabled={
+                  element && element.options && element.options.length <= 0
+                    ? true
+                    : false
+                }
               >
-
                 <CustomSelectBox
                   needSearchBar={true}
                   element={element}
@@ -1143,10 +1183,23 @@ const GroupsRequestForm = ({
                   </option>
                 ))}
               </select> */}
-              {element.name === "message_group_id" && element && element.options && element.options.length <= 0 && <div className="fr-req-nomessage-text">
-                <InfoIcon /> You haven’t created any message group yet. <span><a
-                  href={`${Webview_URL}/messages/groups`}
-                  target="_blank">Create group<BoxOutIcon /></a></span> </div>}
+              {element.name === "message_group_id" &&
+                element &&
+                element.options &&
+                element.options.length <= 0 && (
+                  <div className="fr-req-nomessage-text">
+                    <InfoIcon /> You haven’t created any message group yet.{" "}
+                    <span>
+                      <a
+                        href={`${Webview_URL}/messages/groups`}
+                        target="_blank"
+                      >
+                        Create group
+                        <BoxOutIcon />
+                      </a>
+                    </span>{" "}
+                  </div>
+                )}
               {element?.fieldOptions &&
                 generateElements(
                   element?.fieldOptions && element?.fieldOptions[0]
@@ -1216,8 +1269,9 @@ const GroupsRequestForm = ({
         case "input":
           return (
             <div
-              className={`fr-req-element fr-req-el-${element.type} ${element.isLabeled ? "fr-req-fieldset" : ""
-                }  ${!element.valid ? "not_valid" : ""}`}
+              className={`fr-req-element fr-req-el-${element.type} ${
+                element.isLabeled ? "fr-req-fieldset" : ""
+              }  ${!element.valid ? "not_valid" : ""}`}
             >
               {element.isLabeled ? <label>{element.inLabel}</label> : ""}
               <input
@@ -1242,8 +1296,9 @@ const GroupsRequestForm = ({
         case "stepInput":
           return (
             <div
-              className={`fr-req-element fr-req-el-${element.type} ${element.isLabeled ? "fr-req-lebel" : ""
-                }  ${!element.valid ? "not_valid" : ""}`}
+              className={`fr-req-element fr-req-el-${element.type} ${
+                element.isLabeled ? "fr-req-lebel" : ""
+              }  ${!element.valid ? "not_valid" : ""}`}
             >
               {element.isLabeled ? <label>{element.inLabel}</label> : ""}
               <input
@@ -1259,36 +1314,36 @@ const GroupsRequestForm = ({
                 }
                 value={element.value}
                 onChange={(e) => {
-
                   if (element.name === "tier_filter_value") {
-                    fillInputChange(e.target.value, element)
+                    fillInputChange(e.target.value, element);
                   } else {
-                    inputValueChange(element, e.target.value)
+                    inputValueChange(element, e.target.value);
                   }
                 }}
                 onKeyPress={handleKeyPress}
               />
               <div className="input-arrows">
-                <button className="btn inline-btn btn-transparent"
-
+                <button
+                  className="btn inline-btn btn-transparent"
                   onClick={(e) => {
                     if (element.name === "tier_filter_value") {
-                      fillInputChangeStepwise(element, "+")
+                      fillInputChangeStepwise(element, "+");
                     } else {
-                      inputValueChangeStepWise(element, "+")
+                      inputValueChangeStepWise(element, "+");
                     }
                   }}
-                // onClick={() => inputValueChangeStepWise(element,"+")}
+                  // onClick={() => inputValueChangeStepWise(element,"+")}
                 >
                   <ChevronUpArrowIcon size={15} />
                 </button>
 
-                <button className="btn inline-btn btn-transparent"
+                <button
+                  className="btn inline-btn btn-transparent"
                   onClick={(e) => {
                     if (element.name === "tier_filter_value") {
-                      fillInputChangeStepwise(element, "-")
+                      fillInputChangeStepwise(element, "-");
                     } else {
-                      inputValueChangeStepWise(element, "-")
+                      inputValueChangeStepWise(element, "-");
                     }
                   }}
                 >
@@ -1303,8 +1358,9 @@ const GroupsRequestForm = ({
         case "fillinputCF":
           return (
             <div
-              className={`fr-req-element fr-req-el-${element.type} ${element.isLabeled ? "fr-req-fieldset" : ""
-                } ${!element.valid ? "not_valid" : ""}`}
+              className={`fr-req-element fr-req-el-${element.type} ${
+                element.isLabeled ? "fr-req-fieldset" : ""
+              } ${!element.valid ? "not_valid" : ""}`}
             >
               {element.isLabeled ? <label>{element.inLabel}</label> : ""}
 
@@ -1347,8 +1403,9 @@ const GroupsRequestForm = ({
         case "fillinput":
           return (
             <div
-              className={`fr-req-element fr-req-el-${element.type} ${element.isLabeled ? "fr-req-fieldset" : ""
-                } ${!element.valid ? "not_valid" : ""}`}
+              className={`fr-req-element fr-req-el-${element.type} ${
+                element.isLabeled ? "fr-req-fieldset" : ""
+              } ${!element.valid ? "not_valid" : ""}`}
             >
               {element.isLabeled ? <label>{element.inLabel}</label> : ""}
 
@@ -1398,8 +1455,9 @@ const GroupsRequestForm = ({
         case "selectInput":
           return (
             <div
-              className={`fr-req-element fr-req-el-${element.type} ${element.isLabeled ? "fr-req-fieldset" : ""
-                }`}
+              className={`fr-req-element fr-req-el-${element.type} ${
+                element.isLabeled ? "fr-req-fieldset" : ""
+              }`}
             >
               {element.isLabeled ? <label>{element.inLabel}</label> : ""}
 
@@ -1455,14 +1513,15 @@ const GroupsRequestForm = ({
                 }
               </div>
               <span
-                className={`btn-selectInput btn-right ${element.value.length === 0 ||
+                className={`btn-selectInput btn-right ${
+                  element.value.length === 0 ||
                   element.valueArr.length === 0 ||
                   !element.valid ||
                   element.options.filter((el) => el.label === element.value)
                     .length > 0
-                  ? "disable"
-                  : ""
-                  }`}
+                    ? "disable"
+                    : ""
+                }`}
                 onClick={() => {
                   if (
                     element.value.length === 0 ||
@@ -1516,7 +1575,7 @@ const GroupsRequestForm = ({
             </h5>
           </header>
           {(formCell.headerCheckbox && formCell.isActive) ||
-            !formCell.headerCheckbox ? (
+          !formCell.headerCheckbox ? (
             <div className="fr-cell-content">
               {formCell.fieldOptions.map((item, idx) => {
                 if (item.name === "tier_filter_value") {
@@ -1571,7 +1630,7 @@ const GroupsRequestForm = ({
         btnText={"Save"}
         cancelBtnTxt={"Don't Save"}
         resetFn={() => {
-          resetToDefaultSetting()
+          resetToDefaultSetting();
         }}
       />
       {openSuccessNotification && (
@@ -1598,8 +1657,22 @@ const GroupsRequestForm = ({
                       direction="bottom"
                       type="info"
                     />
-                  </h4> <p> {friendReqSet && friendReqSet.settings_name && "Version:" + friendReqSet.settings_name.split("-")[1]}</p>
-                  {/* <span className="req-setting-version">Default</span> */}
+                  </h4>
+                  <span className="req-setting-version">
+                    <a
+                      href={Webview_URL + "/settings/request-history"}
+                      target="_blank"
+                    >
+                      {friendReqSet &&
+                        friendReqSet.settings_name &&
+                        `Version:` +
+                          utils.firstCharToLowerCase(
+                            friendReqSet.settings_name.split("-")[1]
+                          )}
+                      &nbsp;
+                      <ExternalLink />
+                    </a>
+                  </span>
                 </div>
 
                 <button
@@ -1622,8 +1695,8 @@ const GroupsRequestForm = ({
                       {settingApiPayload.look_up_interval === "auto"
                         ? settingApiPayload.look_up_interval
                         : settingApiPayload.look_up_interval === ".5"
-                          ? "30 sec"
-                          : settingApiPayload.look_up_interval + " min"}{" "}
+                        ? "30 sec"
+                        : settingApiPayload.look_up_interval + " min"}{" "}
                     </h4>
                     <p>Lookup interval</p>
                   </div>
@@ -1641,7 +1714,7 @@ const GroupsRequestForm = ({
                     <p>Request limit</p>
                   </div>
                 </div>
-                {settingApiPayload.gender_filter && (
+                {settingApiPayload.gender_filter ?(
                   <div className="req-setting d-flex f-align-center">
                     <figure>
                       <GenderIcon />
@@ -1655,8 +1728,20 @@ const GroupsRequestForm = ({
                       <p>Gender</p>
                     </div>
                   </div>
+                ):(
+                  <div className="req-setting d-flex f-align-center">
+                  <figure>
+                    <GenderIcon />
+                  </figure>
+                  <div className="req-setting-text">
+                    <h4>
+                     --
+                    </h4>
+                    <p>Gender</p>
+                  </div>
+                </div>
                 )}
-                {settingApiPayload.country_filter_enabled && (
+                {settingApiPayload.country_filter_enabled ? (
                   <div className="req-setting d-flex f-align-center">
                     <figure>
                       <TierIcon />
@@ -1664,24 +1749,38 @@ const GroupsRequestForm = ({
 
                     {settingApiPayload.tier_filter && (
                       <div className="req-setting-text">
-                        {settingApiPayload?.tier_filter_value
-                          ? <h4> {settingApiPayload.tier_filter_value}
-                          </h4>
-
-                          : "N/A"}
+                        {settingApiPayload?.tier_filter_value ? (
+                          <h4> {settingApiPayload.tier_filter_value}</h4>
+                        ) : (
+                          "N/A"
+                        )}
                         <p>Tier level</p>
                       </div>
                     )}
                     {settingApiPayload.country_filter && (
                       <div className="req-setting-text">
                         {settingApiPayload.country_filter_value?.length > 0
-                          ? settingApiPayload.country_filter_value.map(
-                            (item) => <h4>{item}</h4>
-                          )
+                          ?  <h4>
+                          {utils.truncateText(
+                            settingApiPayload.country_filter_value
+                              .map((item) => item)
+                              .join(", "),12
+                          )}
+                        </h4> 
                           : "N/A"}
                         <p>Country level</p>
                       </div>
                     )}
+                  </div>
+                ) : (
+                  <div className="req-setting d-flex f-align-center">
+                    <figure>
+                      <TierIcon />
+                    </figure>
+                    <div className="req-setting-text">
+                      --
+                      <p>Country level</p>
+                    </div>
                   </div>
                 )}
                 {settingApiPayload.keyword && (
@@ -1690,11 +1789,17 @@ const GroupsRequestForm = ({
                       <KeywordsIcon />
                     </figure>
                     <div className="req-setting-text">
-                      {settingApiPayload.selected_keywords?.length > 0
-                        ? settingApiPayload.selected_keywords.map((item) => (
-                          <h4>{item}</h4>
-                        ))
-                        : "N/A"}
+                      {settingApiPayload.selected_keywords?.length > 0 ? (
+                        <h4>
+                          {utils.truncateText(
+                            settingApiPayload.selected_keywords
+                              .map((item) => item)
+                              .join(", ")
+                          )}
+                        </h4>
+                      ) : (
+                        "N/A"
+                      )}
                       <p>Keywords</p>
                     </div>
                   </div>
@@ -1705,13 +1810,18 @@ const GroupsRequestForm = ({
                       <KeywordsIcon />
                     </figure>
                     <div className="req-setting-text">
-                      {settingApiPayload.selected_negative_keywords?.length > 0
-                        ? settingApiPayload.selected_negative_keywords.map(
-                          (item, index) => (
-                            <h4 key={index}>{item ? item : "Keywords"}</h4>
-                          )
-                        )
-                        : "N/A"}
+                      {settingApiPayload.selected_negative_keywords?.length >
+                      0 ? (
+                        <h4>
+                          {utils.truncateText(
+                            settingApiPayload.selected_negative_keywords
+                              .map((item) => item)
+                              .join(", ")
+                          )}
+                        </h4>
+                      ) : (
+                        "N/A"
+                      )}
                       <p>Negative keywords</p>
                     </div>
                   </div>

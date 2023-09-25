@@ -49,13 +49,37 @@
             }
 
             .req-setting-version {
-                @include theme-aware('color', 'text-para-color');
-                text-decoration: underline;
-                text-underline-position: under;
+             
+                //text-decoration: underline;
+               // text-underline-position: under;
                 font-size: $fontSize;
                 display: inline-flex;
-                margin-left: 20px;
-                opacity: 0.2;
+                margin-left: 10px;
+                opacity: 0.5;
+
+                a{
+                    text-decoration: none;
+                    
+                    @include theme-aware('color', 'text-para-color');
+                }
+                &:hover{
+                    @include theme-aware('color',"text-icon-color");
+                    opacity: 1;
+                    a{
+                        text-decoration: none;
+                        @include theme-aware('color',"text-icon-color");
+                        svg{
+                            path[fill] {
+                                @include theme-aware('fill', 'text-icon-color');
+                              }
+                              path[stroke] {
+                                @include theme-aware('stroke', 'text-icon-color');
+                              }
+
+                        }
+                    }
+                    
+                }
             }
         }
 
