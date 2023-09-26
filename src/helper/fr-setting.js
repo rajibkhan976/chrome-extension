@@ -82,6 +82,7 @@ export const requestFormSettings = {
           valid: true,
           name: "request_limit_type",
           value: "Infinite",
+          //don't change the option text then thw validation will not work
           options: [
             {
               text: "Infinite",

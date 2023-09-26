@@ -131,10 +131,13 @@
     flex-wrap: wrap;
     gap: 15px 0;
     margin-top: 20px;
+    .req-setting:nth-child(-n + 4) {
+        flex: 1 1 50%;
+    }
 
     .req-setting {
         @include theme-aware('color', 'text-para-color');
-        flex: 1 1 50%;
+        flex: 1 1 100%;
 
         figure {
             margin-right: 10px;
@@ -176,4 +179,12 @@
             flex: 1 1 100%;
         }
     }
+    .req-setting:nth-child(-n + 4) {
+        flex: 1 1 50%;
+    }
+
 }
+
+// .w-100{
+//     width: 100%;
+// }

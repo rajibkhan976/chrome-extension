@@ -48,6 +48,7 @@ import {
   ChevronDownArrowIcon,
   ChevronUpArrowIcon,
   InfoIcon,
+  NavMessageIcon,
   ServerError,
   ServerSuccess,
 } from "../../../assets/icons/Icons";
@@ -68,8 +69,9 @@ export const findData = (child, parent, level) => {
 };
 export const changeData = (item, level, val, setIsValid) => {
   if (level === 0) {
-    if (val.toString().length === 0) {
-      // console.log("<><>Not valid<><><");
+    //console.log(val);
+    if (val.toString().length === 0||val<=0||val.toString()==='NaN') {
+      
       // setIsValid(false)
       return { ...item, value: val, valid: false };
     } else {
@@ -473,7 +475,7 @@ const GroupsRequestForm = ({
             ...prevState,
             [ele.name]: val,
           }));
-          // console.log("new obj:::??", newObj);
+          console.log("new obj:::??", newObj);
           return newObj;
         } else {
           return {
@@ -622,9 +624,18 @@ const GroupsRequestForm = ({
           ...item,
           fieldOptions: item.fieldOptions.map((itemCh) => {
             if (ele.type === itemCh.type && ele.name === itemCh.name) {
-              itemCh.value = type === "+" ? numericValue + 1 : numericValue - 1;
-              //if (ele.type !== "fillinput" && ele.type !== "fillinputCF") {
-              itemCh.valid = !isNaN(numericValue);
+              if (!isNaN(numericValue)) {
+                itemCh.value = type === "+" ? numericValue + 1 : numericValue - 1;
+              } else {
+                // Handle the case when the input is not a valid number
+                itemCh.value = ''; // Or any other appropriate value
+              }
+              if(itemCh.value <=0){
+                itemCh.valid=false;
+              }else{
+                itemCh.valid = !isNaN(numericValue);
+              }
+             
             }
             return itemCh;
           }),
@@ -1317,7 +1328,7 @@ const GroupsRequestForm = ({
                   if (element.name === "tier_filter_value") {
                     fillInputChange(e.target.value, element);
                   } else {
-                    inputValueChange(element, e.target.value);
+                    inputValueChange(element, parseFloat(e.target.value));
                   }
                 }}
                 onKeyPress={handleKeyPress}
@@ -1714,7 +1725,7 @@ const GroupsRequestForm = ({
                     <p>Request limit</p>
                   </div>
                 </div>
-                {settingApiPayload.gender_filter ?(
+                {settingApiPayload.gender_filter ? (
                   <div className="req-setting d-flex f-align-center">
                     <figure>
                       <GenderIcon />
@@ -1728,18 +1739,16 @@ const GroupsRequestForm = ({
                       <p>Gender</p>
                     </div>
                   </div>
-                ):(
+                ) : (
                   <div className="req-setting d-flex f-align-center">
-                  <figure>
-                    <GenderIcon />
-                  </figure>
-                  <div className="req-setting-text">
-                    <h4>
-                     --
-                    </h4>
-                    <p>Gender</p>
+                    <figure>
+                      <GenderIcon />
+                    </figure>
+                    <div className="req-setting-text">
+                      <h4>--</h4>
+                      <p>Gender</p>
+                    </div>
                   </div>
-                </div>
                 )}
                 {settingApiPayload.country_filter_enabled ? (
                   <div className="req-setting d-flex f-align-center">
@@ -1759,21 +1768,24 @@ const GroupsRequestForm = ({
                     )}
                     {settingApiPayload.country_filter && (
                       <div className="req-setting-text">
-                        {settingApiPayload.country_filter_value?.length > 0
-                          ?  <h4>
-                          {utils.truncateText(
-                            settingApiPayload.country_filter_value
-                              .map((item) => item)
-                              .join(", "),12
-                          )}
-                        </h4> 
-                          : "N/A"}
+                        {settingApiPayload.country_filter_value?.length > 0 ? (
+                          <h4>
+                            {utils.truncateText(
+                              settingApiPayload.country_filter_value
+                                .map((item) => item)
+                                .join(", "),
+                              12
+                            )}
+                          </h4>
+                        ) : (
+                          "N/A"
+                        )}
                         <p>Country level</p>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="req-setting d-flex f-align-center">
+                  <div className="req-setting w-100 d-flex f-align-center">
                     <figure>
                       <TierIcon />
                     </figure>
@@ -1784,7 +1796,7 @@ const GroupsRequestForm = ({
                   </div>
                 )}
                 {settingApiPayload.keyword && (
-                  <div className="req-setting d-flex f-align-center">
+                  <div className="req-setting w-100 d-flex f-align-center">
                     <figure>
                       <KeywordsIcon />
                     </figure>
@@ -1805,7 +1817,7 @@ const GroupsRequestForm = ({
                   </div>
                 )}
                 {settingApiPayload.negative_keyword && (
-                  <div className="req-setting d-flex f-align-center">
+                  <div className="req-setting w-100 d-flex f-align-center">
                     <figure>
                       <KeywordsIcon />
                     </figure>
@@ -1823,6 +1835,18 @@ const GroupsRequestForm = ({
                         "N/A"
                       )}
                       <p>Negative keywords</p>
+                    </div>
+                  </div>
+                )}
+
+                {settingApiPayload.send_message && (
+                  <div className="req-setting w-100 d-flex f-align-center">
+                    <figure>
+                      <NavMessageIcon color={"#11E6B4"} />
+                    </figure>
+                    <div className="req-setting-text">
+                      <h4>Enabled</h4>
+                      <p>Send message</p>
                     </div>
                   </div>
                 )}

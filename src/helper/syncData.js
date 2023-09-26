@@ -111,18 +111,18 @@ const FindInValid = (data) => {
 
 const FindValidInRec = (data) => {
   if (!data.fieldOptions) {
-    return { obj: data, valid: false };
+    return { obj: data, unValid: false };
   }
   const mainData = data.fieldOptions[0];
-  if (mainData.value <= 0 || mainData.value.length === 0) {
+  if (mainData.value <= 0 || mainData.value.length === 0||!mainData.valid) {
     mainData.valid = false;
-    return { obj: { ...data, fieldOptions: [{ ...mainData }] }, valid: true };
+    return { obj: { ...data, fieldOptions: [{ ...mainData }] }, unValid: true };
   } else {
     return FindValidInRec(mainData);
   }
 };
 export const checkValidity = (dataObj, setdata) => {
-  console.log("direct data obj:____>>", dataObj);
+  //console.log("direct data obj:____>>", dataObj);
   let valid = true;
   let data = { ...dataObj };
   for (const fidx in data.fields) {
@@ -134,7 +134,7 @@ export const checkValidity = (dataObj, setdata) => {
       if (data.fields[fidx].isActive) {
         if (data.fields[fidx].recursive) {
           const recValue = FindValidInRec(data.fields[fidx]);
-          if (recValue.valid) {
+          if (recValue.unValid) {
             valid = false;
             //console.log(recValue);
             data.fields[fidx] = recValue.obj;
@@ -178,14 +178,14 @@ export const checkValidity = (dataObj, setdata) => {
     } else {
       if (data.fields[fidx].recursive) {
         if (
-          data.fields[fidx].fieldOptions[0].value ===
-          data.fields[fidx].fieldOptions[0].options[0].text
+          data.fields[fidx].fieldOptions[0].value ==="Limited"
         ) {
+          
           const recValue = FindValidInRec(data.fields[fidx]);
-          if (recValue.valid) {
+          if (recValue.unValid) {
             valid = false;
             //console.log(recValue);
-            // data.fields[fidx] = recValue.obj;
+             //data.fields[fidx] = recValue.obj;
           }
         }
       } else {
