@@ -2,7 +2,7 @@
 import selectors from "./selector";
 import helper from "./helper";
 import common from "./commonScript";
-
+import { settingsType } from "../config/config"
 const $ = require("jquery");
 
 let groupSettings = {};
@@ -515,25 +515,27 @@ const fetchOtherInfosOfMember = async (
       if (sentFriendRequest) {
         // console.log("groupSettings.send_message ::: ", groupSettings, groupSettings.send_message);
         if(groupSettings.send_message){
+
+          countMember = countMember + 1;
+          fr_token = await helper.getDatafromStorage("fr_token");
+          await helper.saveDatainStorage("updated_Profile_data", { "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved })
+          await common.UpdateSettingsAfterFR(fr_token, { ...requestInfo, "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved, is_settings_stop : false });
+          await helper.saveDatainStorage("FRSendCount", countMember);
           await helper.sleep(3000);
+          console.log('settingsType :::: ', settingsType)
           const body = {
             "fbUserId":userID,
             "friendFbId": groupMemberInfo.memberId,
-            "settingsType": 6,
+            "settingsType": settingsType.whenFRSendToMember,
             "settings_id" : groupSettings.settingsId
           };
           fr_token = await helper.getDatafromStorage("fr_token");
           const messageContent = await common.getMessageContent(fr_token, body);
           // console.log("messageContent in content ::: ", messageContent);
           if(messageContent.status){
-            chrome.runtime.sendMessage({ "action": "sendMessage","fbDtsg" : fbDtsg, "userId" : userID,  "recieverId": groupMemberInfo.memberId, "name" :  groupMemberInfo.memberName, "message": messageContent.content});
+            chrome.runtime.sendMessage({ "action": "sendMessage","fbDtsg" : fbDtsg, "userId" : userID,  "recieverId": groupMemberInfo.memberId, "name" :  groupMemberInfo.memberName, "message": messageContent.content, "settingsType": settingsType.whenFRSendToMember});
           }
         }
-        countMember = countMember + 1;
-        fr_token = await helper.getDatafromStorage("fr_token");
-        await helper.saveDatainStorage("updated_Profile_data", { "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved })
-        await common.UpdateSettingsAfterFR(fr_token, { ...requestInfo, "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved, is_settings_stop : false });
-        await helper.saveDatainStorage("FRSendCount", countMember);
         chrome.runtime.sendMessage({ "action": "FRSendCount", "FriendRequestCount": countMember });
 
         memberBlock

@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 import helper from "./helper";
 import common from "./commonScript";
-
+import { settingsType } from "../config/config";
 const APPURL = process.env.REACT_APP_APP_URL
 const settingApi = process.env.REACT_APP_SETTING_API;
 const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
@@ -601,7 +601,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                               break;
           
     case "sendMessage":
-        sendMessage(request.fbDtsg, request.userId, request.recieverId, request.name, request.message);
+        sendMessage(request.fbDtsg, request.userId, request.recieverId, request.name, request.message, request.settingsType);
       break;
 
     case "sendMessageAcceptOrReject":
@@ -1278,7 +1278,7 @@ const getGenderCountryAndTiers = async (name) => {
   }
 
 
-const sendMessage = async (dtsg, fbId, receiverId, name, message="good afternoon", alt = false) => {
+const sendMessage = async (dtsg, fbId, receiverId, name, message="good afternoon", settingsType, alt = false) => {
   return new Promise(async (resolve, reject) => {
     try {
           let Ids = `ids[${receiverId}]`;
@@ -1326,7 +1326,8 @@ const sendMessage = async (dtsg, fbId, receiverId, name, message="good afternoon
             const fr_token = await helper.getDatafromStorage("fr_token");
             await common.confirmSentMessage(fr_token, {
               "fbUserId":fbId,
-              "friendFbId":receiverId
+              "friendFbId":receiverId,
+              "settingsType": settingsType
             });
             resolve(true);
           // }
@@ -1385,12 +1386,12 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
     const body = {
       "fbUserId":userId,
       "friendFbId": sentFRLogForAccept[0].friendFbId,
-      "settingsType": 1
+      "settingsType": settingsType.whenAcceptedByMember
     };
     const messageContent = await common.getMessageContent(fr_token, body);
     // console.log("messageContent ::: ", messageContent);
     if(messageContent.status){
-      sendMessage(fbDtsg, userId, sentFRLogForAccept[0].friendFbId, sentFRLogForAccept[0].friendName,  messageContent.content );
+      sendMessage(fbDtsg, userId, sentFRLogForAccept[0].friendFbId, sentFRLogForAccept[0].friendName,  messageContent.content, settingsType.whenAcceptedByMember );
     }
     sentFRLogForAccept.shift();
     payload = {
@@ -1407,12 +1408,12 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
     const body = {
       "fbUserId":userId,
       "friendFbId": sentFRLogForReject[0].friendFbId,
-      "settingsType": 2
+      "settingsType": settingsType.whenRejectedByMember
     };
     const messageContent = await common.getMessageContent(fr_token, body);
     console.log("messageContent ::: ", messageContent);
     if(messageContent.status){
-      sendMessage(fbDtsg, userId, sentFRLogForReject[0].friendFbId, sentFRLogForReject[0].friendName, messageContent.content );
+      sendMessage(fbDtsg, userId, sentFRLogForReject[0].friendFbId, sentFRLogForReject[0].friendName, messageContent.content, settingsType.whenRejectedByMember );
     }
     sentFRLogForReject.shift();
     payload = {
