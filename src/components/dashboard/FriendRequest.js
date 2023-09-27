@@ -115,7 +115,7 @@ const FriendRequest = (props) => {
 
                 });
               }
-              console.log("Final item-->>>>>", itemCh);
+              //console.log("Final item-->>>>>", itemCh);
               return itemCh;
             }),
           };
@@ -138,7 +138,7 @@ const FriendRequest = (props) => {
     // console.log("all groups", allGroups.data);
     getKeyWords()
       .then((res) => {
-        console.log("inside key_____>>", res);
+        //console.log("inside key_____>>", res);
         const resdata = res.data.data;
         // console.log("ressssssssssss", resdata.length);
         if (resdata.length > 0) {
