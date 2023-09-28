@@ -173,6 +173,20 @@ const GroupsRequestForm = ({
       event.preventDefault();
     }
   };
+  const stepInputIncrementHandle=(element) => {
+    if (element.name === "tier_filter_value") {
+      fillInputChangeStepwise(element, "+");
+    } else {
+      inputValueChangeStepWise(element, "+");
+    }
+  }
+  const stepInputDecrementHandle=(element) => {
+    if (element.name === "tier_filter_value") {
+      fillInputChangeStepwise(element, "-");
+    } else {
+      inputValueChangeStepWise(element, "-");
+    }
+  }
 
   const runFrinderHandle = async () => {
     // console.log("run friender");
@@ -1331,18 +1345,16 @@ const GroupsRequestForm = ({
                     inputValueChange(element, parseFloat(e.target.value));
                   }
                 }}
-                onKeyPress={handleKeyPress}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter"||e.key=== ".") {
+                    e.preventDefault();
+                  }}}
+                // onKeyPress={handleKeyPress}
               />
               <div className="input-arrows">
                 <button
                   className="btn inline-btn btn-transparent"
-                  onClick={(e) => {
-                    if (element.name === "tier_filter_value") {
-                      fillInputChangeStepwise(element, "+");
-                    } else {
-                      inputValueChangeStepWise(element, "+");
-                    }
-                  }}
+                   onMouseDown={()=>stepInputIncrementHandle(element)}
                   // onClick={() => inputValueChangeStepWise(element,"+")}
                 >
                   <ChevronUpArrowIcon size={15} />
@@ -1350,13 +1362,7 @@ const GroupsRequestForm = ({
 
                 <button
                   className="btn inline-btn btn-transparent"
-                  onClick={(e) => {
-                    if (element.name === "tier_filter_value") {
-                      fillInputChangeStepwise(element, "-");
-                    } else {
-                      inputValueChangeStepWise(element, "-");
-                    }
-                  }}
+                  onClick={() =>stepInputDecrementHandle(element)}
                 >
                   <ChevronDownArrowIcon size={15} />
                 </button>
