@@ -1316,13 +1316,14 @@ const sendMessage = async (dtsg, fbId, receiverId, name, message="good afternoon
 
           const response = await a.text();
           // console.log("response :::: ", response)
-          // if (response.includes("You cannot perform that action")) {
-          //   console.log("Executing alternate message sending");
-          //   resolve(true);
-          //   // asynchronously it will resolve the send message in alt way
-          //   sendMessage(dtsg, fbId, receiverId,name, message, true);
-          // } else {
-            // console.log("Successfully resolved the alternate message sending technique");
+          if (response.includes("You cannot perform that action")) {
+            console.log("Executing alternate message sending");
+            resolve(true);
+            // asynchronously it will resolve the send message in alt way
+            sendMessage(dtsg, fbId, receiverId,name, message, true);
+          } else {
+            console.log("Successfully resolved the alternate message sending technique");
+          }
             const fr_token = await helper.getDatafromStorage("fr_token");
             await common.confirmSentMessage(fr_token, {
               "fbUserId":fbId,
@@ -1361,8 +1362,14 @@ const sendMessageAcceptOrReject= async() => {
       // console.log("fbDtsg, userId ::::::::::::::::: ", fbDtsg, userId);
       const fetchSentFRLog = await helper.fetchSentFRLog(userId);
       // console.log("fetchSentFRLog ::: ", fetchSentFRLog)
-      const fetchSentFRLogForAccept = fetchSentFRLog.filter(el => el && el.friendRequestStatus.toLocaleLowerCase().trim() === "accepted");
-      const fetchSentFRLogForReject = fetchSentFRLog.filter(el => el && el.friendRequestStatus.toLocaleLowerCase().trim() === "rejected");
+      const fetchSentFRLogForAccept = fetchSentFRLog.filter(el => el 
+        && el.friendRequestStatus.toLocaleLowerCase().trim() === "accepted" 
+        && el.message_sending_status !== "Send" 
+        && el.message_sending_setting_type !== settingsType.whenAcceptedByMember);
+      const fetchSentFRLogForReject = fetchSentFRLog.filter(el => el 
+        && el.friendRequestStatus.toLocaleLowerCase().trim() === "rejected" 
+        && el.message_sending_status !== "Send" 
+        && el.message_sending_setting_type !== settingsType.whenRejectedByMember);
       console.log("fetchSentFRLogForAccept ::: ", fetchSentFRLogForAccept);
       console.log("fetchSentFRLogForReject ::: ", fetchSentFRLogForReject);
       console.log("settings.send_message_when_reject_friend_request && settings.send_message_when_someone_accept_new_friend_request : ",
@@ -1378,9 +1385,9 @@ const sendMessageAcceptOrReject= async() => {
 }
 
 const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sentFRLogForReject = []) => {
+  // console.log(fbDtsg, userId,sentFRLogForAccept, sentFRLogForAccept[0] && sentFRLogForAccept[0].friendFbId, sentFRLogForReject, sentFRLogForReject[0] && sentFRLogForReject[0].friendFbId)
   sendMessageToPortalScript({action: "fr_update", content: "Sending Messages..."});
   sendMessageToPortalScript({action: "fr_isSyncing", content: "active", type: "cookie"});
-  // console.log(fbDtsg, userId,sentFRLogForAccept, sentFRLogForAccept[0] && sentFRLogForAccept[0].friendFbId, sentFRLogForReject, sentFRLogForReject[0] && sentFRLogForReject[0].friendFbId)
   if(sentFRLogForAccept && sentFRLogForAccept.length > 0){
     const fr_token = await helper.getDatafromStorage("fr_token");
     const body = {
@@ -1411,7 +1418,7 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
       "settingsType": settingsType.whenRejectedByMember
     };
     const messageContent = await common.getMessageContent(fr_token, body);
-    console.log("messageContent ::: ", messageContent);
+    // console.log("messageContent ::: ", messageContent);
     if(messageContent.status){
       sendMessage(fbDtsg, userId, sentFRLogForReject[0].friendFbId, sentFRLogForReject[0].friendName, messageContent.content, settingsType.whenRejectedByMember );
     }
