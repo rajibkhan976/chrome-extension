@@ -513,14 +513,14 @@ const fetchOtherInfosOfMember = async (
       const sentFriendRequest = await common.sentFriendRequest(userID, fbDtsg, groupMemberInfo.memberId)
       // console.log("sentFriendRequest ::: ", sentFriendRequest)
       if (sentFriendRequest) {
+        countMember = countMember + 1;
+        fr_token = await helper.getDatafromStorage("fr_token");
+        await helper.saveDatainStorage("updated_Profile_data", { "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved })
+        await common.UpdateSettingsAfterFR(fr_token, { ...requestInfo, "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved, is_settings_stop : false });
+        await helper.saveDatainStorage("FRSendCount", countMember);
         // console.log("groupSettings.send_message ::: ", groupSettings, groupSettings.send_message);
         if(groupSettings.send_message){
 
-          countMember = countMember + 1;
-          fr_token = await helper.getDatafromStorage("fr_token");
-          await helper.saveDatainStorage("updated_Profile_data", { "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved })
-          await common.UpdateSettingsAfterFR(fr_token, { ...requestInfo, "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved, is_settings_stop : false });
-          await helper.saveDatainStorage("FRSendCount", countMember);
           await helper.sleep(3000);
           console.log('settingsType :::: ', settingsType)
           const body = {
