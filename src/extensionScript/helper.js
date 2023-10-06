@@ -328,7 +328,8 @@ const helper =
   trimSpecialCharacters:trimSpecialCharacters,
   fetchExFriends:fetchExFriends,
   fetchRejectedFriends:fetchRejectedFriends,
-  fetchSentFRLog:fetchSentFRLog
+  fetchSentFRLog:fetchSentFRLog,
+  sendRequest:sendRequest
 };
 
 export default helper

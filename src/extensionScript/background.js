@@ -212,6 +212,7 @@ chrome.runtime.onMessageExternal.addListener(async function (
       break;
     case "syncprofile":
       if (request.frLoginToken !== null) {
+        await helper.saveDatainStorage("fr_token", request.frLoginToken)
         getProfileInfo((userProfileData) =>
           sendResponseExternal(userProfileData)
         );
@@ -227,6 +228,7 @@ chrome.runtime.onMessageExternal.addListener(async function (
         chrome.action.setBadgeText({ text: "Not loggedin yet in Friender" });
         return;
       } else {
+      await helper.saveDatainStorage("fr_token", request.frLoginToken)
         chrome.action.setBadgeText({ text: "loggedin" });
         chrome.action.setBadgeBackgroundColor({ color: "blue" });
         syncFriendLength(sendResponseExternal);
