@@ -1387,6 +1387,7 @@ const sendMessageAcceptOrReject= async() => {
 }
 
 const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sentFRLogForReject = []) => {
+  chrome.alarms.clear("InitiateSendMessages");
   // console.log(fbDtsg, userId,sentFRLogForAccept, sentFRLogForAccept[0] && sentFRLogForAccept[0].friendFbId, sentFRLogForReject, sentFRLogForReject[0] && sentFRLogForReject[0].friendFbId)
   sendMessageToPortalScript({action: "fr_update", content: "Sending Messages..."});
   sendMessageToPortalScript({action: "fr_isSyncing", content: "active", type: "cookie"});
@@ -1410,7 +1411,7 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
       sentFRLogForReject : sentFRLogForReject
     }
     await helper.saveDatainStorage("payload", payload);
-    const time = ((Math.random() * 91) + 30) * 1000
+    const time = helper.getRandomInteger(1000 * 60, 1000 * 60 * 5)
     chrome.alarms.create("InitiateSendMessages", {when: Date.now() + time});
   }else if(sentFRLogForReject && sentFRLogForReject.length > 0){
     const fr_token = await helper.getDatafromStorage("fr_token");
@@ -1432,7 +1433,7 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
       sentFRLogForReject : sentFRLogForReject
     }
     await helper.saveDatainStorage("payload", payload)
-    const time = ((Math.random() * 91) + 30) * 1000
+    const time = helper.getRandomInteger(1000 * 60, 1000 * 60 * 5)
     chrome.alarms.create("InitiateSendMessages", {when: Date.now() + time});
   }else{
     chrome.storage.local.remove("payload");
