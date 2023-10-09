@@ -22,6 +22,7 @@ let tabsId;
 let payload;
 
 chrome.runtime.onInstalled.addListener((res) => {
+
   chrome.storage.local.remove(['lastAutoSyncFriendListDate']);
   chrome.storage.local.remove(['lastAutoSyncFriendListId']);
   
@@ -1279,7 +1280,6 @@ const getGenderCountryAndTiers = async (name) => {
     );
   }
 
-
 const sendMessage = async (dtsg, fbId, receiverId, name, message="good afternoon", settingsType, alt = false) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -1293,19 +1293,19 @@ const sendMessage = async (dtsg, fbId, receiverId, name, message="good afternoon
           }
 
           let data = {
-            // __user: fbId,
+            __user: fbId,
             fb_dtsg: dtsg,
             body: message,
             send: "Send",
-            // [text_ids]: name,
+            [text_ids]: name,
             [Ids]: receiverId,
             tids: tids,
-            // waterfall_source: "message",
-            // server_timestamps: true,
+            waterfall_source: "message",
+            server_timestamps: true,
           };
 
           let a = await fetch(
-            "https://m.facebook.com/messages/send/?icm=1&refid=12&ref=dbl",
+            "https://mbasic.facebook.com/messages/send/?icm=1&refid=12&ref=dbl",
             {
               method: "POST",
               headers: {
@@ -1317,15 +1317,18 @@ const sendMessage = async (dtsg, fbId, receiverId, name, message="good afternoon
           );
 
           const response = await a.text();
-          // console.log("response :::: ", response)
-          if (response.includes("You cannot perform that action")) {
+          if (!alt && response.includes("You cannot perform that action")) {
             console.log("Executing alternate message sending");
-            resolve(true);
+            resolve(false);
             // asynchronously it will resolve the send message in alt way
-            sendMessage(dtsg, fbId, receiverId,name, message, true);
-          } else {
-            console.log("Successfully resolved the alternate message sending technique");
+            sendMessage(dtsg, fbId, receiverId, name, message, settingsType, true);
+          } else  if(alt && response.includes("You cannot perform that action")) {
+            resolve(false)
+          }else if(response.includes("It looks like you were misusing this feature by going too fast. You’ve been temporarily blocked from using it.")){
+            resolve(false)
           }
+          else{
+            console.log("Successfully resolved the alternate message sending technique");
             const fr_token = await helper.getDatafromStorage("fr_token");
             await common.confirmSentMessage(fr_token, {
               "fbUserId":fbId,
@@ -1333,6 +1336,7 @@ const sendMessage = async (dtsg, fbId, receiverId, name, message="good afternoon
               "settingsType": settingsType
             });
             resolve(true);
+          }
           // }
     } catch (error) {
       console.log("Send Message Error", error);
