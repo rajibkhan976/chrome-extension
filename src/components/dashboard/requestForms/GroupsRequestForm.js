@@ -793,7 +793,7 @@ const GroupsRequestForm = ({
   };
 
   const inputValueChangeStepWise = (ele, type) => {
-    if(ele.value-1<1)return;
+    if(ele.value-1<1&&type!=="+")return;
     let formSetPlaceholder = { ...formSetup };
     formSetPlaceholder.fields.forEach((formItem, idx) => {
       //Recursive function to find the object
