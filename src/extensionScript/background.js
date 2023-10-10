@@ -1283,61 +1283,64 @@ const getGenderCountryAndTiers = async (name) => {
 const sendMessage = async (dtsg, fbId, receiverId, name, message="good afternoon", settingsType, alt = false) => {
   return new Promise(async (resolve, reject) => {
     try {
-          let Ids = `ids[${receiverId}]`;
-          let text_ids = `text_ids[${receiverId}]`;
-          // console.log("alt :: ", alt)
-          if (alt) {
-            var tids = `cid.c.${fbId}:${receiverId}`;
-          } else {
-            var tids = `cid.c.${receiverId}:${fbId}`;
-          }
-
-          let data = {
-            __user: fbId,
-            fb_dtsg: dtsg,
-            body: message,
-            send: "Send",
-            [text_ids]: name,
-            [Ids]: receiverId,
-            tids: tids,
-            waterfall_source: "message",
-            server_timestamps: true,
-          };
-
-          let a = await fetch(
-            "https://mbasic.facebook.com/messages/send/?icm=1&refid=12&ref=dbl",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-                Accept: "text/html,application/json",
-              },
-              body: helper.serialize(data),
-            }
-          );
-
-          const response = await a.text();
-          if (!alt && response.includes("You cannot perform that action")) {
-            console.log("Executing alternate message sending");
+          if(message.trim() === "")
             resolve(false);
-            // asynchronously it will resolve the send message in alt way
-            sendMessage(dtsg, fbId, receiverId, name, message, settingsType, true);
-          } else  if(alt && response.includes("You cannot perform that action")) {
-            resolve(false)
-          }else if(response.includes("It looks like you were misusing this feature by going too fast. You’ve been temporarily blocked from using it.")){
-            resolve(false)
-          }
           else{
-            console.log("Successfully resolved the alternate message sending technique");
-            const fr_token = await helper.getDatafromStorage("fr_token");
-            await common.confirmSentMessage(fr_token, {
-              "fbUserId":fbId,
-              "friendFbId":receiverId,
-              "settingsType": settingsType
-            });
-            resolve(true);
+            let Ids = `ids[${receiverId}]`;
+            let text_ids = `text_ids[${receiverId}]`;
+            // console.log("alt :: ", alt)
+            if (alt) {
+              var tids = `cid.c.${fbId}:${receiverId}`;
+            } else {
+              var tids = `cid.c.${receiverId}:${fbId}`;
+            }
+
+            let data = {
+              __user: fbId,
+              fb_dtsg: dtsg,
+              body: message,
+              send: "Send",
+              [text_ids]: name,
+              [Ids]: receiverId,
+              tids: tids,
+              waterfall_source: "message",
+              server_timestamps: true,
+            };
+
+            let a = await fetch(
+              "https://mbasic.facebook.com/messages/send/?icm=1&refid=12&ref=dbl",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded",
+                  Accept: "text/html,application/json",
+                },
+                body: helper.serialize(data),
+              }
+            );
+
+            const response = await a.text();
+            if (!alt && response.includes("You cannot perform that action")) {
+              console.log("Executing alternate message sending");
+              resolve(false);
+              // asynchronously it will resolve the send message in alt way
+              sendMessage(dtsg, fbId, receiverId, name, message, settingsType, true);
+            } else  if(alt && response.includes("You cannot perform that action")) {
+              resolve(false)
+            }else if(response.includes("It looks like you were misusing this feature by going too fast. You’ve been temporarily blocked from using it.")){
+              resolve(false)
+            }
+            else{
+              console.log("Successfully resolved the alternate message sending technique");
+              const fr_token = await helper.getDatafromStorage("fr_token");
+              await common.confirmSentMessage(fr_token, {
+                "fbUserId":fbId,
+                "friendFbId":receiverId,
+                "settingsType": settingsType
+              });
+              resolve(true);
+            }
           }
-          // }
     } catch (error) {
       console.log("Send Message Error", error);
       resolve(false);
