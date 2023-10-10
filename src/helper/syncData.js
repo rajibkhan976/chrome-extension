@@ -134,7 +134,8 @@ export const checkValidity = (dataObj, setdata) => {
     // }
     if(data.fields[fidx].label === "Look up interval")
       time = data.fields[fidx].fieldOptions[0].value;
-    if(data.fields[fidx].label === "Send message" && (time === "auto" || time < 3 )){
+    if(data.fields[fidx].label === "Send message" && data.fields[fidx].isActive && (time === "auto" || time < 3 )){
+      // console.log("data.fields[fidx].label ::: ", data.fields[fidx])
       valid = false;
       data.fields[fidx].valid = false;
       reason = "Please choose the look up interval atleast 3 min."
