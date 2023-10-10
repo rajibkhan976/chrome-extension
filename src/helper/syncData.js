@@ -110,6 +110,7 @@ const FindInValid = (data) => {
 };
 
 const FindValidInRec = (data) => {
+  // console.log("*********************", data, data.fieldOptions)
   if (!data.fieldOptions) {
     return { obj: data, unValid: false };
   }
@@ -123,12 +124,21 @@ const FindValidInRec = (data) => {
 };
 export const checkValidity = (dataObj, setdata) => {
   //console.log("direct data obj:____>>", dataObj);
+  let time = 0;
+  let reason = "Invalid input field" 
   let valid = true;
   let data = { ...dataObj };
   for (const fidx in data.fields) {
     // if(data.fields[fidx].label==="Request Limit"){
     //  console.log("this reccccccc",FindValidInRec(data.fields[fidx]));
     // }
+    if(data.fields[fidx].label === "Look up interval")
+      time = data.fields[fidx].fieldOptions[0].value;
+    if(data.fields[fidx].label === "Send message" && (time === "auto" || time < 3 )){
+      valid = false;
+      data.fields[fidx].valid = false;
+      reason = "Please choose the look up interval atleast 3 min."
+    }
 
     if (data.fields[fidx].headerCheckbox) {
       if (data.fields[fidx].isActive) {
@@ -198,7 +208,7 @@ export const checkValidity = (dataObj, setdata) => {
     }
   }
   setdata(data);
-  return valid;
+  return {valid : valid, errReason : reason};
 };
 
 export const removeEle = (mainObj, removeArr) => {

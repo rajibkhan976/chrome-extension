@@ -105,6 +105,7 @@ const GroupsRequestForm = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editType, setEditType] = useState("basic");
   const [openNotification, setOpenNotification] = useState(false);
+  const [openNotificationMsg, setOpenNotificationMsg] = useState("");
   const [openSuccessNotification, setOpenSuccessNotification] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   // useEffect(() => {
@@ -1961,7 +1962,7 @@ const GroupsRequestForm = ({
                   <ServerMessages
                     icon={<ServerError />}
                     type={"error"}
-                    msgText={"Invalid input field"}
+                    msgText={openNotificationMsg}
                     headerTxt={"Error"}
                     openNotification={openNotification}
                     setOpenNotification={setOpenNotification}
@@ -1972,11 +1973,13 @@ const GroupsRequestForm = ({
                 <button
                   className="btn btn-theme settings-save w-100"
                   onClick={() => {
-                    if (checkValidity(formSetup, setFormSetup)) {
+                    const isValidated = checkValidity(formSetup, setFormSetup)
+                    if (isValidated.valid) {
                       setIsEditing(false);
 
                       setOpenSuccessNotification(true);
                     } else {
+                      setOpenNotificationMsg(isValidated.errReason)
                       setOpenNotification(true);
                     }
                   }}
