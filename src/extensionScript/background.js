@@ -1373,12 +1373,12 @@ const sendMessageAcceptOrReject= async() => {
       // console.log("fetchSentFRLog ::: ", fetchSentFRLog)
       const fetchSentFRLogForAccept = fetchSentFRLog.filter(el => el 
         && el.friendRequestStatus.toLocaleLowerCase().trim() === "accepted" 
-        && el.message_sending_status !== "Send" 
-        && el.message_sending_setting_type !== settingsType.whenAcceptedByMember);
+        && (el.message_sending_status !== "Send" 
+        || el.message_sending_setting_type !== settingsType.whenAcceptedByMember));
       const fetchSentFRLogForReject = fetchSentFRLog.filter(el => el 
         && el.friendRequestStatus.toLocaleLowerCase().trim() === "rejected" 
-        && el.message_sending_status !== "Send" 
-        && el.message_sending_setting_type !== settingsType.whenRejectedByMember);
+        && (el.message_sending_status !== "Send" 
+        || el.message_sending_setting_type !== settingsType.whenRejectedByMember));
       console.log("fetchSentFRLogForAccept ::: ", fetchSentFRLogForAccept);
       console.log("fetchSentFRLogForReject ::: ", fetchSentFRLogForReject);
       console.log("settings.send_message_when_reject_friend_request && settings.send_message_when_someone_accept_new_friend_request : ",
