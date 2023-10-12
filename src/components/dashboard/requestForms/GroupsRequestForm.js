@@ -802,15 +802,16 @@ const GroupsRequestForm = ({
 
       if (found) {
         //Recursive function to change the value of object
+        const currValue=parseInt(ele.value)
         const newObj = changeData(
           formItem,
           found,
-          type === "+" ? ele.value + 1 : ele.value - 1
+          type === "+" ? currValue + 1 : currValue - 1
         );
 
         setSettingApiPayload((prevState) => ({
           ...prevState,
-          [ele.name]: type === "+" ? ele.value + 1 : ele.value - 1,
+          [ele.name]: type === "+" ? currValue + 1 : currValue - 1,
         }));
 
         formSetPlaceholder.fields[idx] = newObj;
