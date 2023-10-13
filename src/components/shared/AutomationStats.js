@@ -66,9 +66,9 @@ const AutomationStats = (props) => {
           <Modal
             modalType="delete-type"
             modalIcon={"Icon"}
-            headerText={"Stop mkaing friends"}
+            headerText={"Stop making friends"}
             bodyText={
-              "This will stop sending friend request. Are you sure you want to stop this run."
+              "This will stop sending friend request. Are you sure you want to stop this run?"
             }
             open={modalOpen}
             setOpen={setModalOpen}
