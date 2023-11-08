@@ -22,7 +22,8 @@ let tabsId;
 let payload;
 
 chrome.runtime.onInstalled.addListener((res) => {
-
+  // sendMessageAcceptOrReject();
+  // return;
   chrome.storage.local.remove(['lastAutoSyncFriendListDate']);
   chrome.storage.local.remove(['lastAutoSyncFriendListId']);
   
@@ -598,6 +599,24 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                               // }
                               break;
 
+    case "getGenderCountryAndTierForIncoming":
+                                // console.log("request ::: ", request);
+                                const list = [...request.incomingPendingList]
+                                // console.log("list ::: ", list);
+                                list.forEach(async(el, i)=>{
+                                  const getGenderCountryAndTierForIncoming = await getGenderCountryAndTiers(el.friendName);
+                                  console.log("getGenderCountryAndTierForIncoming ::: ", getGenderCountryAndTierForIncoming)
+                                  list[i] = {...list[i], 
+                                    "gender": getGenderCountryAndTierForIncoming.gender ? getGenderCountryAndTierForIncoming.gender : "N/A",
+                                    "country": getGenderCountryAndTierForIncoming.countryName ? getGenderCountryAndTierForIncoming.countryName : "N/A",
+                                    "tier": getGenderCountryAndTierForIncoming.Tiers ? getGenderCountryAndTierForIncoming.Tiers : "N/A"
+                                    };
+                                  if(list.length - 1 === i)
+                                    await common.storeIncomingPendingReq(request.userId, list)
+                                });
+                                break;
+  
+
     case "updateCountryAndTier": 
                               console.log(" UPDATE GENDER COUNTRY AND TIER CALLED",request)
                               updateGenderCountryAndTier(request);    
@@ -805,7 +824,7 @@ chrome.alarms.onAlarm.addListener(async(alarm) => {
       case "InitiateSendMessages" :
           const payload = await helper.getDatafromStorage("payload");
           // console.log("payload ::: ", payload)
-          InitiateSendMessages(payload.fbDtsg, payload.userId, payload.sentFRLogForAccept, payload.sentFRLogForReject);
+          InitiateSendMessages(payload.fbDtsg, payload.userId, payload.sentFRLogForAccept, payload.sentFRLogForReject, payload.fetchIncomingLog, payload.fetchIncomingFRLogForAccept, payload.fetchIncomingFRLogForReject);
           break;
 
     default: break;
@@ -1366,34 +1385,74 @@ const sendMessageAcceptOrReject= async() => {
     })
     let settings = await settingResp.json();
     settings = settings && settings.data ? settings.data[0] : {};
-    // console.log("settings ::: ", settings);
-    if(settings.send_message_when_someone_accept_new_friend_request || settings.send_message_when_reject_friend_request){
-      // console.log("fbDtsg, userId ::::::::::::::::: ", fbDtsg, userId);
-      const fetchSentFRLog = await helper.fetchSentFRLog(userId);
-      // console.log("fetchSentFRLog ::: ", fetchSentFRLog)
-      const fetchSentFRLogForAccept = fetchSentFRLog.filter(el => el 
-        && el.friendRequestStatus.toLocaleLowerCase().trim() === "accepted" 
-        && (el.message_sending_status !== "Send" 
-        || el.message_sending_setting_type !== settingsType.whenAcceptedByMember));
-      const fetchSentFRLogForReject = fetchSentFRLog.filter(el => el 
-        && el.friendRequestStatus.toLocaleLowerCase().trim() === "rejected" 
-        && (el.message_sending_status !== "Send" 
-        || el.message_sending_setting_type !== settingsType.whenRejectedByMember));
-      console.log("fetchSentFRLogForAccept ::: ", fetchSentFRLogForAccept);
-      console.log("fetchSentFRLogForReject ::: ", fetchSentFRLogForReject);
-      console.log("settings.send_message_when_reject_friend_request && settings.send_message_when_someone_accept_new_friend_request : ",
-      settings.send_message_when_reject_friend_request, settings.send_message_when_someone_accept_new_friend_request);
-      if(settings.send_message_when_reject_friend_request  && settings.send_message_when_someone_accept_new_friend_request)
-        InitiateSendMessages(fbDtsg, userId, fetchSentFRLogForAccept, fetchSentFRLogForReject);
-      else if(settings.send_message_when_someone_accept_new_friend_request && !settings.send_message_when_reject_friend_request)
-        InitiateSendMessages(fbDtsg, userId, fetchSentFRLogForAccept);
-      else if(!settings.send_message_when_someone_accept_new_friend_request && settings.send_message_when_reject_friend_request)
-        InitiateSendMessages(fbDtsg, userId, [], fetchSentFRLogForReject);
-    }
+    console.log("settings ::: ", settings);
+    if(settings.send_message_when_someone_accept_new_friend_request || 
+      settings.send_message_when_reject_friend_request ||
+      settings.send_message_when_someone_sends_me_friend_request ||
+      settings.send_message_when_reject_incoming_friend_request ||
+      settings.send_message_when_accept_incoming_friend_request){
+        let fetchIncomingLog = [],
+            fetchIncomingFRLogForAccept = [],
+            fetchIncomingFRLogForReject = [],
+            fetchSentFRLogForAccept = [],
+            fetchSentFRLogForReject = [];
+        // console.log("fbDtsg, userId ::::::::::::::::: ", fbDtsg, userId);
+        const fetchSentFRLog = await helper.fetchSentFRLog(userId);
+        console.log("fetchSentFRLog ::: ", fetchSentFRLog)
+
+        if(settings.send_message_when_someone_sends_me_friend_request){
+            fetchIncomingLog = fetchSentFRLog.filter(el => el 
+              && el.friendRequestStatus.toLocaleLowerCase().trim() === "pending" 
+              && el.is_incoming === true );
+            console.log("fetchIncomingLog ::: ", fetchIncomingLog)
+        }
+        if(settings.send_message_when_accept_incoming_friend_request){
+          fetchIncomingFRLogForAccept = fetchSentFRLog.filter(el => el 
+            && el.friendRequestStatus.toLocaleLowerCase().trim() === "accepted" 
+            && el.is_incoming === true
+            && (el.message_sending_status !== "Send" 
+            || el.message_sending_setting_type !== settingsType.whenAcceptedByMember));
+          console.log("fetchIncomingFRLogForAccept ::: ", fetchIncomingFRLogForAccept);
+        }
+        if(settings.send_message_when_reject_incoming_friend_request){
+          fetchIncomingFRLogForReject = fetchSentFRLog.filter(el => el 
+            && el.friendRequestStatus.toLocaleLowerCase().trim() === "rejected" 
+            && el.is_incoming === true
+            && (el.message_sending_status !== "Send" 
+            || el.message_sending_setting_type !== settingsType.whenRejectedByMember));
+          console.log("fetchIncomingFRLogForReject ::: ", fetchIncomingFRLogForReject);
+        }
+        if(settings.send_message_when_someone_accept_new_friend_request){
+          fetchSentFRLogForAccept = fetchSentFRLog.filter(el => el 
+            && el.friendRequestStatus.toLocaleLowerCase().trim() === "accepted" 
+            && el.is_incoming !== true
+            && (el.message_sending_status !== "Send" 
+            || el.message_sending_setting_type !== settingsType.whenAcceptedByMember));
+          console.log("fetchSentFRLogForAccept ::: ", fetchSentFRLogForAccept);
+        }
+        if(settings.send_message_when_reject_friend_request){
+          fetchSentFRLogForReject = fetchSentFRLog.filter(el => el 
+            && el.friendRequestStatus.toLocaleLowerCase().trim() === "rejected" 
+            && el.is_incoming !== true
+            && (el.message_sending_status !== "Send" 
+            || el.message_sending_setting_type !== settingsType.whenRejectedByMember));
+          console.log("fetchSentFRLogForReject ::: ", fetchSentFRLogForReject);
+          // console.log("settings.send_message_when_reject_friend_request && settings.send_message_when_someone_accept_new_friend_request : ",
+          // settings.send_message_when_reject_friend_request, settings.send_message_when_someone_accept_new_friend_request);
+          // if(settings.send_message_when_reject_friend_request  && settings.send_message_when_someone_accept_new_friend_request)
+          //   InitiateSendMessages(fbDtsg, userId, fetchSentFRLogForAccept, fetchSentFRLogForReject);
+          // else if(settings.send_message_when_someone_accept_new_friend_request && !settings.send_message_when_reject_friend_request)
+          //   InitiateSendMessages(fbDtsg, userId, fetchSentFRLogForAccept);
+          // else if(!settings.send_message_when_someone_accept_new_friend_request && settings.send_message_when_reject_friend_request)
+          //   InitiateSendMessages(fbDtsg, userId, [], fetchSentFRLogForReject);
+        }
+        InitiateSendMessages(fbDtsg, userId, fetchSentFRLogForAccept, fetchSentFRLogForReject, fetchIncomingLog, fetchIncomingFRLogForAccept, fetchIncomingFRLogForReject);
+      }
   })
 }
 
-const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sentFRLogForReject = []) => {
+const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sentFRLogForReject = [], fetchIncomingLog = [], fetchIncomingFRLogForAccept = [], fetchIncomingFRLogForReject = []) => {
+  console.log(sentFRLogForAccept, sentFRLogForReject, fetchIncomingLog, fetchIncomingFRLogForAccept, fetchIncomingFRLogForReject);
   chrome.alarms.clear("InitiateSendMessages");
   // console.log(fbDtsg, userId,sentFRLogForAccept, sentFRLogForAccept[0] && sentFRLogForAccept[0].friendFbId, sentFRLogForReject, sentFRLogForReject[0] && sentFRLogForReject[0].friendFbId)
   sendMessageToPortalScript({action: "fr_update", content: "Sending Messages..."});
@@ -1415,7 +1474,10 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
       fbDtsg : fbDtsg,
       userId : userId,
       sentFRLogForAccept : sentFRLogForAccept,
-      sentFRLogForReject : sentFRLogForReject
+      sentFRLogForReject : sentFRLogForReject,
+      fetchIncomingLog : fetchIncomingLog,
+      fetchIncomingFRLogForAccept : fetchIncomingFRLogForAccept,
+      fetchIncomingFRLogForReject : fetchIncomingFRLogForReject
     }
     await helper.saveDatainStorage("payload", payload);
     const time = helper.getRandomInteger(1000 * 60, 1000 * 60 * 5)
@@ -1437,7 +1499,85 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
       fbDtsg : fbDtsg,
       userId : userId,
       sentFRLogForAccept : sentFRLogForAccept,
-      sentFRLogForReject : sentFRLogForReject
+      sentFRLogForReject : sentFRLogForReject,
+      fetchIncomingLog : fetchIncomingLog,
+      fetchIncomingFRLogForAccept : fetchIncomingFRLogForAccept,
+      fetchIncomingFRLogForReject : fetchIncomingFRLogForReject
+    }
+    await helper.saveDatainStorage("payload", payload)
+    const time = helper.getRandomInteger(1000 * 60, 1000 * 60 * 5)
+    chrome.alarms.create("InitiateSendMessages", {when: Date.now() + time});
+  }else if(fetchIncomingLog && fetchIncomingLog.length > 0){
+    const fr_token = await helper.getDatafromStorage("fr_token");
+    const body = {
+      "fbUserId":userId,
+      "friendFbId": fetchIncomingLog[0].friendFbId,
+      "settingsType": settingsType.    whenRecievesRequest
+    };
+    const messageContent = await common.getMessageContent(fr_token, body);
+    // console.log("messageContent ::: ", messageContent);
+    if(messageContent.status){
+      sendMessage(fbDtsg, userId, fetchIncomingLog[0].friendFbId, fetchIncomingLog[0].friendName, messageContent.content, settingsType.    whenRecievesRequest );
+    }
+    fetchIncomingLog.shift();
+    payload = {
+      fbDtsg : fbDtsg,
+      userId : userId,
+      sentFRLogForAccept : sentFRLogForAccept,
+      sentFRLogForReject : sentFRLogForReject,
+      fetchIncomingLog : fetchIncomingLog,
+      fetchIncomingFRLogForAccept : fetchIncomingFRLogForAccept,
+      fetchIncomingFRLogForReject : fetchIncomingFRLogForReject
+    }
+    await helper.saveDatainStorage("payload", payload)
+    const time = helper.getRandomInteger(1000 * 60, 1000 * 60 * 5)
+    chrome.alarms.create("InitiateSendMessages", {when: Date.now() + time});
+  }else if(fetchIncomingFRLogForAccept && fetchIncomingFRLogForAccept.length > 0){
+    const fr_token = await helper.getDatafromStorage("fr_token");
+    const body = {
+      "fbUserId":userId,
+      "friendFbId": fetchIncomingFRLogForAccept[0].friendFbId,
+      "settingsType": settingsType.whenAcceptedByUser
+    };
+    const messageContent = await common.getMessageContent(fr_token, body);
+    // console.log("messageContent ::: ", messageContent);
+    if(messageContent.status){
+      sendMessage(fbDtsg, userId, fetchIncomingFRLogForAccept[0].friendFbId, fetchIncomingFRLogForAccept[0].friendName, messageContent.content, settingsType.whenAcceptedByUser );
+    }
+    fetchIncomingFRLogForAccept.shift();
+    payload = {
+      fbDtsg : fbDtsg,
+      userId : userId,
+      sentFRLogForAccept : sentFRLogForAccept,
+      sentFRLogForReject : sentFRLogForReject,
+      fetchIncomingLog : fetchIncomingLog,
+      fetchIncomingFRLogForAccept : fetchIncomingFRLogForAccept,
+      fetchIncomingFRLogForReject : fetchIncomingFRLogForReject
+    }
+    await helper.saveDatainStorage("payload", payload)
+    const time = helper.getRandomInteger(1000 * 60, 1000 * 60 * 5)
+    chrome.alarms.create("InitiateSendMessages", {when: Date.now() + time});
+  }else if(fetchIncomingFRLogForReject && fetchIncomingFRLogForReject.length > 0){
+    const fr_token = await helper.getDatafromStorage("fr_token");
+    const body = {
+      "fbUserId":userId,
+      "friendFbId": fetchIncomingFRLogForReject[0].friendFbId,
+      "settingsType": settingsType.whenRejectedByUser
+    };
+    const messageContent = await common.getMessageContent(fr_token, body);
+    // console.log("messageContent ::: ", messageContent);
+    if(messageContent.status){
+      sendMessage(fbDtsg, userId, fetchIncomingFRLogForReject[0].friendFbId, fetchIncomingFRLogForReject[0].friendName, messageContent.content, settingsType.whenRejectedByUser );
+    }
+    fetchIncomingFRLogForReject.shift();
+    payload = {
+      fbDtsg : fbDtsg,
+      userId : userId,
+      sentFRLogForAccept : sentFRLogForAccept,
+      sentFRLogForReject : sentFRLogForReject,
+      fetchIncomingLog : fetchIncomingLog,
+      fetchIncomingFRLogForAccept : fetchIncomingFRLogForAccept,
+      fetchIncomingFRLogForReject : fetchIncomingFRLogForReject
     }
     await helper.saveDatainStorage("payload", payload)
     const time = helper.getRandomInteger(1000 * 60, 1000 * 60 * 5)

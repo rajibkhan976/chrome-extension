@@ -1,5 +1,8 @@
 import helper from "./helper";
-
+const HEADERS = {
+  "Content-Type": "application/json",
+};
+let incomingPendingList = [];
 const getAboutInfo = async (memberId, fbDtsg, userID) => {
   const payload = {
     av: userID,
@@ -481,6 +484,102 @@ const confirmSentMessage = async (token, payload) => {
   // console.log("updateSendMessageStatus :::  ", updateSendMessageStatus)
 }
 
+
+const getIncomingPendingList = async(userId, fbDTSG, cursor = "") => {
+  const variables= cursor === "" ? {"scale":1} : {"count":20,"cursor":cursor,"scale":1} // from second time
+  const payload = {
+      "av" : userId,
+      "__user" : userId,
+      "__a" : 1,
+      "dpr" : 1,
+      "__ccg" : "EXCELLENT",
+      "__comet_req ": 15,
+      "fb_dtsg" : fbDTSG,
+      "fb_api_caller_class" : "RelayModern",
+      "fb_api_req_friendly_name" : "FriendingCometFriendRequestsRootQuery",
+      "variables" : JSON.stringify(variables),
+      "server_timestamps" : true,
+      "doc_id" : cursor === "" ? 4851458921570237 : 4843321999100134 // second time
+  }
+
+  const getIncomingPendingRequests = await fetch(
+    "https://www.facebook.com/api/graphql/",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "text/html,application/json",
+        "x-fb-friendly-name": "FriendingCometFriendRequestsRootQuery",
+      },
+      body: helper.serialize(payload),
+    }
+  );
+  let getIncomingPendingListResponse = await getIncomingPendingRequests.text();
+  // console.log("getIncomingPendingListResponse ::: ", getIncomingPendingListResponse)
+  getIncomingPendingListResponse = helper.makeParsable(
+    getIncomingPendingListResponse
+  );
+  getIncomingPendingListResponse = getIncomingPendingListResponse && 
+                                  getIncomingPendingListResponse.data &&
+                                  getIncomingPendingListResponse.data.viewer && 
+                                  getIncomingPendingListResponse.data.viewer.friending_possibilities && 
+                                  getIncomingPendingListResponse.data.viewer.friending_possibilities
+  // console.log("getIncomingPendingListResponse ::: ", getIncomingPendingListResponse);
+  const pendingList = getIncomingPendingListResponse && getIncomingPendingListResponse.edges
+  // console.log("pendingList ::: ", pendingList);
+  incomingPendingList = pendingList && pendingList.length > 0 ? [...incomingPendingList, ...pendingList] : incomingPendingList
+  const hasNextPage = getIncomingPendingListResponse && 
+                      getIncomingPendingListResponse.page_info && 
+                      getIncomingPendingListResponse.page_info.has_next_page
+  // console.log("hasNextPage ::: ", hasNextPage);
+  if(hasNextPage){
+    cursor = getIncomingPendingListResponse && 
+              getIncomingPendingListResponse.page_info && 
+              getIncomingPendingListResponse.page_info.end_cursor
+    // console.log("cursor ::: ", cursor);
+    const time = helper.getRandomInteger(1000 * 30, 1000 * 60 * 1);
+    await helper.sleep(time)
+    getIncomingPendingList(userId, fbDTSG, cursor)
+  }
+  else{
+    // console.log("Incoming pending list ::: ", incomingPendingList);
+    incomingPendingList = incomingPendingList && incomingPendingList.length > 0 && incomingPendingList.map((el)=>{
+      const data = {
+        "friendFbId": el.node.id,
+        "friendProfileUrl": el.node.url,
+        "friendName": el.node.name,
+        "friendProfilePicture": el.node.profile_picture.uri
+      }
+      return data;
+    })
+    //store in DB
+    chrome.runtime.sendMessage({
+      "action": "getGenderCountryAndTierForIncoming",
+      "incomingPendingList": incomingPendingList,
+      "userId": userId
+    });
+    return incomingPendingList;
+  }
+}
+
+const storeIncomingPendingReq = async(userId, incomingPendingList) => {
+  let payload = {
+    "facebookUserId": userId,
+    "friend_details": incomingPendingList
+  }    
+  HEADERS.authorization = await helper.getDatafromStorage("fr_token");
+  let getIncomingPendingRequests = await fetch(
+    process.env.REACT_APP_STORE_INCOMING_PENDING_REQUEST,
+    {
+      method: "POST",
+      headers: HEADERS,
+      body: JSON.stringify(payload),
+    }
+  );
+  getIncomingPendingRequests = await getIncomingPendingRequests.json();
+  // console.log("getIncomingPendingRequests ::: ", getIncomingPendingRequests);
+}
+
 const common = {
   getAboutInfo: getAboutInfo,
   getMemberGender: getMemberGender,
@@ -489,7 +588,9 @@ const common = {
   sentFriendRequest: sentFriendRequest,
   UpdateSettingsAfterFR: UpdateSettingsAfterFR,
   getMessageContent: getMessageContent,
-  confirmSentMessage: confirmSentMessage
+  confirmSentMessage: confirmSentMessage,
+  getIncomingPendingList : getIncomingPendingList,
+  storeIncomingPendingReq : storeIncomingPendingReq
 };
 
 export default common;

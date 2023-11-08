@@ -1,9 +1,10 @@
 import helper from "./helper";
+import common from "./commonScript";
 let finalFriendList = [], countInterval;
 let finalFriendListWithMsg = [], commentREactionThread = [];
 let dayBackCount = 7;
 let allPendingFriendReqList = [], commenters = [], reactors = [];
-let allPendingFriendReqListFromDB = []
+let allOutgoingPendingFriendReqListFromDB = []
 let dayBack = new Date(Date.now() - dayBackCount * 24 * 60 * 60 * 1000);
 let dayBackMonth = 120;
 let scannedPostIds = {};
@@ -209,13 +210,26 @@ const getMessageEngagement = async (
 const initSyncSendFriendRequestStatus = async (fbDtsg, userID) => {
   try {
     const pendingList = await helper.fetchSendFriendRequests(userID);
-    console.log("pendingList :::: ", pendingList)
-    if (pendingList.length > 0) {
-      allPendingFriendReqListFromDB = pendingList;
-      syncSendFriendRequestStatus(fbDtsg, userID, null);
-    } else {
+    // console.log("all pendingList from DB :::: ", pendingList);
+    const incomingPendingList = pendingList && pendingList.filter(el => el.is_incoming === true)
+    const outgoingPendingList = pendingList && pendingList.filter(el => !el.is_incoming || el.is_incoming !== true);
+    // console.log("incomingPendingList :::: ", incomingPendingList)
+    // console.log("outgoingPendingList :::: ", outgoingPendingList)
+    const allIncomingPendingFriendReqListFromFB = await common.getIncomingPendingList(userID, fbDtsg)
+    console.log("allIncomingPendingFriendReqListFromFB ::: ", allIncomingPendingFriendReqListFromFB);
+    if(incomingPendingList.length === 0 && outgoingPendingList.length === 0){
       saveFriendList(finalFriendListWithMsg, userID, fbDtsg, "syncCompleted");
     }
+    if (outgoingPendingList.length > 0) {
+      // allOutgoingPendingFriendReqListFromDB = outgoingPendingList;
+      await syncSendFriendRequestStatus(fbDtsg, userID, null);
+      // console.log("outgoingPendingList ::: ", outgoingPendingList);
+      await comparePendingfFrReqList(userID, allPendingFriendReqList, outgoingPendingList, true);
+    } 
+    if(allIncomingPendingFriendReqListFromFB.length > 0){
+      await comparePendingfFrReqList(userID, allIncomingPendingFriendReqListFromFB, incomingPendingList, false);
+    }
+    saveFriendList(finalFriendListWithMsg, userID, fbDtsg, "syncCompleted");
   } catch (error) {
     console.log("ERROR IN FETCHING PENDING REQUEST LIST", error)
     saveFriendList(finalFriendListWithMsg, userID, fbDtsg, "syncCompleted");
@@ -223,7 +237,7 @@ const initSyncSendFriendRequestStatus = async (fbDtsg, userID) => {
 }
 
 /**
- * function fetch all pending friend request list from facebook
+ * function fetch all outgoing pending friend request list from facebook
  * @param {*} fbDtsg 
  * @param {*} userID 
  * @param {String} cursor 
@@ -269,61 +283,56 @@ const syncSendFriendRequestStatus = async (fbDtsg, userID, cursor = null) => {
     await helper.sleep(helper.getRandomInteger(1000, 10000));
     syncSendFriendRequestStatus(fbDtsg, userID, cursorId)
   } else {
-    // console.log("data got all going to compare", allPendingFriendReqListFromDB)
-    comparePendingfFrReqList(userID, fbDtsg, allPendingFriendReqList, allPendingFriendReqListFromDB)
+    // console.log("data got all going to compare", allOutgoingPendingFriendReqListFromDB)
+    // comparePendingfFrReqList(userID, fbDtsg, allPendingFriendReqList, allOutgoingPendingFriendReqListFromDB)
   }
 }
 
-/**
- * function to check the for DB are in Facebook request list or not if not then send then for soft delete
- * @param {*} userID 
- * @param {*} fbDtsg 
- * @param {Array} arrFromFb 
- * @param {Array} arrFrmDb 
- */
-const comparePendingfFrReqList = async (userID, fbDtsg, arrFromFb, arrFrmDb) => {
-  // console.log("all data from fb", arrFromFb);
-  // console.log("all adata from db", arrFrmDb);
-  let currentFbPendingFRlist = [];
-  for (let item of arrFromFb) {
-    currentFbPendingFRlist = [...currentFbPendingFRlist, item.cursor];
-  }
-  // console.log("all ids from fb", currentFbPendingFRlist);
-  const currentFbPendingFrSet = new Set(currentFbPendingFRlist);
-  let allFrIDList = [];
-  for (let item of finalFriendListWithMsg) {
-    if (item.id) {
-      allFrIDList = [...allFrIDList, item.id];
+const comparePendingfFrReqList = async (userID, arrFromFb, arrFrmDb, isOutgoing) => {
+  // console.log("finalFriendListWithMsg ::: ", finalFriendListWithMsg);
+  // console.log("arrFromFb ::: ", arrFromFb);
+  // console.log("arrFrmDb ::: ", arrFrmDb);
+  return new Promise(async(resolve, reject) => {
+    let currentFbPendingFRlist = [], allFrRejectList = [], allFrIDList = [];
+    for (let item of arrFromFb) {
+      if(isOutgoing){
+        currentFbPendingFRlist = [...currentFbPendingFRlist, item.cursor];
+      }else
+        currentFbPendingFRlist = [...currentFbPendingFRlist, item.friendFbId];
     }
-  }
-  let allFrIdSet = new Set(allFrIDList);
-  let allFrRejectList = [];
-  for (let item of arrFrmDb) {
-    if (!currentFbPendingFrSet.has(item.friendFbId) && !allFrIdSet.has(item.friendFbId)) {
-      allFrRejectList = [...allFrRejectList, item._id];
+    // console.log("all ids from fb", currentFbPendingFRlist);
+    const currentFbPendingFrSet = new Set(currentFbPendingFRlist);
+    for (let item of finalFriendListWithMsg) {
+      if (item.id) {
+        allFrIDList = [...allFrIDList, item.id];
+      }
     }
-  }
-  //  console.log("all rejexted list", allFrRejectList);
-  if (allFrRejectList.length > 0) {
-    try {
-      let responseDelFr = await helper.deleteFRFromFriender(
-        allFrRejectList,
-        userID
-      );
-      console.log("REPONSE DELETING FR REQ", responseDelFr);
-    } catch (error) {
-      console.log("ERROR HAPPEND IN DELETE PENDINF FRIEND REQUEST", error);
-    } finally {
-      saveFriendList(finalFriendListWithMsg, userID, fbDtsg, "syncCompleted");
+    const allFrIdSet = new Set(allFrIDList);
+    for (let item of arrFrmDb) {
+      if (!currentFbPendingFrSet.has(item.friendFbId) && !allFrIdSet.has(item.friendFbId)) {
+        allFrRejectList = [...allFrRejectList, item._id];
+      }
     }
-  } else {
-    saveFriendList(finalFriendListWithMsg, userID, fbDtsg, "syncCompleted");
-  }
-
-
-};
-
-
+    console.log("all rejexted list", allFrRejectList);
+    if (allFrRejectList.length > 0) {
+      try {
+        let responseDelFr = await helper.deleteFRFromFriender(
+          allFrRejectList,
+          userID
+        );
+        console.log("REPONSE DELETING FR REQ", responseDelFr);
+      } catch (error) {
+        console.log("ERROR HAPPEND IN DELETE PENDINF FRIEND REQUEST", error);
+      } finally {
+        resolve(true)
+        // saveFriendList(finalFriendListWithMsg, userID, fbDtsg, "syncCompleted");
+      }
+    } else {
+        resolve(true)
+        // saveFriendList(finalFriendListWithMsg, userID, fbDtsg, "syncCompleted");
+    }
+  })
+}
 
 const saveFriendList = async (
   finalFriendList,
@@ -445,7 +454,7 @@ const saveFriendList = async (
 
         // Reset scanned post to blank
         scannedPostIds = {};
-         getEngagements(fbDtsg, userID, finalFriendList);
+        getEngagements(fbDtsg, userID, finalFriendList);
         chrome.runtime.sendMessage({
           action: "sendUpdate",
           isSyncing: "active",

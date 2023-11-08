@@ -165,7 +165,7 @@ const fetchSendFriendRequests = (userID) => {
     })
     let outgoingPendingRequestDefinition = await outgoingPendingRequestSerive.json();
     outgoingPendingRequestDefinition = outgoingPendingRequestDefinition.data
-    console.log("outgoingPendingRequestSerive :::: ", outgoingPendingRequestDefinition)
+    // console.log("outgoingPendingRequestSerive :::: ", outgoingPendingRequestDefinition)
     if(outgoingPendingRequestDefinition && outgoingPendingRequestDefinition.length > 0){
       resolve(outgoingPendingRequestDefinition);
     } else {
@@ -255,11 +255,11 @@ const fetchRejectedFriends = async ( userID, friend_uid ) => {
         rejectedFriends = rejectedFriends.filter(el => el.friendFbId === friend_uid)
         console.log("rejectedFriends 2 :::: ", rejectedFriends)
         if(rejectedFriends.length > 0)
-          resolve(true)
-        else resolve(false)
+          resolve({isRejected : true, is_incoming : rejectedFriends.is_incoming ? rejectedFriends.is_incoming : false})
+        else resolve({isRejected : false})
       }
       else
-        resolve(false)
+        resolve({isRejected : false})
   })
 }
 const sendRequest = async (url, method, data, callback = () => {}, headersObj) => {
