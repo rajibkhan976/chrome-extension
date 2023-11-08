@@ -204,12 +204,12 @@ chrome.runtime.onMessageExternal.addListener(async function (
   sender,
   sendResponseExternal
 ) {
-  console.log("request ::::::: ", request)
-  // console.log("sendResponseExternal : ", sendResponseExternal)
+  console.log("request ::::::-> ", request)
   chrome.storage.local.set({ senExternalResponse: sendResponseExternal });
   switch (request.action) {
     case "extensionInstallation":
       await helper.saveDatainStorage("fr_token", request.frLoginToken)
+      await helper.saveDatainStorage("fr_debug_mode", request.frDebugMode)
       sendResponseExternal(true);
       break;
     case "syncprofile":
@@ -263,6 +263,7 @@ chrome.runtime.onMessageExternal.addListener(async function (
     case "frienderLogout":
       checkTabsActivation("fr_sync");
       chrome.storage.local.remove("fr_token")
+      chrome.storage.local.remove("fr_debug_mode")
       stopRunningScript();
       removeTab("tabsId")
       break;
@@ -272,6 +273,7 @@ chrome.runtime.onMessageExternal.addListener(async function (
       break;
     case "logout" : 
       chrome.storage.local.remove('fr_token');
+      chrome.storage.local.remove('fr_debug_mode');
       break;
     case "deletePendingFR" : 
     console.log("Delete All.................", request)

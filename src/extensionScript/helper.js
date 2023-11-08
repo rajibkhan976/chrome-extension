@@ -308,6 +308,70 @@ const fetchSentFRLog = async ( userID ) => {
   })
 }
 
+/**
+ * Custom function to handle the console.log events
+ * @param {*} msg 
+ * @param {*} arr 
+ */
+console.log = function (msg, arr) {
+updateLog(msg, arr);
+console.warn(msg, arr);
+};
+/**
+ * Custom function to handle the console.info events
+ * @param {*} msg 
+ * @param {*} arr 
+ */
+console.info = function (msg, arr) {
+updateLog(msg, arr);
+console.warn(msg, arr);
+};
+/**
+ * Custom function to handle the console.error events
+ * @param {*} msg 
+ * @param {*} arr 
+ */
+console.error = function (msg, arr) {
+updateLog(msg, arr);
+console.warn(msg, arr);
+};
+
+/**
+ * Function to update the log for a user 
+ * @param {*} msg 
+ * @param {*} arr 
+ * @returns 
+ */
+const updateLog = (msg, arr) => {
+  // need to check debug flag 
+  return new Promise(async (resolve, reject) => {
+    let fbUserId = await helper.getDatafromStorage("fbTokenAndId");
+    let logPermission = await helper.getDatafromStorage("fr_debug_mode");
+    if(logPermission == 0){
+      resolve([])
+      return
+    }
+    let reqPayload =
+    {
+      "fbUserId": fbUserId.userID,
+      "logMessage": msg + arr
+    }
+    HEADERS.authorization = await helper.getDatafromStorage("fr_token");
+    let updateLog = await fetch(process.env.REACT_APP_UPDATE_LOG, {
+      method: 'POST',
+      headers: HEADERS,
+      body: JSON.stringify(reqPayload)
+    })
+    updateLog = await updateLog.json();
+    
+    if(updateLog){
+      resolve(updateLog);
+    } else {
+      resolve([])
+    }
+  })
+}
+
 const helper =
 {
   getDatafromStorage: getDatafromStorage,
