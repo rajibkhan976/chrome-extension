@@ -38,7 +38,8 @@
     {
       "matches": [
         "https://*.friender.io/*",
-         "https://localhost:3000/*"
+         "https://localhost:3000/*",
+         "http://localhost:3000/*"
       ],
       "js": [
         "portalScript.js"
@@ -63,7 +64,8 @@
     "matches": [
       "https://localhost:3000/*",
       "https://beta.friender.io/*",
-      "https://dev.friender.io/*"
+      "https://dev.friender.io/*",
+      "http://localhost:3000/*"
     ],
     "accepts_tls_channel_id": true
   },
