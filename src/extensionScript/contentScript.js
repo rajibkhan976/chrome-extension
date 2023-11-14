@@ -235,7 +235,7 @@ const initSyncSendFriendRequestStatus = async (fbDtsg, userID) => {
     if(allIncomingPendingFriendReqListFromFB.length > 0){
       await comparePendingfFrReqList(userID, allIncomingPendingFriendReqListFromFB, incomingPendingList, false);
     }
-    saveFriendList(finalFriendListWithMsg, userID, fbDtsg, "syncCompleted");
+    saveFriendListEngagement([], userID, fbDtsg, "syncCompleted");
   } catch (error) {
     console.log("ERROR IN FETCHING PENDING REQUEST LIST", error)
     saveFriendListEngagement([], userID, fbDtsg, "syncCompleted");
@@ -430,12 +430,12 @@ const saveFriendListEngagement = async (
 
           console.log("Blocked the flow")
         
-          // chrome.runtime.sendMessage({
-          //   action: "sendUpdate",
-          //   isSyncing: "active",
-          //   update: "Syncing Messages...",
-          // });
-          // initSyncSendFriendRequestStatus(fbDtsg, userID)
+          chrome.runtime.sendMessage({
+            action: "sendUpdate",
+            isSyncing: "active",
+            update: "Syncing Messages...",
+          });
+          initSyncSendFriendRequestStatus(fbDtsg, userID)
           break;
 
         case "syncCompleted":
@@ -582,7 +582,7 @@ const saveFriendList = async (
 
         // Reset scanned post to blank
         scannedPostIds = {};
-        getEngagements(fbDtsg, userID, finalFriendList);
+        getEngagementsNew(fbDtsg, userID, finalFriendList);
         chrome.runtime.sendMessage({
           action: "sendUpdate",
           isSyncing: "active",
@@ -1693,8 +1693,7 @@ const getEngagementsNew = async (dtsg, userId, friendList, cursor = "", attempt 
       await getEngagementsNew(dtsg, userId, friendList, cursor, attempt, onErrorAttempt);
     } else {
       // saveFriendList(friendList, userId, dtsg, "messageEngagement")
-      saveFriendListEngagement(allPostEngagementInfo,userId,dtsg,"triggerSyncMessage")
-
+      saveFriendListEngagement([],userId,dtsg,"triggerSyncMessage")
     }
   }
   return true;
