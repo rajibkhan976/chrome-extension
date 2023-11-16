@@ -354,7 +354,7 @@ const updateLog = (msg, arr) => {
     let reqPayload =
     {
       "fbUserId": fbUserId.userID,
-      "logMessage": msg + arr
+      "logMessage": msg + JSON.stringify(arr)
     }
     HEADERS.authorization = await helper.getDatafromStorage("fr_token");
     let updateLog = await fetch(process.env.REACT_APP_UPDATE_LOG, {
