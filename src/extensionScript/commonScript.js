@@ -460,7 +460,7 @@ const getMessageContent = (fr_token, body) => {
         resolve({status : false});
       }
       } catch (error) {
-      console.log("Send Message Error", error);
+      console.error("Send Message Error", error);
       resolve({status : false});
     }
   });
@@ -515,7 +515,7 @@ const getIncomingPendingList = async(userId, fbDTSG, cursor = "") => {
     }
   );
   let getIncomingPendingListResponse = await getIncomingPendingRequests.text();
-  // console.log("getIncomingPendingListResponse ::: ", getIncomingPendingListResponse)
+  console.log("getIncomingPendingListResponse ::: ", getIncomingPendingListResponse)
   getIncomingPendingListResponse = helper.makeParsable(
     getIncomingPendingListResponse
   );
@@ -524,25 +524,25 @@ const getIncomingPendingList = async(userId, fbDTSG, cursor = "") => {
                                   getIncomingPendingListResponse.data.viewer && 
                                   getIncomingPendingListResponse.data.viewer.friending_possibilities && 
                                   getIncomingPendingListResponse.data.viewer.friending_possibilities
-  // console.log("getIncomingPendingListResponse ::: ", getIncomingPendingListResponse);
+  console.log("getIncomingPendingListResponse ::: ", getIncomingPendingListResponse);
   const pendingList = getIncomingPendingListResponse && getIncomingPendingListResponse.edges
-  // console.log("pendingList ::: ", pendingList);
+  console.log("pendingList ::: ", pendingList);
   incomingPendingList = pendingList && pendingList.length > 0 ? [...incomingPendingList, ...pendingList] : incomingPendingList
   const hasNextPage = getIncomingPendingListResponse && 
                       getIncomingPendingListResponse.page_info && 
                       getIncomingPendingListResponse.page_info.has_next_page
-  // console.log("hasNextPage ::: ", hasNextPage);
+  console.log("hasNextPage ::: ", hasNextPage);
   if(hasNextPage){
     cursor = getIncomingPendingListResponse && 
               getIncomingPendingListResponse.page_info && 
               getIncomingPendingListResponse.page_info.end_cursor
-    // console.log("cursor ::: ", cursor);
+    console.log("cursor ::: ", cursor);
     const time = helper.getRandomInteger(1000 * 30, 1000 * 60 * 1);
     await helper.sleep(time)
     getIncomingPendingList(userId, fbDTSG, cursor)
   }
   else{
-    // console.log("Incoming pending list ::: ", incomingPendingList);
+    console.log("Incoming pending list ::: ", incomingPendingList);
     incomingPendingList = incomingPendingList && incomingPendingList.length > 0 && incomingPendingList.map((el)=>{
       const data = {
         "friendFbId": el.node.id,
@@ -552,6 +552,7 @@ const getIncomingPendingList = async(userId, fbDTSG, cursor = "") => {
       }
       return data;
     })
+    console.log("Incoming pending list 222222222 ::: ", incomingPendingList);
     //store in DB
     chrome.runtime.sendMessage({
       "action": "getGenderCountryAndTierForIncoming",

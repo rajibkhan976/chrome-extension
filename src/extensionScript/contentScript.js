@@ -428,7 +428,7 @@ const saveFriendListEngagement = async (
             body: JSON.stringify(friendsMessagePayload),
           });
 
-          console.log("Blocked the flow")
+          console.error("Blocked the flow")
         
           chrome.runtime.sendMessage({
             action: "sendUpdate",
@@ -535,7 +535,7 @@ const saveFriendList = async (
         if (shouldISaveData) {
           if(el.last_engagement_date && el.last_engagement_date.getFullYear() !== 1970) {
             resultFormat = el.last_engagement_date.toISOString().slice(0, 19).replace("T", " ");
-            console.log("resultFormat ::: ", resultFormat);
+            // console.log("resultFormat ::: ", resultFormat);
             if(resultFormat) 
               eachFriendinfo.last_engagement_date = resultFormat
           } else {
@@ -654,7 +654,7 @@ const getReactionComment = async (
   if (countInterval)
     clearInterval(countInterval)
   let reactionCommentPayload;
-  console.log("nextPage ::: ", nextPage)
+  // console.log("nextPage ::: ", nextPage)
   // if (nextPage && nextPage === "default") {
   //   reactionCommentPayload = {
   //     fb_dtsg: fbDtsg,
@@ -723,7 +723,7 @@ const getReactionComment = async (
     if (commentREactionThread.length === count + 1) {
 
       clearInterval(countInterval);
-      console.log("Beak fast")
+      // console.log("Beak fast")
       const commentThread = commentReactionCount(commenters);
       const reactionThread = commentReactionCount(reactors)
       const PayloadWithReactionComment = getPayloadWithReactionComment(commentThread, reactionThread, finalFriendListWithMsg);
@@ -1270,7 +1270,7 @@ const getComments = async (dtsg, userId, friendList, feedbackId, after, postCrea
           }
           return true;
       } catch (e) {
-          console.log("Error in get comment", e)
+          console.error("Error in get comment", e)
           if (onErrorAttempt < 3) {
             console.error("Comment Fetching error 2 =====")
             onErrorAttempt++;
@@ -1418,7 +1418,7 @@ const getReactions = async  (dtsg, userId, friendList, feedbackId, after, postCr
  */
 const getEngagementsNew = async (dtsg, userId, friendList, cursor = "", attempt = "", onErrorAttempt = 0) => {
 
-  console.log("Fetch timeline feed cursor=", cursor)
+  // console.log("Fetch timeline feed cursor=", cursor)
 
   if (!cursor) cursor = "";
   if (!attempt) attempt = 1;
@@ -1684,8 +1684,8 @@ const getEngagementsNew = async (dtsg, userId, friendList, cursor = "", attempt 
 
     return true;
   } catch (e) {
-    console.log(e);
-    console.log(e.message);
+    console.error(e);
+    console.error(e.message);
     if (onErrorAttempt < 3) {
       console.error("POST Fetching error 5 =====")
       onErrorAttempt++;
@@ -1788,7 +1788,7 @@ const getCommentsNew = async (dtsg, userId, friendList, feedbackId, after, postC
 
           return true;
       } catch (e) {
-          console.log("Error in get comment", e)
+          console.error("Error in get comment", e)
           if (onErrorAttempt < 3) {
             console.error("Comment Fetching error 2 =====")
             onErrorAttempt++;

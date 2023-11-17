@@ -410,7 +410,7 @@ const fetchOtherInfosOfMember = async (
       (profileMysettings.dont_send_friend_requests_prople_i_sent_friend_requests_they_rejected 
       || profileMysettings.dont_send_friend_requests_prople_who_send_me_friend_request_i_rejected)){
         const isRejectedFriends = await helper.fetchRejectedFriends(userID, groupMemberInfo.memberId)
-        console.log("isRejectedFriends ::: ", isRejectedFriends)
+        // console.log("isRejectedFriends ::: ", isRejectedFriends)
       if(profileMysettings.dont_send_friend_requests_prople_i_sent_friend_requests_they_rejected ){
         if(isRejectedFriends && isRejectedFriends.isRejected && !isRejectedFriends.is_incoming)
           groupMemberInfo = { ...groupMemberInfo, isEligible: false };
@@ -433,7 +433,7 @@ const fetchOtherInfosOfMember = async (
             //case: matched keyword is not empty and re_friending_keywords is not empty then check for key match
             //console.log("started checking of keys for re-fr status:")
             for (const keyw of profileMysettings.re_friending_settings[0].keywords.split(",")) {
-              console.log("keyw ::: ", keyw)
+              // console.log("keyw ::: ", keyw)
               if (keyw.trim().length > 0)
                 if (requestInfo.matchedKeyword.toLocaleLowerCase().includes(helper.trimSpecialCharacters(keyw.toLocaleLowerCase()))) {
                   groupMemberInfo.refriending = true;
@@ -530,7 +530,7 @@ const fetchOtherInfosOfMember = async (
         if(groupSettings.send_message){
 
           await helper.sleep(3000);
-          console.log('settingsType :::: ', settingsType)
+          // console.log('settingsType :::: ', settingsType)
           const body = {
             "fbUserId":userID,
             "friendFbId": groupMemberInfo.memberId,

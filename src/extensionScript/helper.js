@@ -191,7 +191,7 @@ const deleteFRFromFriender = async (deletedPendingFR, userID) => {
       })
 
       deleteFR = await deleteFR.json();
-      console.log("deleteFR ::: ", deleteFR)
+      // console.log("deleteFR ::: ", deleteFR)
       if (deleteFR && deleteFR.data)
         resolve(true)
       else resolve(false)
@@ -246,14 +246,14 @@ const fetchRejectedFriends = async ( userID, friend_uid ) => {
         method: 'GET',
         headers: HEADERS
       })
-      console.log("rejectedFriends::: ", rejectedFriends)
+      // console.log("rejectedFriends::: ", rejectedFriends)
       rejectedFriends = await rejectedFriends.json();
       rejectedFriends = rejectedFriends && rejectedFriends.data
-      console.log("rejectedFriends 1 :::: ", rejectedFriends)
+      // console.log("rejectedFriends 1 :::: ", rejectedFriends)
       if(rejectedFriends && rejectedFriends.length > 0)
       {
         rejectedFriends = rejectedFriends.filter(el => el.friendFbId === friend_uid)
-        console.log("rejectedFriends 2 :::: ", rejectedFriends)
+        // console.log("rejectedFriends 2 :::: ", rejectedFriends)
         if(rejectedFriends.length > 0)
           resolve({isRejected : true, is_incoming : rejectedFriends.is_incoming ? rejectedFriends.is_incoming : false})
         else resolve({isRejected : false})
@@ -315,7 +315,7 @@ const fetchSentFRLog = async ( userID ) => {
  */
 console.log = function (msg, arr) {
 updateLog(msg, arr);
-console.warn(msg, arr);
+console.log(msg, arr);
 };
 /**
  * Custom function to handle the console.info events
@@ -324,7 +324,7 @@ console.warn(msg, arr);
  */
 console.info = function (msg, arr) {
 updateLog(msg, arr);
-console.warn(msg, arr);
+console.log(msg, arr);
 };
 /**
  * Custom function to handle the console.error events
@@ -333,7 +333,7 @@ console.warn(msg, arr);
  */
 console.error = function (msg, arr) {
 updateLog(msg, arr);
-console.warn(msg, arr);
+console.log(msg, arr);
 };
 
 /**

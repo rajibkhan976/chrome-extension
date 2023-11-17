@@ -18,7 +18,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse)=>{
 const getProfileData = (sendResponse, getUID = false) => {
     let userData = {};
     let fbDetails = document.querySelector('head').querySelector(selectors.script_contet);
-    console.log("fbDetails :::: ", fbDetails)
+    // console.log("fbDetails :::: ", fbDetails)
     if(fbDetails){
         fbDetails = JSON.parse(fbDetails.innerHTML);
         // console.log("fbDetails : ", fbDetails);
@@ -36,7 +36,7 @@ const getProfileData = (sendResponse, getUID = false) => {
         };
     }else{
         const loginBtn = document.querySelector(selectors.loginBtn);
-        console.log("loginBtn ::: ", loginBtn)
+        // console.log("loginBtn ::: ", loginBtn)
         if(loginBtn){
             userData = {
                 isFbLoggedin : false,
@@ -49,7 +49,7 @@ const getProfileData = (sendResponse, getUID = false) => {
             }
         }
     }
-    console.log("userData ::: ", userData);
+    // console.log("userData ::: ", userData);
     sendResponse(userData)
 
 
@@ -73,9 +73,9 @@ const getprofileDataofURL = (sendResponse) => {
             // console.log("profileOwnerScripts ::: ", profileOwnerScripts);
             if(profileOwnerScripts && profileOwnerScripts.length > 0){
                 const profileOwner  = profileOwnerScripts[0].innerHTML.split(`"profile_owner":`)[1].split('}')[0].split(`"id":"`)[1].split(`"`)[0];
-                console.log("profileOwner ::: ", profileOwner);
+                // console.log("profileOwner ::: ", profileOwner);
                 const userId = getProfileData(sendResponse, true)
-                console.log("userId ::: ", userId)
+                // console.log("userId ::: ", userId)
                 if(userId === profileOwner)
                     sendResponse({"uid" : profileOwner, status : true, isFbLoggedin : true});
                 else

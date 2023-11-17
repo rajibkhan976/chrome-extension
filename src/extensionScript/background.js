@@ -192,7 +192,7 @@ const syncFriendList = async (fbUserId, sendResponseExternal = null) => {
 
 const checkTabsActivation = async (opener) => {
   const tab = await chrome.tabs.query({ url: "https://www.facebook.com/*?opener=" + opener });
-  console.log("tab ::: ", tab)
+  // console.log("tab ::: ", tab)
   if(tab.length > 0 )
     for(let i = 0; i < tab.length; ++i){
       chrome.tabs.remove(parseInt(tab[i].id));
@@ -204,7 +204,7 @@ chrome.runtime.onMessageExternal.addListener(async function (
   sender,
   sendResponseExternal
 ) {
-  console.log("request ::::::-> ", request)
+  // console.log("request ::::::-> ", request)
   chrome.storage.local.set({ senExternalResponse: sendResponseExternal });
   switch (request.action) {
     case "extensionInstallation":
@@ -246,7 +246,7 @@ chrome.runtime.onMessageExternal.addListener(async function (
       chrome.tabs.create(
         { url: "https://www.facebook.com/me?opener=fr_sync", active: false, pinned: true, selected: false },
         (tab) => {
-          console.log("Syncing tab ::::::::::::", tab)
+          // console.log("Syncing tab ::::::::::::", tab)
           chrome.tabs.onUpdated.addListener(async function listener(
             tabId,
             info
@@ -276,7 +276,7 @@ chrome.runtime.onMessageExternal.addListener(async function (
       chrome.storage.local.remove('fr_debug_mode');
       break;
     case "deletePendingFR" : 
-    console.log("Delete All.................", request)
+    // console.log("Delete All.................", request)
       fbDtsg(async(fbDtsg, userID) => {
         if(!userID)
           return;
@@ -387,15 +387,15 @@ const getProfileInfo = (callback = null) => {
         userProfileData =  userProfileData[0];
         userProfileData = JSON.parse(userProfileData);
         if(userProfileData && userProfileData.f && userProfileData.u){
-          console.log("inside if block......................")
+          // console.log("inside if block......................")
           const userId = userProfileData.u.split("__user=")[1].split("&")[0];
           let profileUrls = e.split(`"profile_picture":{"uri":"`)
           profileUrls = profileUrls && profileUrls.length > 1 && profileUrls[1];
           profileUrls = profileUrls && profileUrls.split(`"},`)[0]
           profileUrls = profileUrls && profileUrls.replaceAll("\\", "")
-          console.log("profile pic :3333333333333333333333:: ", profileUrls);
+          // console.log("profile pic :3333333333333333333333:: ", profileUrls);
           if (callback) {
-            console.log("callback is here")
+            // console.log("callback is here")
             let profileUpdate = {
               uid: userId.toString(),
               path: "/" + userId,
@@ -404,7 +404,7 @@ const getProfileInfo = (callback = null) => {
               isFbLoggedin: true,
               status : true
             };
-            console.log("profileUpdate ::: ", profileUpdate)
+            // console.log("profileUpdate ::: ", profileUpdate)
             callback(profileUpdate);
           }
         }else{
@@ -442,7 +442,7 @@ const sendMessageToPortalScript = async (request) => {
 // This function is called to reload portal after reloading the extension
 const reloadPortal = async () =>{
   const [...tab] = await chrome.tabs.query({title: "Friender", url: process.env.REACT_APP_APP_URL + "/*" });
-  console.log("tab", tab)
+  // console.log("tab", tab)
   for(let i=0; i < tab.length; ++i){
     chrome.tabs.update(tab[i].id, { url: tab[i].url });
   }
@@ -525,7 +525,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       break;
 
     case "sendUpdate":
-      console.log("request.isSyncing ::: ", request.isSyncing , request);
+      // console.log("request.isSyncing ::: ", request.isSyncing , request);
       if (request.tabClose !== undefined && request.tabClose) {
         checkTabsActivation("fr_sync");
         removeTab("tabsId");
@@ -603,8 +603,8 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 
     case "getGenderCountryAndTierForIncoming":
                                 // console.log("request ::: ", request);
-                                const list = [...request.incomingPendingList]
-                                // console.log("list ::: ", list);
+                                const list = [...{...request}.incomingPendingList]
+                                console.log("list ::: ", list);
                                 list.forEach(async(el, i)=>{
                                   const getGenderCountryAndTierForIncoming = await getGenderCountryAndTiers(el.friendName);
                                   console.log("getGenderCountryAndTierForIncoming ::: ", getGenderCountryAndTierForIncoming)
@@ -613,6 +613,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                                     "country": getGenderCountryAndTierForIncoming.countryName ? getGenderCountryAndTierForIncoming.countryName : "N/A",
                                     "tier": getGenderCountryAndTierForIncoming.Tiers ? getGenderCountryAndTierForIncoming.Tiers : "N/A"
                                     };
+                                    // console.log("i ::: ", i)
                                   if(list.length - 1 === i)
                                     await common.storeIncomingPendingReq(request.userId, list)
                                 });
@@ -620,7 +621,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   
 
     case "updateCountryAndTier": 
-                              console.log(" UPDATE GENDER COUNTRY AND TIER CALLED",request)
+                              // console.log(" UPDATE GENDER COUNTRY AND TIER CALLED",request)
                               updateGenderCountryAndTier(request);    
                               break;
           
@@ -1106,9 +1107,9 @@ const getGenderCountryAndTiers = async (name) => {
     let frToken = await helper.getDatafromStorage("fr_token");
   
     if (!fbuserId) {
-      console.log("fbuserId", fbuserId);
+      // console.log("fbuserId", fbuserId);
       fbDtsg((fbDtsg, userID) => {
-        console.log("userID", userID);
+        // console.log("userID", userID);
         if(!userID)
           return;
         chrome.storage.local.set({
@@ -1146,17 +1147,17 @@ const getGenderCountryAndTiers = async (name) => {
       let settingsDetails = settings.automatic_cancel_friend_requests_settings &&
                             settings.automatic_cancel_friend_requests_settings[0].remove_after && 
                             settings.automatic_cancel_friend_requests_settings[0].remove_after
-      console.log(settingsDetails)
+      // console.log(settingsDetails)
       if(settingsDetails){
         fbDtsg(async (fbDtsg, userID) => {
-          console.log("fbDtsg, userID ::: ", fbDtsg, userID)
+          // console.log("fbDtsg, userID ::: ", fbDtsg, userID)
           if(!userID)
             return;
           chrome.storage.local.set({
             fbTokenAndId: { fbDtsg: fbDtsg, userID: userID },
           });
           const outgoingPendingRequestDefinition = await helper.getOutgoingPendingRequestList( userID, true, settingsDetails)
-          console.log("getOutgoingPendingRequestList ::: ", outgoingPendingRequestDefinition)
+          // console.log("getOutgoingPendingRequestList ::: ", outgoingPendingRequestDefinition)
           if(!outgoingPendingRequestDefinition || outgoingPendingRequestDefinition.length === 0){
             sendMessageToPortalScript({type : "cookie", content : "Empty", action : "deleteAllPendingFR"})
             return;
@@ -1208,14 +1209,14 @@ const getGenderCountryAndTiers = async (name) => {
       });
       let cancelFriendRequestDefinition = await cancelFriendRequestSerive.text();
       cancelFriendRequestDefinition = helper.makeParsable(cancelFriendRequestDefinition);
-      console.log("cancelFriendRequestDefinition :::: ", cancelFriendRequestDefinition);
+      // console.log("cancelFriendRequestDefinition :::: ", cancelFriendRequestDefinition);
       let isCancelFriendRequest = cancelFriendRequestDefinition && 
                                       cancelFriendRequestDefinition.data && 
                                       cancelFriendRequestDefinition.data.friend_request_cancel && 
                                       cancelFriendRequestDefinition.data.friend_request_cancel.cancelled_friend_requestee ? true : false;
-      console.log("isCancelFriendRequest :::: ", isCancelFriendRequest)
+      // console.log("isCancelFriendRequest :::: ", isCancelFriendRequest)
       const isDeletedFromPortal = await helper.deleteFRFromFriender([requestList[0]._id], userID);
-      console.log("isDeletedFromPorta ::: ", isDeletedFromPortal);
+      // console.log("isDeletedFromPorta ::: ", isDeletedFromPortal);
       if(refriending && isCancelFriendRequest){
         await helper.sleep(((Math.random * 241) + 60) *1000);
         await common.sentFriendRequest(userID, fbDtsg, requestList[0].friendFbId, "groups_member_list");
@@ -1271,7 +1272,7 @@ const getGenderCountryAndTiers = async (name) => {
         headers: HEADERS
       });
       reFriendingList = await reFriendingList.json();
-      console.log("reFriendingList ::: ", reFriendingList.data);
+      // console.log("reFriendingList ::: ", reFriendingList.data);
       if(reFriendingList && reFriendingList.data && reFriendingList.data.length > 0){
         cancelPendingFriendRequest(reFriendingList.data, fbDtsg, userID, true);
       }
@@ -1363,7 +1364,7 @@ const sendMessage = async (dtsg, fbId, receiverId, name, message="good afternoon
             }
           }
     } catch (error) {
-      console.log("Send Message Error", error);
+      console.error("Send Message Error", error);
       resolve(false);
     }
   });
@@ -1387,7 +1388,7 @@ const sendMessageAcceptOrReject= async() => {
     })
     let settings = await settingResp.json();
     settings = settings && settings.data ? settings.data[0] : {};
-    console.log("settings ::: ", settings);
+    // console.log("settings ::: ", settings);
     if(settings.send_message_when_someone_accept_new_friend_request || 
       settings.send_message_when_reject_friend_request ||
       settings.send_message_when_someone_sends_me_friend_request ||
@@ -1405,7 +1406,9 @@ const sendMessageAcceptOrReject= async() => {
         if(settings.send_message_when_someone_sends_me_friend_request){
             fetchIncomingLog = fetchSentFRLog.filter(el => el 
               && el.friendRequestStatus.toLocaleLowerCase().trim() === "pending" 
-              && el.is_incoming === true );
+              && el.is_incoming === true 
+              && (el.message_sending_status !== "Send" 
+              || el.message_sending_setting_type !== settingsType.whenRecievesRequest));
             console.log("fetchIncomingLog ::: ", fetchIncomingLog)
         }
         if(settings.send_message_when_accept_incoming_friend_request){
@@ -1413,7 +1416,7 @@ const sendMessageAcceptOrReject= async() => {
             && el.friendRequestStatus.toLocaleLowerCase().trim() === "accepted" 
             && el.is_incoming === true
             && (el.message_sending_status !== "Send" 
-            || el.message_sending_setting_type !== settingsType.whenAcceptedByMember));
+            || el.message_sending_setting_type !== settingsType.whenAcceptedByUser));
           console.log("fetchIncomingFRLogForAccept ::: ", fetchIncomingFRLogForAccept);
         }
         if(settings.send_message_when_reject_incoming_friend_request){
@@ -1421,7 +1424,7 @@ const sendMessageAcceptOrReject= async() => {
             && el.friendRequestStatus.toLocaleLowerCase().trim() === "rejected" 
             && el.is_incoming === true
             && (el.message_sending_status !== "Send" 
-            || el.message_sending_setting_type !== settingsType.whenRejectedByMember));
+            || el.message_sending_setting_type !== settingsType.whenRejectedByUser));
           console.log("fetchIncomingFRLogForReject ::: ", fetchIncomingFRLogForReject);
         }
         if(settings.send_message_when_someone_accept_new_friend_request){
@@ -1439,14 +1442,6 @@ const sendMessageAcceptOrReject= async() => {
             && (el.message_sending_status !== "Send" 
             || el.message_sending_setting_type !== settingsType.whenRejectedByMember));
           console.log("fetchSentFRLogForReject ::: ", fetchSentFRLogForReject);
-          // console.log("settings.send_message_when_reject_friend_request && settings.send_message_when_someone_accept_new_friend_request : ",
-          // settings.send_message_when_reject_friend_request, settings.send_message_when_someone_accept_new_friend_request);
-          // if(settings.send_message_when_reject_friend_request  && settings.send_message_when_someone_accept_new_friend_request)
-          //   InitiateSendMessages(fbDtsg, userId, fetchSentFRLogForAccept, fetchSentFRLogForReject);
-          // else if(settings.send_message_when_someone_accept_new_friend_request && !settings.send_message_when_reject_friend_request)
-          //   InitiateSendMessages(fbDtsg, userId, fetchSentFRLogForAccept);
-          // else if(!settings.send_message_when_someone_accept_new_friend_request && settings.send_message_when_reject_friend_request)
-          //   InitiateSendMessages(fbDtsg, userId, [], fetchSentFRLogForReject);
         }
         InitiateSendMessages(fbDtsg, userId, fetchSentFRLogForAccept, fetchSentFRLogForReject, fetchIncomingLog, fetchIncomingFRLogForAccept, fetchIncomingFRLogForReject);
       }
