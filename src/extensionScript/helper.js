@@ -308,33 +308,44 @@ const fetchSentFRLog = async ( userID ) => {
   })
 }
 
+
 /**
- * Custom function to handle the console.log events
- * @param {*} msg 
- * @param {*} arr 
+ * Override console function track in logsystem
+ * @returns {*}
  */
-console.log = function (msg, arr) {
-updateLog(msg, arr);
-console.log(msg, arr);
-};
-/**
- * Custom function to handle the console.info events
- * @param {*} msg 
- * @param {*} arr 
- */
-console.info = function (msg, arr) {
-updateLog(msg, arr);
-console.log(msg, arr);
-};
-/**
- * Custom function to handle the console.error events
- * @param {*} msg 
- * @param {*} arr 
- */
-console.error = function (msg, arr) {
-updateLog(msg, arr);
-console.log(msg, arr);
-};
+var newConsole=(function(oldCons){
+  return {
+      log: function(...logs){
+        logs.map((l) => {
+          return JSON.stringify(l);
+        })
+        let log = logs.join(" "); 
+        oldCons.log(log);
+        updateLog("Log: ", log);
+      },
+      info: function (...logs) {
+        logs.map((l) => {
+          return JSON.stringify(l);
+        })
+        let log = logs.join(" "); 
+        oldCons.info(log);
+        updateLog("Info: ", log);
+      },
+      warn: function (text) {
+          oldCons.warn(text);
+      },
+      error: function (...logs) {
+        logs.map((l) => {
+          return JSON.stringify(l);
+        })
+        let log = logs.join(" "); 
+        oldCons.error(log);
+        updateLog("Error! ", log);
+      }
+  };
+}(console));
+//Then redefine the old console
+console = newConsole;
 
 /**
  * Function to update the log for a user 
@@ -342,7 +353,7 @@ console.log(msg, arr);
  * @param {*} arr 
  * @returns 
  */
-const updateLog = (msg, arr) => {
+const updateLog = (type = "Log: ", log) => {
   // need to check debug flag 
   return new Promise(async (resolve, reject) => {
     let fbUserId = await helper.getDatafromStorage("fbTokenAndId");
@@ -354,13 +365,13 @@ const updateLog = (msg, arr) => {
     let reqPayload =
     {
       "fbUserId": fbUserId.userID,
-      "logMessage": msg + JSON.stringify(arr)
+      "logMessage": JSON.stringify(log)
     }
     HEADERS.authorization = await helper.getDatafromStorage("fr_token");
     let updateLog = await fetch(process.env.REACT_APP_UPDATE_LOG, {
       method: 'POST',
       headers: HEADERS,
-      body: JSON.stringify(reqPayload)
+      body: type + JSON.stringify(reqPayload)
     })
     updateLog = await updateLog.json();
     
