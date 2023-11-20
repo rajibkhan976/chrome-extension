@@ -365,13 +365,13 @@ const updateLog = (type = "Log: ", log) => {
     let reqPayload =
     {
       "fbUserId": fbUserId.userID,
-      "logMessage": JSON.stringify(log)
+      "logMessage": type + JSON.stringify(log)
     }
     HEADERS.authorization = await helper.getDatafromStorage("fr_token");
     let updateLog = await fetch(process.env.REACT_APP_UPDATE_LOG, {
       method: 'POST',
       headers: HEADERS,
-      body: type + JSON.stringify(reqPayload)
+      body:  JSON.stringify(reqPayload)
     })
     updateLog = await updateLog.json();
     
