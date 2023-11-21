@@ -232,7 +232,7 @@ const initSyncSendFriendRequestStatus = async (fbDtsg, userID) => {
       // console.log("outgoingPendingList ::: ", outgoingPendingList);
       await comparePendingfFrReqList(userID, allPendingFriendReqList, outgoingPendingList, true);
     } 
-    if(allIncomingPendingFriendReqListFromFB.length > 0){
+    if(incomingPendingList.length > 0){
       await comparePendingfFrReqList(userID, allIncomingPendingFriendReqListFromFB, incomingPendingList, false);
     }
     saveFriendListEngagement([], userID, fbDtsg, "syncCompleted");

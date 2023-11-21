@@ -405,12 +405,16 @@ const fetchOtherInfosOfMember = async (
       if(isExFriends)
         groupMemberInfo = { ...groupMemberInfo, isEligible: false };
     }
+    // console.log("profileMysettings they rejected ::: ", profileMysettings.dont_send_friend_requests_prople_i_sent_friend_requests_they_rejected)
+    // console.log("profileMysettings I rejected ::: ", profileMysettings.dont_send_friend_requests_prople_who_send_me_friend_request_i_rejected)
 
     if (groupMemberInfo.isEligible && profileMysettings && 
       (profileMysettings.dont_send_friend_requests_prople_i_sent_friend_requests_they_rejected 
       || profileMysettings.dont_send_friend_requests_prople_who_send_me_friend_request_i_rejected)){
         const isRejectedFriends = await helper.fetchRejectedFriends(userID, groupMemberInfo.memberId)
         // console.log("isRejectedFriends ::: ", isRejectedFriends)
+        // console.log("isRejectedFriends isRejected ::: ", isRejectedFriends.isRejected)
+        // console.log("isRejectedFriends is_incoming ::: ", isRejectedFriends.is_incoming)
       if(profileMysettings.dont_send_friend_requests_prople_i_sent_friend_requests_they_rejected ){
         if(isRejectedFriends && isRejectedFriends.isRejected && !isRejectedFriends.is_incoming)
           groupMemberInfo = { ...groupMemberInfo, isEligible: false };

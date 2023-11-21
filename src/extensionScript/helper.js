@@ -239,7 +239,7 @@ const fetchExFriends = async ( userID, friend_uid ) => {
 
 const fetchRejectedFriends = async ( userID, friend_uid ) => {
   return new Promise(async (resolve, reject) => {
-
+      // console.log("friend_uid ::::::::::::::::::::::::: ", friend_uid);
       HEADERS.authorization = await helper.getDatafromStorage("fr_token");
 
       let rejectedFriends = await fetch(process.env.REACT_APP_FETCH_REJECTED_FRIENDS + userID, {
@@ -253,9 +253,9 @@ const fetchRejectedFriends = async ( userID, friend_uid ) => {
       if(rejectedFriends && rejectedFriends.length > 0)
       {
         rejectedFriends = rejectedFriends.filter(el => el.friendFbId === friend_uid)
-        // console.log("rejectedFriends 2 :::: ", rejectedFriends)
+        // console.log("rejectedFriends 2 :::: ", rejectedFriends[0].is_incoming)
         if(rejectedFriends.length > 0)
-          resolve({isRejected : true, is_incoming : rejectedFriends.is_incoming ? rejectedFriends.is_incoming : false})
+          resolve({isRejected : true, is_incoming : rejectedFriends[0].is_incoming ? rejectedFriends[0].is_incoming : false})
         else resolve({isRejected : false})
       }
       else

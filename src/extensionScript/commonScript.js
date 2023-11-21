@@ -543,22 +543,24 @@ const getIncomingPendingList = async(userId, fbDTSG, cursor = "") => {
   }
   else{
     console.log("Incoming pending list ::: ", incomingPendingList);
-    incomingPendingList = incomingPendingList && incomingPendingList.length > 0 && incomingPendingList.map((el)=>{
-      const data = {
-        "friendFbId": el.node.id,
-        "friendProfileUrl": el.node.url,
-        "friendName": el.node.name,
-        "friendProfilePicture": el.node.profile_picture.uri
-      }
-      return data;
-    })
-    console.log("Incoming pending list 222222222 ::: ", incomingPendingList);
-    //store in DB
-    chrome.runtime.sendMessage({
-      "action": "getGenderCountryAndTierForIncoming",
-      "incomingPendingList": incomingPendingList,
-      "userId": userId
-    });
+    if(incomingPendingList && incomingPendingList.length > 0){
+      incomingPendingList = incomingPendingList.map((el)=>{
+        const data = {
+          "friendFbId": el.node.id,
+          "friendProfileUrl": el.node.url,
+          "friendName": el.node.name,
+          "friendProfilePicture": el.node.profile_picture.uri
+        }
+        return data;
+      })
+      console.log("Incoming pending list 222222222 ::: ", incomingPendingList);
+      //store in DB
+      chrome.runtime.sendMessage({
+        "action": "getGenderCountryAndTierForIncoming",
+        "incomingPendingList": incomingPendingList,
+        "userId": userId
+      });
+    }
     return incomingPendingList;
   }
 }

@@ -1444,6 +1444,10 @@ const sendMessageAcceptOrReject= async() => {
           console.log("fetchSentFRLogForReject ::: ", fetchSentFRLogForReject);
         }
         InitiateSendMessages(fbDtsg, userId, fetchSentFRLogForAccept, fetchSentFRLogForReject, fetchIncomingLog, fetchIncomingFRLogForAccept, fetchIncomingFRLogForReject);
+      }else{
+        chrome.storage.local.remove("payload");
+        sendMessageToPortalScript({action: "fr_update", content: "Done"});
+        sendMessageToPortalScript({action: "fr_isSyncing", content: "", type: "cookie"});
       }
   })
 }
