@@ -22,7 +22,12 @@ chrome.runtime.sendMessage({ action: "msgFormExt", content: "hello" });
 let fbBody = document.getElementsByTagName("body")[0];
 fbBody.innerHTML += overlay;
 fbBody.style["pointer-events"] = "none";
-
+let fbBodyChild = fbBody.querySelector('[id^="mount_0_0"]');
+// console.log("fbBodyChild ::: ", fbBodyChild)
+setTimeout(()=>{
+  // console.log(` fbBodyChild.style["display"] ::: `,  fbBodyChild.style["display"])
+  fbBodyChild.style["display"] = "block";
+}, 500)
 let fr_token
 let data = {
   variables: { "count": 30, "scale": 1, "name": null },
@@ -1323,9 +1328,9 @@ const getReactions = async  (dtsg, userId, friendList, feedbackId, after, postCr
   c.append('doc_id', "3783547041750558");
   let e = null;
 
-  console.time("SLEEP")
+  // console.time("SLEEP")
   await helper.sleep(helper.getRandomInteger(100, 500));
-  console.timeEnd("SLEEP");
+  // console.timeEnd("SLEEP");
 
   await fetch("https://www.facebook.com/api/graphql/", { body: c, headers: { accept: "application/json, text/plain, */*" }, method: "POST" }).then(async function (d) { return d.text() }).then(async function (d) {
       try {
@@ -1840,9 +1845,9 @@ const getReactionsNew = async  (dtsg, userId, friendList, feedbackId, after, pos
   c.append('doc_id', "3783547041750558");
   let e = null;
 
-  console.time("SLEEP")
+  // console.time("SLEEP")
   await helper.sleep(helper.getRandomInteger(100, 500));
-  console.timeEnd("SLEEP");
+  // console.timeEnd("SLEEP");
 
   await fetch("https://www.facebook.com/api/graphql/", { body: c, headers: { accept: "application/json, text/plain, */*" }, method: "POST" }).then(async function (d) { return d.text() }).then(async function (d) {
       try {
