@@ -987,14 +987,14 @@ const updateGenderCountryAndTier = async (request) => {
      if(exFriendData.status != 1){
        let fetchGenderAPI = await fetchGenderCountryTier(friend)
        if(fetchGenderAPI.status){
-        console.log("actual friend object",friend)
-        console.log("GENDER from gender API",fetchGenderAPI.gender)
+        console.log("actual friend object",JSON.stringify(friend))
+        console.log("GENDER from gender API",JSON.stringify(fetchGenderAPI.gender))
         console.log("conditioned final gender",friend.gender!=undefined && friend.gender!="UNKNOWN"?friend.gender:fetchGenderAPI.gender)
          friendPayload.country = fetchGenderAPI.country 
          friendPayload.tier = fetchGenderAPI.tier
          friendPayload["friendGender"] = friend.gender!=undefined && friend.gender!="UNKNOWN"?friend.gender:fetchGenderAPI.gender
          totalGenderAPIHits++
-         console.log("payload from Gender API",friendPayload)
+         console.log("payload from Gender API",JSON.stringify(friendPayload))
          updateFriendPayload.push(friendPayload);
        }
 
@@ -1003,16 +1003,16 @@ const updateGenderCountryAndTier = async (request) => {
        friendPayload.country = exFriendData.currentData.country;
        friendPayload.tier = exFriendData.currentData.tier
        // friendPayload.friendGender = exFriendData.friendGender
-       console.log("payload from local data",friendPayload)
+       console.log("payload from local data",JSON.stringify(friendPayload))
        updateFriendPayload.push(friendPayload);
      }
 
      if (i + 1 === listLen) {
       // console.log("Country List", updateFriendPayload);
       setTimeout( () => {
-        console.log("totalGenderAPIhits ::",totalGenderAPIHits)
-        console.log("totalLocalfetchs ::",totalLocalfetchs)
-        console.log("Update country and Tier",updateFriendPayload)
+        console.log("totalGenderAPIhits ::",JSON.stringify(totalGenderAPIHits))
+        console.log("totalLocalfetchs ::",JSON.stringify(totalLocalfetchs))
+        console.log("Update country and Tier",JSON.stringify(updateFriendPayload))
         updateFriendList(updateFriendPayload, fbUserId)
       },2000)
     }
@@ -1035,7 +1035,7 @@ const updateGenderCountryAndTier = async (request) => {
    .then((response) => response.json())
    .then((res) => { 
     if(res && res.data!=undefined && res.data.length && res.data[0].friend_details!=undefined && res.data[0].friend_details.length){
-      console.log("friend list present***",res.data[0].friend_details)
+      console.log("friend list present***",JSON.stringify(res.data[0].friend_details))
       proceedToUpdateGenderCountryAndTier(res.data[0].friend_details)
     }else{
       console.log("Else block : friend list not present")
@@ -1401,7 +1401,7 @@ const sendMessageAcceptOrReject= async() => {
             fetchSentFRLogForReject = [];
         // console.log("fbDtsg, userId ::::::::::::::::: ", fbDtsg, userId);
         const fetchSentFRLog = await helper.fetchSentFRLog(userId);
-        console.log("fetchSentFRLog ::: ", fetchSentFRLog)
+        console.log("fetchSentFRLog ::: ", JSON.stringify(fetchSentFRLog))
 
         if(settings.send_message_when_someone_sends_me_friend_request){
             fetchIncomingLog = fetchSentFRLog.filter(el => el 
@@ -1409,7 +1409,7 @@ const sendMessageAcceptOrReject= async() => {
               && el.is_incoming === true 
               && (el.message_sending_status !== "Send" 
               || el.message_sending_setting_type !== settingsType.whenRecievesRequest));
-            console.log("fetchIncomingLog ::: ", fetchIncomingLog)
+            console.log("fetchIncomingLog ::: ", JSON.stringify(fetchIncomingLog))
         }
         if(settings.send_message_when_accept_incoming_friend_request){
           fetchIncomingFRLogForAccept = fetchSentFRLog.filter(el => el 
@@ -1417,7 +1417,7 @@ const sendMessageAcceptOrReject= async() => {
             && el.is_incoming === true
             && (el.message_sending_status !== "Send" 
             || el.message_sending_setting_type !== settingsType.whenAcceptedByUser));
-          console.log("fetchIncomingFRLogForAccept ::: ", fetchIncomingFRLogForAccept);
+          console.log("fetchIncomingFRLogForAccept ::: ", JSON.stringify(fetchIncomingFRLogForAccept));
         }
         if(settings.send_message_when_reject_incoming_friend_request){
           fetchIncomingFRLogForReject = fetchSentFRLog.filter(el => el 
@@ -1425,7 +1425,7 @@ const sendMessageAcceptOrReject= async() => {
             && el.is_incoming === true
             && (el.message_sending_status !== "Send" 
             || el.message_sending_setting_type !== settingsType.whenRejectedByUser));
-          console.log("fetchIncomingFRLogForReject ::: ", fetchIncomingFRLogForReject);
+          console.log("fetchIncomingFRLogForReject ::: ", JSON.stringify(fetchIncomingFRLogForReject));
         }
         if(settings.send_message_when_someone_accept_new_friend_request){
           fetchSentFRLogForAccept = fetchSentFRLog.filter(el => el 
@@ -1433,7 +1433,7 @@ const sendMessageAcceptOrReject= async() => {
             && el.is_incoming !== true
             && (el.message_sending_status !== "Send" 
             || el.message_sending_setting_type !== settingsType.whenAcceptedByMember));
-          console.log("fetchSentFRLogForAccept ::: ", fetchSentFRLogForAccept);
+          console.log("fetchSentFRLogForAccept ::: ", JSON.stringify(fetchSentFRLogForAccept));
         }
         if(settings.send_message_when_reject_friend_request){
           fetchSentFRLogForReject = fetchSentFRLog.filter(el => el 
@@ -1441,7 +1441,7 @@ const sendMessageAcceptOrReject= async() => {
             && el.is_incoming !== true
             && (el.message_sending_status !== "Send" 
             || el.message_sending_setting_type !== settingsType.whenRejectedByMember));
-          console.log("fetchSentFRLogForReject ::: ", fetchSentFRLogForReject);
+          console.log("fetchSentFRLogForReject ::: ", JSON.stringify(fetchSentFRLogForReject));
         }
         InitiateSendMessages(fbDtsg, userId, fetchSentFRLogForAccept, fetchSentFRLogForReject, fetchIncomingLog, fetchIncomingFRLogForAccept, fetchIncomingFRLogForReject);
       }else{

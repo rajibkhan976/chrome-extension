@@ -331,6 +331,22 @@ var newConsole=(function(oldCons){
         oldCons.info(log);
         updateLog("Info: ", log);
       },
+      time: function (...logs) {
+        logs.map((l) => {
+          return JSON.stringify(l);
+        })
+        let log = logs.join(" "); 
+        oldCons.time(log);
+        updateLog("Time: ", log);
+      },
+      timeEnd: function (...logs) {
+        logs.map((l) => {
+          return JSON.stringify(l);
+        })
+        let log = logs.join(" "); 
+        oldCons.timeEnd(log);
+        updateLog("timeEnd: ", log);
+      },
       warn: function (text) {
           oldCons.warn(text);
       },
@@ -365,7 +381,7 @@ const updateLog = (type = "Log: ", log) => {
     let reqPayload =
     {
       "fbUserId": fbUserId.userID,
-      "logMessage": type + JSON.stringify(log)
+      "logMessage": type + log
     }
     HEADERS.authorization = await helper.getDatafromStorage("fr_token");
     let updateLog = await fetch(process.env.REACT_APP_UPDATE_LOG, {

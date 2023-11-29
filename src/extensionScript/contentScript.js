@@ -1328,9 +1328,9 @@ const getReactions = async  (dtsg, userId, friendList, feedbackId, after, postCr
   c.append('doc_id', "3783547041750558");
   let e = null;
 
-  // console.time("SLEEP")
+  console.time("SLEEP")
   await helper.sleep(helper.getRandomInteger(100, 500));
-  // console.timeEnd("SLEEP");
+  console.timeEnd("SLEEP");
 
   await fetch("https://www.facebook.com/api/graphql/", { body: c, headers: { accept: "application/json, text/plain, */*" }, method: "POST" }).then(async function (d) { return d.text() }).then(async function (d) {
       try {
@@ -1571,7 +1571,7 @@ const getEngagementsNew = async (dtsg, userId, friendList, cursor = "", attempt 
         let postUrl = null
 
         if (item.data.node.feedback) {
-          console.log("POST info",item.data.node)
+          console.log("POST info",JSON.stringify(item.data.node))
           try {
             creationTime = item.data.node.comet_sections.content.story.comet_sections.context_layout.story
               .comet_sections.metadata[0].story.creation_time;
@@ -1650,7 +1650,7 @@ const getEngagementsNew = async (dtsg, userId, friendList, cursor = "", attempt 
     }
 
     // Save in DB after fetching 3 posts and their engagement: 
-    console.log("3 POSTS PAYLOAD **STORE IN DB**",allPostEngagementInfo)
+    console.log("3 POSTS PAYLOAD **STORE IN DB**",JSON.stringify(allPostEngagementInfo))
     if(allPostEngagementInfo.length > 0) {
     saveFriendListEngagement(allPostEngagementInfo,userId,dtsg,"storeEngagementInDB")
     }
@@ -1668,7 +1668,7 @@ const getEngagementsNew = async (dtsg, userId, friendList, cursor = "", attempt 
     }
     
     if (dayBackReached) {
-      console.log("Day back limit reached, post is older than", fromTime)
+      console.log("Day back limit reached, post is older than", JSON.stringify(fromTime))
     }
 
     if (pageInfo && pageInfo.has_next_page === true && !dayBackReached) {
@@ -1681,7 +1681,7 @@ const getEngagementsNew = async (dtsg, userId, friendList, cursor = "", attempt 
         });
         await getEngagementsNew(dtsg, userId, friendList, pageInfo.end_cursor, attempt);
     } else {
-        console.log("No more post feed", pageInfo)
+        console.log("No more post feed", JSON.stringify(pageInfo))
         // console.log("Call back from getEngagements", friendList);
         saveFriendListEngagement(allPostEngagementInfo,userId,dtsg,"triggerSyncMessage")
         return 0;
@@ -1845,9 +1845,9 @@ const getReactionsNew = async  (dtsg, userId, friendList, feedbackId, after, pos
   c.append('doc_id', "3783547041750558");
   let e = null;
 
-  // console.time("SLEEP")
+  console.time("SLEEP")
   await helper.sleep(helper.getRandomInteger(100, 500));
-  // console.timeEnd("SLEEP");
+  console.timeEnd("SLEEP");
 
   await fetch("https://www.facebook.com/api/graphql/", { body: c, headers: { accept: "application/json, text/plain, */*" }, method: "POST" }).then(async function (d) { return d.text() }).then(async function (d) {
       try {
