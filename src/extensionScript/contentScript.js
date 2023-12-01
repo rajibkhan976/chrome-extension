@@ -184,7 +184,7 @@ const getMessageEngagement = async (
     msgEngRes = helper.makeParsable(
       msgEngRes.split('{"successful_results":')[0].trim()
     );
-    msgEngRes = msgEngRes && msgEngRes.o0.data.message_thread;
+    msgEngRes = msgEngRes && msgEngRes.o0 && msgEngRes.o0.data!=undefined && msgEngRes.o0.data.message_thread!=undefined? msgEngRes.o0.data.message_thread:0 ;
     // console.log("msgEngResv 124 ::: ", msgEngRes)
     finalFriendListWithMsg = [
       ...finalFriendListWithMsg,
