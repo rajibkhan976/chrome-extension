@@ -50,14 +50,22 @@ chrome.runtime.onInstalled.addListener((res) => {
   return false;
 });
 
-chrome.action.onClicked.addListener(function (activeInfo) {
+chrome.action.onClicked.addListener(async function (activeInfo) {
   // console.log("activeInfo on clicked ::::: ", activeInfo)
-  setPopup(activeInfo.url);
+  const fr_token = await helper.getDatafromStorage("fr_token")
+  // console.log("fr_token ::: ", fr_token)
+  if(!helper.isEmptyObj(fr_token)){
+    // setPopup(activeInfo.url);
+    chrome.action.setPopup({ popup: "popup.html" });
+  }
+  else{
+    chrome.tabs.create({ url: process.env.REACT_APP_APP_URL });
+  }
 });
 
 const setPopup = async () => {
   const fr_token = await helper.getDatafromStorage("fr_token")
-  // console.log("fr_token ::: ", fr_token)
+  console.log("fr_token ::: ", fr_token)
   if(!helper.isEmptyObj(fr_token)){
     chrome.action.setPopup({ popup: "popup.html" });
   }
@@ -272,8 +280,13 @@ chrome.runtime.onMessageExternal.addListener(async function (
       sendResponseExternal(resp);
       break;
     case "logout" : 
+      console.log('logggggggggggggggggggggggggggggggg out        :')
+      chrome.action.setPopup({ popup: "" });
       chrome.storage.local.remove('fr_token');
       chrome.storage.local.remove('fr_debug_mode');
+
+      const currentFBTabId = await helper.getDatafromStorage("tabId");
+      chrome.tabs.sendMessage(Number(currentFBTabId), {"action" : "stop"});
       break;
     case "deletePendingFR" : 
     // console.log("Delete All.................", request)
@@ -1405,6 +1418,8 @@ const sendMessageAcceptOrReject= async() => {
 
         if(settings.send_message_when_someone_sends_me_friend_request){
             fetchIncomingLog = fetchSentFRLog.filter(el => el 
+              && el.friendRequestStatus
+              && el.friendRequestStatus.toLocaleLowerCase()
               && el.friendRequestStatus.toLocaleLowerCase().trim() === "pending" 
               && el.is_incoming === true 
               && (el.message_sending_status !== "Send" 
@@ -1413,6 +1428,8 @@ const sendMessageAcceptOrReject= async() => {
         }
         if(settings.send_message_when_accept_incoming_friend_request){
           fetchIncomingFRLogForAccept = fetchSentFRLog.filter(el => el 
+            && el.friendRequestStatus
+            && el.friendRequestStatus.toLocaleLowerCase()
             && el.friendRequestStatus.toLocaleLowerCase().trim() === "accepted" 
             && el.is_incoming === true
             && (el.message_sending_status !== "Send" 
@@ -1421,6 +1438,8 @@ const sendMessageAcceptOrReject= async() => {
         }
         if(settings.send_message_when_reject_incoming_friend_request){
           fetchIncomingFRLogForReject = fetchSentFRLog.filter(el => el 
+            && el.friendRequestStatus
+            && el.friendRequestStatus.toLocaleLowerCase()
             && el.friendRequestStatus.toLocaleLowerCase().trim() === "rejected" 
             && el.is_incoming === true
             && (el.message_sending_status !== "Send" 
@@ -1429,6 +1448,8 @@ const sendMessageAcceptOrReject= async() => {
         }
         if(settings.send_message_when_someone_accept_new_friend_request){
           fetchSentFRLogForAccept = fetchSentFRLog.filter(el => el 
+            && el.friendRequestStatus
+            && el.friendRequestStatus.toLocaleLowerCase()
             && el.friendRequestStatus.toLocaleLowerCase().trim() === "accepted" 
             && el.is_incoming !== true
             && (el.message_sending_status !== "Send" 
@@ -1437,6 +1458,8 @@ const sendMessageAcceptOrReject= async() => {
         }
         if(settings.send_message_when_reject_friend_request){
           fetchSentFRLogForReject = fetchSentFRLog.filter(el => el 
+            && el.friendRequestStatus
+            && el.friendRequestStatus.toLocaleLowerCase()
             && el.friendRequestStatus.toLocaleLowerCase().trim() === "rejected" 
             && el.is_incoming !== true
             && (el.message_sending_status !== "Send" 
