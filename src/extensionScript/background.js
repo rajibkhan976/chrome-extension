@@ -1,4 +1,4 @@
-import { io } from "socket.io-client";
+// import { io } from "socket.io-client";
 import helper from "./helper";
 import common from "./commonScript";
 import { settingsType } from "../config/config";
@@ -10,9 +10,9 @@ const action_url = "https://www.facebook.com/friends/list?opener=fr_sync";
 const HEADERS = {
   "Content-Type": "application/json",
 };
-let socket = io(process.env.REACT_APP_SOCKET_URL, {
-  transports: ["websocket", "polling"], // use WebSocket first, if available
-});
+// let socket = io(process.env.REACT_APP_SOCKET_URL, {
+//   transports: ["websocket", "polling"], // use WebSocket first, if available
+// });
 const schedulerIntvTime = 10;
 const pendingFRIntvTime = 120;
 const reFRIntvTime = 240;
@@ -463,34 +463,34 @@ const reloadPortal = async () =>{
 
 
 // this function is called to connect Ticket master
-const ConnectToSocket = async (request)    =>{
+// const ConnectToSocket = async (request)    =>{
 
-  if (!frToken) {
-    frToken = await helper.getDatafromStorage("fr_token"); 
-  }
+//   if (!frToken) {
+//     frToken = await helper.getDatafromStorage("fr_token"); 
+//   }
 
-  if (!socket || !socket.connected) {
-    // console.log("reconnect socket",frToken )
-    socket = io(SOCKET_URL, {
-     auth: {token: frToken},
-     transports: ["websocket", "polling"] // use WebSocket first, if available
-   });
-   }
+//   if (!socket || !socket.connected) {
+//     // console.log("reconnect socket",frToken )
+//     socket = io(SOCKET_URL, {
+//      auth: {token: frToken},
+//      transports: ["websocket", "polling"] // use WebSocket first, if available
+//    });
+//    }
   
-  socket.on("connect_error", (e) => {
-      // console.log("There is a socket connection Error", e);
-      socket.io.opts.transports = ["polling", "websocket"];
-  });
+//   socket.on("connect_error", (e) => {
+//       // console.log("There is a socket connection Error", e);
+//       socket.io.opts.transports = ["polling", "websocket"];
+//   });
   
-  socket.on('connect', function () {
-    socket.emit('join', {token: frToken});
-  });
+//   socket.on('connect', function () {
+//     socket.emit('join', {token: frToken});
+//   });
 
-  socket.emit(request.action, request, function (data) {
-    // console.log("socket resp", data)
-  });
+//   socket.emit(request.action, request, function (data) {
+//     // console.log("socket resp", data)
+//   });
 
-}
+// }
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   switch (request.action) {
@@ -520,20 +520,20 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 
     case "countBadge":
       chrome.action.setBadgeText({ text: request.count.toString() });
-      ConnectToSocket(request);
+      // ConnectToSocket(request);
       sendMessageToPortalScript({action: "fr_countBadge", content: request.count.toString()})
       break;
 
     case "facebookLoggedOut":
       helper.removeDatafromStorage("fbTokenAndId");
-      ConnectToSocket(request);
+      // ConnectToSocket(request);
       checkTabsActivation("fr_sync");
       removeTab("tabsId");
       chrome.action.setBadgeText({ text: "" });
       break;
 
     case "finalFriendList":
-      ConnectToSocket(request);
+      // ConnectToSocket(request);
       chrome.action.setBadgeText({ text: "Done" });
       break;
 
@@ -543,7 +543,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         checkTabsActivation("fr_sync");
         removeTab("tabsId");
       }
-      ConnectToSocket(request);
+      // ConnectToSocket(request);
       sendMessageToPortalScript({action: "fr_update", content: request.update});
       sendMessageToPortalScript({action: "fr_isSyncing", content: request.isSyncing, type: "cookie"});
       break;

@@ -228,11 +228,10 @@ const initSyncSendFriendRequestStatus = async (fbDtsg, userID) => {
     // console.log("outgoingPendingList :::: ", outgoingPendingList)
     const allIncomingPendingFriendReqListFromFB = await common.getIncomingPendingList(userID, fbDtsg)
     console.log("allIncomingPendingFriendReqListFromFB ::: ", allIncomingPendingFriendReqListFromFB);
-    if(incomingPendingList.length === 0 && outgoingPendingList.length === 0){
-      saveFriendListEngagement([], userID, fbDtsg, "syncCompleted");
-    }
+    // if(incomingPendingList.length === 0 && outgoingPendingList.length === 0){
+    //   saveFriendListEngagement([], userID, fbDtsg, "syncCompleted");
+    // }
     if (outgoingPendingList.length > 0) {
-      // allOutgoingPendingFriendReqListFromDB = outgoingPendingList;
       await syncSendFriendRequestStatus(fbDtsg, userID, null);
       // console.log("outgoingPendingList ::: ", outgoingPendingList);
       await comparePendingfFrReqList(userID, allPendingFriendReqList, outgoingPendingList, true);
@@ -240,9 +239,11 @@ const initSyncSendFriendRequestStatus = async (fbDtsg, userID) => {
     if(incomingPendingList.length > 0){
       await comparePendingfFrReqList(userID, allIncomingPendingFriendReqListFromFB, incomingPendingList, false);
     }
-    saveFriendListEngagement([], userID, fbDtsg, "syncCompleted");
+    // saveFriendListEngagement([], userID, fbDtsg, "syncCompleted");
   } catch (error) {
     console.log("ERROR IN FETCHING PENDING REQUEST LIST", error)
+    // saveFriendListEngagement([], userID, fbDtsg, "syncCompleted");
+  } finally {
     saveFriendListEngagement([], userID, fbDtsg, "syncCompleted");
   }
 }
