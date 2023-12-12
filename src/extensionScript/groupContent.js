@@ -424,6 +424,13 @@ const fetchOtherInfosOfMember = async (
           groupMemberInfo = { ...groupMemberInfo, isEligible: false };
       }
     }
+
+    if (groupMemberInfo.isEligible && profileMysettings && avoid_sending_friend_request_to_restricted_people){
+      const isRestricted = await common.fetchRestrictedFbProfile({ "facebookUserId":userID, "peopleFbId":groupMemberInfo.memberId});
+      console.log("isRestricted ::: ", isRestricted)
+      if(isRestricted)
+        groupMemberInfo = { ...groupMemberInfo, isEligible: false };
+    }
       
     //check for user re-friending  
     if (groupMemberInfo.isEligible) {
@@ -523,8 +530,16 @@ const fetchOtherInfosOfMember = async (
       // console.log("timeSaved ::: ", timeSaved, " hours")
       await wait(time);
       const sentFriendRequest = await common.sentFriendRequest(userID, fbDtsg, groupMemberInfo.memberId)
-      // console.log("sentFriendRequest ::: ", sentFriendRequest)
-      if (sentFriendRequest) {
+      console.log("sentFriendRequest.status ::: ", sentFriendRequest.status)
+      console.log("sentFriendRequest.description ::: ", sentFriendRequest.description)
+      if(sentFriendRequest.status === false && sentFriendRequest.description.includes('It looks like you may not know this person.')){
+        console.log("Checking facebook tupulu tupulu.");
+        await common.storeRestrictedFbProfile({
+          "facebookUserId": userID,
+          "peopleFbId": groupMemberInfo.memberId 
+        })
+      }
+      if (sentFriendRequest.status) {
         countMember = countMember + 1;
         fr_token = await helper.getDatafromStorage("fr_token");
         await helper.saveDatainStorage("updated_Profile_data", { "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved })

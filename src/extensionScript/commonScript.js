@@ -413,9 +413,9 @@ const sentFriendRequest = async (userID, fbDtsg, memberId, source = "groups_memb
     getSentFriendReq.data.friend_request_send &&
     getSentFriendReq.data.friend_request_send.friend_requestees &&
     getSentFriendReq.data.friend_request_send.friend_requestees.length > 0) {
-    return true;
+    return {status :  true};
   } else {
-    return false;
+    return {status : false, description : getSentFriendReq && getSentFriendReq.errors && getSentFriendReq.errors.description};
   }
 }
 
@@ -590,6 +590,36 @@ const storeIncomingPendingReq = async(userId, incomingPendingList) => {
   // console.log("getIncomingPendingRequests ::: ", getIncomingPendingRequests);
 }
 
+const storeRestrictedFbProfile = async (payload) => {
+  HEADERS.authorization = await helper.getDatafromStorage("fr_token");
+  let storeRestrictedProfiles = await fetch(
+    process.env.REACT_APP_STORE_RESTRICTED_PEOPLE,
+    {
+      method: "POST",
+      headers: HEADERS,
+      body: JSON.stringify(payload),
+    }
+  );
+  storeRestrictedProfiles = await storeRestrictedProfiles.json();
+  console.log("storeRestrictedProfiles ::: ", storeRestrictedProfiles)
+}
+
+
+const fetchRestrictedFbProfile = async (payload) => {
+  HEADERS.authorization = await helper.getDatafromStorage("fr_token");
+  let fetchRestrictedProfiles = await fetch(
+    process.env.REACT_APP_FETCH_RESTRICTED_PEOPLE,
+    {
+      method: "POST",
+      headers: HEADERS,
+      body: JSON.stringify(payload),
+    }
+  );
+  fetchRestrictedProfiles = await fetchRestrictedProfiles.json();
+  console.log("fetchRestrictedProfiles ::: ", fetchRestrictedProfiles)
+  return (fetchRestrictedProfiles && fetchRestrictedProfiles.data && fetchRestrictedProfiles.data.length > 0 ? true : false);
+}
+
 const common = {
   getAboutInfo: getAboutInfo,
   getMemberGender: getMemberGender,
@@ -600,7 +630,9 @@ const common = {
   getMessageContent: getMessageContent,
   confirmSentMessage: confirmSentMessage,
   getIncomingPendingList : getIncomingPendingList,
-  storeIncomingPendingReq : storeIncomingPendingReq
+  storeIncomingPendingReq : storeIncomingPendingReq,
+  fetchRestrictedFbProfile : fetchRestrictedFbProfile,
+  storeRestrictedFbProfile : storeRestrictedFbProfile
 };
 
 export default common;
