@@ -425,7 +425,7 @@ const fetchOtherInfosOfMember = async (
       }
     }
 
-    if (groupMemberInfo.isEligible && profileMysettings && avoid_sending_friend_request_to_restricted_people){
+    if (groupMemberInfo.isEligible && profileMysettings && profileMysettings.avoid_sending_friend_request_to_restricted_people){
       const isRestricted = await common.fetchRestrictedFbProfile({ "facebookUserId":userID, "peopleFbId":groupMemberInfo.memberId});
       console.log("isRestricted ::: ", isRestricted)
       if(isRestricted)
@@ -532,7 +532,8 @@ const fetchOtherInfosOfMember = async (
       const sentFriendRequest = await common.sentFriendRequest(userID, fbDtsg, groupMemberInfo.memberId)
       console.log("sentFriendRequest.status ::: ", sentFriendRequest.status)
       console.log("sentFriendRequest.description ::: ", sentFriendRequest.description)
-      if(sentFriendRequest.status === false && sentFriendRequest.description.includes('It looks like you may not know this person.')){
+      if(sentFriendRequest.status === false && (sentFriendRequest.description && sentFriendRequest.description.length > 0 && 
+        (sentFriendRequest.description.includes('It looks like you may not know this person.') || sentFriendRequest.description.includes("Only send friend requests to people you know personally.")))){
         console.log("Checking facebook tupulu tupulu.");
         await common.storeRestrictedFbProfile({
           "facebookUserId": userID,

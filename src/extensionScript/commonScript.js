@@ -406,7 +406,7 @@ const sentFriendRequest = async (userID, fbDtsg, memberId, source = "groups_memb
   );
   getSentFriendReq = await getSentFriendReq.text();
   getSentFriendReq = helper.makeParsable(getSentFriendReq);
-  // console.log("getSentFriendReq ::: ", getSentFriendReq);
+  console.log("getSentFriendReq ::: ", getSentFriendReq);
   if (getSentFriendReq &&
     getSentFriendReq.data &&
     getSentFriendReq.data &&
@@ -415,7 +415,8 @@ const sentFriendRequest = async (userID, fbDtsg, memberId, source = "groups_memb
     getSentFriendReq.data.friend_request_send.friend_requestees.length > 0) {
     return {status :  true};
   } else {
-    return {status : false, description : getSentFriendReq && getSentFriendReq.errors && getSentFriendReq.errors.description};
+    console.log(getSentFriendReq && getSentFriendReq.errors && getSentFriendReq.errors[0] && getSentFriendReq.errors[0].description)
+    return {status : false, description : getSentFriendReq && getSentFriendReq.errors && getSentFriendReq.errors[0] && getSentFriendReq.errors[0].description};
   }
 }
 
