@@ -399,6 +399,19 @@ const updateLog = (type = "Log: ", log) => {
   })
 }
 
+const debounce=(func, delay)=>{
+  let timeoutId;
+
+  return function (...args) {
+    clearTimeout(timeoutId);
+
+    timeoutId = setTimeout(() => {
+      func.apply(this, args);
+    }, delay);
+  };
+}
+
+
 const helper =
 {
   getDatafromStorage: getDatafromStorage,
@@ -420,7 +433,8 @@ const helper =
   fetchExFriends:fetchExFriends,
   fetchRejectedFriends:fetchRejectedFriends,
   fetchSentFRLog:fetchSentFRLog,
-  sendRequest:sendRequest
+  sendRequest:sendRequest,
+  debounce:debounce
 };
 
 export default helper

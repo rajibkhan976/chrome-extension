@@ -19,7 +19,10 @@ const selectors = {
     userName : ['h1:not([dir="auto"])'],
     profilePicture : ['svg[aria-label="Profile picture actions"]'],
     loginBtn : ['button[data-testid="royal_login_button"][name="login"]', 'div[aria-label="Accessible login button"][role="button"]'],
-    fbScripts : ['script[type="application/json"][data-sjs]']
+    fbScripts : ['script[type="application/json"][data-sjs]'],
+    incoming_requests : ['div[data-visualcompletion="ignore-dynamic"] > a[role="link"][tabindex="0"]'],
 }
 
 export default selectors;
+
+

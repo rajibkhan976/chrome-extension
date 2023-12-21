@@ -71,6 +71,7 @@ module.exports = {
   groupContent: resolveApp("src/extensionScript/groupContent.js"),
   helper: resolveApp("src/extensionScript/helper.js"),
   getFriendLength: resolveApp("src/extensionScript/getFriendLength.js"),
+  frListMarkingScript: resolveApp("src/extensionScript/frListMarkingScript.js"),
   // serviceWorker: resolveApp("src/extensionScript/serviceWorker.js"),
   publicUrlOrPath,
 };

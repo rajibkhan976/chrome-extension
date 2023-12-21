@@ -73,11 +73,15 @@
     }
    }
 
-  .fr-highlight{
-    background-color: #F2BA2A;
-    color: #050505;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 500;
-    padding: 0px 6px;
+
+
+  .incoming_fr_synced{
+    position: relative;
   }
+  .incoming_fr_synced svg{
+    position: absolute;
+    top: -8%;
+    left: 0;
+    transform: translate(24%,0%);
+  }
+

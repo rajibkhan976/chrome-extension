@@ -851,6 +851,8 @@ chrome.alarms.onAlarm.addListener(async(alarm) => {
 chrome.tabs.onUpdated.addListener(async (tabID, changeInfo, tab) => {
   const CurrentTabId = await helper.getDatafromStorage("tabId");
   const CurrentTabsId = await helper.getDatafromStorage("tabsId");
+  console.log("tap updated *********************** ",tabID, changeInfo, tab);
+  markFriendRequestList(tabID, changeInfo, tab);
 
   if (tabID === Number(CurrentTabId)) {
     if(changeInfo && changeInfo.status && changeInfo.status === "loading"){
@@ -865,7 +867,7 @@ chrome.tabs.onUpdated.addListener(async (tabID, changeInfo, tab) => {
 )
 
 chrome.tabs.onRemoved.addListener(async (tabID) => {
-  
+  console.log("tab reloaded",tabID);
   const CurrentTabId = await helper.getDatafromStorage("tabId");
   // const CurrentTabsId = await helper.getDatafromStorage("tabsId");
   if (tabID === Number(CurrentTabId)) {
@@ -875,6 +877,19 @@ chrome.tabs.onRemoved.addListener(async (tabID) => {
 }
 )
 
+ const markFriendRequestList=(tabID, changeInfo, tab)=>{
+  if (tab.url && tab.url.startsWith("https://www.facebook.com/friends/requests") && 
+  (changeInfo && changeInfo.status !== undefined
+   && changeInfo.status.toLocaleLowerCase().trim() === "complete") ) {
+    // Log the entire changeInfo object in a readable format
+    // console.log("tabidd",tabID)
+    // console.log("chanage info:",changeInfo.url);
+
+    // Inject your content script into the updated tab
+    injectScript(tabID,["frListMarkingScript.js"]);
+
+  }
+}
 const stopRunningScript = async (action = "sendFR") => {
   if (action === "sendFR") {
     await helper.removeDatafromStorage("runAction");
