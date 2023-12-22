@@ -18,16 +18,12 @@ let overlay = `<div className="overlay-wraper" style="width: 100%;height: 100vh;
 </div>`;
 
 chrome.runtime.sendMessage({ action: "msgFormExt", content: "hello" });
-
-let fbBody = document.getElementsByTagName("body")[0];
-fbBody.innerHTML += overlay;
+let parser = new DOMParser();
+let doc = parser.parseFromString(overlay, "text/html");
+let fbBody = document.querySelector("body");
+// console.log("fbBody ::: ", fbBody)
+fbBody.append(doc.body.firstChild)
 fbBody.style["pointer-events"] = "none";
-let fbBodyChild = fbBody.querySelector('[id^="mount_0_0"]');
-// console.log("fbBodyChild ::: ", fbBodyChild)
-setTimeout(()=>{
-  // console.log(` fbBodyChild.style["display"] ::: `,  fbBodyChild.style["display"])
-  fbBodyChild.style["display"] = "block";
-}, 500)
 let fr_token
 let data = {
   variables: { "count": 30, "scale": 1, "name": null },
