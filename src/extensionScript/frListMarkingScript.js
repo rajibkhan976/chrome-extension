@@ -1,10 +1,8 @@
 import selectors from "./selector";
 import helper from "./helper";
 
-
-
-
-///////NEW::::
+let friend_requests_div = selectors.incoming_requests_1;
+let friendReqList_div_1 = null, friendReqList_div_2 = null;
 let processed_friendReqst_count = 0, friendReqst_blocks = null, scrollTarget1 = null, scrollTarget2 = null;
 let profileLinkSet = new Set();
 let notSyncedIcon = `
@@ -14,11 +12,11 @@ let notSyncedIcon = `
   </svg>
 `;
 let syncedIcon = `
-<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 30 30" fill="none">
-   <rect x="0" y="0" width="30" height="30" rx="15" fill="rgb(25, 195, 125)" />
-  <path d="M8.67188 5.5625L7.23223 6.8C6.13018 7.84926 5.25315 9.11178 4.6545 10.5107C4.05585 11.9097 3.74811 13.4158 3.75001 14.9375C3.75001 21.1484 8.78907 26.1875 15 26.1875C21.2109 26.1875 26.25 21.1484 26.25 14.9375C26.2498 12.6107 25.5286 10.3412 24.1855 8.44123C22.8424 6.54126 20.9434 5.10424 18.75 4.32793" stroke="white" stroke-width="1.875" stroke-miterlimit="10" stroke-linecap="round"/>
-  <path d="M10 14.6667L13.5714 18L20 12" stroke="white" stroke-width="1.5"/>
-  <path d="M6.45004 4L9.55128 4C9.67029 4 9.78442 4.04728 9.86857 4.13144C9.95272 4.21559 10 4.32973 10 4.44875L10 7.55018C10 7.95013 9.51678 8.15038 9.23409 7.86767L6.13257 4.76596C5.84932 4.48325 6.05012 4 6.45004 4Z" fill="white"/>
+<svg width="18" height="18" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="36" height="36" rx="18" fill="#5DB566"/>
+<path d="M11.6719 8.5625L10.2322 9.8C9.13018 10.8493 8.25315 12.1118 7.6545 13.5107C7.05585 14.9097 6.74811 16.4158 6.75001 17.9375C6.75001 24.1484 11.7891 29.1875 18 29.1875C24.2109 29.1875 29.25 24.1484 29.25 17.9375C29.2498 15.6107 28.5286 13.3412 27.1855 11.4412C25.8424 9.54126 23.9434 8.10424 21.75 7.32793" stroke="white" stroke-width="1.875" stroke-miterlimit="10" stroke-linecap="round"/>
+<path d="M13 17.6667L16.5714 21L23 15" stroke="white" stroke-width="1.5"/>
+<path d="M9.45004 7L12.5513 7C12.6703 7 12.7844 7.04728 12.8686 7.13144C12.9527 7.21559 13 7.32973 13 7.44875L13 10.5502C13 10.9501 12.5168 11.1504 12.2341 10.8677L9.13257 7.76596C8.84932 7.48325 9.05012 7 9.45004 7Z" fill="white"/>
 </svg>
 `
 async function initMarkingFunction() {
@@ -55,12 +53,23 @@ async function initMarkingFunction() {
 initMarkingFunction();
 
 function attachScrollEventToFRList() {
-    scrollTarget1 = document.querySelector(
-        'div[aria-label="Friend requests"][role="navigation"] > div'
-    ).children[1];
-    scrollTarget2 = document.querySelector(
-        'div[aria-label="Friend requests"][role="navigation"] > div'
-    ).children[2];
+    if (friendReqList_div_2) {
+        scrollTarget1 = document.querySelector(
+            'div[aria-label="Friend Requests"][role="navigation"] > div'
+        ).children[1];
+        scrollTarget2 = document.querySelector(
+            'div[aria-label="Friend Requests"][role="navigation"] > div'
+        ).children[2];
+
+    } else {
+        scrollTarget1 = document.querySelector(
+            'div[aria-label="Friend requests"][role="navigation"] > div'
+        ).children[1];
+        scrollTarget2 = document.querySelector(
+            'div[aria-label="Friend requests"][role="navigation"] > div'
+        ).children[2];
+    }
+
     const debouncedScrollHandler = helper.debounce(trackHieghtChange, 200);
     if (scrollTarget1) scrollTarget1.addEventListener('scroll', debouncedScrollHandler);
     if (scrollTarget2) scrollTarget2.addEventListener('scroll', debouncedScrollHandler);
@@ -70,10 +79,10 @@ function attachScrollEventToFRList() {
 function trackHieghtChange() {
     //console.log("Tracking height change on scroll");
     let ele = document
-        .querySelector('div[aria-label="Friend requests"][role="navigation"]')
+        .querySelector(friend_requests_div)
         .querySelectorAll(
             'div[data-visualcompletion="ignore-dynamic"]:not([role="row"]'
-        )
+        );
     if (ele.length > processed_friendReqst_count) {
         initMarking();
     }
@@ -81,8 +90,20 @@ function trackHieghtChange() {
 
 
 function initMarking() {
+
+    friendReqList_div_1 = document.querySelector(selectors.incoming_requests_1);
+    friendReqList_div_2 = document.querySelector(selectors.incoming_requests_2);
+
+    if (friendReqList_div_1) {
+        friend_requests_div = selectors.incoming_requests_1;
+    } else if (friendReqList_div_2) {
+        friend_requests_div = selectors.incoming_requests_2;
+    } else {
+        setTimeout(initMarking, 500);
+        return;
+    }
     let friendReqst_count = document
-        .querySelector('div[aria-label="Friend requests"][role="navigation"]')
+        .querySelector(friend_requests_div)
         .querySelectorAll(
             'div[data-visualcompletion="ignore-dynamic"]:not([role="row"])'
         ).length;
@@ -99,7 +120,7 @@ function initMarking() {
         //console.log("Now fr are = " + friendReqst_count);
         let FRItemInterval = setInterval(function () {
             friendReqst_blocks = document
-                .querySelector('div[aria-label="Friend requests"][role="navigation"]')
+                .querySelector(friend_requests_div)
                 .querySelectorAll(
                     'div[data-visualcompletion="ignore-dynamic"]:not([role="row"]'
                 );
@@ -121,7 +142,7 @@ function initMarking() {
 
 function attchMarkToFrList(callback) {
     friendReqst_blocks = document
-        .querySelector('div[aria-label="Friend requests"][role="navigation"]')
+        .querySelector(friend_requests_div)
         .querySelectorAll(
             'div[data-visualcompletion="ignore-dynamic"]:not([role="row"]'
         );
