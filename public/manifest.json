@@ -83,8 +83,9 @@
   "commands": {
     "_execute_action": {
       "suggested_key": {
+        "default": "Ctrl+Shift+F",
         "windows": "Ctrl+Shift+F",
-    "mac": "Command+Shift+F",
+        "mac": "Command+Shift+F",
         "linux": "Ctrl+Shift+F"
       }
     }
