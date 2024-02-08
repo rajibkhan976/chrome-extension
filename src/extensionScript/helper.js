@@ -23,6 +23,7 @@ const getDatafromStorage = (key) => {
           }
         } else {
           if (key == "FRSendCount" || key == "profile_viewed") resolve(0);
+          else if(key == 'messageQueue') resolve([])
           else resolve({});
         }
       });
@@ -313,55 +314,55 @@ const fetchSentFRLog = async ( userID ) => {
  * Override console function track in logsystem
  * @returns {*}
  */
-var newConsole=(function(oldCons){
-  return {
-      log: function(...logs){
-        logs.map((l) => {
-          return JSON.stringify(l);
-        })
-        let log = logs.join(" "); 
-        oldCons.log(log);
-        updateLog("Log: ", log);
-      },
-      info: function (...logs) {
-        logs.map((l) => {
-          return JSON.stringify(l);
-        })
-        let log = logs.join(" "); 
-        oldCons.info(log);
-        updateLog("Info: ", log);
-      },
-      time: function (...logs) {
-        logs.map((l) => {
-          return JSON.stringify(l);
-        })
-        let log = logs.join(" "); 
-        oldCons.time(log);
-        updateLog("Time: ", log);
-      },
-      timeEnd: function (...logs) {
-        logs.map((l) => {
-          return JSON.stringify(l);
-        })
-        let log = logs.join(" "); 
-        oldCons.timeEnd(log);
-        updateLog("timeEnd: ", log);
-      },
-      warn: function (text) {
-          oldCons.warn(text);
-      },
-      error: function (...logs) {
-        logs.map((l) => {
-          return JSON.stringify(l);
-        })
-        let log = logs.join(" "); 
-        oldCons.error(log);
-        updateLog("Error! ", log);
-      }
-  };
-}(console));
-//Then redefine the old console
-console = newConsole;
+// var newConsole=(function(oldCons){
+//   return {
+//       log: function(...logs){
+//         logs.map((l) => {
+//           return JSON.stringify(l);
+//         })
+//         let log = logs.join(" "); 
+//         oldCons.log(log);
+//         updateLog("Log: ", log);
+//       },
+//       info: function (...logs) {
+//         logs.map((l) => {
+//           return JSON.stringify(l);
+//         })
+//         let log = logs.join(" "); 
+//         oldCons.info(log);
+//         updateLog("Info: ", log);
+//       },
+//       time: function (...logs) {
+//         logs.map((l) => {
+//           return JSON.stringify(l);
+//         })
+//         let log = logs.join(" "); 
+//         oldCons.time(log);
+//         updateLog("Time: ", log);
+//       },
+//       timeEnd: function (...logs) {
+//         logs.map((l) => {
+//           return JSON.stringify(l);
+//         })
+//         let log = logs.join(" "); 
+//         oldCons.timeEnd(log);
+//         updateLog("timeEnd: ", log);
+//       },
+//       warn: function (text) {
+//           oldCons.warn(text);
+//       },
+//       error: function (...logs) {
+//         logs.map((l) => {
+//           return JSON.stringify(l);
+//         })
+//         let log = logs.join(" "); 
+//         oldCons.error(log);
+//         updateLog("Error! ", log);
+//       }
+//   };
+// }(console));
+// //Then redefine the old console
+// console = newConsole;
 
 /**
  * Function to update the log for a user 
@@ -411,7 +412,29 @@ const debounce=(func, delay)=>{
   };
 }
 
+const getAllKeysFromStorage = (key='') => {
+  return new Promise((resolve, reject) => {
+    try {
+      chrome.storage.local.get(null, function(items) {
+        let allKeys = Object.keys(items);
+        allKeys = allKeys.length > 0 && allKeys.filter(el=>el.includes(key))
+        console.log("allKeys ::: ", allKeys);
+        resolve(allKeys)
+      });;
+    } catch (e) {
+      resolve([]);
+    }
+  });
+};
 
+const getCurrentDayAndTimein = () => {
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  let day = new Date();
+  const currentTime = day.getHours() + ":" + day.getMinutes() + ":" + day.getSeconds()	;
+  day = days[day.getDay()];
+  console.log("day ::: ",  day, currentTime);
+  return({day : day, currentTime : currentTime})
+}
 const helper =
 {
   getDatafromStorage: getDatafromStorage,
@@ -434,7 +457,9 @@ const helper =
   fetchRejectedFriends:fetchRejectedFriends,
   fetchSentFRLog:fetchSentFRLog,
   sendRequest:sendRequest,
-  debounce:debounce
+  debounce:debounce,
+  getAllKeysFromStorage:getAllKeysFromStorage,
+  getCurrentDayAndTimein:getCurrentDayAndTimein
 };
 
 export default helper

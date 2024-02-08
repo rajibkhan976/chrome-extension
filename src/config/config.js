@@ -4,5 +4,6 @@ export const settingsType ={
     whenRecievesRequest : 3,
     whenAcceptedByUser : 5,
     whenRejectedByUser : 4,
-    whenFRSendToMember : 6
+    whenFRSendToMember : 6,
+    forCampaign : 7 
 }

@@ -439,18 +439,15 @@ const UpdateSettingsAfterFR = async (token, payload) => {
   return updateSettings;
 }
 
-const getMessageContent = (fr_token, body) => {
+const getMessageContent = ( body) => {
   return new Promise(async (resolve, reject) => {
     try {
+      HEADERS.authorization = await helper.getDatafromStorage("fr_token");
       let messageContent = await fetch(
         process.env.REACT_APP_FETCH_MESSAGE_CONTENT_LOG,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: fr_token,
-          },
+          headers: HEADERS,
           body: JSON.stringify(body),
         }
       );
@@ -621,19 +618,346 @@ const fetchRestrictedFbProfile = async (payload) => {
   return (fetchRestrictedProfiles && fetchRestrictedProfiles.data && fetchRestrictedProfiles.data.length > 0 ? true : false);
 }
 
+const fetchAllCampaignList = async ( day, current_time, status="active") => {
+  HEADERS.authorization = await helper.getDatafromStorage("fr_token");
+  let campaignList = await fetch(
+    process.env.REACT_APP_ACTIVE_CAMPAIGNS+"?status=" + status + "&day=" + day + "&start_time=" + current_time,
+    {
+      method: "GET",
+      headers: HEADERS,
+    }
+  );
+  campaignList = await campaignList.json();
+  // console.log("campaignList ::: ", campaignList);
+  return campaignList.data;
+  // const campaignList = {
+  //   "facebookUserId" : "100056780663581",
+  //   "campaigns" : [
+  //     {
+  //       "campaign_name": "Your Campaign Name 0",
+  //       "_id" : "1111111111111",
+  //       "time_delay" : 10,
+  //       "schedule": [
+  //                     {
+  //                     "day": "Monday",
+  //                     "from_time": "2024-01-17 09:41:15",
+  //                     "to_time": "2024-01-13 19:41:15"
+  //                     },
+  //                     {
+  //                     "day": "Wednesday",
+  //                     "from_time": "2023-12-10 09:41:15",
+  //                     "to_time": "2023-12-13 09:41:15"
+  //                     },
+  //                     {
+  //                     "day": "Friday",
+  //                     "from_time": "2023-12-10 09:41:15",
+  //                     "to_time": "2023-12-13 09:41:15"
+  //                     }
+  //                   ],
+  //       "friendDetails" : [
+  //         {
+  //           "message" : "Hello, How Are you?",
+  //           "friendFbId" : "00",
+  //           "name" : "Susmta Biswas"
+
+  //         },
+  //         {
+  //           "message" : "Hello, How Are you?",
+  //           "friendFbId" : "01",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "hi, How Are you?",
+  //           "friendFbId" : "02",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "hey, How Are you?",
+  //           "friendFbId" : "03",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Moshmoshi, How Are you?",
+  //           "friendFbId" : "04",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Whatsup? How Are you?",
+  //           "friendFbId" : "05",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Hello, How Are you?",
+  //           "friendFbId" : "06",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Hi, How Are you?",
+  //           "friendFbId" : "07",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "hiiiiiiii, How Are you?",
+  //           "friendFbId" : "08",
+  //           "name" : "Susmta Biswas"
+  //         }
+  //       ]
+  //     },
+  //     {
+  //       "campaign_name": "Your Campaign Name 1",
+  //       "_id" : "2222222222222",
+  //       "time_delay" : 80,
+  //       "schedule": [
+  //                     {
+  //                     "day": "Monday",
+  //                     "from_time": "2023-12-10 09:41:15",
+  //                     "to_time": "2023-12-13 09:41:15"
+  //                     },
+  //                     {
+  //                     "day": "Wednesday",
+  //                     "from_time": "2023-12-10 09:41:15",
+  //                     "to_time": "2023-12-13 09:41:15"
+  //                     },
+  //                     {
+  //                     "day": "Friday",
+  //                     "from_time": "2023-12-10 09:41:15",
+  //                     "to_time": "2023-12-13 09:41:15"
+  //                     }
+  //                   ],
+        
+  //       "friendDetails" : [
+  //         {
+  //           "message" : "Hello, How Are you?",
+  //           "friendFbId" : "11",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "hi, How Are you?",
+  //           "friendFbId" : "12",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "hey, How Are you?",
+  //           "friendFbId" : "13",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Moshmoshi, How Are you?",
+  //           "friendFbId" : "14",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Whatsup? How Are you?",
+  //           "friendFbId" : "15",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Hello, How Are you?",
+  //           "friendFbId" : "16",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Hi, How Are you?",
+  //           "friendFbId" : "17",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "hiiiiiiii, How Are you?",
+  //           "friendFbId" : "18",
+  //           "name" : "Susmta Biswas"
+  //         }
+  //       ]
+  //     },
+  //     {
+  //       "campaign_name": "Your Campaign Name 2",
+  //       "_id" : "3333333333333",
+  //       "time_delay" : 75,
+  //       "schedule": [
+  //                     {
+  //                     "day": "Monday",
+  //                     "from_time": "2023-12-10 09:41:15",
+  //                     "to_time": "2023-12-13 09:41:15"
+  //                     },
+  //                     {
+  //                     "day": "Wednesday",
+  //                     "from_time": "2023-12-10 09:41:15",
+  //                     "to_time": "2023-12-13 09:41:15"
+  //                     },
+  //                     {
+  //                     "day": "Friday",
+  //                     "from_time": "2023-12-10 09:41:15",
+  //                     "to_time": "2023-12-13 09:41:15"
+  //                     }
+  //                   ],
+  //       "friendDetails" : [
+  //         {
+  //           "message" : "Hello, How Are you?",
+  //           "friendFbId" : "20",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Hello, How Are you?",
+  //           "friendFbId" : "21",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "hi, How Are you?",
+  //           "friendFbId" : "22",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "hey, How Are you?",
+  //           "friendFbId" : "23",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Moshmoshi, How Are you?",
+  //           "friendFbId" : "24",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Whatsup? How Are you?",
+  //           "friendFbId" : "25",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Hello, How Are you?",
+  //           "friendFbId" : "26",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Hi, How Are you?",
+  //           "friendFbId" : "27",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "hiiiiiiii, How Are you?",
+  //           "friendFbId" : "28",
+  //           "name" : "Susmta Biswas"
+  //         }
+  //       ]
+  //     },
+  //     {
+  //       "campaign_name": "Your Campaign Name 3",
+  //       "_id" : "44444444444444",
+  //       "time_delay" : 115,
+  //       "schedule": [
+  //                     {
+  //                     "day": "Monday",
+  //                     "from_time": "2023-12-10 09:41:15",
+  //                     "to_time": "2023-12-13 09:41:15"
+  //                     },
+  //                     {
+  //                     "day": "Wednesday",
+  //                     "from_time": "2023-12-10 09:41:15",
+  //                     "to_time": "2023-12-13 09:41:15"
+  //                     },
+  //                     {
+  //                     "day": "Friday",
+  //                     "from_time": "2023-12-10 09:41:15",
+  //                     "to_time": "2023-12-13 09:41:15"
+  //                     }
+  //                   ],
+  //       "friendDetails" : [
+  //         {
+  //           "message" : "Hello, How Are you?",
+  //           "friendFbId" : "30",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Hello, How Are you?",
+  //           "friendFbId" : "31",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "hi, How Are you?",
+  //           "friendFbId" : "32",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "hey, How Are you?",
+  //           "friendFbId" : "33",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Moshmoshi, How Are you?",
+  //           "friendFbId" : "34",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Whatsup? How Are you?",
+  //           "friendFbId" : "35",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Hello, How Are you?",
+  //           "friendFbId" : "36",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "Hi, How Are you?",
+  //           "friendFbId" : "37",
+  //           "name" : "Susmta Biswas"
+  //         },
+  //         {
+  //           "message" : "hiiiiiiii, How Are you?",
+  //           "friendFbId" : "38",
+  //           "name" : "Susmta Biswas"
+  //         }
+  //       ]
+  //     }
+  //   ]
+  // }
+
+  // return campaignList;
+}
+
+const checkCampaignStatus = async (userId, day, current_time, camaign_id) => {
+  HEADERS.authorization = await helper.getDatafromStorage("fr_token");
+  let campaignStatus = await fetch(
+    process.env.REACT_APP_CHECK_CAMPAIGN_STATUS+"?fb_user_id=" + userId +
+     "&day=" + day + "&start_time=" + current_time + "&campaign_id=" + camaign_id,
+    {
+      method: "GET",
+      headers: HEADERS,
+    }
+  );
+  campaignStatus = await campaignStatus.json();
+  // console.log("campaignStatus ::: ", campaignStatus);
+  return campaignStatus;
+}
+
+const checkMessageStatus = async (member_id, camaign_id, status="pending") => {
+  HEADERS.authorization = await helper.getDatafromStorage("fr_token");
+  let messageStatus = await fetch(
+    process.env.REACT_APP_CHECK_MESSAGE_STATUS+"?status=" + status + "&member_id=" + member_id + "&campaign_id=" + camaign_id,
+    {
+      method: "GET",
+      headers: HEADERS,
+    }
+  );
+  messageStatus = await messageStatus.json();
+  // console.log("messageStatus ::: ", messageStatus);
+  return messageStatus;
+}
+
+
 const common = {
-  getAboutInfo: getAboutInfo,
-  getMemberGender: getMemberGender,
-  getMemberCountry: getMemberCountry,
-  getWorkDescription: getWorkDescription,
-  sentFriendRequest: sentFriendRequest,
-  UpdateSettingsAfterFR: UpdateSettingsAfterFR,
-  getMessageContent: getMessageContent,
-  confirmSentMessage: confirmSentMessage,
+  getAboutInfo : getAboutInfo,
+  getMemberGender : getMemberGender,
+  getMemberCountry : getMemberCountry,
+  getWorkDescription : getWorkDescription,
+  sentFriendRequest : sentFriendRequest,
+  UpdateSettingsAfterFR : UpdateSettingsAfterFR,
+  getMessageContent : getMessageContent,
+  confirmSentMessage : confirmSentMessage,
   getIncomingPendingList : getIncomingPendingList,
   storeIncomingPendingReq : storeIncomingPendingReq,
   fetchRestrictedFbProfile : fetchRestrictedFbProfile,
-  storeRestrictedFbProfile : storeRestrictedFbProfile
+  storeRestrictedFbProfile : storeRestrictedFbProfile,
+  fetchAllCampaignList : fetchAllCampaignList,
+  checkCampaignStatus : checkCampaignStatus,
+  checkMessageStatus : checkMessageStatus
 };
 
 export default common;

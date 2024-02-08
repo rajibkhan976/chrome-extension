@@ -555,7 +555,13 @@ const fetchOtherInfosOfMember = async (
             "fbUserId":userID,
             "friendFbId": groupMemberInfo.memberId,
             "settingsType": settingsType.whenFRSendToMember,
-            "settings_id" : groupSettings.settingsId
+            "settings_id" : groupSettings.settingsId,
+            // "groupId" : groupSettings && groupSettings.send_message_when_reject_friend_request_groupSettings &&
+            //   groupSettings.send_message_when_reject_friend_request_groupSettings.length > 0 &&
+            //   groupSettings.send_message_when_reject_friend_request_groupSettings[0].message_group_id,
+            // "quick_message" : groupSettings && groupSettings.send_message_when_reject_friend_request_groupSettings &&
+            //   groupSettings.send_message_when_reject_friend_request_groupSettings.length ?
+            //   groupSettings.send_message_when_reject_friend_request_settings[0].messengerText : null
           };
           fr_token = await helper.getDatafromStorage("fr_token");
           const messageContent = await common.getMessageContent(fr_token, body);
