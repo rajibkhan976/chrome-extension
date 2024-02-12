@@ -7,9 +7,13 @@ const settingApi = process.env.REACT_APP_SETTING_API;
 const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
 const unfriendApi = "https://www.facebook.com/ajax/profile/removefriendconfirm.php?dpr=1";
 const action_url = "https://www.facebook.com/friends/list?opener=fr_sync";
+let sendMessageOnSomeOneAccptMyFR_EvenHasConversation=false;
+let sendMessageOnIAccptFR_EvenHasConversation=false;
 const HEADERS = {
   "Content-Type": "application/json",
 };
+let fbUserId=null;;
+
 // let socket = io(process.env.REACT_APP_SOCKET_URL, {
 //   transports: ["websocket", "polling"], // use WebSocket first, if available
 // });
@@ -880,6 +884,7 @@ chrome.alarms.onAlarm.addListener(async(alarm) => {
       case "InitiateSendMessages" :
           const payload = await helper.getDatafromStorage("payload");
           // console.log("payload ::: ", payload)
+          fbUserId = await helper.getDatafromStorage("fbTokenAndId");
           InitiateSendMessages(payload.fbDtsg, payload.userId, payload.sentFRLogForAccept, payload.sentFRLogForReject, payload.fetchIncomingLog, payload.fetchIncomingFRLogForAccept, payload.fetchIncomingFRLogForReject);
           break;
 
@@ -1451,6 +1456,8 @@ const sendMessageAcceptOrReject= async() => {
     })
     let settings = await settingResp.json();
     settings = settings && settings.data ? settings.data[0] : {};
+    sendMessageOnSomeOneAccptMyFR_EvenHasConversation = settings && settings.send_message_if_conservation_occured_when_someone_accept_new_friend_request;
+    sendMessageOnIAccptFR_EvenHasConversation = settings && settings.send_message_if_conservation_occured_when_accept_incoming_friend_request;
     // console.log("settings ::: ", settings);
     if(settings.send_message_when_someone_accept_new_friend_request || 
       settings.send_message_when_reject_friend_request ||
@@ -1516,6 +1523,7 @@ const sendMessageAcceptOrReject= async() => {
             || el.message_sending_setting_type !== settingsType.whenRejectedByMember));
           console.log("fetchSentFRLogForReject ::: ", JSON.stringify(fetchSentFRLogForReject));
         }
+        fbUserId = await helper.getDatafromStorage("fbTokenAndId");
         InitiateSendMessages(fbDtsg, userId, settings, fetchSentFRLogForAccept, fetchSentFRLogForReject, fetchIncomingLog, fetchIncomingFRLogForAccept, fetchIncomingFRLogForReject);
       }else{
         chrome.storage.local.remove("payload");
@@ -1543,12 +1551,20 @@ const InitiateSendMessages = async(fbDtsg, userId, settings, sentFRLogForAccept 
       settings.send_message_when_someone_accept_new_friend_request_settings.length ?
       settings.send_message_when_someone_accept_new_friend_request_settings[0].messengerText : null
     }
-    const messageContent = await common.getMessageContent( message_payload )
-    console.log("messageContent ::: ", messageContent);
-    if(messageContent.status){
-      storeInMsqs( userId, sentFRLogForAccept[0].friendFbId, sentFRLogForAccept[0].friendName,  messageContent.content, settingsType.whenAcceptedByMember );
-      // sendMessage(fbDtsg, userId, sentFRLogForAccept[0].friendFbId, sentFRLogForAccept[0].friendName,  messageContent.content, settingsType.whenAcceptedByMember );
+
+    const conversationStatus=await common.checkHasConversation(fbUserId,sentFRLogForAccept[0].friendFbId)
+    // send message to user
+    // console.log("sendMessageOnIAccptFR_EvenHasConversation",sendMessageOnIAccptFR_EvenHasConversation);
+    // console.log("has converse in i am accepting",conversationStatus);
+    if(sendMessageOnSomeOneAccptMyFR_EvenHasConversation || !conversationStatus.hasConversation){
+      const messageContent = await common.getMessageContent( message_payload )
+      console.log("messageContent ::: ", messageContent);
+      if(messageContent.status){
+        storeInMsqs( userId, sentFRLogForAccept[0].friendFbId, sentFRLogForAccept[0].friendName,  messageContent.content, settingsType.whenAcceptedByMember );
+        // sendMessage(fbDtsg, userId, sentFRLogForAccept[0].friendFbId, sentFRLogForAccept[0].friendName,  messageContent.content, settingsType.whenAcceptedByMember );
+      }
     }
+ 
     sentFRLogForAccept.shift();
   }else if(sentFRLogForReject && sentFRLogForReject.length > 0){
     const message_payload = {
@@ -1596,12 +1612,21 @@ const InitiateSendMessages = async(fbDtsg, userId, settings, sentFRLogForAccept 
         settings.send_message_when_accept_incoming_friend_request_settings[0].message_group_id,
       "quick_message" : settings && settings.send_message_when_accept_incoming_friend_request_settings &&
         settings.send_message_when_accept_incoming_friend_request_settings.length ?
-        settings.send_message_when_accept_incoming_friend_request_settings[0].messengerText : null}
-    const messageContent = await common.getMessageContent( message_payload );
-    if(messageContent.status){
-      // sendMessage(fbDtsg, userId, fetchIncomingFRLogForAccept[0].friendFbId, fetchIncomingFRLogForAccept[0].friendName, messageContent.content, settingsType.whenAcceptedByUser );
-      storeInMsqs( userId, fetchIncomingFRLogForAccept[0].friendFbId, fetchIncomingFRLogForAccept[0].friendName, messageContent.content, settingsType.whenAcceptedByUser );
-    }
+        settings.send_message_when_accept_incoming_friend_request_settings[0].messengerText : null
+      }
+
+      const conversationStatus=await common.checkHasConversation(fbUserId,sentFRLogForAccept[0].friendFbId)
+      // send message to user
+      // console.log("sendMessageOnIAccptFR_EvenHasConversation",sendMessageOnIAccptFR_EvenHasConversation);
+      // console.log("has converse in i am accepting",conversationStatus);
+      if(sendMessageOnIAccptFR_EvenHasConversation || !conversationStatus.hasConversation){
+        const messageContent = await common.getMessageContent( message_payload );
+        if(messageContent.status){
+          // sendMessage(fbDtsg, userId, fetchIncomingFRLogForAccept[0].friendFbId, fetchIncomingFRLogForAccept[0].friendName, messageContent.content, settingsType.whenAcceptedByUser );
+          storeInMsqs( userId, fetchIncomingFRLogForAccept[0].friendFbId, fetchIncomingFRLogForAccept[0].friendName, messageContent.content, settingsType.whenAcceptedByUser );
+        }
+      }
+ 
     fetchIncomingFRLogForAccept.shift();
   }else if(fetchIncomingFRLogForReject && fetchIncomingFRLogForReject.length > 0){
     const message_payload = {

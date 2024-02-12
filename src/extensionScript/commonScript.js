@@ -942,6 +942,26 @@ const checkMessageStatus = async (member_id, camaign_id, status="pending") => {
 }
 
 
+const checkHasConversation= async(fb_user_id,friendFbId)=>{
+  const apiurl=`${process.env.REACT_APP_HAS_CONVERSATION}?friendFbId=${friendFbId}&fb_user_id=${fb_user_id}`;
+  const requestOptions={
+    method:"GET",
+    headers:{
+      'Content-Type': 'application/json',
+      'Authorization': await helper.getDatafromStorage("fr_token")
+    }
+  }
+  try{
+      let res=await fetch(apiurl,requestOptions);
+      const data= await res.json();
+      return data;
+
+  }catch(error){
+    console.log("Has Conversation chekc Error:",error);
+    return error;
+  }     
+}
+
 const common = {
   getAboutInfo : getAboutInfo,
   getMemberGender : getMemberGender,
@@ -955,6 +975,7 @@ const common = {
   storeIncomingPendingReq : storeIncomingPendingReq,
   fetchRestrictedFbProfile : fetchRestrictedFbProfile,
   storeRestrictedFbProfile : storeRestrictedFbProfile,
+  checkHasConversation:checkHasConversation,
   fetchAllCampaignList : fetchAllCampaignList,
   checkCampaignStatus : checkCampaignStatus,
   checkMessageStatus : checkMessageStatus
