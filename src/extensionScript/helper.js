@@ -430,10 +430,11 @@ const getAllKeysFromStorage = (key='') => {
 const getCurrentDayAndTimein = () => {
   const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   let day = new Date();
-  const currentTime = day.getHours() + ":" + day.getMinutes() + ":" + day.getSeconds()	;
+  const currentTime = day.getHours() + ":" + day.getMinutes() + ":" + day.getSeconds();
+  const search_date = day.toJSON().split("T")[0];
   day = days[day.getDay()];
   console.log("day ::: ",  day, currentTime);
-  return({day : day, currentTime : currentTime})
+  return({day : day, currentTime : currentTime, search_date : search_date})
 }
 const helper =
 {

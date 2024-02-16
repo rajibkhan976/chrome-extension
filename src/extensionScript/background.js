@@ -670,7 +670,8 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                               break;
           
     case "sendMessage":
-        sendMessage(request.fbDtsg, request.userId, request.recieverId, request.name, request.message, request.settingsType);
+      storeInMsqs( request.userId, request.recieverId, request.name, request.message, request.settingsType )
+        // sendMessage(request.fbDtsg, request.userId, request.recieverId, request.name, request.message, request.settingsType);
       break;
 
     case "sendMessageAcceptOrReject":
@@ -1544,12 +1545,12 @@ const InitiateSendMessages = async(fbDtsg, userId, settings, sentFRLogForAccept 
     "fbUserId" : userId,
     "friendFbId": sentFRLogForAccept[0].friendFbId,
     "settingsType": settingsType.whenAcceptedByMember,
-    "groupId" : settings && settings.send_message_when_someone_accept_new_friend_request_settings &&
-      settings.send_message_when_someone_accept_new_friend_request_settings.length &&
-      settings.send_message_when_someone_accept_new_friend_request_settings[0].message_group_id,
-    "quick_message" : settings && settings.send_message_when_someone_accept_new_friend_request_settings &&
-      settings.send_message_when_someone_accept_new_friend_request_settings.length ?
-      settings.send_message_when_someone_accept_new_friend_request_settings[0].messengerText : null
+    // "groupId" : settings && settings.send_message_when_someone_accept_new_friend_request_settings &&
+    //   settings.send_message_when_someone_accept_new_friend_request_settings.length &&
+    //   settings.send_message_when_someone_accept_new_friend_request_settings[0].message_group_id,
+    // "quick_message" : settings && settings.send_message_when_someone_accept_new_friend_request_settings &&
+    //   settings.send_message_when_someone_accept_new_friend_request_settings.length ?
+    //   settings.send_message_when_someone_accept_new_friend_request_settings[0].messengerText : null
     }
 
     const conversationStatus=await common.checkHasConversation(fbUserId,sentFRLogForAccept[0].friendFbId)
@@ -1571,12 +1572,13 @@ const InitiateSendMessages = async(fbDtsg, userId, settings, sentFRLogForAccept 
       "fbUserId" : userId,      
       "friendFbId": sentFRLogForReject[0].friendFbId,
       "settingsType": settingsType.whenRejectedByMember,
-      "groupId" : settings && settings.send_message_when_reject_friend_request_settings &&
-        settings.send_message_when_reject_friend_request_settings.length > 0 &&
-        settings.send_message_when_reject_friend_request_settings[0].message_group_id,
-      "quick_message" : settings && settings.send_message_when_reject_friend_request_settings &&
-        settings.send_message_when_reject_friend_request_settings.length ?
-        settings.send_message_when_reject_friend_request_settings[0].messengerText : null}
+      // "groupId" : settings && settings.send_message_when_reject_friend_request_settings &&
+      //   settings.send_message_when_reject_friend_request_settings.length > 0 &&
+      //   settings.send_message_when_reject_friend_request_settings[0].message_group_id,
+      // "quick_message" : settings && settings.send_message_when_reject_friend_request_settings &&
+      //   settings.send_message_when_reject_friend_request_settings.length ?
+      //   settings.send_message_when_reject_friend_request_settings[0].messengerText : null
+    }
     const messageContent = await common.getMessageContent( message_payload );
     console.log("messageContent ::: ", messageContent);
     if(messageContent.status){
@@ -1589,12 +1591,13 @@ const InitiateSendMessages = async(fbDtsg, userId, settings, sentFRLogForAccept 
       "fbUserId" : userId,      
       "friendFbId": fetchIncomingLog[0].friendFbId,
       "settingsType": settingsType.whenRecievesRequest,
-      "groupId" : settings && settings.send_message_when_someone_sends_me_friend_request_settings &&
-        settings.send_message_when_someone_sends_me_friend_request_settings.length > 0 &&
-        settings.send_message_when_someone_sends_me_friend_request_settings[0].message_group_id,
-      "quick_message" : settings && settings.send_message_when_someone_sends_me_friend_request_settings &&
-        settings.send_message_when_someone_sends_me_friend_request_settings.length ?
-        settings.send_message_when_someone_sends_me_friend_request_settings[0].messengerText : null}
+      // "groupId" : settings && settings.send_message_when_someone_sends_me_friend_request_settings &&
+      //   settings.send_message_when_someone_sends_me_friend_request_settings.length > 0 &&
+      //   settings.send_message_when_someone_sends_me_friend_request_settings[0].message_group_id,
+      // "quick_message" : settings && settings.send_message_when_someone_sends_me_friend_request_settings &&
+      //   settings.send_message_when_someone_sends_me_friend_request_settings.length ?
+      //   settings.send_message_when_someone_sends_me_friend_request_settings[0].messengerText : null
+    }
     const messageContent = await common.getMessageContent( message_payload );
     // console.log("messageContent ::: ", messageContent);
     if(messageContent.status){
@@ -1633,12 +1636,13 @@ const InitiateSendMessages = async(fbDtsg, userId, settings, sentFRLogForAccept 
       "fbUserId" : userId,
       "friendFbId": fetchIncomingFRLogForReject[0].friendFbId,
       "settingsType": settingsType.whenRejectedByUser,
-      "groupId" : settings && settings.send_message_when_reject_incoming_friend_request_settings &&
-        settings.send_message_when_reject_incoming_friend_request_settings.length &&
-        settings.send_message_when_reject_incoming_friend_request_settings[0].message_group_id,
-      "quick_message" : settings && settings.send_message_when_reject_incoming_friend_request_settings &&
-        settings.send_message_when_reject_incoming_friend_request_settings.length ?
-        settings.send_message_when_reject_incoming_friend_request_settings[0].messengerText : null}
+      // "groupId" : settings && settings.send_message_when_reject_incoming_friend_request_settings &&
+      //   settings.send_message_when_reject_incoming_friend_request_settings.length &&
+      //   settings.send_message_when_reject_incoming_friend_request_settings[0].message_group_id,
+      // "quick_message" : settings && settings.send_message_when_reject_incoming_friend_request_settings &&
+      //   settings.send_message_when_reject_incoming_friend_request_settings.length ?
+      //   settings.send_message_when_reject_incoming_friend_request_settings[0].messengerText : null
+      }
       const messageContent = await common.getMessageContent( message_payload );
     // console.log("messageContent ::: ", messageContent);
     if(messageContent.status){
@@ -1743,52 +1747,73 @@ function startSendingLoop() {
 // Event listener for Chrome alarms
 chrome.alarms.onAlarm.addListener( async function (alarm) {
   if (alarm.name === "coldstart_MSQS") {
-      //check fb login here If logged in then conitnue else let the alarm run 
-      let fbuserDetails = await helper.getDatafromStorage("fbTokenAndId");
-      let dtsg = fbuserDetails.fbDtsg;
-      let fr_fbId = fbuserDetails.userID;
-      console.log("fb userdetails in MSQS:",fbuserDetails)
-      if(dtsg && fr_fbId){
-        removeFromQueue(async function (queueInfo) {
-            if (queueInfo) {
-  
-                 // clear the alarm and create a new one for next one
-                stopSendingLoop()   
-                let fbId = queueInfo.frienderFbId
-                let  receiverId = queueInfo.recieverFbId
-                let  name = queueInfo.recieverName
-                let  message= queueInfo.message
-                let  alt = false  
-  
-                // If current logged in  fb id and MSQS sender fb id is same then proceed else not
-                if(fr_fbId == fbId){
-                  if(fbId && receiverId && name && message && (queueInfo.campaignId || queueInfo.settingsType)){
-
-                  // Check if the message is already sent to this user and message_limit is reached or not?
-                  // const messageStatus = await common.checkMessageStatus(campaign.friendDetails[0]._id, campaign.campaignId);
-                  // if(messageStatus && messageStatus.status === "Not sent") {
-                  let fbResponse = await   sendMessageViaFacebook(dtsg,queueInfo)
-                        // Callback mechanism to handle the facebook send message func
-                        handleResponse(queueInfo, fbResponse);
-                  }
-                // }
-                }else{
-                  // Add it back to the queue
-                  console.log("added back to queue as current fbid and camapign fb id is not matching",queueInfo)
-                  addToQueue(queueInfo)
-                }
-  
-                // Start a fresh loop with 3 mins and random delay
-                manageSendingLoop()
-            }else{
-              console.log("NO data found in queue to execute in MSQS session")
-            }
-        });
-      }else{
-        console.log("FB id and dtsg not found in local storage, So MSQS is not executing")
-      }
+    MSQS()
   }
 });
+
+async function MSQS(){
+    //check fb login here If logged in then conitnue else let the alarm run 
+    let fbuserDetails = await helper.getDatafromStorage("fbTokenAndId");
+    let dtsg = fbuserDetails.fbDtsg;
+    let fr_fbId = fbuserDetails.userID;
+    console.log("fb userdetails in MSQS:",fbuserDetails)
+    if(dtsg && fr_fbId){
+      removeFromQueue(async function (queueInfo) {
+          if (queueInfo) {
+
+               // clear the alarm and create a new one for next one
+              stopSendingLoop()   
+              let fbId = queueInfo.frienderFbId
+              let  receiverId = queueInfo.recieverFbId
+              let  name = queueInfo.recieverName
+              let  message= queueInfo.message
+              let  alt = false  
+
+              // If current logged in  fb id and MSQS sender fb id is same then proceed else not
+              if(fr_fbId == fbId){
+                if(fbId && receiverId && name && message && (queueInfo.campaignId || queueInfo.settingsType)){
+                  //If its campaing then check message already sent or not and also message_limit has reached or not
+                if(queueInfo.campaignId){
+                  let {day, currentTime, search_date} = helper.getCurrentDayAndTimein(); 
+                  // This messageStatus should have details of message status and message_limit
+                  const messageStatus = await common.checkMessageStatus(queueInfo.memberId,null, queueInfo.campaignId,search_date);
+                  // Here we are checking the message sent status for that friend and also campaigns reamaing limit out of the actual message limit for the given date
+                    if(messageStatus && messageStatus.message_status_boolean === 0 && messageStatus.remaining_limit_count>0) {
+                          let fbResponse = await   sendMessageViaFacebook(dtsg,queueInfo)
+                          // Callback mechanism to handle the facebook send message func
+                          handleResponse(queueInfo, fbResponse);
+                      }else{
+                        console.log("Message not sent as its already been sent or the limit is exceeded (campaign automation)",messageStatus)
+                      }
+                }else{
+                    // Settings automation
+                    const messageStatus = await common.checkMessageStatus(queueInfo.recieverFbId,queueInfo.settingsType);
+                    if(messageStatus && messageStatus.message_status_boolean === 0) {
+
+                    //Need a checking here as well to figure out if message is already sent or not
+                    let fbResponse = await   sendMessageViaFacebook(dtsg,queueInfo)
+                    // Callback mechanism to handle the facebook send message func
+                    handleResponse(queueInfo, fbResponse);
+                    }
+                  }
+                }
+              // }
+              }else{
+                // Add it back to the queue
+                console.log("added back to queue as current fbid and camapign fb id is not matching",queueInfo)
+                addToQueue(queueInfo)
+              }
+
+              // Start a fresh loop with 3 mins and random delay
+              manageSendingLoop()
+          }else{
+            console.log("NO data found in queue to execute in MSQS session")
+          }
+      });
+    }else{
+      console.log("FB id and dtsg not found in local storage, So MSQS is not executing")
+    }
+}
 
 // {
 //   frienderFbId: fbId,
@@ -1879,28 +1904,30 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 
 // Function to handle the response of the sent message from MSQS
 async function handleResponse(queueInfo, response) {
-  console.log("Handle FB response MSQS",response)
-  let frToken = await helper.getDatafromStorage("fr_token");
-  if(queueInfo && queueInfo.campaignId!=undefined && queueInfo.campaignId){
-      console.log("Updating the system, its a campaign contact",queueInfo)
-      await common.confirmSentMessage(frToken, {
-                "fbUserId":queueInfo.frienderFbId,
-                "friendFbId":queueInfo.recieverFbId,
-                "settingsType": 7,
-                "status" : response == true?"success" :"failed"
-              });
-  }else{
-    if(response){
-        console.log("Updating the system, its a settings message",queueInfo)
-        await common.confirmSentMessage(fr_token, {
-                "fbUserId":queueInfo.frienderFbId,
-                "friendFbId":queueInfo.recieverFbId,
-                "settingsType": settingsType
-              });
-    }else{
-      console.log("Message sending failed for the settings type automation, Didn't update the DB as no backend implementation is found",queueInfo)
+  try {
+    console.log("Into send message  function",queueInfo,response)
+    let frToken = await helper.getDatafromStorage("fr_token");
+    let payload = {
+      "fbUserId":queueInfo.frienderFbId,
+      "friendFbId":queueInfo.recieverFbId,
+      "status" : response == true?"send" :"failed",
+      "message" : queueInfo.message
     }
+  
+    // If its a Campaign : 
+    if(queueInfo && queueInfo.campaignId!=undefined && queueInfo.campaignId){
+      payload["settingsType"] = 7
+      payload["campaignId"] = queueInfo.campaignId
+    }else{
+      //If its only Settings
+      payload["settingsType"] = queueInfo.settingsType
+    }
+    console.log("final payload",payload)
+    await common.confirmSentMessage(frToken, payload);
+  } catch (error) {
+    console.log("There was an error while creating message send logs",error)
   }
+
 }
 
 
@@ -1928,7 +1955,7 @@ function removeFromQueue(callback) {
       }
   });
 }
-const storeInMsqs = async ( fbId, receiverId, name, message, settingsType, campaignId = "") => {
+const storeInMsqs = async ( fbId, receiverId, name, message, settingsType, campaignId = "", memberId="") => {
   // let Ids = `ids[${receiverId}]`;
   // let text_ids = `text_ids[${receiverId}]`;
   let payload = {
@@ -1936,6 +1963,7 @@ const storeInMsqs = async ( fbId, receiverId, name, message, settingsType, campa
     message: message,
     recieverName: name,
     recieverFbId : receiverId,
+    memberId : memberId
   };
   // let payload = {
   //   msgPayload : data
@@ -1977,9 +2005,9 @@ const getCampaignList = async() =>  {
   }
   
   const { userID} = await helper.getDatafromStorage('fbTokenAndId'); 
-  const {day, currentTime} = helper.getCurrentDayAndTimein(); // get Current time and day
+  const {day, currentTime, search_date} = helper.getCurrentDayAndTimein(); // get Current time and day
   // console.log("day ::: ",  day, currentTime);
-  const allCampaigns = await common.fetchAllCampaignList( day, currentTime); // fetch campaign
+  const allCampaigns = await common.fetchAllCampaignList( day, currentTime, search_date); // fetch campaign
   console.log("allCampaigns ::: ", allCampaigns);
   allCampaigns.length > 0 && allCampaigns.forEach(async(el)=>{
     const individualCampaignPayload = {
@@ -2040,21 +2068,18 @@ const campaignToMsqs = async(campaign) => {
       // console.log("messageQueue ::: ", messageQueue)
       let anyDuplicateData = messageQueue && messageQueue.filter(el=>el.recieverFbId===campaign.friendDetails[0].friendFbId && el.campaignId===campaign.campaignId)
       if(anyDuplicateData && anyDuplicateData.length === 0) { 
-        const messageStatus = await common.checkMessageStatus(campaign.friendDetails[0]._id, campaign.campaignId);
-        if(messageStatus && messageStatus.status === "Not sent") {
-          const message_payload = {
-            "fbUserId" : campaign.facebookUserId,
-            "friendFbId" : campaign.friendDetails[0].friendFbId,
-            "settingsType": settingsType.forCampaign,
-            "campaignId" : campaign.campaignId,
-            "groupId" : campaign.message_group_id,
-            "quick_message" : campaign.quick_message  ? campaign.quick_message.messengerText : null,
-            "member_id" : campaign.friendDetails[0]._id
-          }
-          const messageContent = await common.getMessageContent( message_payload )
-          if(messageContent.status){
-            storeInMsqs( campaign.facebookUserId, campaign.friendDetails[0].friendFbId, campaign.friendDetails[0].friendName, messageContent.content, '', campaign.campaignId);
-          }
+        const message_payload = {
+          "fbUserId" : campaign.facebookUserId,
+          "friendFbId" : campaign.friendDetails[0].friendFbId,
+          "settingsType": settingsType.forCampaign,
+          "campaignId" : campaign.campaignId,
+          "groupId" : campaign.message_group_id,
+          "quick_message" : campaign.quick_message  ? campaign.quick_message.messengerText : null,
+          "member_id" : campaign.friendDetails[0]._id
+        }
+        const messageContent = await common.getMessageContent( message_payload )
+        if(messageContent.status){
+          storeInMsqs( campaign.facebookUserId, campaign.friendDetails[0].friendFbId, campaign.friendDetails[0].friendName, messageContent.content, '', campaign.campaignId, campaign.friendDetails[0]._id);
         }
       }
       campaign.friendDetails.shift();

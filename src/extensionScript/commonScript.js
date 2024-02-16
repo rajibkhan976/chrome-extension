@@ -1,3 +1,4 @@
+import { param } from "jquery";
 import helper from "./helper";
 const HEADERS = {
   "Content-Type": "application/json",
@@ -618,10 +619,10 @@ const fetchRestrictedFbProfile = async (payload) => {
   return (fetchRestrictedProfiles && fetchRestrictedProfiles.data && fetchRestrictedProfiles.data.length > 0 ? true : false);
 }
 
-const fetchAllCampaignList = async ( day, current_time, status="active") => {
+const fetchAllCampaignList = async ( day, current_time, search_date, status="active") => {
   HEADERS.authorization = await helper.getDatafromStorage("fr_token");
   let campaignList = await fetch(
-    process.env.REACT_APP_ACTIVE_CAMPAIGNS+"?status=" + status + "&day=" + day + "&start_time=" + current_time,
+    process.env.REACT_APP_ACTIVE_CAMPAIGNS+"?status=" + status + "&day=" + day + "&start_time=" + current_time + "&search_date=" + search_date,
     {
       method: "GET",
       headers: HEADERS,
@@ -927,10 +928,20 @@ const checkCampaignStatus = async (userId, day, current_time, camaign_id) => {
   return campaignStatus;
 }
 
-const checkMessageStatus = async (member_id, camaign_id, status="pending") => {
+const checkMessageStatus = async (friend_fb_id,settings_type =null, camaign_id = null, search_date =null) => {
   HEADERS.authorization = await helper.getDatafromStorage("fr_token");
+
+  let params = "&friend_fb_id=" + friend_fb_id 
+  if(camaign_id!=null){
+    params = params+"&campaign_id=" + camaign_id+ "&search_date=" +search_date
+  }
+
+  if(settings_type!=null){
+    params = params+"&settings_type=" + settings_type
+  }
+
   let messageStatus = await fetch(
-    process.env.REACT_APP_CHECK_MESSAGE_STATUS+"?status=" + status + "&member_id=" + member_id + "&campaign_id=" + camaign_id,
+    process.env.REACT_APP_CHECK_MESSAGE_STATUS+ params,
     {
       method: "GET",
       headers: HEADERS,
