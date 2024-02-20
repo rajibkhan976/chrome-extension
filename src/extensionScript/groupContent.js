@@ -563,8 +563,8 @@ const fetchOtherInfosOfMember = async (
             //   groupSettings.send_message_when_reject_friend_request_groupSettings.length ?
             //   groupSettings.send_message_when_reject_friend_request_settings[0].messengerText : null
           };
-          fr_token = await helper.getDatafromStorage("fr_token");
-          const messageContent = await common.getMessageContent(fr_token, body);
+          // fr_token = await helper.getDatafromStorage("fr_token");
+          const messageContent = await common.getMessageContent( body);
           // console.log("messageContent in content ::: ", messageContent);
           if(messageContent.status){
             chrome.runtime.sendMessage({ "action": "sendMessage","fbDtsg" : fbDtsg, "userId" : userID,  "recieverId": groupMemberInfo.memberId, "name" :  groupMemberInfo.memberName, "message": messageContent.content, "settingsType": settingsType.whenFRSendToMember});

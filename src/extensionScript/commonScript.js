@@ -931,7 +931,7 @@ const checkCampaignStatus = async (userId, day, current_time, camaign_id) => {
 const checkMessageStatus = async (friend_fb_id,settings_type =null, camaign_id = null, search_date =null) => {
   HEADERS.authorization = await helper.getDatafromStorage("fr_token");
 
-  let params = "&friend_fb_id=" + friend_fb_id 
+  let params = "?friend_fb_id=" + friend_fb_id 
   if(camaign_id!=null){
     params = params+"&campaign_id=" + camaign_id+ "&search_date=" +search_date
   }

@@ -1776,7 +1776,7 @@ async function MSQS(){
                 if(queueInfo.campaignId){
                   let {day, currentTime, search_date} = helper.getCurrentDayAndTimein(); 
                   // This messageStatus should have details of message status and message_limit
-                  const messageStatus = await common.checkMessageStatus(queueInfo.memberId,null, queueInfo.campaignId,search_date);
+                  const messageStatus = await common.checkMessageStatus(receiverId, null, queueInfo.campaignId,search_date);
                   // Here we are checking the message sent status for that friend and also campaigns reamaing limit out of the actual message limit for the given date
                     if(messageStatus && messageStatus.message_status_boolean === 0 && messageStatus.remaining_limit_count>0) {
                           let fbResponse = await   sendMessageViaFacebook(dtsg,queueInfo)
@@ -1822,72 +1822,71 @@ async function MSQS(){
 //   recieverFbId : receiverId,
 //   campaignId : campaignId
 // };
-let sendMessageViaFacebook = (dtsg,queueInfo,alt = false) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-          if(queueInfo.message.trim() === "")
-            resolve(false);
-          else{
-            let Ids = `ids[${queueInfo.recieverFbId}]`;
-            let text_ids = `text_ids[${queueInfo.recieverFbId}]`;
-            // console.log("alt :: ", alt)
-            if (alt) {
-              var tids = `cid.c.${queueInfo.frienderFbId}:${queueInfo.recieverFbId}`;
-            } else {
-              var tids = `cid.c.${queueInfo.recieverFbId}:${queueInfo.frienderFbId}`;
-            }
-
-            let data = {
-              __user: queueInfo.frienderFbId,
-              fb_dtsg: dtsg,
-              body: queueInfo.message,
-              send: "Send",
-              [text_ids]: queueInfo.recieverName,
-              [Ids]: queueInfo.recieverFbId,
-              tids: tids,
-              waterfall_source: "message",
-              server_timestamps: true,
-            };
-
-            let a = await fetch(
-              "https://mbasic.facebook.com/messages/send/?icm=1&refid=12&ref=dbl",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/x-www-form-urlencoded",
-                  Accept: "text/html,application/json",
-                },
-                body: helper.serialize(data),
-              }
-            );
-
-            const response = await a.text();
-            if (!alt && response.includes("You cannot perform that action")) {
-              console.log("Executing alternate message sending");
-              // resolve(false);
-              // asynchronously it will resolve the send message in alt way
-              sendMessageViaFacebook(dtsg,queueInfo,true);
-            } else  if(alt && response.includes("You cannot perform that action")) {
-              resolve(false)
-            }else if(response.includes("It looks like you were misusing this feature by going too fast. You’ve been temporarily blocked from using it.")){
-              resolve(false)
-            }
-            else{
-              console.log("Successfully resolved the alternate message sending technique");
-              // const fr_token = await helper.getDatafromStorage("fr_token");
-              // await common.confirmSentMessage(fr_token, {
-              //   "fbUserId":queueInfo.frienderFbId,
-              //   "friendFbId":queueInfo.recieverFbId,
-              //   "settingsType": settingsType
-              // });
-              resolve(true);
-            }
+let sendMessageViaFacebook = async (dtsg,queueInfo,alt = false) => {
+  try {
+        if(queueInfo.message.trim() === "")
+          return false
+        else{
+          let Ids = `ids[${queueInfo.recieverFbId}]`;
+          let text_ids = `text_ids[${queueInfo.recieverFbId}]`;
+          // console.log("alt :: ", alt)
+          if (alt) {
+            var tids = `cid.c.${queueInfo.frienderFbId}:${queueInfo.recieverFbId}`;
+          } else {
+            var tids = `cid.c.${queueInfo.recieverFbId}:${queueInfo.frienderFbId}`;
           }
-    } catch (error) {
-      console.error("Send Message Error", error);
-      resolve(false);
-    }
-  })
+
+          let data = {
+            __user: queueInfo.frienderFbId,
+            fb_dtsg: dtsg,
+            body: queueInfo.message,
+            send: "Send",
+            [text_ids]: queueInfo.recieverName,
+            [Ids]: queueInfo.recieverFbId,
+            tids: tids,
+            waterfall_source: "message",
+            server_timestamps: true,
+          };
+
+          let a = await fetch(
+            "https://mbasic.facebook.com/messages/send/?icm=1&refid=12&ref=dbl",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                Accept: "text/html,application/json",
+              },
+              body: helper.serialize(data),
+            }
+          );
+
+          const response = await a.text();
+          if (!alt && response.includes("You cannot perform that action")) {
+            console.log("Executing alternate message sending");
+            // resolve(false);
+            // asynchronously it will resolve the send message in alt way
+           return await sendMessageViaFacebook(dtsg,queueInfo,true);
+          } else  if(alt && response.includes("You cannot perform that action")) {
+            console.log("response from alternative try ::: ", response)
+            return false
+          }else if(response.includes("It looks like you were misusing this feature by going too fast. You’ve been temporarily blocked from using it.")){
+            return false
+          }
+          else{
+            console.log("Successfully resolved the alternate message sending technique");
+            // const fr_token = await helper.getDatafromStorage("fr_token");
+            // await common.confirmSentMessage(fr_token, {
+            //   "fbUserId":queueInfo.frienderFbId,
+            //   "friendFbId":queueInfo.recieverFbId,
+            //   "settingsType": settingsType
+            // });
+            return true
+          }
+        }
+  } catch (error) {
+    console.error("Send Message Error", error);
+    return false;
+  }
 }
 // Event listener to watch for changes in login status
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
@@ -2075,7 +2074,7 @@ const campaignToMsqs = async(campaign) => {
           "campaignId" : campaign.campaignId,
           "groupId" : campaign.message_group_id,
           "quick_message" : campaign.quick_message  ? campaign.quick_message.messengerText : null,
-          "member_id" : campaign.friendDetails[0]._id
+          // "member_id" : campaign.friendDetails[0]._id
         }
         const messageContent = await common.getMessageContent( message_payload )
         if(messageContent.status){
