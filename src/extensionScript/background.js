@@ -1553,7 +1553,8 @@ const InitiateSendMessages = async(fbDtsg, userId, settings, sentFRLogForAccept 
     //   settings.send_message_when_someone_accept_new_friend_request_settings[0].messengerText : null
     }
 
-    const conversationStatus=await common.checkHasConversation(fbUserId,sentFRLogForAccept[0].friendFbId)
+    const conversationStatus=await common.checkHasConversation(userId,sentFRLogForAccept[0].friendFbId)
+    //console.log("ConversationStatus_______^^^^(0)^^^^______",conversationStatus);
     // send message to user
     // console.log("sendMessageOnIAccptFR_EvenHasConversation",sendMessageOnIAccptFR_EvenHasConversation);
     // console.log("has converse in i am accepting",conversationStatus);
@@ -1618,7 +1619,7 @@ const InitiateSendMessages = async(fbDtsg, userId, settings, sentFRLogForAccept 
         settings.send_message_when_accept_incoming_friend_request_settings[0].messengerText : null
       }
 
-      const conversationStatus=await common.checkHasConversation(fbUserId,sentFRLogForAccept[0].friendFbId)
+      const conversationStatus=await common.checkHasConversation(userId,sentFRLogForAccept[0].friendFbId)
       // send message to user
       // console.log("sendMessageOnIAccptFR_EvenHasConversation",sendMessageOnIAccptFR_EvenHasConversation);
       // console.log("has converse in i am accepting",conversationStatus);
