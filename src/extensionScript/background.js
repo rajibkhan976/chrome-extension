@@ -1525,7 +1525,7 @@ const sendMessageAcceptOrReject= async() => {
           console.log("fetchSentFRLogForReject ::: ", JSON.stringify(fetchSentFRLogForReject));
         }
         fbUserId = await helper.getDatafromStorage("fbTokenAndId");
-        InitiateSendMessages(fbDtsg, userId, settings, fetchSentFRLogForAccept, fetchSentFRLogForReject, fetchIncomingLog, fetchIncomingFRLogForAccept, fetchIncomingFRLogForReject);
+        InitiateSendMessages(fbDtsg, userId, fetchSentFRLogForAccept, fetchSentFRLogForReject, fetchIncomingLog, fetchIncomingFRLogForAccept, fetchIncomingFRLogForReject);
       }else{
         chrome.storage.local.remove("payload");
         sendMessageToPortalScript({action: "fr_update", content: "Done"});
@@ -1534,7 +1534,7 @@ const sendMessageAcceptOrReject= async() => {
   })
 }
 
-const InitiateSendMessages = async(fbDtsg, userId, settings, sentFRLogForAccept = [], sentFRLogForReject = [], fetchIncomingLog = [], fetchIncomingFRLogForAccept = [], fetchIncomingFRLogForReject = []) => {
+const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sentFRLogForReject = [], fetchIncomingLog = [], fetchIncomingFRLogForAccept = [], fetchIncomingFRLogForReject = []) => {
   console.log(sentFRLogForAccept, sentFRLogForReject, fetchIncomingLog, fetchIncomingFRLogForAccept, fetchIncomingFRLogForReject);
   chrome.alarms.clear("InitiateSendMessages");
   // console.log(fbDtsg, userId,sentFRLogForAccept, sentFRLogForAccept[0] && sentFRLogForAccept[0].friendFbId, sentFRLogForReject, sentFRLogForReject[0] && sentFRLogForReject[0].friendFbId)
@@ -1611,12 +1611,12 @@ const InitiateSendMessages = async(fbDtsg, userId, settings, sentFRLogForAccept 
       "fbUserId" : userId,
       "friendFbId": fetchIncomingFRLogForAccept[0].friendFbId,
       "settingsType": settingsType.whenAcceptedByUser,
-      "groupId" : settings && settings.send_message_when_accept_incoming_friend_request_settings > 0&&
-        settings.send_message_when_accept_incoming_friend_request_settings.length &&
-        settings.send_message_when_accept_incoming_friend_request_settings[0].message_group_id,
-      "quick_message" : settings && settings.send_message_when_accept_incoming_friend_request_settings &&
-        settings.send_message_when_accept_incoming_friend_request_settings.length ?
-        settings.send_message_when_accept_incoming_friend_request_settings[0].messengerText : null
+      // "groupId" : settings && settings.send_message_when_accept_incoming_friend_request_settings > 0&&
+      //   settings.send_message_when_accept_incoming_friend_request_settings.length &&
+      //   settings.send_message_when_accept_incoming_friend_request_settings[0].message_group_id,
+      // "quick_message" : settings && settings.send_message_when_accept_incoming_friend_request_settings &&
+      //   settings.send_message_when_accept_incoming_friend_request_settings.length ?
+      //   settings.send_message_when_accept_incoming_friend_request_settings[0].messengerText : null
       }
 
       const conversationStatus=await common.checkHasConversation(userId,sentFRLogForAccept[0].friendFbId)
