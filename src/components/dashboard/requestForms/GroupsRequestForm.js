@@ -490,7 +490,6 @@ const GroupsRequestForm = ({
             ...prevState,
             [ele.name]: val,
           }));
-          console.log("new obj:::??", newObj);
           return newObj;
         } else {
           return {

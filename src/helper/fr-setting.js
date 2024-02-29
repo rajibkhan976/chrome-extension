@@ -496,7 +496,7 @@ export const fr_Req_Payload = {
   country_filter: false,
   country_filter_value: [],
   tier_filter: false,
-  tier_filter_value: [],
+  tier_filter_value: "1",
   keyword: false,
   selected_keywords: [],
   negative_keyword: false,
