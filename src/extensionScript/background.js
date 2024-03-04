@@ -225,10 +225,7 @@ chrome.runtime.onMessageExternal.addListener(async function (
   // console.log("request ::::::-> ", request)
   chrome.storage.local.set({ senExternalResponse: sendResponseExternal });
   switch (request.action) {
-    case "extensionInstallation":
-      // Function to start MSQS alarm
-      manageSendingLoop()
-
+    case "frienderLogin" : 
       chrome.alarms.clear("scheduler")
       chrome.alarms.create("scheduler", {periodInMinutes: schedulerIntvTime})
       chrome.alarms.clear("pendingFR")
@@ -238,6 +235,11 @@ chrome.runtime.onMessageExternal.addListener(async function (
       chrome.alarms.clear("campaignScheduler")
 
       chrome.alarms.create("campaignScheduler", {periodInMinutes: campaignIntvTime})
+      await helper.saveDatainStorage("fr_token", request.frLoginToken)
+      break;
+    case "extensionInstallation":
+      // Function to start MSQS alarm
+      manageSendingLoop()
       await helper.saveDatainStorage("fr_token", request.frLoginToken)
       await helper.saveDatainStorage("fr_debug_mode", request.frDebugMode)
       sendResponseExternal(true);
@@ -571,8 +573,8 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     case "sendUpdate":
       console.log("request.isSyncing ::: ", request.isSyncing , request.tabClose);
       if (request.tabClose !== undefined && request.tabClose) {
-        checkTabsActivation("fr_sync");
-        removeTab("tabsId");
+        // checkTabsActivation("fr_sync");
+        // removeTab("tabsId");
       }
       // ConnectToSocket(request);
       sendMessageToPortalScript({action: "fr_update", content: request.update});
