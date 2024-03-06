@@ -1766,8 +1766,8 @@ const GroupsRequestForm = ({
 
                     {settingApiPayload.tier_filter && (
                       <div className="req-setting-text">
-                        {settingApiPayload?.tier_filter_value ? (
-                          <h4> {settingApiPayload.tier_filter_value}</h4>
+                        {settingApiPayload?.tier_filter_value.length === 5 ? (
+                          <h4> {settingApiPayload.tier_filter_value[4]}</h4>
                         ) : (
                           "N/A"
                         )}

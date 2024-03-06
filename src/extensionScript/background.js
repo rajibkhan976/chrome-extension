@@ -573,8 +573,8 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     case "sendUpdate":
       console.log("request.isSyncing ::: ", request.isSyncing , request.tabClose);
       if (request.tabClose !== undefined && request.tabClose) {
-        // checkTabsActivation("fr_sync");
-        // removeTab("tabsId");
+        checkTabsActivation("fr_sync");
+        removeTab("tabsId");
       }
       // ConnectToSocket(request);
       sendMessageToPortalScript({action: "fr_update", content: request.update});

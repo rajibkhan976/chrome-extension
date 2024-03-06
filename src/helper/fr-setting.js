@@ -229,24 +229,24 @@ export const requestFormSettings = {
           inLabel: "Select Tier",
           valid: true,
           name: "tier_filter_value",
-          value: "1",
+          value: "Tier1",
           //sggArray: tier_list,
           //valueArr: [],
           options: [
             {
               selected: true,
               label: "Tier 1",
-              value: "1",
+              value: "Tier1",
             },
             {
               selected: false,
               label: "Tier 2",
-              value: "2",
+              value: "Tier2",
             },
             {
               selected: false,
               label: "Tier 3",
-              value: "3",
+              value: "Tier3",
             },
           ],
 
@@ -496,7 +496,7 @@ export const fr_Req_Payload = {
   country_filter: false,
   country_filter_value: [],
   tier_filter: false,
-  tier_filter_value: "1",
+  tier_filter_value: "Tier1",
   keyword: false,
   selected_keywords: [],
   negative_keyword: false,
