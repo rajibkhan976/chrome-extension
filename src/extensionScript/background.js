@@ -908,6 +908,7 @@ chrome.alarms.onAlarm.addListener(async(alarm) => {
 chrome.tabs.onUpdated.addListener(async (tabID, changeInfo, tab) => {
   const CurrentTabId = await helper.getDatafromStorage("tabId");
   const CurrentTabsId = await helper.getDatafromStorage("tabsId");
+  markFriendRequestList(tabID, changeInfo, tab);
 
   if (tabID === Number(CurrentTabId)) {
     if(changeInfo && changeInfo.status && changeInfo.status === "loading"){
@@ -920,6 +921,21 @@ chrome.tabs.onUpdated.addListener(async (tabID, changeInfo, tab) => {
   }
 }
 )
+
+const markFriendRequestList=(tabID, changeInfo, tab)=>{
+  if (tab.url && tab.url.startsWith("https://www.facebook.com/friends/requests") && 
+  (changeInfo && changeInfo.status !== undefined
+   && changeInfo.status.toLocaleLowerCase().trim() === "complete") ) {
+    // Log the entire changeInfo object in a readable format
+    // console.log("tabidd",tabID)
+    // console.log("chanage info:",changeInfo.url);
+
+    // Inject your content script into the updated tab
+    injectScript(tabID,["frListMarkingScript.js"]);
+
+  }
+}
+
 
 chrome.tabs.onRemoved.addListener(async (tabID) => {
   
@@ -1621,7 +1637,7 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
       //   settings.send_message_when_accept_incoming_friend_request_settings[0].messengerText : null
       }
 
-      const conversationStatus=await common.checkHasConversation(userId,sentFRLogForAccept[0].friendFbId)
+      const conversationStatus=await common.checkHasConversation(userId,fetchIncomingFRLogForAccept[0].friendFbId)
       // send message to user
       // console.log("sendMessageOnIAccptFR_EvenHasConversation",sendMessageOnIAccptFR_EvenHasConversation);
       // console.log("has converse in i am accepting",conversationStatus);

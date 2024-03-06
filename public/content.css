@@ -87,7 +87,7 @@
   }
   .incoming_fr_synced svg{
     position: absolute;
-    top: -6%;
+    top: 1;
     left: 0;
     transform: translate(24%,0%);
   }
