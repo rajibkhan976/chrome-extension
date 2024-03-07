@@ -427,9 +427,11 @@ const getAllKeysFromStorage = (key='') => {
   });
 };
 
-const getCurrentDayAndTimein = () => {
+const getCurrentDayAndTimein = (epoch = null) => {
   const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   let day = new Date();
+  if(epoch !== null)
+    day = new Date(epoch)
   const currentTime = day.getHours() + ":" + day.getMinutes() + ":" + day.getSeconds();
   const search_date = day.toJSON().split("T")[0];
   day = days[day.getDay()];

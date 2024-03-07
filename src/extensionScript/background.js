@@ -25,6 +25,9 @@ const pendingFRIntvTime = 120;
 const reFRIntvTime = 240;
 const campaignIntvTime = 60;
 
+const campaignExpTime = 2 * 60 * 60 * 1000;
+const settingExpTime = 2 * 60 * 60 * 1000;
+
 let frToken =  ""; 
 let tabsId;
 let payload;
@@ -672,7 +675,10 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                               break;
           
     case "sendMessage":
-      storeInMsqs( request.userId, request.recieverId, request.name, request.message, request.settingsType )
+      let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + settingExpTime); 
+      const exp_time = search_date + "T" + currentTime;
+      console.log("exp_time", exp_time)
+      storeInMsqs( request.userId, request.recieverId, request.name, request.message, request.settingsType, exp_time )
         // sendMessage(request.fbDtsg, request.userId, request.recieverId, request.name, request.message, request.settingsType);
       break;
 
@@ -1580,7 +1586,10 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
       const messageContent = await common.getMessageContent( message_payload )
       console.log("messageContent ::: ", messageContent);
       if(messageContent.status){
-        storeInMsqs( userId, sentFRLogForAccept[0].friendFbId, sentFRLogForAccept[0].friendName,  messageContent.content, settingsType.whenAcceptedByMember );
+        let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + settingExpTime); 
+        const exp_time = search_date + "T" + currentTime;
+        console.log("exp_time", exp_time)
+        storeInMsqs( userId, sentFRLogForAccept[0].friendFbId, sentFRLogForAccept[0].friendName,  messageContent.content, settingsType.whenAcceptedByMember, exp_time );
         // sendMessage(fbDtsg, userId, sentFRLogForAccept[0].friendFbId, sentFRLogForAccept[0].friendName,  messageContent.content, settingsType.whenAcceptedByMember );
       }
     }
@@ -1601,7 +1610,10 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
     const messageContent = await common.getMessageContent( message_payload );
     console.log("messageContent ::: ", messageContent);
     if(messageContent.status){
-      storeInMsqs( userId, sentFRLogForReject[0].friendFbId, sentFRLogForReject[0].friendName, messageContent.content, settingsType.whenRejectedByMember );
+      let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + settingExpTime); 
+      const exp_time = search_date + "T" + currentTime;
+      console.log("exp_time", exp_time)
+      storeInMsqs( userId, sentFRLogForReject[0].friendFbId, sentFRLogForReject[0].friendName, messageContent.content, settingsType.whenRejectedByMember, exp_time );
       // sendMessage(fbDtsg, userId, sentFRLogForReject[0].friendFbId, sentFRLogForReject[0].friendName, messageContent.content, settingsType.whenRejectedByMember );
     }
     sentFRLogForReject.shift();
@@ -1620,7 +1632,10 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
     const messageContent = await common.getMessageContent( message_payload );
     // console.log("messageContent ::: ", messageContent);
     if(messageContent.status){
-      storeInMsqs( userId, fetchIncomingLog[0].friendFbId, fetchIncomingLog[0].friendName, messageContent.content, settingsType.whenRecievesRequest );
+      let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + settingExpTime); 
+      const exp_time = search_date + "T" + currentTime;
+      console.log("exp_time", exp_time)
+      storeInMsqs( userId, fetchIncomingLog[0].friendFbId, fetchIncomingLog[0].friendName, messageContent.content, settingsType.whenRecievesRequest, exp_time );
       // sendMessage(fbDtsg, userId, fetchIncomingLog[0].friendFbId, fetchIncomingLog[0].friendName, messageContent.content, settingsType.    whenRecievesRequest );
     }
     fetchIncomingLog.shift();
@@ -1644,8 +1659,11 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
       if(sendMessageOnIAccptFR_EvenHasConversation || !conversationStatus.hasConversation){
         const messageContent = await common.getMessageContent( message_payload );
         if(messageContent.status){
+          let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + settingExpTime); 
+          const exp_time = search_date + "T" + currentTime;
+          console.log("exp_time", exp_time)
           // sendMessage(fbDtsg, userId, fetchIncomingFRLogForAccept[0].friendFbId, fetchIncomingFRLogForAccept[0].friendName, messageContent.content, settingsType.whenAcceptedByUser );
-          storeInMsqs( userId, fetchIncomingFRLogForAccept[0].friendFbId, fetchIncomingFRLogForAccept[0].friendName, messageContent.content, settingsType.whenAcceptedByUser );
+          storeInMsqs( userId, fetchIncomingFRLogForAccept[0].friendFbId, fetchIncomingFRLogForAccept[0].friendName, messageContent.content, settingsType.whenAcceptedByUser, exp_time );
         }
       }
  
@@ -1665,8 +1683,11 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
       const messageContent = await common.getMessageContent( message_payload );
     // console.log("messageContent ::: ", messageContent);
     if(messageContent.status){
+      let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + settingExpTime); 
+      const exp_time = search_date + "T" + currentTime;
+      console.log("exp_time", exp_time)
       // sendMessage(fbDtsg, userId, fetchIncomingFRLogForReject[0].friendFbId, fetchIncomingFRLogForReject[0].friendName, messageContent.content, settingsType.whenRejectedByUser );
-      storeInMsqs( userId, fetchIncomingFRLogForReject[0].friendFbId, fetchIncomingFRLogForReject[0].friendName, messageContent.content, settingsType.whenRejectedByUser );
+      storeInMsqs( userId, fetchIncomingFRLogForReject[0].friendFbId, fetchIncomingFRLogForReject[0].friendName, messageContent.content, settingsType.whenRejectedByUser, exp_time );
     }
     fetchIncomingFRLogForReject.shift();
   }
@@ -1770,6 +1791,24 @@ chrome.alarms.onAlarm.addListener( async function (alarm) {
   }
 });
 
+function isDateAndTimeNotPassed(dateTimeString) {
+  // Convert the given date string to a Date object
+  const givenDateTime = new Date(dateTimeString);
+
+  // Get the current date and time
+  const currentDateTime = new Date();
+
+  // Compare the given date and time with the current date and time
+  if (givenDateTime > currentDateTime) {
+      // If the given date and time is in the future, return true
+      return true;
+  } else {
+      // If the given date and time has already passed, return false
+      return false;
+  }
+}
+
+
 async function MSQS(){
     //check fb login here If logged in then conitnue else let the alarm run 
     let fbuserDetails = await helper.getDatafromStorage("fbTokenAndId");
@@ -1780,7 +1819,9 @@ async function MSQS(){
       removeFromQueue(async function (queueInfo) {
           if (queueInfo) {
 
-               // clear the alarm and create a new one for next one
+            if(isDateAndTimeNotPassed(queueInfo.expiration_time)){
+              console.log("The queue info time is not expired",queueInfo)
+              // clear the alarm and create a new one for next one
               stopSendingLoop()   
               let fbId = queueInfo.frienderFbId
               let  receiverId = queueInfo.recieverFbId
@@ -1804,8 +1845,12 @@ async function MSQS(){
                       }else{
                         console.log("Message not sent as its already been sent or the limit is exceeded (campaign automation)",messageStatus)
                       }
-                }else{
-                    // Settings automation
+                }else if(queueInfo.settingsType == 6){
+                      let fbResponse = await   sendMessageViaFacebook(dtsg,queueInfo)
+                      // Callback mechanism to handle the facebook send message func
+                      handleResponse(queueInfo, fbResponse);
+                    }else{
+                         // Settings automation
                     const messageStatus = await common.checkMessageStatus(queueInfo.recieverFbId,queueInfo.settingsType);
                     if(messageStatus && messageStatus.message_status_boolean === 0) {
 
@@ -1825,6 +1870,10 @@ async function MSQS(){
 
               // Start a fresh loop with 3 mins and random delay
               manageSendingLoop()
+            }else{
+              console.log("The data has been removed from queue as its expired",queueInfo)
+            }
+
           }else{
             console.log("NO data found in queue to execute in MSQS session")
           }
@@ -1929,7 +1978,9 @@ async function handleResponse(queueInfo, response) {
       "fbUserId":queueInfo.frienderFbId,
       "friendFbId":queueInfo.recieverFbId,
       "status" : response == true?"send" :"failed",
-      "message" : queueInfo.message
+      "message" : queueInfo.message,
+      "messageGroupId" : queueInfo.groupId
+
     }
   
     // If its a Campaign : 
@@ -1973,7 +2024,7 @@ function removeFromQueue(callback) {
       }
   });
 }
-const storeInMsqs = async ( fbId, receiverId, name, message, settingsType, campaignId = "", memberId="") => {
+const storeInMsqs = async ( fbId, receiverId, name, message, settingsType, exp_time, campaignId = "", memberId="", groupId = "") => {
   // let Ids = `ids[${receiverId}]`;
   // let text_ids = `text_ids[${receiverId}]`;
   let payload = {
@@ -1981,7 +2032,9 @@ const storeInMsqs = async ( fbId, receiverId, name, message, settingsType, campa
     message: message,
     recieverName: name,
     recieverFbId : receiverId,
-    memberId : memberId
+    memberId : memberId,
+    expiration_time : exp_time,
+    groupId : groupId && groupId.length > 0 ? groupId : 'Quick Message',
   };
   // let payload = {
   //   msgPayload : data
@@ -2097,7 +2150,10 @@ const campaignToMsqs = async(campaign) => {
         }
         const messageContent = await common.getMessageContent( message_payload )
         if(messageContent.status){
-          storeInMsqs( campaign.facebookUserId, campaign.friendDetails[0].friendFbId, campaign.friendDetails[0].friendName, messageContent.content, '', campaign.campaignId, campaign.friendDetails[0]._id);
+          let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + campaignExpTime); 
+          const exp_time = search_date + "T" + currentTime;
+          console.log("exp_time", exp_time)
+          storeInMsqs( campaign.facebookUserId, campaign.friendDetails[0].friendFbId, campaign.friendDetails[0].friendName, messageContent.content, 7, exp_time, campaign.campaignId, campaign.friendDetails[0]._id, message_payload.groupId );
         }
       }
       campaign.friendDetails.shift();
