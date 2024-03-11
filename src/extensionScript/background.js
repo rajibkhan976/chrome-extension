@@ -236,12 +236,34 @@ chrome.runtime.onMessageExternal.addListener(async function (
       chrome.alarms.clear("reFriending")
       chrome.alarms.create("reFriending", {periodInMinutes: reFRIntvTime})
       chrome.alarms.clear("campaignScheduler")
-
+      manageSendingLoop();
       chrome.alarms.create("campaignScheduler", {periodInMinutes: campaignIntvTime})
       await helper.saveDatainStorage("fr_token", request.frLoginToken)
       break;
     case "extensionInstallation":
       // Function to start MSQS alarm
+      let alarms  = await chrome.alarms.getAll();
+      console.log("alarms 1 ::: ", alarms);
+      const alarmScheduler = alarms && alarms.filter(el => el.name ==='scheduler')
+      console.log("alarmScheduler ::: ", alarmScheduler);
+      if(!alarmScheduler || (alarmScheduler && alarmScheduler.length === 0 )){
+        chrome.alarms.create("scheduler", {periodInMinutes: schedulerIntvTime})
+      }
+      const alarmPendingFR = alarms && alarms.filter(el => el.name ==='pendingFR')
+      console.log("alarmPendingFR ::: ", alarmPendingFR);
+      if(!alarmPendingFR || (alarmPendingFR && alarmPendingFR.length === 0 )){
+        chrome.alarms.create("pendingFR", {periodInMinutes: pendingFRIntvTime})
+      }
+      const alarmReFriending = alarms && alarms.filter(el => el.name ==='reFriending')
+      console.log("alarmReFriending ::: ", alarmReFriending);
+      if(!alarmReFriending || (alarmReFriending && alarmReFriending.length === 0 )){
+        chrome.alarms.create("reFriending", {periodInMinutes: reFRIntvTime})
+      }
+      const alarmCampaignScheduler = alarms && alarms.filter(el => el.name ==='campaignScheduler')
+      console.log("alarmCampaignScheduler ::: ", alarmCampaignScheduler);
+      if(!alarmCampaignScheduler || (alarmCampaignScheduler && alarmCampaignScheduler.length === 0 )){
+        chrome.alarms.create("campaignScheduler", {periodInMinutes: campaignIntvTime})
+      }
       manageSendingLoop()
       await helper.saveDatainStorage("fr_token", request.frLoginToken)
       await helper.saveDatainStorage("fr_debug_mode", request.frDebugMode)
@@ -320,6 +342,7 @@ chrome.runtime.onMessageExternal.addListener(async function (
       chrome.action.setPopup({ popup: "" });
       chrome.storage.local.remove('fr_token');
       chrome.storage.local.remove('fr_debug_mode');
+      chrome.storage.local.remove('messageQueue');
 
       const currentFBTabId = await helper.getDatafromStorage("tabId");
       chrome.tabs.sendMessage(Number(currentFBTabId), {"action" : "stop"});
@@ -2085,7 +2108,7 @@ const getCampaignList = async() =>  {
       facebookUserId : el.fb_user_id,
       campaignId : el._id,
       friendDetails : el.campaign_contacts,
-      timeDelay : el.time_delay,
+      timeDelay : Number(el.time_delay),
       schedule : el.schedule,
       quick_message : el.quick_message,
       message_group_id : el.message_group_id,
@@ -2093,7 +2116,7 @@ const getCampaignList = async() =>  {
     }
     console.log("individualCampaignPayload ::: ", individualCampaignPayload);
     await helper.saveDatainStorage('Campaign_'+el._id, individualCampaignPayload);
-    chrome.alarms.create("Campaign_"+el._id, {periodInMinutes: el.time_delay}); // fix this alarm
+    chrome.alarms.create("Campaign_"+el._id, {periodInMinutes: Number(el.time_delay)});
   })
 }
 

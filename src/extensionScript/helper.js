@@ -433,7 +433,7 @@ const getCurrentDayAndTimein = (epoch = null) => {
   if(epoch !== null)
     day = new Date(epoch)
   const currentTime = day.getHours() + ":" + day.getMinutes() + ":" + day.getSeconds();
-  const search_date = day.toJSON().split("T")[0];
+  const search_date = day.toLocaleDateString().replaceAll('/', '-');
   day = days[day.getDay()];
   console.log("day ::: ",  day, currentTime);
   return({day : day, currentTime : currentTime, search_date : search_date})
