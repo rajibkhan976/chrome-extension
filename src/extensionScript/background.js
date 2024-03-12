@@ -229,6 +229,8 @@ chrome.runtime.onMessageExternal.addListener(async function (
   chrome.storage.local.set({ senExternalResponse: sendResponseExternal });
   switch (request.action) {
     case "frienderLogin" : 
+      await helper.saveDatainStorage("fr_token", request.frLoginToken)
+      getCampaignList()
       chrome.alarms.clear("scheduler")
       chrome.alarms.create("scheduler", {periodInMinutes: schedulerIntvTime})
       chrome.alarms.clear("pendingFR")
@@ -236,9 +238,8 @@ chrome.runtime.onMessageExternal.addListener(async function (
       chrome.alarms.clear("reFriending")
       chrome.alarms.create("reFriending", {periodInMinutes: reFRIntvTime})
       chrome.alarms.clear("campaignScheduler")
-      manageSendingLoop();
       chrome.alarms.create("campaignScheduler", {periodInMinutes: campaignIntvTime})
-      await helper.saveDatainStorage("fr_token", request.frLoginToken)
+      manageSendingLoop();
       break;
     case "extensionInstallation":
       // Function to start MSQS alarm

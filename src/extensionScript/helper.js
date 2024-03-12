@@ -431,15 +431,23 @@ const getCurrentDayAndTimein = (epoch = null) => {
   const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   let day = new Date();
   if(epoch !== null)
-    day = new Date(epoch)
-  const currentTime = day.getHours() + ":" + day.getMinutes() + ":" + day.getSeconds();
-  let search_date = day.toLocaleDateString().split("/");
-  const month = search_date[0] && search_date[0].length === 1 ? '0'+search_date[0] : search_date[0];
-  const date = search_date[1] && search_date[1].length === 1 ? '0'+search_date[1] : search_date[1];
-  search_date = search_date[2] + "-" + month + "-" + date
+    day = new Date(epoch);
+    
+  // Format the adjusted date and time into the required format
+  const year = day.getFullYear();
+  const month = String(day.getMonth() + 1).padStart(2, '0');
+  const date = String(day.getDate()).padStart(2, '0');
+  const hours = String(day.getHours()).padStart(2, '0');
+  const minutes = String(day.getMinutes()).padStart(2, '0');
+  const seconds = String(day.getSeconds()).padStart(2, '0');
+
+  const formattedDateTime = `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`;
+  console.log(formattedDateTime)
+  console.log(formattedDateTime.split(" ")[0])
+  console.log(formattedDateTime.split(" ")[1])
   day = days[day.getDay()];
-  console.log("day ::: ",  day, currentTime);
-  return({day : day, currentTime : currentTime, search_date : search_date})
+  console.log("day ::: ",  day);
+  return({day : day, currentTime : formattedDateTime.split(" ")[1], search_date : formattedDateTime.split(" ")[0]})
 }
 const helper =
 {
