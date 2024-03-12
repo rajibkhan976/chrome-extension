@@ -1817,17 +1817,20 @@ chrome.alarms.onAlarm.addListener( async function (alarm) {
 function isDateAndTimeNotPassed(dateTimeString) {
   // Convert the given date string to a Date object
   const givenDateTime = new Date(dateTimeString);
-
+  console.log(givenDateTime);
   // Get the current date and time
   const currentDateTime = new Date();
+  console.log(currentDateTime);
 
   // Compare the given date and time with the current date and time
   if (givenDateTime > currentDateTime) {
       // If the given date and time is in the future, return true
-      return true;
+    console.log(">", givenDateTime > currentDateTime);
+    return true;
   } else {
       // If the given date and time has already passed, return false
-      return false;
+    console.log("<", givenDateTime < currentDateTime);
+    return false;
   }
 }
 

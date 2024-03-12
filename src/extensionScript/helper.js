@@ -434,7 +434,9 @@ const getCurrentDayAndTimein = (epoch = null) => {
     day = new Date(epoch)
   const currentTime = day.getHours() + ":" + day.getMinutes() + ":" + day.getSeconds();
   let search_date = day.toLocaleDateString().split("/");
-  search_date = search_date[2] + "-" + search_date[0] + "-" + search_date[1]
+  const month = search_date[0] && search_date[0].length === 1 ? '0'+search_date[0] : search_date[0];
+  const date = search_date[1] && search_date[1].length === 1 ? '0'+search_date[1] : search_date[1];
+  search_date = search_date[2] + "-" + month + "-" + date
   day = days[day.getDay()];
   console.log("day ::: ",  day, currentTime);
   return({day : day, currentTime : currentTime, search_date : search_date})
