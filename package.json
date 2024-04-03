@@ -50,10 +50,15 @@
     "build:beta": "./scripts/build.beta.sh",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "watch": "npm-watch"
+    "watch": "npm-watch `build:dev`"
   },
   "watch": {
-    "build": "src/"
+    "build:dev": {
+      "patterns": [
+        "src/",
+        "!src/kyubiSettings.json"
+      ]
+    }
   },
   "eslintConfig": {
     "extends": [
