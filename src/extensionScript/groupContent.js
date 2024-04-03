@@ -534,7 +534,7 @@ const fetchOtherInfosOfMember = async (
       console.log("sentFriendRequest.description ::: ", sentFriendRequest.description)
       if(sentFriendRequest.status === false && (sentFriendRequest.description && sentFriendRequest.description.length > 0 && 
         (sentFriendRequest.description.includes('It looks like you may not know this person.') || sentFriendRequest.description.includes("Only send friend requests to people you know personally.")))){
-        console.log("Checking facebook tupulu tupulu.");
+        // console.log("Checking facebook tupulu tupulu.");
         await common.storeRestrictedFbProfile({
           "facebookUserId": userID,
           "peopleFbId": groupMemberInfo.memberId 

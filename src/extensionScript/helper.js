@@ -3,6 +3,7 @@ const HEADERS = {
   "Content-Type": "application/json",
 };
 // console.log("I am a helper");
+const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 const getDatafromStorage = (key) => {
   // console.log("key ::::::::::::::::::::::: ", key)
@@ -428,7 +429,6 @@ const getAllKeysFromStorage = (key='') => {
 };
 
 const getCurrentDayAndTimein = (epoch = null) => {
-  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   let day = new Date();
   if(epoch !== null)
     day = new Date(epoch);
@@ -442,13 +442,32 @@ const getCurrentDayAndTimein = (epoch = null) => {
   const seconds = String(day.getSeconds()).padStart(2, '0');
 
   const formattedDateTime = `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`;
-  console.log(formattedDateTime)
-  console.log(formattedDateTime.split(" ")[0])
-  console.log(formattedDateTime.split(" ")[1])
+  // console.log(formattedDateTime)
+  // console.log(formattedDateTime.split(" ")[0])
+  // console.log(formattedDateTime.split(" ")[1])
   day = days[day.getDay()];
   console.log("day ::: ",  day);
   return({day : day, currentTime : formattedDateTime.split(" ")[1], search_date : formattedDateTime.split(" ")[0]})
 }
+
+const gapBetweenTowdays = (today, upcomingDay) => {
+  const todayIndx = days.indexOf(today);
+  const upcomingDayIndx = days.indexOf(upcomingDay);
+  // console.log("todayIndx ::: ", todayIndx);
+  // console.log("upcomingDayIndx ::: ", upcomingDayIndx);
+  if(todayIndx !== -1 && upcomingDayIndx !== -1){
+      if(upcomingDayIndx < todayIndx){
+          return (6-todayIndx+upcomingDayIndx+1);
+      }
+      if(upcomingDayIndx > todayIndx){
+          return (upcomingDayIndx-todayIndx);
+      }
+      if(upcomingDayIndx === todayIndx){
+          return 0;
+      }
+  }
+}
+
 const helper =
 {
   getDatafromStorage: getDatafromStorage,
@@ -473,7 +492,8 @@ const helper =
   sendRequest:sendRequest,
   debounce:debounce,
   getAllKeysFromStorage:getAllKeysFromStorage,
-  getCurrentDayAndTimein:getCurrentDayAndTimein
+  getCurrentDayAndTimein:getCurrentDayAndTimein,
+  gapBetweenTowdays:gapBetweenTowdays
 };
 
 export default helper
