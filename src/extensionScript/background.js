@@ -2258,16 +2258,22 @@ const startSchedulerOfSubCampaign = async (day, currentTime, campaign) => {
     
     const curr_hour = currentTime.split(":")[0];
     const curr_minute = currentTime.split(":")[1];
+    const curr_sec = currentTime.split(":")[2];
     console.log("curr_hour ::: ", curr_hour);
     console.log("curr_minute ::: ", curr_minute);
+    console.log("curr_sec ::: ", curr_sec);
     const scheduled_hour = elem.from_time.split(":")[0];
     const scheduled_minute = elem.from_time.split(":")[1];
+    const scheduled_sec = elem.from_time.split(":")[2];
     console.log("scheduled_hour ::: ", scheduled_hour);
     console.log("scheduled_minute ::: ", scheduled_minute);
-    const curr_sec = currentTime.split(":")[2];
-    const scheduled_sec = elem.from_time.split(":")[2];
-    console.log("curr_sec ::: ", curr_sec);
     console.log("scheduled_sec ::: ", scheduled_sec);
+    const scheduled_end_hour = elem.to_time.split(":")[0];
+    const scheduled_end_minute = elem.to_time.split(":")[1];
+    const scheduled_end_sec = elem.to_time.split(":")[2];
+    console.log("scheduled_end_hour ::: ", scheduled_end_hour);
+    console.log("scheduled_end_minute ::: ", scheduled_end_minute);
+    console.log("scheduled_end_sec ::: ", scheduled_end_sec);
     let diff_hour = scheduled_hour - curr_hour;
     let diff_min = scheduled_minute - curr_minute;
     let diff_sec = scheduled_sec - curr_minute;
@@ -2286,21 +2292,45 @@ const startSchedulerOfSubCampaign = async (day, currentTime, campaign) => {
       diff_hour++;
     }
     if(elem.day === day){
-      if((curr_hour === scheduled_hour && curr_minute > scheduled_minute ) || curr_hour > scheduled_hour){
-        gapBetweenTwoDays = 7;
-      }
-      else if(curr_hour === scheduled_hour && curr_minute === scheduled_minute){
+      // in between hours
+      if(curr_hour > scheduled_hour && curr_hour < scheduled_end_hour ){
         upcomingDateAndTime = Date.now();
+      }
+      else if(curr_hour === scheduled_end_hour && curr_minute <= scheduled_end_minute){
+        upcomingDateAndTime = Date.now();
+      }
+      else if(curr_hour === scheduled_hour && curr_minute >= scheduled_minute){
+        upcomingDateAndTime = Date.now();
+      }
+      else if(curr_hour < scheduled_hour ){
+        upcomingDateAndTime = Date.now() + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000;
+      }
+      else if(curr_hour > scheduled_end_hour){
+        gapBetweenTwoDays = 7;
+        upcomingDateAndTime = Date.now() + gapBetweenTwoDays*24*60*60*1000 + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000;
+        console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
+      }
+      else if(curr_hour === scheduled_hour && curr_minute < scheduled_minute){
+        upcomingDateAndTime = Date.now() + 60*diff_min*1000 + diff_sec*1000;
+      }
+      else if(curr_hour === scheduled_end_hour && curr_minute > scheduled_end_minute){
+        gapBetweenTwoDays = 7;
+        upcomingDateAndTime = Date.now() + gapBetweenTwoDays*24*60*60*1000 + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000;
+        console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
+      }
+      else if(curr_hour > scheduled_end_hour){
+        gapBetweenTwoDays = 7;
+        upcomingDateAndTime = Date.now() + gapBetweenTwoDays*24*60*60*1000 + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000;
+        console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
       }
     }
     else{
       gapBetweenTwoDays = helper.gapBetweenTowdays(day, elem.day);
       console.log("gap between two days ::: ", gapBetweenTwoDays); // calculate time also
+      upcomingDateAndTime = Date.now() + gapBetweenTwoDays*24*60*60*1000 + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000;
+      console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
     }
-    upcomingDateAndTime = Date.now() + gapBetweenTwoDays*24*60*60*1000 + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000;;
-    console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
-    // fetch payload of current campaign with members
-    // make payload
+
     helper.saveDatainStorage("Campaign_" + campaign.campaign_id, campaign);
     chrome.alarm.create("Campaign_" + campaign.campaign_id, { when : upcomingDateAndTime })
     // chrome.alarm.create("Campaign_" + campaign.campaign_id, { when : Date.now() + Math.random()*2*60*1000});
