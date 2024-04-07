@@ -419,7 +419,7 @@ const getAllKeysFromStorage = (key='') => {
       chrome.storage.local.get(null, function(items) {
         let allKeys = Object.keys(items);
         allKeys = allKeys.length > 0 && allKeys.filter(el=>el.includes(key))
-        console.log("allKeys ::: ", allKeys);
+        // console.log("allKeys ::: ", allKeys);
         resolve(allKeys)
       });;
     } catch (e) {
@@ -446,7 +446,7 @@ const getCurrentDayAndTimein = (epoch = null) => {
   // console.log(formattedDateTime.split(" ")[0])
   // console.log(formattedDateTime.split(" ")[1])
   day = days[day.getDay()];
-  console.log("day ::: ",  day);
+  // console.log("day ::: ",  day);
   return({day : day, currentTime : formattedDateTime.split(" ")[1], search_date : formattedDateTime.split(" ")[0]})
 }
 

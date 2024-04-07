@@ -393,6 +393,11 @@ chrome.runtime.onMessageExternal.addListener(async function (
         getprofileDataofURL(request.url, sendResponseExternal)
       break;
 
+    case "update_schedules" : 
+      console.log("update_schedules invoked");
+      startCampaignScheduler();
+      break;
+
     default:
       break;
   }
@@ -726,10 +731,6 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     case "sendMessageAcceptOrReject":
       sendMessageAcceptOrReject()
       break;
-
-    case "update_schedules" : 
-      startCampaignScheduler();
-      break;
                           
     default : break;
   }
@@ -904,7 +905,7 @@ const checkScheduledSync = async () => {
 
 
 chrome.alarms.onAlarm.addListener(async(alarm) => {
-  // console.log("alarm ::: ", alarm)
+  console.log("alarm in add listener ::: ", alarm)
   let alarmName = alarm.name;
   if(alarmName.includes('_')){
     alarmName = alarmName && alarmName.split('_')[0];
@@ -943,14 +944,22 @@ chrome.alarms.onAlarm.addListener(async(alarm) => {
           break;
 
       case "Campaign" : 
-            // console.log("-----------------Campaign Scheduler------------------", alarm, alarm.name)
+            console.log("-----------------Campaign Scheduler------------------", alarm, alarm.name)
             const campaignId = alarm && alarm.name && alarm.name.split('_')[1];
             console.log("Campaign Id ::: " , campaignId)
             const nextCampaign = await helper.getDatafromStorage('Campaign_'+campaignId);
             console.log("next campaign :::: ", nextCampaign)
-            campaignToMsqs(nextCampaign);
+            satrtHourlyScheduler(nextCampaign);
           break;
-
+        
+      case "CampaignMin" : 
+            console.log("-----------------Campaign Min Scheduler------------------", alarm, alarm.name)
+            const campaignIdd = alarm && alarm.name && alarm.name.split('_')[1];
+            console.log("Campaign Id ::: " , campaignIdd)
+            const next_campaign = await helper.getDatafromStorage('Campaign_'+campaignIdd);
+            console.log("next campaign :::: ", next_campaign)
+            campaignToMsqs(next_campaign);
+          break;
     default: break;
   }
 
@@ -2216,16 +2225,17 @@ const saveMessageSentStatus = async () => {
 
 
 const startCampaignScheduler = async () => {
+  console.log("logged in ??? ", helper.isEmptyObj(helper.getDatafromStorage('fr_token')));
   //check logged in or not
-  if(helper.isEmptyObj(helper.getDatafromStorage('fr_token')))
+  if(!helper.isEmptyObj(helper.getDatafromStorage('fr_token')))
     return;
   //clear storage
   console.log("lets start FETCHING CAMPAIGN");
   const campaignListFromStore = await helper.getAllKeysFromStorage('Campaign_');
-  // console.log("campaignListFromStore ::: ", campaignListFromStore)
+  // console.log("campaignListFromStore ::: ", campaignListFromStore);
   if(campaignListFromStore.length > 0){
     for(let i = 0; i < campaignListFromStore.length; ++i){
-      // console.log("campaignListFromStore :: ", campaignListFromStore[i])
+      // console.log("campaignListFromStore :: ", campaignListFromStore[i]);
       helper.removeDatafromStorage(campaignListFromStore[i])
     }
   }
@@ -2241,7 +2251,7 @@ const startCampaignScheduler = async () => {
   //clear alarms
   let allCampaigns = await common.fetchAllCampaignList( "", "", "", "all"); // fetch campaign
   allCampaigns = allCampaigns && allCampaigns.filter(el => el.status === true)
-  console.log("allCampaigns ::: ", allCampaigns);
+  // console.log("allCampaigns ::: ", allCampaigns);
   const {day, currentTime} = helper.getCurrentDayAndTimein();
   allCampaigns && allCampaigns.forEach((el, i) => {
     startSchedulerOfSubCampaign(day, currentTime, el);
@@ -2249,8 +2259,8 @@ const startCampaignScheduler = async () => {
 }
 
 const startSchedulerOfSubCampaign = async (day, currentTime, campaign) => {
-  console.log("day ::: ", day);
-  console.log("currentTime ::: ", currentTime);
+  // console.log("day ::: ", day);
+  // console.log("currentTime ::: ", currentTime);
   console.log("campaign ::: ", campaign);
   console.log("campaign schedule ::: ", campaign.schedule);
   let upcomingDateAndTime = 0;
@@ -2259,21 +2269,21 @@ const startSchedulerOfSubCampaign = async (day, currentTime, campaign) => {
     const curr_hour = currentTime.split(":")[0];
     const curr_minute = currentTime.split(":")[1];
     const curr_sec = currentTime.split(":")[2];
-    console.log("curr_hour ::: ", curr_hour);
-    console.log("curr_minute ::: ", curr_minute);
-    console.log("curr_sec ::: ", curr_sec);
+    // console.log("curr_hour ::: ", curr_hour);
+    // console.log("curr_minute ::: ", curr_minute);
+    // console.log("curr_sec ::: ", curr_sec);
     const scheduled_hour = elem.from_time.split(":")[0];
     const scheduled_minute = elem.from_time.split(":")[1];
     const scheduled_sec = elem.from_time.split(":")[2];
-    console.log("scheduled_hour ::: ", scheduled_hour);
-    console.log("scheduled_minute ::: ", scheduled_minute);
-    console.log("scheduled_sec ::: ", scheduled_sec);
+    // console.log("scheduled_hour ::: ", scheduled_hour);
+    // console.log("scheduled_minute ::: ", scheduled_minute);
+    // console.log("scheduled_sec ::: ", scheduled_sec);
     const scheduled_end_hour = elem.to_time.split(":")[0];
     const scheduled_end_minute = elem.to_time.split(":")[1];
     const scheduled_end_sec = elem.to_time.split(":")[2];
-    console.log("scheduled_end_hour ::: ", scheduled_end_hour);
-    console.log("scheduled_end_minute ::: ", scheduled_end_minute);
-    console.log("scheduled_end_sec ::: ", scheduled_end_sec);
+    // console.log("scheduled_end_hour ::: ", scheduled_end_hour);
+    // console.log("scheduled_end_minute ::: ", scheduled_end_minute);
+    // console.log("scheduled_end_sec ::: ", scheduled_end_sec);
     let diff_hour = scheduled_hour - curr_hour;
     let diff_min = scheduled_minute - curr_minute;
     let diff_sec = scheduled_sec - curr_minute;
@@ -2294,13 +2304,13 @@ const startSchedulerOfSubCampaign = async (day, currentTime, campaign) => {
     if(elem.day === day){
       // in between hours
       if(curr_hour > scheduled_hour && curr_hour < scheduled_end_hour ){
-        upcomingDateAndTime = Date.now();
+        upcomingDateAndTime = Date.now() + 60*1000;
       }
       else if(curr_hour === scheduled_end_hour && curr_minute <= scheduled_end_minute){
-        upcomingDateAndTime = Date.now();
+        upcomingDateAndTime = Date.now() + 60*1000;
       }
       else if(curr_hour === scheduled_hour && curr_minute >= scheduled_minute){
-        upcomingDateAndTime = Date.now();
+        upcomingDateAndTime = Date.now() + 60*1000;
       }
       else if(curr_hour < scheduled_hour ){
         upcomingDateAndTime = Date.now() + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000;
@@ -2308,7 +2318,7 @@ const startSchedulerOfSubCampaign = async (day, currentTime, campaign) => {
       else if(curr_hour > scheduled_end_hour){
         gapBetweenTwoDays = 7;
         upcomingDateAndTime = Date.now() + gapBetweenTwoDays*24*60*60*1000 + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000;
-        console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
+        // console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
       }
       else if(curr_hour === scheduled_hour && curr_minute < scheduled_minute){
         upcomingDateAndTime = Date.now() + 60*diff_min*1000 + diff_sec*1000;
@@ -2316,88 +2326,111 @@ const startSchedulerOfSubCampaign = async (day, currentTime, campaign) => {
       else if(curr_hour === scheduled_end_hour && curr_minute > scheduled_end_minute){
         gapBetweenTwoDays = 7;
         upcomingDateAndTime = Date.now() + gapBetweenTwoDays*24*60*60*1000 + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000;
-        console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
+        // console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
       }
       else if(curr_hour > scheduled_end_hour){
         gapBetweenTwoDays = 7;
         upcomingDateAndTime = Date.now() + gapBetweenTwoDays*24*60*60*1000 + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000;
-        console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
+        // console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
       }
     }
     else{
       gapBetweenTwoDays = helper.gapBetweenTowdays(day, elem.day);
-      console.log("gap between two days ::: ", gapBetweenTwoDays); // calculate time also
+      // console.log("gap between two days ::: ", gapBetweenTwoDays); // calculate time also
       upcomingDateAndTime = Date.now() + gapBetweenTwoDays*24*60*60*1000 + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000;
-      console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
+      // console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
     }
-
+    // console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
     helper.saveDatainStorage("Campaign_" + campaign.campaign_id, campaign);
-    chrome.alarm.create("Campaign_" + campaign.campaign_id, { when : upcomingDateAndTime })
+    console.log("creating alarm at ::: ", new Date(upcomingDateAndTime));
+    chrome.alarms.create("Campaign_" + campaign.campaign_id, { when : upcomingDateAndTime })
     // chrome.alarm.create("Campaign_" + campaign.campaign_id, { when : Date.now() + Math.random()*2*60*1000});
   })
 }   
 
-const campaignToMsqs = async(campaign) => {
-  let alarms  = await chrome.alarms.getAll();
-  alarms = alarms && alarms.filter(el => el.name.includes('Campaign_' + campaign.campaignId));
-  console.log("alarms ::: ", alarms);
-  if(alarms && alarms.length === 0){
-    chrome.alarm.clear("Campaign_" + campaign.campaign_id)
-    chrome.alarm.create("Campaign_" + campaign.campaign_id, { periodInMinutes : 1 * 60 });
-  }
+const satrtHourlyScheduler = async(campaign) => {
+  chrome.alarms.clear("Campaign_" + campaign.campaign_id)
+  chrome.alarms.create("Campaign_" + campaign.campaign_id, { periodInMinutes : 1 * 60 });
+      // if member is not present in campaign payload fetch campaign members
   let allCampaigns;
-  console.log("campaign ::: ", campaign);
-  // Check if campaign is active or not
-  const {day, currentTime, search_date} = helper.getCurrentDayAndTimein();
-    console.log("day ::: ",  day, currentTime);
-  const campaignStatus = await common.checkCampaignStatus(campaign.facebookUserId, day, currentTime, campaign.campaignId);
-  console.log("campaignStatus ::: ", campaignStatus.status); 
-  if(campaignStatus && campaignStatus.status ==="Active"){
-  // if member is not present in campaign payload fetch campaign members
+  
+  
   if(campaign.campaign_contacts && campaign.campaign_contacts.length > 0){
     campaign = {...campaign, campaign_contacts : campaign.campaign_contacts };
   } else {
+    const {day, currentTime, search_date} = helper.getCurrentDayAndTimein();
     allCampaigns = await common.fetchAllCampaignList( day, currentTime, search_date); // fetch campaign
-    allCampaigns = allCampaigns && allCampaigns.length > 0 && allCampaigns.filter(el =>  campaign.campaignId === el.campaignId);
+    allCampaigns = allCampaigns && allCampaigns.length > 0 && allCampaigns.filter(el =>  campaign.campaign_id === el._id);
     console.log("allCampaigns ::: ", allCampaigns);
     if(allCampaigns && allCampaigns.length > 0){
-      console.log("allCampaigns ::: ", allCampaigns, allCampaigns[0]);
-      campaign = allCampaigns[0].campaign_contacts;
+      // console.log("allCampaigns ::: ", allCampaigns, allCampaigns[0]);
+      campaign.campaign_contacts = allCampaigns[0].campaign_contacts;
+      campaign.fb_user_id = allCampaigns[0].fb_user_id;
+      campaign.message_group_id = allCampaigns[0].message_group_id;
+      campaign.quick_message = allCampaigns[0].quick_message;
+      campaign.campaign_id = allCampaigns[0]._id;
+      campaign.time_delay = allCampaigns[0].time_delay;
     }
   }
   if(allCampaigns && allCampaigns.length === 0)
+  {
+    chrome.alarms.clear("Campaign_" + allCampaigns[0]._id);
+    await helper.removeDatafromStorage("Campaign_" + allCampaigns[0]._id)
     return;
-  // check from message queue 
-  const messageQueue = await helper.getDatafromStorage('messageQueue')
-  // console.log("messageQueue ::: ", messageQueue)
-  let anyDuplicateData = messageQueue && messageQueue.filter(el=>el.recieverFbId===campaign.campaign_contacts[0].friendFbId && el.campaignId===campaign.campaignId)
-  if(anyDuplicateData && anyDuplicateData.length === 0) { 
-    // compose message 
-    const message_payload = {
-      "fbUserId" : campaign.facebookUserId,
-      "friendFbId" : campaign.campaign_contacts[0].friendFbId,
-      "settingsType": settingsType.forCampaign,
-      "campaignId" : campaign.campaignId,
-      "groupId" : campaign.message_group_id,
-      "quick_message" : campaign.quick_message  ? campaign.quick_message.messengerText : null,
-      // "member_id" : campaign.campaign_contacts[0]._id
-    }
-    // check member status
-    const messageContent = await common.getMessageContent( message_payload )
-    if(messageContent.status){
-      let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + campaignExpTime); 
-      const exp_time = search_date + "T" + currentTime;
-      console.log("exp_time", exp_time)
-      // store in msqs
-      storeInMsqs( campaign.facebookUserId, campaign.campaign_contacts[0].friendFbId, campaign.campaign_contacts[0].friendName, messageContent.content, 7, exp_time, campaign.campaignId, campaign.campaign_contacts[0]._id, message_payload.groupId );
-    }
   }
-  // shift array
-  campaign.campaign_contacts.shift();
-  // store array in storage
-  await helper.saveDatainStorage('Campaign_' + campaign.campaignId, campaign);
+  campaignToMsqs(campaign);
+  await helper.saveDatainStorage('Campaign_' + campaign.campaign_id, campaign);
+  chrome.alarms.create("CampaignMin_" + campaign.campaign_id, { periodInMinutes : campaign.time_delay });
+}
+
+const campaignToMsqs = async(campaign) => {
+  console.log("**********************************************");
+  console.log("campaign ::: ", campaign);
+  // Check if campaign is active or not
+  const {day, currentTime} = helper.getCurrentDayAndTimein();
+    console.log("day ::: ",  day, currentTime);
+  const {userID} = await helper.getDatafromStorage("fbTokenAndId")
+  const campaignStatus = await common.checkCampaignStatus(userID, day, currentTime, campaign.campaign_id);
+  console.log("campaignStatus ::: ", campaignStatus.status); 
+  if(campaignStatus && campaignStatus.status ==="Active"){
+    if(campaign.campaign_contacts.length === 0){
+      chrome.alarms.clear("CampaignMin_" + campaign.campaign_id);
+      await helper.removeDatafromStorage("Campaign_" + campaign.campaign_id)
+      return;
+    }
+    // check from message queue 
+    const messageQueue = await helper.getDatafromStorage('messageQueue')
+    console.log("messageQueue ::: ", messageQueue)
+    let anyDuplicateData = messageQueue && messageQueue.filter(el=>el.recieverFbId===campaign.campaign_contacts[0].friendFbId && el.campaignId===campaign.campaign_id)
+    if(anyDuplicateData && anyDuplicateData.length === 0) { 
+      // compose message 
+      const message_payload = {
+        "fbUserId" : campaign.fb_user_id,
+        "friendFbId" : campaign.campaign_contacts[0].friendFbId,
+        "settingsType": settingsType.forCampaign,
+        "campaignId" : campaign.campaign_id,
+        "groupId" : campaign.message_group_id,
+        "quick_message" : campaign.quick_message  ? campaign.quick_message.messengerText : null,
+        // "member_id" : campaign.campaign_contacts[0]._id
+      }
+      // check member status
+      const messageContent = await common.getMessageContent( message_payload )
+      if(messageContent.status){
+        let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + campaignExpTime); 
+        const exp_time = search_date + "T" + currentTime;
+        console.log("exp_time", exp_time)
+        // store in msqs
+        storeInMsqs( campaign.fb_user_id, campaign.campaign_contacts[0].friendFbId, campaign.campaign_contacts[0].friendName, messageContent.content, 7, exp_time, campaign.campaignId, campaign.campaign_contacts[0]._id, message_payload.groupId );
+      }
+    }
+    // shift array
+    campaign.campaign_contacts.shift();
+    // store array in storage
+    await helper.saveDatainStorage('Campaign_' + campaign.campaign_id, campaign);
   }
   else{
-    chrome.alarm.clear("Campaign_" + campaign.campaign_id)
+    chrome.alarms.clear("Campaign_" + campaign.campaign_id);
+    chrome.alarms.clear("CampaignMin_" + campaign.campaign_id);
+    await helper.removeDatafromStorage("Campaign_" + campaign.campaign_id);
   }
 }
