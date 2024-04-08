@@ -721,11 +721,12 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                               break;
           
     case "sendMessage":
+      let campaign_send_date = helper.getCurrentDayAndTimein();
+      campaign_send_date = campaign_send_date.search_date
       let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + settingExpTime); 
       const exp_time = search_date + "T" + currentTime;
       console.log("exp_time", exp_time)
-      storeInMsqs( request.userId, request.recieverId, request.name, request.message, request.settingsType, exp_time )
-        // sendMessage(request.fbDtsg, request.userId, request.recieverId, request.name, request.message, request.settingsType);
+      storeInMsqs( request.userId, request.recieverId, request.name, request.message, request.settingsType, exp_time, campaign_send_date )
       break;
 
     case "sendMessageAcceptOrReject":
@@ -1449,74 +1450,6 @@ const getGenderCountryAndTiers = async (name) => {
     );
   }
 
-const sendMessage = async (dtsg, fbId, receiverId, name, message="good afternoon", settingsType, alt = false) => {
-  return new Promise(async (resolve, reject) => {
-    try {
-          if(message.trim() === "")
-            resolve(false);
-          else{
-            let Ids = `ids[${receiverId}]`;
-            let text_ids = `text_ids[${receiverId}]`;
-            // console.log("alt :: ", alt)
-            if (alt) {
-              var tids = `cid.c.${fbId}:${receiverId}`;
-            } else {
-              var tids = `cid.c.${receiverId}:${fbId}`;
-            }
-
-            let data = {
-              __user: fbId,
-              fb_dtsg: dtsg,
-              body: message,
-              send: "Send",
-              [text_ids]: name,
-              [Ids]: receiverId,
-              tids: tids,
-              waterfall_source: "message",
-              server_timestamps: true,
-            };
-
-            let a = await fetch(
-              "https://mbasic.facebook.com/messages/send/?icm=1&refid=12&ref=dbl",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/x-www-form-urlencoded",
-                  Accept: "text/html,application/json",
-                },
-                body: helper.serialize(data),
-              }
-            );
-
-            const response = await a.text();
-            if (!alt && response.includes("You cannot perform that action")) {
-              console.log("Executing alternate message sending");
-              resolve(false);
-              // asynchronously it will resolve the send message in alt way
-              sendMessage(dtsg, fbId, receiverId, name, message, settingsType, true);
-            } else  if(alt && response.includes("You cannot perform that action")) {
-              resolve(false)
-            }else if(response.includes("It looks like you were misusing this feature by going too fast. You’ve been temporarily blocked from using it.")){
-              resolve(false)
-            }
-            else{
-              console.log("Successfully resolved the alternate message sending technique");
-              resolve(true);
-            }
-            const fr_token = await helper.getDatafromStorage("fr_token");
-            await common.confirmSentMessage(fr_token, {
-              "fbUserId":fbId,
-              "friendFbId":receiverId,
-              "settingsType": settingsType
-            });
-          }
-    } catch (error) {
-      console.error("Send Message Error", error);
-      resolve(false);
-    }
-  });
-};
-
 const sendMessageAcceptOrReject= async() => {
   // console.log("orre oreewaaa.......................");
   fbDtsg(async(fbDtsg, userId)=>{
@@ -1622,13 +1555,7 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
     const message_payload = {
     "fbUserId" : userId,
     "friendFbId": sentFRLogForAccept[0].friendFbId,
-    "settingsType": settingsType.whenAcceptedByMember,
-    // "groupId" : settings && settings.send_message_when_someone_accept_new_friend_request_settings &&
-    //   settings.send_message_when_someone_accept_new_friend_request_settings.length &&
-    //   settings.send_message_when_someone_accept_new_friend_request_settings[0].message_group_id,
-    // "quick_message" : settings && settings.send_message_when_someone_accept_new_friend_request_settings &&
-    //   settings.send_message_when_someone_accept_new_friend_request_settings.length ?
-    //   settings.send_message_when_someone_accept_new_friend_request_settings[0].messengerText : null
+    "settingsType": settingsType.whenAcceptedByMember
     }
 
     const conversationStatus=await common.checkHasConversation(userId,sentFRLogForAccept[0].friendFbId)
@@ -1643,8 +1570,9 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
         let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + settingExpTime); 
         const exp_time = search_date + "T" + currentTime;
         console.log("exp_time", exp_time)
-        storeInMsqs( userId, sentFRLogForAccept[0].friendFbId, sentFRLogForAccept[0].friendName,  messageContent.content, settingsType.whenAcceptedByMember, exp_time );
-        // sendMessage(fbDtsg, userId, sentFRLogForAccept[0].friendFbId, sentFRLogForAccept[0].friendName,  messageContent.content, settingsType.whenAcceptedByMember );
+        let campaign_send_date = helper.getCurrentDayAndTimein();
+        campaign_send_date = campaign_send_date.search_date
+        storeInMsqs( userId, sentFRLogForAccept[0].friendFbId, sentFRLogForAccept[0].friendName,  messageContent.content, settingsType.whenAcceptedByMember, exp_time, campaign_send_date );
       }
     }
  
@@ -1667,21 +1595,16 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
       let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + settingExpTime); 
       const exp_time = search_date + "T" + currentTime;
       console.log("exp_time", exp_time)
-      storeInMsqs( userId, sentFRLogForReject[0].friendFbId, sentFRLogForReject[0].friendName, messageContent.content, settingsType.whenRejectedByMember, exp_time );
-      // sendMessage(fbDtsg, userId, sentFRLogForReject[0].friendFbId, sentFRLogForReject[0].friendName, messageContent.content, settingsType.whenRejectedByMember );
+      let campaign_send_date = helper.getCurrentDayAndTimein();
+      campaign_send_date = campaign_send_date.search_date
+      storeInMsqs( userId, sentFRLogForReject[0].friendFbId, sentFRLogForReject[0].friendName, messageContent.content, settingsType.whenRejectedByMember, exp_time, campaign_send_date );
     }
     sentFRLogForReject.shift();
   }else if(fetchIncomingLog && fetchIncomingLog.length > 0){
     const message_payload = {
       "fbUserId" : userId,      
       "friendFbId": fetchIncomingLog[0].friendFbId,
-      "settingsType": settingsType.whenRecievesRequest,
-      // "groupId" : settings && settings.send_message_when_someone_sends_me_friend_request_settings &&
-      //   settings.send_message_when_someone_sends_me_friend_request_settings.length > 0 &&
-      //   settings.send_message_when_someone_sends_me_friend_request_settings[0].message_group_id,
-      // "quick_message" : settings && settings.send_message_when_someone_sends_me_friend_request_settings &&
-      //   settings.send_message_when_someone_sends_me_friend_request_settings.length ?
-      //   settings.send_message_when_someone_sends_me_friend_request_settings[0].messengerText : null
+      "settingsType": settingsType.whenRecievesRequest
     }
     const messageContent = await common.getMessageContent( message_payload );
     // console.log("messageContent ::: ", messageContent);
@@ -1689,21 +1612,16 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
       let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + settingExpTime); 
       const exp_time = search_date + "T" + currentTime;
       console.log("exp_time", exp_time)
-      storeInMsqs( userId, fetchIncomingLog[0].friendFbId, fetchIncomingLog[0].friendName, messageContent.content, settingsType.whenRecievesRequest, exp_time );
-      // sendMessage(fbDtsg, userId, fetchIncomingLog[0].friendFbId, fetchIncomingLog[0].friendName, messageContent.content, settingsType.    whenRecievesRequest );
+      let campaign_send_date = helper.getCurrentDayAndTimein();
+      campaign_send_date = campaign_send_date.search_date
+      storeInMsqs( userId, fetchIncomingLog[0].friendFbId, fetchIncomingLog[0].friendName, messageContent.content, settingsType.whenRecievesRequest, exp_time, campaign_send_date );
     }
     fetchIncomingLog.shift();
   }else if(fetchIncomingFRLogForAccept && fetchIncomingFRLogForAccept.length > 0){
     const message_payload = {
       "fbUserId" : userId,
       "friendFbId": fetchIncomingFRLogForAccept[0].friendFbId,
-      "settingsType": settingsType.whenAcceptedByUser,
-      // "groupId" : settings && settings.send_message_when_accept_incoming_friend_request_settings > 0&&
-      //   settings.send_message_when_accept_incoming_friend_request_settings.length &&
-      //   settings.send_message_when_accept_incoming_friend_request_settings[0].message_group_id,
-      // "quick_message" : settings && settings.send_message_when_accept_incoming_friend_request_settings &&
-      //   settings.send_message_when_accept_incoming_friend_request_settings.length ?
-      //   settings.send_message_when_accept_incoming_friend_request_settings[0].messengerText : null
+      "settingsType": settingsType.whenAcceptedByUser
       }
 
       const conversationStatus=await common.checkHasConversation(userId,fetchIncomingFRLogForAccept[0].friendFbId)
@@ -1716,8 +1634,9 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
           let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + settingExpTime); 
           const exp_time = search_date + "T" + currentTime;
           console.log("exp_time", exp_time)
-          // sendMessage(fbDtsg, userId, fetchIncomingFRLogForAccept[0].friendFbId, fetchIncomingFRLogForAccept[0].friendName, messageContent.content, settingsType.whenAcceptedByUser );
-          storeInMsqs( userId, fetchIncomingFRLogForAccept[0].friendFbId, fetchIncomingFRLogForAccept[0].friendName, messageContent.content, settingsType.whenAcceptedByUser, exp_time );
+          let campaign_send_date = helper.getCurrentDayAndTimein();
+          campaign_send_date = campaign_send_date.search_date;
+          storeInMsqs( userId, fetchIncomingFRLogForAccept[0].friendFbId, fetchIncomingFRLogForAccept[0].friendName, messageContent.content, settingsType.whenAcceptedByUser, exp_time, campaign_send_date );
         }
       }
  
@@ -1739,9 +1658,10 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
     if(messageContent.status){
       let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + settingExpTime); 
       const exp_time = search_date + "T" + currentTime;
-      console.log("exp_time", exp_time)
-      // sendMessage(fbDtsg, userId, fetchIncomingFRLogForReject[0].friendFbId, fetchIncomingFRLogForReject[0].friendName, messageContent.content, settingsType.whenRejectedByUser );
-      storeInMsqs( userId, fetchIncomingFRLogForReject[0].friendFbId, fetchIncomingFRLogForReject[0].friendName, messageContent.content, settingsType.whenRejectedByUser, exp_time );
+      console.log("exp_time", exp_time);
+      let campaign_send_date = helper.getCurrentDayAndTimein();
+      campaign_send_date = campaign_send_date.search_date
+      storeInMsqs( userId, fetchIncomingFRLogForReject[0].friendFbId, fetchIncomingFRLogForReject[0].friendName, messageContent.content, settingsType.whenRejectedByUser, exp_time, campaign_send_date );
     }
     fetchIncomingFRLogForReject.shift();
   }
@@ -1999,12 +1919,6 @@ let sendMessageViaFacebook = async (dtsg,queueInfo,alt = false) => {
           }
           else{
             console.log("Successfully resolved the alternate message sending technique");
-            // const fr_token = await helper.getDatafromStorage("fr_token");
-            // await common.confirmSentMessage(fr_token, {
-            //   "fbUserId":queueInfo.frienderFbId,
-            //   "friendFbId":queueInfo.recieverFbId,
-            //   "settingsType": settingsType
-            // });
             return true
           }
         }
@@ -2036,8 +1950,8 @@ async function handleResponse(queueInfo, response) {
       "friendFbId":queueInfo.recieverFbId,
       "status" : response == true?"send" :"failed",
       "message" : queueInfo.message,
-      "messageGroupId" : queueInfo.groupId
-
+      "messageGroupId" : queueInfo.groupId,
+      "campaign_send_date" : queueInfo.campaign_send_date
     }
   
     // If its a Campaign : 
@@ -2081,9 +1995,7 @@ function removeFromQueue(callback) {
       }
   });
 }
-const storeInMsqs = async ( fbId, receiverId, name, message, settingsType, exp_time, campaignId = "", memberId="", groupId = "") => {
-  // let Ids = `ids[${receiverId}]`;
-  // let text_ids = `text_ids[${receiverId}]`;
+const storeInMsqs = async ( fbId, receiverId, name, message, settingsType, exp_time, campaign_send_date, campaignId = "", memberId="", groupId = "") => {
   let payload = {
     frienderFbId: fbId,
     message: message,
@@ -2092,10 +2004,8 @@ const storeInMsqs = async ( fbId, receiverId, name, message, settingsType, exp_t
     memberId : memberId,
     expiration_time : exp_time,
     groupId : groupId && groupId.length > 0 ? groupId : 'Quick Message',
+    campaign_send_date : campaign_send_date
   };
-  // let payload = {
-  //   msgPayload : data
-  // }
   payload = campaignId && campaignId.length > 0 ? {...payload, campaignId : campaignId} : {...payload, settingsType};
   console.log("payload ::: ", payload)
   // store above payload in msqs
@@ -2111,26 +2021,6 @@ const saveMessageSentStatus = async () => {
  * @returns Started fetch campaign lists and inserting to msqs
  */
 // const getCampaignList = async() =>  {
-//   // if(helper.isEmptyObj(helper.getDatafromStorage('fr_token')))
-//   //   return;
-//   console.log("lets start FETCHING CAMPAIGN")
-//   const campaignListFromStore = await helper.getAllKeysFromStorage('Campaign_');
-//   // console.log("campaignListFromStore ::: ", campaignListFromStore)
-//   if(campaignListFromStore.length > 0){
-//     for(let i = 0; i < campaignListFromStore.length; ++i){
-//       // console.log("campaignListFromStore :: ", campaignListFromStore[i])
-//       helper.removeDatafromStorage(campaignListFromStore[i])
-//     }
-//   }
-//   let alarms  = await chrome.alarms.getAll();
-//   alarms = alarms && alarms.filter(el => el.name.includes('Campaign_'))
-//   // console.log("alarms ::: ", alarms)
-//   if(alarms && alarms.length > 0){
-//     for(let i = 0; i < alarms.length; ++i){
-//       // console.log("alarms :: ", alarms[i])
-//       chrome.alarms.clear(alarms[i].name);
-//     }
-//   }
   
 //   // const { userID} = await helper.getDatafromStorage('fbTokenAndId'); 
 //   const {day, currentTime, search_date} = helper.getCurrentDayAndTimein(); // get Current time and day
@@ -2225,7 +2115,7 @@ const saveMessageSentStatus = async () => {
 
 
 const startCampaignScheduler = async () => {
-  console.log("logged in ??? ", helper.isEmptyObj(helper.getDatafromStorage('fr_token')));
+  console.log("logged in ??? ", helper.getDatafromStorage('fr_token'), helper.isEmptyObj(helper.getDatafromStorage('fr_token')));
   //check logged in or not
   if(!helper.isEmptyObj(helper.getDatafromStorage('fr_token')))
     return;
@@ -2388,7 +2278,7 @@ const campaignToMsqs = async(campaign) => {
   console.log("campaign ::: ", campaign);
   // Check if campaign is active or not
   const {day, currentTime} = helper.getCurrentDayAndTimein();
-    console.log("day ::: ",  day, currentTime);
+  console.log("day ::: ",  day, currentTime);
   const {userID} = await helper.getDatafromStorage("fbTokenAndId")
   const campaignStatus = await common.checkCampaignStatus(userID, day, currentTime, campaign.campaign_id);
   console.log("campaignStatus ::: ", campaignStatus.status); 
@@ -2419,8 +2309,10 @@ const campaignToMsqs = async(campaign) => {
         let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + campaignExpTime); 
         const exp_time = search_date + "T" + currentTime;
         console.log("exp_time", exp_time)
+        let campaign_send_date = helper.getCurrentDayAndTimein();
+        campaign_send_date = campaign_send_date.search_date
         // store in msqs
-        storeInMsqs( campaign.fb_user_id, campaign.campaign_contacts[0].friendFbId, campaign.campaign_contacts[0].friendName, messageContent.content, 7, exp_time, campaign.campaignId, campaign.campaign_contacts[0]._id, message_payload.groupId );
+        storeInMsqs( campaign.fb_user_id, campaign.campaign_contacts[0].friendFbId, campaign.campaign_contacts[0].friendName, messageContent.content, 7, exp_time, campaign_send_date, campaign.campaign_id, campaign.campaign_contacts[0]._id, message_payload.groupId );
       }
     }
     // shift array

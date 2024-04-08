@@ -289,7 +289,7 @@ const syncSendFriendRequestStatus = async (fbDtsg, userID, cursor = null) => {
     const cursorId = outgoingPendingRequestDefinition[outgoingPendingRequestDefinition.length - 1].cursor;
     //console.log(cursorId)
     await helper.sleep(helper.getRandomInteger(1000, 10000));
-    syncSendFriendRequestStatus(fbDtsg, userID, cursorId)
+    await syncSendFriendRequestStatus(fbDtsg, userID, cursorId)
   } else {
     // console.log("data got all going to compare", allOutgoingPendingFriendReqListFromDB)
     // comparePendingfFrReqList(userID, fbDtsg, allPendingFriendReqList, allOutgoingPendingFriendReqListFromDB)
