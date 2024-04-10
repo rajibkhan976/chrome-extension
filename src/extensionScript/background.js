@@ -1979,12 +1979,20 @@ const startCampaignScheduler = async () => {
     }
   }
   let alarms  = await chrome.alarms.getAll();
-  alarms = alarms && alarms.filter(el => el.name.includes('Campaign_'))
-  // console.log("alarms ::: ", alarms)
-  if(alarms && alarms.length > 0){
-    for(let i = 0; i < alarms.length; ++i){
-      // console.log("alarms :: ", alarms[i])
-      chrome.alarms.clear(alarms[i].name);
+  let alarms_campaign = alarms && alarms.filter(el => el.name.includes('Campaign_'))
+  // console.log("alarms_campaign ::: ", alarms_campaign)
+  if(alarms_campaign && alarms_campaign.length > 0){
+    for(let i = 0; i < alarms_campaign.length; ++i){
+      // console.log("alarms_campaign :: ", alarms_campaign[i])
+      chrome.alarms.clear(alarms_campaign[i].name);
+    }
+  }
+  let alarms_campaign_min = alarms && alarms.filter(el => el.name.includes('CampaignMin_'))
+  // console.log("alarms_campaign_min ::: ", alarms_campaign_min)
+  if(alarms_campaign_min && alarms_campaign_min.length > 0){
+    for(let i = 0; i < alarms_campaign_min.length; ++i){
+      // console.log("alarms_campaign_min :: ", alarms_campaign_min[i])
+      chrome.alarms.clear(alarms_campaign_min[i].name);
     }
   }
   //clear alarms
@@ -2052,7 +2060,7 @@ const startSchedulerOfSubCampaign = async (day, currentTime, campaign) => {
         upcomingDateAndTime = Date.now() + 60*1000;
       }
       else if(curr_hour < scheduled_hour ){
-        upcomingDateAndTime = Date.now() + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000;
+        upcomingDateAndTime = Date.now() + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000 + 60*1000;
       }
       else if(curr_hour > scheduled_end_hour){
         gapBetweenTwoDays = 7;
