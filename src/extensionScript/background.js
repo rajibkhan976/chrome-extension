@@ -32,10 +32,15 @@ chrome.runtime.onInstalled.addListener(async (res) => {
   
   reloadPortal();
 
-  fbDtsg((fbDtsg, userID) => {
-    chrome.storage.local.set({
-      fbTokenAndId: { fbDtsg: fbDtsg, userID: userID },
-    });
+  fbDtsg(async (fbDtsg, userID) => {
+    await helper.saveDatainStorage("fbTokenAndId", { fbDtsg: fbDtsg, userID: userID })
+    chrome.alarms.clear("scheduler")
+    chrome.alarms.create("scheduler", {periodInMinutes: schedulerIntvTime})
+    chrome.alarms.clear("pendingFR")
+    chrome.alarms.create("pendingFR", {periodInMinutes: pendingFRIntvTime})
+    chrome.alarms.clear("reFriending")
+    chrome.alarms.create("reFriending", {periodInMinutes: reFRIntvTime})
+    startCampaignScheduler();
   });
   if (res && res.reason === "install") {
     chrome.tabs.create({
@@ -43,17 +48,24 @@ chrome.runtime.onInstalled.addListener(async (res) => {
       active: true,
     });
   }
-  chrome.alarms.clear("scheduler")
-  chrome.alarms.create("scheduler", {periodInMinutes: schedulerIntvTime})
-  chrome.alarms.clear("pendingFR")
-  chrome.alarms.create("pendingFR", {periodInMinutes: pendingFRIntvTime})
-  chrome.alarms.clear("reFriending")
-  chrome.alarms.create("reFriending", {periodInMinutes: reFRIntvTime})
-  startCampaignScheduler();
-  // chrome.alarms.clear("campaignScheduler")
-  // chrome.alarms.create("campaignScheduler", {periodInMinutes: campaignIntvTime})
   return false;
 });
+
+chrome.windows.onCreated.addListener(function() {
+  chrome.storage.local.remove(['lastAutoSyncFriendListDate']);
+  chrome.storage.local.remove(['lastAutoSyncFriendListId']);
+
+  fbDtsg(async (fbDtsg, userID) => {
+    await helper.saveDatainStorage("fbTokenAndId", { fbDtsg: fbDtsg, userID: userID })
+    chrome.alarms.clear("scheduler")
+    chrome.alarms.create("scheduler", {periodInMinutes: schedulerIntvTime})
+    chrome.alarms.clear("pendingFR")
+    chrome.alarms.create("pendingFR", {periodInMinutes: pendingFRIntvTime})
+    chrome.alarms.clear("reFriending")
+    chrome.alarms.create("reFriending", {periodInMinutes: reFRIntvTime})
+    startCampaignScheduler();
+  });
+})
 
 chrome.action.onClicked.addListener(async function (activeInfo) {
   // console.log("activeInfo on clicked ::::: ", activeInfo)
@@ -2012,7 +2024,7 @@ const startSchedulerOfSubCampaign = async (day, currentTime, campaign) => {
   // console.log("campaign schedule ::: ", campaign.schedule);
   let upcomingDateAndTime = 0;
   campaign && campaign.schedule && campaign.schedule.forEach(async(elem, indx) => {
-    
+    // console.log("elem :::: ", elem);
     const curr_hour = currentTime.split(":")[0];
     const curr_minute = currentTime.split(":")[1];
     // const curr_sec = currentTime.split(":")[2];
@@ -2077,7 +2089,7 @@ const startSchedulerOfSubCampaign = async (day, currentTime, campaign) => {
       }
       else if(curr_hour > scheduled_end_hour){
         gapBetweenTwoDays = 7;
-        upcomingDateAndTime = Date.now() + gapBetweenTwoDays*24*60*60*1000 + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000 + 60*1000;
+        upcomingDateAndTime = Date.now() + gapBetweenTwoDays*24*60*60*1000 + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000 + 2*60*1000;
         // console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
       }
     }
@@ -2089,7 +2101,7 @@ const startSchedulerOfSubCampaign = async (day, currentTime, campaign) => {
     }
     // console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
     // console.log("Campaign to be added ::: ", campaign.campaign_id, campaign );
-    await helper.saveDatainStorage("Campaign_" + campaign.campaign_id, campaign);
+    helper.saveDatainStorage("Campaign_" + campaign.campaign_id, campaign);
     console.log("creating alarm at ::: ", new Date(upcomingDateAndTime));
     chrome.alarms.create("Campaign_" + campaign.campaign_id, { when : upcomingDateAndTime })
     // chrome.alarm.create("Campaign_" + campaign.campaign_id, { when : Date.now() + Math.random()*2*60*1000});
