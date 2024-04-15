@@ -8,6 +8,7 @@
     @include theme-aware('color', 'footer-text');
     font-size: $smallFontSize;
     font-weight: $fontWeight;
+    border-top: 1px solid #313037;
 
     > a {
         @include theme-aware('color', 'footer-text');

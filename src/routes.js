@@ -2,21 +2,25 @@ import { useEffect, useState } from "react";
 import { Routes, Route, useNavigate, Navigate, redirect } from "react-router-dom";
 
 import BodyExtension from "./components/dashboard/BodyExtension";
-import Home from "./components/home/home";
+// import Home from "./components/home/home";
 import FriendRequest from "./components/dashboard/FriendRequest";
-import Messages from "./components/dashboard/Messages";
-import Notes from "./components/dashboard/Notes";
-import Messenger from "./components/dashboard/Messenger";
+import SentFromGroups from "./components/settings/SentFromGroups"
+import SentFromPosts from "./components/settings/SentFromPosts"
+import SentFromFriendsFriend from "./components/settings/SentFromFriendsFriend"
+import SentFromSuggestedFriends from "./components/settings/SentFromSuggestedFriends"
+// import Messages from "./components/dashboard/Messages";
+// import Notes from "./components/dashboard/Notes";
+// import Messenger from "./components/dashboard/Messenger";
 
 const Approutes = (props) => {
   const [settingPage, setSettingPage] = useState("")
   const setPageForSentFR = (settings) => {
     switch(settings){
       case "setSettingsForGroup" : 
-                                    setSettingPage(settings);
-                                    break;
+        setSettingPage(settings);
+        break;
       default : 
-                break;
+        break;
     }
   }
 
@@ -40,6 +44,30 @@ const Approutes = (props) => {
             index
             element={
               <FriendRequest settingPage={settingPage} />
+            }
+          />
+          <Route
+            path={'group'}
+            element={
+              <SentFromGroups />
+            }
+          />
+          <Route
+            path={'posts'}
+            element={
+              <SentFromPosts />
+            }
+          />
+          <Route
+            path={'suggested-friends'}
+            element={
+              <SentFromSuggestedFriends />
+            }
+          />
+          <Route
+            path={'friends-friend'}
+            element={
+              <SentFromFriendsFriend />
             }
           />
           {/* <Route

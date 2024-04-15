@@ -4,11 +4,15 @@
 
 .extension-routes {
     @include theme-aware('background-color', 'header-color');
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    // border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-right: 1px solid rgba(255,255,255,0.1);
 
     // Only when other Nav links are disabled
     justify-content: flex-start;
-    padding-inline: 40px;
+    // padding-inline: 40px;
+    padding-block: 10px;
+    flex: 0 0 50px;
+
     // Only when other Nav links are disabled
 
     a {
@@ -28,21 +32,26 @@
             margin-right: 0;
         }
 
-        &:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            margin-bottom: -10px;
-            left: 0;
-            height: 3px;
-            width: 100%;
-            @include border-radius(10px 10px 0px 0px);
-            @include theme-aware('background-color', 'active-color');
-            transition: all ease-in-out 0.3s;
-            -webkit-transition: all ease-in-out 0.3s;
-            -moz-transition: all ease-in-out 0.3s;
-            -ms-transition: all ease-in-out 0.3s;
-            -o-transition: all ease-in-out 0.3s;
+        &.active {
+            background: linear-gradient(90deg, rgba(0, 148, 255, 0.20) 0%, rgba(0, 148, 255, 0.00) 100%);
+            &:after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                margin-bottom: -10px;
+                left: 0;
+                // height: 3px;
+                // width: 100%;
+                height: 100%;
+                width: 3px;
+                @include border-radius(0 10px 10px 0px);
+                @include theme-aware('background-color', 'active-color');
+                transition: all ease-in-out 0.3s;
+                -webkit-transition: all ease-in-out 0.3s;
+                -moz-transition: all ease-in-out 0.3s;
+                -ms-transition: all ease-in-out 0.3s;
+                -o-transition: all ease-in-out 0.3s;
+            }
         }
 
         &:hover {

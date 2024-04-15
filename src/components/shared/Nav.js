@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   HomeIcon,
   RequestIcon,
@@ -10,8 +10,10 @@ import {
 import "../../assets/scss/component/shared/_nav.scss"
 
 const Nav = () => {
+  const location = useLocation();
+
   return (
-    <nav className="extension-routes d-flex f-align-center f-justify-center">
+    <nav className="extension-routes d-flex f-justify-center">
       {/*
         --- Commented out this portion as its non-function as of Sprint-3 ---
       <NavLink to="/" data-tooltip="Home">
@@ -20,6 +22,12 @@ const Nav = () => {
       <NavLink 
         // to="/friend-request" 
         to="/"
+        className={() =>   [
+          '/',
+          '/suggested-friends', 
+          '/group',
+          '/posts',
+          '/friends-friend'].includes(location.pathname) ? "active" : ''}
         data-tooltip="Friend requests"
       >
         <RequestIcon />

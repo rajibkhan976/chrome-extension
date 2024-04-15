@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 // import requestFormSettings from "../../helper/friend-request-setting-form.json"
 import {
@@ -12,13 +12,15 @@ import Tooltip from "../shared/Tooltip";
 import GroupsRequestForm from "./requestForms/GroupsRequestForm";
 import FriendsFriendRequestForm from "./requestForms/FriendsFriendRequestForm";
 
-import { FriendsFriend, Groups } from "../shared/SVGAsset";
+import { FriendsFriend, Groups, Post, QueryIcon, Suggested } from "../shared/SVGAsset";
 import "../../assets/scss/pages/_friend-request.scss";
 import helper from "../../extensionScript/helper";
 import AutomationRunner from "../shared/AutomationRunner";
 import { getFrndReqSet, getKeyWords } from "../../service/FriendRequest";
 import { removeEle, syncFromApi, syncPayload } from "../../helper/syncData";
 import { fetchMesssageGroups } from "../../service/messages/MessagesServices";
+import InnherHeader from "../shared/InnerHeader";
+import { ExternalIcon } from "../../assets/icons/Icons";
 export const removeforBasic = [
   "_id",
   "user_id",
@@ -42,6 +44,7 @@ export const removeforBasic = [
 
 const FriendRequest = (props) => {
   const location = useLocation();
+  const navigate = useNavigate()
   const [requestActive, setRequestActive] = useState(null);
   const [formSetup, setFormSetup] = useState(requestFormSettings);
   // const [formSetup, setFormSetup] = useState(requestFormSettings);
@@ -52,24 +55,24 @@ const FriendRequest = (props) => {
   const [isLoding, setIsLoding] = useState(true);
   const [settingApiPayload, setSettingApiPayload] = useState(fr_Req_Payload);
 
-  const setActiveText = () => {
-    switch (requestActive) {
-      case null:
-        return "Choose one option to start sending out requests!";
-      //break;
+  // const setActiveText = () => {
+  //   switch (requestActive) {
+  //     case null:
+  //       return "Choose one option to start sending out requests!";
+  //     //break;
 
-      case "groups":
-        return "Facebook Groups";
-      //  break;
+  //     case "groups":
+  //       return "Facebook Groups";
+  //     //  break;
 
-      case "friendsfriend":
-        return "Facebook Friends Friend";
-      //break;
+  //     case "friendsfriend":
+  //       return "Facebook Friends Friend";
+  //     //break;
 
-      default:
-        break;
-    }
-  };
+  //     default:
+  //       break;
+  //   }
+  // };
 
   const chooseRequestMethod = async (type) => {
     setRequestActive(type);
@@ -272,46 +275,172 @@ const FriendRequest = (props) => {
       setIsLoding(false);
     }
   })
+  
+  const navigatePage = (el) => {
+    navigate(`/${el}`)
+  }
 
   return (
     <>
-      <header className="header-inner d-flex f-align-center f-justify-between">
-        {requestActive && requestActive != null && (
-          <button
-            className="btn btn-go-back"
-            onClick={() => setRequestActive(null)}
-          ></button>
-        )}
-        <p
-          style={{
-            marginRight: requestActive && requestActive != null ? "auto" : 0,
-            marginLeft: requestActive && requestActive != null ? "10px" : 0,
-          }}
-        >
-          {requestActive === 'groups' ? 'Facebook groups' : requestActive === 'friendsfriend' ? 'Friends Friends' : 'Sent Friend Request from'}
-        </p>
-
-        <Tooltip textContent={setActiveText()} direction="left" />
-      </header>
-
+      <InnherHeader
+        subHeaderText="Add friends to friend queue from"
+        activePageTextTooltip="Friender's Friend Queue lets you save Facebook profiles for future friend requests, making connecting easier and organized"
+      />
       <section className="section-main f-1">
         <div className="main-container">
-          {requestActive == null && (
+          {/* {requestActive == null && ( */}
             <ul className="fr-request-choice request-bordered">
-              <li onClick={() => chooseRequestMethod("groups")}>
-                <figure>
-                  <Groups />
-                </figure>
-                <div className="text-option-req">
-                  <h4>Facebook Groups</h4>
-                  <p>You can send friend request to facebook group members.</p>
-                </div>
+              {/* <li onClick={() => chooseRequestMethod("groups")}> */}
+              <li>
+                <button
+                  className="btn text-left w-100"
+                  onClick={()=>navigatePage("group")}
+                >
+                  <figure>
+                    <Groups />
+                  </figure>
+                  <div className="text-option-req d-flex w-100">
+                    <article className="f-1">
+                    <h4>Groups <a rel="noreferrer" href="https://www.facebook.com/groups/joins/" target="_blank"><ExternalIcon /></a></h4>
+                    <p>Getting friends from facebook group members.</p>
+                    </article>
+                    <aside className="tooltip-bawasir d-flex f-justify-end">
+                      <div className="tooltip-v3">
+                        <span className="trigger-tooltip-v3">How to use <QueryIcon /></span>
+                        <div className="tooltip-content-v3">
+                        <h6>To use this feature -</h6>
+
+                        <ul>
+                          <li>
+                            Open any facebook group.
+                          </li>
+                          <li>
+                            Then open <strong>People</strong> tab
+                          </li>
+                          <li>
+                            Then open the <strong>Extension</strong>
+                          </li>
+                        </ul>
+                        </div>
+                      </div>
+                    </aside>
+                  </div>
+                </button>
+              </li>
+              <li>
+                <button
+                  className="btn text-left w-100"
+                  onClick={()=>navigatePage("posts")}
+                >
+                  <figure>
+                    <Post />
+                  </figure>
+                  <div className="text-option-req d-flex w-100">
+                    <article className="f-1">
+                    <h4>Posts <a rel="noreferrer" href="https://www.facebook.com/feed" target="_blank"><ExternalIcon /></a></h4>
+                    <p>Getting friends from any facebook post that is visible to your facebook account.</p>
+                    </article>
+                    <aside className="tooltip-bawasir d-flex f-justify-end">
+                      <div className="tooltip-v3">
+                        <span className="trigger-tooltip-v3">How to use <QueryIcon /></span>
+                        <div className="tooltip-content-v3">
+                        <h6>To use this feature -</h6>
+
+                        <ul>
+                          <li>
+                            Go to a <strong></strong>post
+                          </li>
+                          <li>
+                          Click on the <strong>three dots</strong> of the post
+                          </li>
+                          <li>
+                          Then click on <strong>Run Friender</strong>
+                          </li>
+                        </ul>
+                        </div>
+                      </div>
+                    </aside>
+                  </div>
+                </button>
+              </li>
+              <li>
+                <button
+                  className="btn text-left w-100"
+                  onClick={()=>navigatePage("suggested-friends")}
+                >
+                  <figure>
+                    <Suggested />
+                  </figure>
+                  <div className="text-option-req d-flex w-100">
+                    <article className="f-1">
+                    <h4>Suggested friends <a rel="noreferrer" href="https://www.facebook.com/friends/suggestions" target="_blank"><ExternalIcon /></a></h4>
+                    <p>Getting friends from facebook friends suggestion list.</p>
+                    </article>
+                    <aside className="tooltip-bawasir d-flex f-justify-end">
+                      <div className="tooltip-v3">
+                        <span className="trigger-tooltip-v3">How to use <QueryIcon /></span>
+                        <div className="tooltip-content-v3">
+                        <h6>To use this feature -</h6>
+
+                        <ul>
+                          <li>
+                          Open facebook
+                          </li>
+                          <li>
+                            Than open facebook <strong>Suggested friends</strong> tab
+                          </li>
+                          <li>
+                            Then run <strong>Friender</strong>
+                          </li>
+                        </ul>
+                        </div>
+                      </div>
+                    </aside>
+                  </div>
+                </button>
+              </li>
+              <li>
+                <button
+                  className="btn text-left w-100"
+                  onClick={()=>navigatePage("friends-friend")}
+                >
+                  <figure>
+                    <FriendsFriend />
+                  </figure>
+                  <div className="text-option-req d-flex w-100">
+                    <article className="f-1">
+                    <h4>Friends friend <a rel="noreferrer"  href="https://www.facebook.com/friends/list" target="_blank"><ExternalIcon /></a></h4>
+                    <p>Getting friends to your facebook friends friend list.</p>
+                    </article>
+                    <aside className="tooltip-bawasir d-flex f-justify-end">
+                      <div className="tooltip-v3">
+                        <span className="trigger-tooltip-v3">How to use <QueryIcon /></span>
+                        <div className="tooltip-content-v3">
+                        <h6>To use this feature -</h6>
+
+                        <ul>
+                          <li>
+                            Open any facebook group.
+                          </li>
+                          <li>
+                            Then open <strong>People</strong> tab
+                          </li>
+                          <li>
+                            Then open the <strong>Extension</strong>
+                          </li>
+                        </ul>
+                        </div>
+                      </div>
+                    </aside>
+                  </div>
+                </button>
               </li>
               {/* <li onClick={() => chooseRequestMethod("friendsfriend")}>
                 <figure>
                   <FriendsFriend />
                 </figure>
-                <div className="text-option-req">
+                <div className="text-option-req d-flex w-100">
+                <article className="f-1">
                   <h4>Facebook Friends Friend</h4>
                   <p>
                     You can send friend request to your facebook Friends Friend
@@ -320,9 +449,9 @@ const FriendRequest = (props) => {
                 </div>
               </li> */}
             </ul>
-          )}
+          {/* )} */}
 
-          {!runningScript && (
+          {/* {!runningScript && (
             <>
               {requestActive === "groups" && (
                 <GroupsRequestForm
@@ -352,7 +481,7 @@ const FriendRequest = (props) => {
               setrunningScript={setrunningScript}
               setRequestActive={setRequestActive}
             />
-          )}
+          )} */}
         </div>
       </section>
     </>

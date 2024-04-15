@@ -2,16 +2,23 @@
 
 .main-content {
     @include theme-aware('background-color', 'body-color');
+    border-top: 1px solid #313037;
     overflow: hidden;
     height: calc(100% - 86px);
 
     .fr-view-section {
+        overflow: hidden;
         .main-container {
             .close-modal {
                 path {
                     fill: #fff;
                 }
             }
+        }
+
+        .section-main {
+            display: flex;
+            flex-direction: column;
         }
     }
 }

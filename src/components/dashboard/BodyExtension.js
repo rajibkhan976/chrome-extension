@@ -29,7 +29,7 @@ const BodyExtension = (props) => {
   }, []);
 
   return (
-    <div className="main-content d-flex d-flex-column f-1">
+    <div className="main-content d-flex f-1"> {/** d-flex-column */}
       <Nav />
       <div className="fr-view-section f-1 d-flex d-flex-column">
         <Outlet />

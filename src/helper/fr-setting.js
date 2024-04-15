@@ -1,4 +1,5 @@
 //import { getKeyWords } from "../service/FriendRequest";
+import { isAction } from "@reduxjs/toolkit";
 import { country_list, demo_list, tier_list } from "./helper";
 
 // export const keywordObj = () => {
@@ -15,6 +16,1003 @@ import { country_list, demo_list, tier_list } from "./helper";
 // };
 
 //::::::Never Delete any comment from this file:::::::
+
+// FOR GROUPS REQUEST SETTINGS
+export const requestGroupsFormSettings = {
+  label: "Settings",
+  uniqueId: "generalSettings",
+  name: "settings",
+  method: null,
+  id: "generalSettings",
+  action: null,
+  autocomplete: "off",
+  fields: [
+    {
+      label: "Look up for given",
+      headerCheckbox: false,
+      recursive: true,
+      name: "given_reactions",
+      isActive: false,
+      valid: true,
+      disabled: true,
+      fieldOptions: [
+        {
+          type: "checkbox",
+          isLabeled: false,
+          valid: true,
+          name: "given_reaction_fields",
+          value: "",
+          options: [
+            {
+              text: "Reaction",
+              isActive: false,
+            },
+            {
+              text: "Comment",
+              isActive: false,
+            },
+          ],
+        },
+      ]
+    },
+
+    {
+      label: "Look up for mutual friends?",
+      headerCheckbox: true,
+      recursive: true,
+      name: "look_up_mutual_friend",
+      isActive: false,
+      valid: true,
+      disabled: true,
+      fieldOptions: [
+        {
+          type: "customSelect",
+          isLabeled: false,
+          valid: true,
+          isHalfWidth: true,
+          name: "mutual_friend_condition",
+          value: "=<",
+          options: [
+            {
+              selected: true,
+              label: "=<",
+              value: "less and equal",
+            },
+            {
+              selected: false,
+              label: "=>",
+              value: "greater and equal",
+            },
+          ],
+        },
+
+        {
+          type: "stepInput",
+          name: "request_limit",
+          isLabeled: false,
+          isHalfWidth: true,  
+          valid: true,
+          // inLabel: "Number of request",
+          value: 0,
+        },
+      ]
+    },
+
+    {
+      label: "Gender filter",
+      headerCheckbox: true,
+      recursive: true,
+      name: "gender_filter",
+      isActive: false,
+      valid: true,
+      fieldOptions: [
+        {
+          type: "customSelect",
+          isLabeled: false,
+          valid: true,
+          name: "gender_filter_value",
+          value: "male",
+          options: [
+            {
+              selected: true,
+              label: "Male",
+              value: "male",
+            },
+            {
+              selected: false,
+              label: "Female",
+              value: "female",
+            },
+            {
+              selected: false,
+              label: "Others",
+              value: "others",
+            },
+          ],
+        },
+      ],
+    },
+
+    {
+      label: "Country Filter",
+      headerCheckbox: true,
+      isActive: false,
+      recursive: false,
+      valid: true,
+      name: "country_filter_enabled",
+      fieldOptions: [
+        {
+          type: "radio",
+          isLabeled: false,
+          valid: true,
+          name: "country_filter",
+          value: "Tier Level",
+          options: [
+            {
+              text: "Tier Level",
+            },
+            {
+              text: "Country Level",
+            },
+          ],
+        },
+        {
+          type: "customSelect",
+          isLabeled: false,
+          valid: true,
+          name: "tier_filter_value",
+          value: "Tier1",
+          //sggArray: tier_list,
+          //valueArr: [],
+          options: [
+            {
+              selected: true,
+              label: "Tier 1",
+              value: "Tier1",
+            },
+            {
+              selected: false,
+              label: "Tier 2",
+              value: "Tier2",
+            },
+            {
+              selected: false,
+              label: "Tier 3",
+              value: "Tier3",
+            },
+          ],
+
+        },
+        {
+          type: "fillinputCF",
+          isLabeled: true,
+          inLabel: "Select Country",
+          sggArray: country_list,
+          valid: true,
+          name: "country_filter_value",
+          valueArr: [],
+          value: "",
+        },
+      ],
+    },
+
+    {
+      label: "Skip Admin",
+      headerCheckbox: true,
+      name: "skip_admin",
+      valid: true,
+      isActive: false,
+      recursive: false,
+      fieldOptions: [],
+    },
+
+    {
+      label: "Keywords",
+      headerCheckbox: true,
+      name: "keyword",
+      recursive: false,
+      valid: true,
+      isActive: false,
+      fieldOptions: [
+        {
+          type: "selectInput",
+          isLabeled: true,
+          valid: true,
+          name: "selected_keywords",
+          inLabel: "Title",
+          value: "",
+          valueArr: [],
+          options: [],
+        },
+        {
+          type: "fillinput",
+          color: "#005911",
+          valid: true,
+          isLabeled: true,
+          inLabel: "Keywords",
+          name: "selected_keywords",
+          sggArray: [],
+          valueArr: [],
+          value: "",
+        },
+      ],
+    },
+
+    {
+      label: "Negative Keywords",
+      headerCheckbox: true,
+      name: "negative_keyword",
+      recursive: false,
+      isActive: false,
+      valid: true,
+      fieldOptions: [
+        {
+          type: "selectInput",
+          isLabeled: true,
+          valid: true,
+          inLabel: "Title",
+          name: "selected_negative_keywords",
+          fieldCount: 1,
+          sggArray: [],
+          valueArr: [],
+          value: "",
+          options: [],
+        },
+        {
+          type: "fillinput",
+          color: "#92000D",
+          isLabeled: true,
+          valid: true,
+          inLabel: "Keywords",
+          sggArray: demo_list,
+          fieldCount: 2,
+          name: "selected_negative_keywords",
+          valueArr: [],
+          value: "",
+        },
+      ],
+    },
+
+    //send_message -> true / false
+    // message_group_id -> objectId
+    {
+      label: "Send message when friend request is sent",
+      headerCheckbox: true,
+      name: "send_message",
+      recursive: true,
+      isActive: false,
+      valid: true,
+      fieldOptions: [
+        {
+          type: "customSelect",
+          isLabeled: false,
+          valid: true,
+          name: "message_group_id",
+          value: "Select message",
+          options: [
+            {
+              selected: true,
+              label: "message 1",
+              value: "message_1",
+            },
+            {
+              selected: false,
+              label: "message 2",
+              value: "message_2",
+            },
+            {
+              selected: false,
+              label: "message 3",
+              value: "message_3",
+            },
+          ],
+        },
+      ],
+    },
+
+    {
+      label: "Send message when friend request is accepted",
+      headerCheckbox: true,
+      name: "send_message_accepted",
+      recursive: true,
+      isActive: false,
+      valid: true,
+      fieldOptions: [
+        {
+          type: "customSelect",
+          isLabeled: false,
+          valid: true,
+          name: "message_group_id_accepted",
+          value: "Select message",
+          options: [
+            {
+              selected: true,
+              label: "message 1",
+              value: "message_1",
+            },
+            {
+              selected: false,
+              label: "message 2",
+              value: "message_2",
+            },
+            {
+              selected: false,
+              label: "message 3",
+              value: "message_3",
+            }
+          ]
+        }
+      ]
+    }
+
+  ],
+}
+
+// FOR POSTS REQUEST SETTINGS..
+export const requestPostsSettings = {
+  label: "Settings",
+  uniqueId: "generalSettings",
+  name: "settings",
+  method: null,
+  id: "generalSettings",
+  action: null,
+  autocomplete: "off",
+  fields: [
+    {
+      label: "Look up for given",
+      headerCheckbox: false,
+      recursive: true,
+      name: "given_reactions",
+      isActive: false,
+      valid: true,
+      fieldOptions: [
+        {
+          type: "checkbox",
+          isLabeled: false,
+          valid: true,
+          name: "given_reaction_fields",
+          value: "",
+          options: [
+            {
+              text: "Reaction",
+              isActive: false,
+            },
+            {
+              text: "Comment",
+              isActive: false,
+            },
+          ],
+        },
+      ]
+    },
+
+    {
+      label: "Look up for mutual friends?",
+      headerCheckbox: true,
+      recursive: true,
+      name: "look_up_mutual_friend",
+      isActive: false,
+      valid: true,
+      fieldOptions: [
+        {
+          type: "customSelect",
+          isLabeled: false,
+          valid: true,
+          isHalfWidth: true,
+          name: "mutual_friend_condition",
+          value: "=<",
+          options: [
+            {
+              selected: true,
+              label: "=<",
+              value: "less and equal",
+            },
+            {
+              selected: false,
+              label: "=>",
+              value: "greater and equal",
+            },
+          ],
+        },
+
+        {
+          type: "stepInput",
+          name: "request_limit",
+          isLabeled: false,
+          isHalfWidth: true,  
+          valid: true,
+          // inLabel: "Number of request",
+          value: 0,
+        },
+      ]
+    },
+
+    {
+      label: "Gender filter",
+      headerCheckbox: true,
+      recursive: true,
+      name: "gender_filter",
+      isActive: false,
+      valid: true,
+      fieldOptions: [
+        {
+          type: "customSelect",
+          isLabeled: false,
+          valid: true,
+          name: "gender_filter_value",
+          value: "male",
+          options: [
+            {
+              selected: true,
+              label: "Male",
+              value: "male",
+            },
+            {
+              selected: false,
+              label: "Female",
+              value: "female",
+            },
+            {
+              selected: false,
+              label: "Others",
+              value: "others",
+            },
+          ],
+        },
+      ],
+    },
+
+    {
+      label: "Country Filter",
+      headerCheckbox: true,
+      isActive: false,
+      recursive: false,
+      valid: true,
+      name: "country_filter_enabled",
+      fieldOptions: [
+        {
+          type: "radio",
+          isLabeled: false,
+          valid: true,
+          name: "country_filter",
+          value: "Tier Level",
+          options: [
+            {
+              text: "Tier Level",
+            },
+            {
+              text: "Country Level",
+            },
+          ],
+        },
+        {
+          type: "customSelect",
+          isLabeled: false,
+          valid: true,
+          name: "tier_filter_value",
+          value: "Tier1",
+          //sggArray: tier_list,
+          //valueArr: [],
+          options: [
+            {
+              selected: true,
+              label: "Tier 1",
+              value: "Tier1",
+            },
+            {
+              selected: false,
+              label: "Tier 2",
+              value: "Tier2",
+            },
+            {
+              selected: false,
+              label: "Tier 3",
+              value: "Tier3",
+            },
+          ],
+
+        },
+        {
+          type: "fillinputCF",
+          isLabeled: true,
+          inLabel: "Select Country",
+          sggArray: country_list,
+          valid: true,
+          name: "country_filter_value",
+          valueArr: [],
+          value: "",
+        },
+      ],
+    },
+
+    {
+      label: "Skip Admin",
+      headerCheckbox: true,
+      name: "skip_admin",
+      valid: true,
+      isActive: false,
+      recursive: false,
+      fieldOptions: [],
+      disabled: true,
+    },
+
+    {
+      label: "Keywords",
+      headerCheckbox: true,
+      name: "keyword",
+      recursive: false,
+      valid: true,
+      isActive: false,
+      disabled: true,
+      fieldOptions: [
+        {
+          type: "selectInput",
+          isLabeled: true,
+          valid: true,
+          name: "selected_keywords",
+          inLabel: "Title",
+          value: "",
+          valueArr: [],
+          options: [],
+        },
+        {
+          type: "fillinput",
+          color: "#005911",
+          valid: true,
+          isLabeled: true,
+          inLabel: "Keywords",
+          name: "selected_keywords",
+          sggArray: [],
+          valueArr: [],
+          value: "",
+        },
+      ],
+    },
+
+    {
+      label: "Negative Keywords",
+      headerCheckbox: true,
+      name: "negative_keyword",
+      recursive: false,
+      isActive: false,
+      valid: true,
+      disabled: true,
+      fieldOptions: [
+        {
+          type: "selectInput",
+          isLabeled: true,
+          valid: true,
+          inLabel: "Title",
+          name: "selected_negative_keywords",
+          fieldCount: 1,
+          sggArray: [],
+          valueArr: [],
+          value: "",
+          options: [],
+        },
+        {
+          type: "fillinput",
+          color: "#92000D",
+          isLabeled: true,
+          valid: true,
+          inLabel: "Keywords",
+          sggArray: demo_list,
+          fieldCount: 2,
+          name: "selected_negative_keywords",
+          valueArr: [],
+          value: "",
+        },
+      ],
+    },
+
+    //send_message -> true / false
+    // message_group_id -> objectId
+    {
+      label: "Send message when friend request is sent",
+      headerCheckbox: true,
+      name: "send_message",
+      recursive: true,
+      isActive: false,
+      valid: true,
+      fieldOptions: [
+        {
+          type: "customSelect",
+          isLabeled: false,
+          valid: true,
+          name: "message_group_id",
+          value: "Select message",
+          options: [
+            {
+              selected: true,
+              label: "message 1",
+              value: "message_1",
+            },
+            {
+              selected: false,
+              label: "message 2",
+              value: "message_2",
+            },
+            {
+              selected: false,
+              label: "message 3",
+              value: "message_3",
+            },
+          ],
+        },
+      ],
+    },
+
+    {
+      label: "Send message when friend request is accepted",
+      headerCheckbox: true,
+      name: "send_message_accepted",
+      recursive: true,
+      isActive: false,
+      valid: true,
+      fieldOptions: [
+        {
+          type: "customSelect",
+          isLabeled: false,
+          valid: true,
+          name: "message_group_id_accepted",
+          value: "Select message",
+          options: [
+            {
+              selected: true,
+              label: "message 1",
+              value: "message_1",
+            },
+            {
+              selected: false,
+              label: "message 2",
+              value: "message_2",
+            },
+            {
+              selected: false,
+              label: "message 3",
+              value: "message_3",
+            }
+          ]
+        }
+      ]
+    }
+
+  ],
+}
+
+// FOR SUGGESTED FRIENDS AND FRIENDS OF FRIENDS SETTINGS..
+export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
+  label: "Settings",
+  uniqueId: "generalSettings",
+  name: "settings",
+  method: null,
+  id: "generalSettings",
+  action: null,
+  autocomplete: "off",
+  fields: [
+    {
+      label: "Look up for given",
+      headerCheckbox: false,
+      recursive: true,
+      name: "given_reactions",
+      isActive: false,
+      valid: true,
+      disabled: true,
+      fieldOptions: [
+        {
+          type: "checkbox",
+          isLabeled: false,
+          valid: true,
+          name: "given_reaction_fields",
+          value: "",
+          options: [
+            {
+              text: "Reaction",
+              isActive: false,
+            },
+            {
+              text: "Comment",
+              isActive: false,
+            },
+          ],
+        },
+      ]
+    },
+
+    {
+      label: "Look up for mutual friends?",
+      headerCheckbox: true,
+      recursive: true,
+      name: "look_up_mutual_friend",
+      isActive: false,
+      valid: true,
+      fieldOptions: [
+        {
+          type: "customSelect",
+          isLabeled: false,
+          valid: true,
+          isHalfWidth: true,
+          name: "mutual_friend_condition",
+          value: "=<",
+          options: [
+            {
+              selected: true,
+              label: "=<",
+              value: "less and equal",
+            },
+            {
+              selected: false,
+              label: "=>",
+              value: "greater and equal",
+            },
+          ],
+        },
+
+        {
+          type: "stepInput",
+          name: "request_limit",
+          isLabeled: false,
+          isHalfWidth: true,  
+          valid: true,
+          // inLabel: "Number of request",
+          value: 0,
+        },
+      ]
+    },
+
+    {
+      label: "Gender filter",
+      headerCheckbox: true,
+      recursive: true,
+      name: "gender_filter",
+      isActive: false,
+      valid: true,
+      fieldOptions: [
+        {
+          type: "customSelect",
+          isLabeled: false,
+          valid: true,
+          name: "gender_filter_value",
+          value: "male",
+          options: [
+            {
+              selected: true,
+              label: "Male",
+              value: "male",
+            },
+            {
+              selected: false,
+              label: "Female",
+              value: "female",
+            },
+            {
+              selected: false,
+              label: "Others",
+              value: "others",
+            },
+          ],
+        },
+      ],
+    },
+
+    {
+      label: "Country Filter",
+      headerCheckbox: true,
+      isActive: false,
+      recursive: false,
+      valid: true,
+      name: "country_filter_enabled",
+      fieldOptions: [
+        {
+          type: "radio",
+          isLabeled: false,
+          valid: true,
+          name: "country_filter",
+          value: "Tier Level",
+          options: [
+            {
+              text: "Tier Level",
+            },
+            {
+              text: "Country Level",
+            },
+          ],
+        },
+        {
+          type: "customSelect",
+          isLabeled: false,
+          valid: true,
+          name: "tier_filter_value",
+          value: "Tier1",
+          //sggArray: tier_list,
+          //valueArr: [],
+          options: [
+            {
+              selected: true,
+              label: "Tier 1",
+              value: "Tier1",
+            },
+            {
+              selected: false,
+              label: "Tier 2",
+              value: "Tier2",
+            },
+            {
+              selected: false,
+              label: "Tier 3",
+              value: "Tier3",
+            },
+          ],
+
+        },
+        {
+          type: "fillinputCF",
+          isLabeled: true,
+          inLabel: "Select Country",
+          sggArray: country_list,
+          valid: true,
+          name: "country_filter_value",
+          valueArr: [],
+          value: "",
+        },
+      ],
+    },
+
+    {
+      label: "Skip Admin",
+      headerCheckbox: true,
+      name: "skip_admin",
+      valid: true,
+      isActive: false,
+      recursive: false,
+      fieldOptions: [],
+      disabled: true,
+    },
+
+    {
+      label: "Keywords",
+      headerCheckbox: true,
+      name: "keyword",
+      recursive: false,
+      valid: true,
+      isActive: false,
+      disabled: true,
+      fieldOptions: [
+        {
+          type: "selectInput",
+          isLabeled: true,
+          valid: true,
+          name: "selected_keywords",
+          inLabel: "Title",
+          value: "",
+          valueArr: [],
+          options: [],
+        },
+        {
+          type: "fillinput",
+          color: "#005911",
+          valid: true,
+          isLabeled: true,
+          inLabel: "Keywords",
+          name: "selected_keywords",
+          sggArray: [],
+          valueArr: [],
+          value: "",
+        },
+      ],
+    },
+
+    {
+      label: "Negative Keywords",
+      headerCheckbox: true,
+      name: "negative_keyword",
+      recursive: false,
+      isActive: false,
+      valid: true,
+      disabled: true,
+      fieldOptions: [
+        {
+          type: "selectInput",
+          isLabeled: true,
+          valid: true,
+          inLabel: "Title",
+          name: "selected_negative_keywords",
+          fieldCount: 1,
+          sggArray: [],
+          valueArr: [],
+          value: "",
+          options: [],
+        },
+        {
+          type: "fillinput",
+          color: "#92000D",
+          isLabeled: true,
+          valid: true,
+          inLabel: "Keywords",
+          sggArray: demo_list,
+          fieldCount: 2,
+          name: "selected_negative_keywords",
+          valueArr: [],
+          value: "",
+        },
+      ],
+    },
+
+    //send_message -> true / false
+    // message_group_id -> objectId
+    {
+      label: "Send message when friend request is sent",
+      headerCheckbox: true,
+      name: "send_message",
+      recursive: true,
+      isActive: false,
+      valid: true,
+      fieldOptions: [
+        {
+          type: "customSelect",
+          isLabeled: false,
+          valid: true,
+          name: "message_group_id",
+          value: "Select message",
+          options: [
+            {
+              selected: true,
+              label: "message 1",
+              value: "message_1",
+            },
+            {
+              selected: false,
+              label: "message 2",
+              value: "message_2",
+            },
+            {
+              selected: false,
+              label: "message 3",
+              value: "message_3",
+            },
+          ],
+        },
+      ],
+    },
+
+    {
+      label: "Send message when friend request is accepted",
+      headerCheckbox: true,
+      name: "send_message_accepted",
+      recursive: true,
+      isActive: false,
+      valid: true,
+      fieldOptions: [
+        {
+          type: "customSelect",
+          isLabeled: false,
+          valid: true,
+          name: "message_group_id_accepted",
+          value: "Select message",
+          options: [
+            {
+              selected: true,
+              label: "message 1",
+              value: "message_1",
+            },
+            {
+              selected: false,
+              label: "message 2",
+              value: "message_2",
+            },
+            {
+              selected: false,
+              label: "message 3",
+              value: "message_3",
+            }
+          ]
+        }
+      ]
+    }
+
+  ],
+}
+
 
 export const requestFormSettings = {
   label: "Settings",
@@ -385,6 +1383,7 @@ export const requestFormSettings = {
     },
   ],
 };
+
 
 export const requestFormAdvncSettings = {
   label: "Advance Settings",

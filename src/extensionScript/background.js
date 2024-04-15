@@ -633,15 +633,15 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       break;
 
     case "checkTabUrl":
-      chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-        if (tabs[0].url.includes("groups") && (tabs[0].url.includes("members") || tabs[0].url.includes("people"))) {
+      // chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
+      //   if (tabs[0].url.includes("groups") && (tabs[0].url.includes("members") || tabs[0].url.includes("people"))) {
           // console.log("url ::: ", tabs[0].url);
           chrome.alarms.create("setSettingsForGroup", { when: Date.now() })
-        }
-        else{
-          chrome.tabs.create({ url: process.env.REACT_APP_APP_URL });
-        }
-      })
+        // }
+        // else{
+        //   chrome.tabs.create({ url: process.env.REACT_APP_APP_URL });
+        // }
+      // })
       break;
 
     case "reSendFriendRequestInGroup":

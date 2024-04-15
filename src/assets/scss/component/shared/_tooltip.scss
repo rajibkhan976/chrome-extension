@@ -6,21 +6,24 @@
     vertical-align: middle;
 
     .fr-tooltip-content {
-        @include border-radius(10px);
-        padding: 14px 18px;
+        // @include border-radius(10px);
+        @include border-radius(2px);
+        // padding: 14px 18px;
+        padding: 8px;
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
         position: absolute;
         font-size: 12px;
         line-height: 150%;
-        text-align: center;
+        // text-align: center;
         z-index: 99;
         margin-inline: auto;
         //white-space: nowrap;
         white-space: pre-wrap;
-        max-width: 197px;
-        min-width: 150px;
+        // max-width: 197px;
+        // min-width: 150px;
+        width: 243px;
         -webkit-filter: drop-shadow(0px 2px 20px rgba(0, 0, 0, 0.2));
                 filter: drop-shadow(0px 2px 20px rgba(0, 0, 0, 0.2));
         transition: all cubic-bezier(0.87, 0.13, 0.25, 1) 0.3s;
@@ -51,7 +54,8 @@
                 width: 32px;
                 height: 32px;
                 @include theme-aware('background-color','tooltip-bg');
-                @include border-radius(10px);
+                // @include border-radius(10px);
+                @include border-radius(3px);
             }
         }
     }
@@ -59,11 +63,13 @@
     &.fr-tooltip-bottom {
         .fr-tooltip-content {
             top: 100%;
-            margin-top: 17px;
+            // margin-top: 17px;
+            margin-top: 12px;
 
             &::after {
                 bottom: 100%;
-                margin-bottom: -30px;
+                // margin-bottom: -30px;
+                margin-bottom: -44px;
                 z-index: -1;
             }
         }
@@ -93,7 +99,7 @@
             -o-transform: translate(-50%);
 
             &::after {
-                left: 46%;
+                left: 48%;
                 transform: translateX(-50%);
                 -webkit-transform: translateX(-50%);
                 -moz-transform: translateX(-50%);

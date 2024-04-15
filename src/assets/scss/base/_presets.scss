@@ -40,13 +40,26 @@ html:focus-within {
   scroll-behavior: smooth;
 }
 
+html {
+  // width: 960px;
+  width: 799px;
+  height: 600px;
+  overflow: hidden;
+}
+
 html,
 body {
   background-color: $themeBlack1;
 }
 
+#root {
+  height: 100%;
+  width: 100%;
+}
+
 body {
-  height: 100vh;
+  // height: 100vh;
+  height: 100%;
   text-rendering: optimizeSpeed;
   line-height: 1;
   overflow: hidden;
@@ -157,8 +170,10 @@ button {
 
 .fr-main {
   z-index: auto;
-  width: 400px;
-  height: 600px;
+  // width: 400px;
+  width: 100%;
+  // height: 600px;
+  height: 100%;
   overflow: hidden;
 
   &.outsideFb {
@@ -222,7 +237,14 @@ button {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
   p {
-    font-weight: $headingFontWeight;
+    // font-weight: $headingFontWeight;
+    font-weight: $mediumFontWeight;
+    margin-inline-end: auto;
+    line-height: 18px;
+
+    .fr-tooltip {
+      margin-inline-start: 8px;
+    }
   }
 
   .btn-go-back {
@@ -236,6 +258,7 @@ button {
     -ms-transform: scaleX(-1);
     -o-transform: scaleX(-1);
     background-position: 5px -86px;
+    margin-inline-end: 10px;
 
     &:hover {
       background-position: 5px 2px;
