@@ -922,19 +922,21 @@ chrome.alarms.onAlarm.addListener(async(alarm) => {
       case "Campaign" : 
             console.log("-----------------Campaign Scheduler------------------", alarm, alarm.name)
             const campaignId = alarm && alarm.name && alarm.name.split('_')[1];
+            const indx = alarm && alarm.name && alarm.name.split('_')[2];
             console.log("Campaign Id ::: " , campaignId)
             const nextCampaign = await helper.getDatafromStorage('Campaign_'+campaignId);
             console.log("next campaign :::: ", nextCampaign)
-            satrtHourlyScheduler(nextCampaign);
+            satrtHourlyScheduler(nextCampaign, indx);
           break;
         
       case "CampaignMin" : 
             console.log("-----------------Campaign Min Scheduler------------------", alarm, alarm.name)
             const campaignIdd = alarm && alarm.name && alarm.name.split('_')[1];
+            const indxx = alarm && alarm.name && alarm.name.split('_')[2];
             console.log("Campaign Id ::: " , campaignIdd)
             const next_campaign = await helper.getDatafromStorage('Campaign_'+campaignIdd);
             console.log("next campaign :::: ", next_campaign)
-            campaignToMsqs(next_campaign);
+            campaignToMsqs(next_campaign, indxx);
           break;
     default: break;
   }
@@ -2027,7 +2029,7 @@ const startSchedulerOfSubCampaign = async (day, currentTime, campaign) => {
     // console.log("elem :::: ", elem);
     const curr_hour = currentTime.split(":")[0];
     const curr_minute = currentTime.split(":")[1];
-    // const curr_sec = currentTime.split(":")[2];
+    const curr_sec = currentTime.split(":")[2];
     // console.log("curr_hour ::: ", curr_hour);
     // console.log("curr_minute ::: ", curr_minute);
     // console.log("curr_sec ::: ", curr_sec);
@@ -2045,7 +2047,7 @@ const startSchedulerOfSubCampaign = async (day, currentTime, campaign) => {
     // console.log("scheduled_end_sec ::: ", scheduled_end_sec);
     let diff_hour = scheduled_hour - curr_hour;
     let diff_min = scheduled_minute - curr_minute;
-    let diff_sec = scheduled_sec - curr_minute;
+    let diff_sec = scheduled_sec - curr_sec;
     if (diff_sec<0) {
       diff_sec+=60;
       diff_min--;
@@ -2089,26 +2091,25 @@ const startSchedulerOfSubCampaign = async (day, currentTime, campaign) => {
       }
       else if(curr_hour > scheduled_end_hour){
         gapBetweenTwoDays = 7;
-        upcomingDateAndTime = Date.now() + gapBetweenTwoDays*24*60*60*1000 + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000 + 2*60*1000;
+        upcomingDateAndTime = Date.now() + gapBetweenTwoDays*24*60*60*1000 + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000 + 60*1000;
         // console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
       }
     }
     else{
       gapBetweenTwoDays = helper.gapBetweenTowdays(day, elem.day);
       // console.log("gap between two days ::: ", gapBetweenTwoDays); // calculate time also
-      upcomingDateAndTime = Date.now() + gapBetweenTwoDays*24*60*60*1000 + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000;
+      upcomingDateAndTime = Date.now() + gapBetweenTwoDays*24*60*60*1000 + 60*diff_hour*60*1000 + 60*diff_min*1000 + diff_sec*1000 + 60*1000;
       // console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
     }
     // console.log("upcomingDateAndTime ::: ", upcomingDateAndTime);
     // console.log("Campaign to be added ::: ", campaign.campaign_id, campaign );
     helper.saveDatainStorage("Campaign_" + campaign.campaign_id, campaign);
     console.log("creating alarm at ::: ", new Date(upcomingDateAndTime));
-    chrome.alarms.create("Campaign_" + campaign.campaign_id, { when : upcomingDateAndTime })
-    // chrome.alarm.create("Campaign_" + campaign.campaign_id, { when : Date.now() + Math.random()*2*60*1000});
+    chrome.alarms.create("Campaign_" + campaign.campaign_id + "_" + indx, { when : upcomingDateAndTime })
   })
 }   
 
-const satrtHourlyScheduler = async(campaign) => {
+const satrtHourlyScheduler = async(campaign, indx) => {
   // console.log("Capaign satrtHourlyScheduler ::::::::::::::::::::::::: ", campaign);
   const {day, currentTime, search_date} = helper.getCurrentDayAndTimein();
   const {userID} = await helper.getDatafromStorage("fbTokenAndId")
@@ -2116,8 +2117,8 @@ const satrtHourlyScheduler = async(campaign) => {
   // console.log("campaignStatus ::: ", campaignStatus.status); 
   if(campaignStatus && campaignStatus.status ==="Active"){
     // console.log("Campaign is active.");
-    chrome.alarms.clear("Campaign_" + campaign.campaign_id)
-    chrome.alarms.create("Campaign_" + campaign.campaign_id, { periodInMinutes : 1 * 60 });
+    chrome.alarms.clear("Campaign_" + campaign.campaign_id + "_" + indx)
+    chrome.alarms.create("Campaign_" + campaign.campaign_id + "_" + indx, { periodInMinutes : 1 * 60 });
         // if member is not present in campaign payload fetch campaign members
     let allCampaigns;
     if(campaign.campaign_contacts && campaign.campaign_contacts.length > 0){
@@ -2138,24 +2139,25 @@ const satrtHourlyScheduler = async(campaign) => {
     }
     if(allCampaigns && allCampaigns.length === 0)
     {
-      chrome.alarms.clear("Campaign_" + allCampaigns[0]._id);
+      chrome.alarms.clear("Campaign_" + allCampaigns[0]._id + "_" + indx);
+      chrome.alarms.clear("CampaignMin_" + allCampaigns[0]._id + "_" + indx);
       await helper.removeDatafromStorage("Campaign_" + allCampaigns[0]._id)
       return;
     }
     // console.log("campaign ::: ", campaign);
     campaignToMsqs(campaign);
     await helper.saveDatainStorage('Campaign_' + campaign.campaign_id, campaign);
-    chrome.alarms.create("CampaignMin_" + campaign.campaign_id, { periodInMinutes : campaign.time_delay });
+    chrome.alarms.create("CampaignMin_" + campaign.campaign_id + "_" + indx, { periodInMinutes : campaign.time_delay });
   }
   else{
     // console.log("Campaign Is inactive");
-    chrome.alarms.clear("Campaign_" + campaign.campaign_id);
-    chrome.alarms.clear("CampaignMin_" + campaign.campaign_id);
-    await helper.removeDatafromStorage("Campaign_" + campaign.campaign_id);
+    chrome.alarms.clear("Campaign_" + campaign.campaign_id + "_" + indx);
+    chrome.alarms.clear("CampaignMin_" + campaign.campaign_id + "_" + indx);
+    // await helper.removeDatafromStorage("Campaign_" + campaign.campaign_id);
   }
 }
 
-const campaignToMsqs = async(campaign) => {
+const campaignToMsqs = async(campaign, indx) => {
   console.log("**********************************************");
   console.log("campaign ::: ", campaign);
   // Check if campaign is active or not
@@ -2165,7 +2167,7 @@ const campaignToMsqs = async(campaign) => {
   // console.log("campaignStatus ::: ", campaignStatus.status); 
   if(campaignStatus && campaignStatus.status ==="Active"){
     if(campaign && campaign.campaign_contacts && campaign.campaign_contacts.length === 0){
-      chrome.alarms.clear("CampaignMin_" + campaign.campaign_id);
+      chrome.alarms.clear("CampaignMin_" + campaign.campaign_id + "_" + indx);
       await helper.removeDatafromStorage("Campaign_" + campaign.campaign_id)
       return;
     }
@@ -2188,7 +2190,7 @@ const campaignToMsqs = async(campaign) => {
       if(messageContent.status){
         let {currentTime, search_date} = helper.getCurrentDayAndTimein(Date.now() + campaignExpTime); 
         const exp_time = search_date + "T" + currentTime;
-        // console.log("exp_time", exp_time)
+        console.log("exp_time", exp_time)
         let campaign_send_date = helper.getCurrentDayAndTimein();
         campaign_send_date = campaign_send_date.search_date
         // store in msqs
@@ -2203,8 +2205,8 @@ const campaignToMsqs = async(campaign) => {
   }
   else{
     console.log("Campaign Is inactive");
-    chrome.alarms.clear("Campaign_" + campaign.campaign_id);
-    chrome.alarms.clear("CampaignMin_" + campaign.campaign_id);
-    await helper.removeDatafromStorage("Campaign_" + campaign.campaign_id);
+    chrome.alarms.clear("Campaign_" + campaign.campaign_id + indx);
+    chrome.alarms.clear("CampaignMin_" + campaign.campaign_id + "_" +  indx);
+    // await helper.removeDatafromStorage("Campaign_" + campaign.campaign_id);
   }
 }
