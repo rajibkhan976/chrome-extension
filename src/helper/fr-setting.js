@@ -66,7 +66,7 @@ export const requestGroupsFormSettings = {
       disabled: true,
       fieldOptions: [
         {
-          type: "customSelect",
+          type: "select",
           isLabeled: false,
           valid: true,
           isHalfWidth: true,
@@ -93,7 +93,7 @@ export const requestGroupsFormSettings = {
           isHalfWidth: true,  
           valid: true,
           // inLabel: "Number of request",
-          value: 0,
+          value: 10,
         },
       ]
     },
@@ -107,7 +107,7 @@ export const requestGroupsFormSettings = {
       valid: true,
       fieldOptions: [
         {
-          type: "customSelect",
+          type: "select",
           isLabeled: false,
           valid: true,
           name: "gender_filter_value",
@@ -157,7 +157,7 @@ export const requestGroupsFormSettings = {
           ],
         },
         {
-          type: "customSelect",
+          type: "select",
           isLabeled: false,
           valid: true,
           name: "tier_filter_value",
@@ -194,16 +194,6 @@ export const requestGroupsFormSettings = {
           value: "",
         },
       ],
-    },
-
-    {
-      label: "Skip Admin",
-      headerCheckbox: true,
-      name: "skip_admin",
-      valid: true,
-      isActive: false,
-      recursive: false,
-      fieldOptions: [],
     },
 
     {
@@ -343,8 +333,16 @@ export const requestGroupsFormSettings = {
           ]
         }
       ]
+    },
+    {
+      label: "Skip sending friend request to admin(s)",
+      headerCheckbox: true,
+      name: "skip_admin",
+      valid: true,
+      isActive: false,
+      recursive: false,
+      fieldOptions: [],
     }
-
   ],
 }
 
@@ -395,7 +393,7 @@ export const requestPostsSettings = {
       valid: true,
       fieldOptions: [
         {
-          type: "customSelect",
+          type: "select",
           isLabeled: false,
           valid: true,
           isHalfWidth: true,
@@ -436,7 +434,7 @@ export const requestPostsSettings = {
       valid: true,
       fieldOptions: [
         {
-          type: "customSelect",
+          type: "select",
           isLabeled: false,
           valid: true,
           name: "gender_filter_value",
@@ -486,7 +484,7 @@ export const requestPostsSettings = {
           ],
         },
         {
-          type: "customSelect",
+          type: "select",
           isLabeled: false,
           valid: true,
           name: "tier_filter_value",
@@ -523,17 +521,6 @@ export const requestPostsSettings = {
           value: "",
         },
       ],
-    },
-
-    {
-      label: "Skip Admin",
-      headerCheckbox: true,
-      name: "skip_admin",
-      valid: true,
-      isActive: false,
-      recursive: false,
-      fieldOptions: [],
-      disabled: true,
     },
 
     {
@@ -675,8 +662,18 @@ export const requestPostsSettings = {
           ]
         }
       ]
-    }
+    },
 
+    {
+      label: "Skip sending friend request to admin(s)",
+      headerCheckbox: true,
+      name: "skip_admin",
+      valid: true,
+      isActive: false,
+      recursive: false,
+      fieldOptions: [],
+      disabled: true,
+    }
   ],
 }
 
@@ -769,7 +766,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
       valid: true,
       fieldOptions: [
         {
-          type: "customSelect",
+          type: "select",
           isLabeled: false,
           valid: true,
           name: "gender_filter_value",
@@ -819,7 +816,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
           ],
         },
         {
-          type: "customSelect",
+          type: "select",
           isLabeled: false,
           valid: true,
           name: "tier_filter_value",
@@ -856,17 +853,6 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
           value: "",
         },
       ],
-    },
-
-    {
-      label: "Skip Admin",
-      headerCheckbox: true,
-      name: "skip_admin",
-      valid: true,
-      isActive: false,
-      recursive: false,
-      fieldOptions: [],
-      disabled: true,
     },
 
     {
@@ -1008,8 +994,18 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
           ]
         }
       ]
-    }
+    },
 
+    {
+      label: "Skip sending friend request to admin(s)",
+      headerCheckbox: true,
+      name: "skip_admin",
+      valid: true,
+      isActive: false,
+      recursive: false,
+      fieldOptions: [],
+      disabled: true,
+    }
   ],
 }
 

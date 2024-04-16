@@ -1130,8 +1130,11 @@ const GroupsRequestForm = ({
                 case "select":
                     return (
                         <div
-                            className={`fr-req-element fr-req-el-${element.type} ${element.isLabeled ? "fr-req-fieldset" : ""
-                                } ${element?.isHalfWidth ? 'fr-req-half-width' : ''}`}
+                            className={`fr-req-element fr-req-el-${element.type} 
+                            ${element.isLabeled ? "fr-req-fieldset" : ""} 
+                            ${element?.isHalfWidth ? 'fr-req-half-width' : ''}
+                            ${mainEl?.disabled ? 'fr-req-el-disabled' : ''}
+                            `}
                         >
                             {element.isLabeled ? <label>{element.inLabel}</label> : ""}
                             <select
@@ -1290,39 +1293,39 @@ const GroupsRequestForm = ({
                                         </label>
                                         <label>
                                             <input type="checkbox" />
-                                        <span className="fr-reaction-icon">
-                                            <LoveReactionIcon />
-                                        </span>
+                                            <span className="fr-reaction-icon">
+                                                <LoveReactionIcon />
+                                            </span>
                                         </label>
                                         <label>
                                             <input type="checkbox" />
-                                        <span className="fr-reaction-icon">
-                                            <CareReactionIcon />
-                                        </span>
+                                            <span className="fr-reaction-icon">
+                                                <CareReactionIcon />
+                                            </span>
                                         </label>
                                         <label>
                                             <input type="checkbox" />
-                                        <span className="fr-reaction-icon">
-                                            <HahaReactionIcon />
-                                        </span>
+                                            <span className="fr-reaction-icon">
+                                                <HahaReactionIcon />
+                                            </span>
                                         </label>
                                         <label>
                                             <input type="checkbox" />
-                                        <span className="fr-reaction-icon">
-                                            <WowReactionIcon />
-                                        </span>
+                                            <span className="fr-reaction-icon">
+                                                <WowReactionIcon />
+                                            </span>
                                         </label>
                                         <label>
                                             <input type="checkbox" />
-                                        <span className="fr-reaction-icon">
-                                            <SadReactionIcon />
-                                        </span>
+                                            <span className="fr-reaction-icon">
+                                                <SadReactionIcon />
+                                            </span>
                                         </label>
                                         <label>
                                             <input type="checkbox" />
-                                        <span className="fr-reaction-icon">
-                                            <AngryReactionIcon />
-                                        </span>
+                                            <span className="fr-reaction-icon">
+                                                <AngryReactionIcon />
+                                            </span>
                                         </label>
                                     </div>
                                 </section>
@@ -1531,7 +1534,25 @@ const GroupsRequestForm = ({
                                 ${mainEl?.disabled ? 'fr-req-el-disabled' : ''}
                             `}
                         >
-                            {element.isLabeled ? <label>{element.inLabel}</label> : ""}
+                            <div className="d-flex keywords-label-wrapper">
+                                <div>
+                                    {element.isLabeled ? <span>{element.inLabel}</span> : ""}
+                                </div>
+
+                                {console.log("ELEMENET -- ", element)}
+
+                                <div>
+                                    {/* CROSS BUTTON TO REMOVE TAG */}
+                                    <span
+                                        className={`clear-tags-btn ${element?.valueArr?.length === 0 ? "clear-btn-disabled" : ""}`}
+                                        onClick={() => {
+                                            clearKeyWordsHandle(element);
+                                        }}
+                                    >
+                                        Clear all
+                                    </span>
+                                </div>
+                            </div>
 
                             <div
                                 className={
@@ -1628,15 +1649,6 @@ const GroupsRequestForm = ({
                             >
                                 <CheckIcon />
                             </span>
-                            {/* CROSS BUTTON TO REMOVE TAG */}
-                            {/* <span
-                                className="btn-selectInput btn-wrong"
-                                onClick={() => {
-                                    clearKeyWordsHandle(element);
-                                }}
-                            >
-                                <XmarkIcon />
-                            </span> */}
                         </div>
                     );
 
@@ -1984,7 +1996,6 @@ const GroupsRequestForm = ({
                     />
                 )}
             </div>
-
 
             {/* FOOTER OF FROM SECTION */}
             {/* <footer className="fr-settings-footer settings-btn-wraper d-flex d-flex-center">

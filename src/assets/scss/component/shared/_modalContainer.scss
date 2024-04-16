@@ -185,6 +185,7 @@
     @include theme-aware("background-color", "radio-bg");
     display: flex;
     align-items: center;
+    justify-content: center;
 
     .fr-ext-radio-text {
       @include theme-aware("color", "radio-text");
@@ -193,21 +194,21 @@
       z-index: 1;
     }
 
-    &:before {
-      content: "";
-      border: 2px solid $themeBlack4;
-      box-shadow: 0 0 0 2px $themeSecondaryDarkBlue5;
-      width: 8px;
-      height: 8px;
-      display: inline-flex;
-      border-radius: 50%;
-      -webkit-border-radius: 50%;
-      -moz-border-radius: 50%;
-      -ms-border-radius: 50%;
-      -o-border-radius: 50%;
-      margin-right: 5px;
-      margin-left: 2px;
-    }
+    // &:before {
+    //   content: "";
+    //   border: 2px solid $themeBlack4;
+    //   box-shadow: 0 0 0 2px $themeSecondaryDarkBlue5;
+    //   width: 8px;
+    //   height: 8px;
+    //   display: inline-flex;
+    //   border-radius: 50%;
+    //   -webkit-border-radius: 50%;
+    //   -moz-border-radius: 50%;
+    //   -ms-border-radius: 50%;
+    //   -o-border-radius: 50%;
+    //   margin-right: 5px;
+    //   margin-left: 2px;
+    // }
   }
 
   input:checked ~ .fr-ext-radio-ui {

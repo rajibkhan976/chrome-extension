@@ -29,21 +29,21 @@ const SentFromGroups = () => {
 
     // SEGREGATIONS OF 1st Row FORM FIELDS
     const [firstRowFormSetup, setFirstRowFormSetup] = useState(() => {
-        const firstRowFormFields = requestGroupsFormSettings.fields.slice(0, 5);
+        const firstRowFormFields = requestGroupsFormSettings.fields.slice(0, 4);
         const firstRowFormData = { ...requestGroupsFormSettings, fields: [...firstRowFormFields] };
         return firstRowFormData;
     });
 
     // SEGREGATIONS OF 2nd Row FORM FIELDS
     const [secondRowFormSetup, setSecondRowFormSetup] = useState(() => {
-        const secondRowFormFields = requestGroupsFormSettings.fields.slice(5, 7);
+        const secondRowFormFields = requestGroupsFormSettings.fields.slice(4, 6);
         const secondRowFormData = { ...requestGroupsFormSettings, fields: [...secondRowFormFields] };
         return secondRowFormData;
     });
 
     // SEGREGATIONS OF 3rd Row FORM FIELDS
     const [thirdRowFormSetup, setThirdRowFormSetup] = useState(() => {
-        const thirdRowFormFields = requestGroupsFormSettings.fields.slice(7, 9);
+        const thirdRowFormFields = requestGroupsFormSettings.fields.slice(6, 9);
         const thirdRowFormData = { ...requestGroupsFormSettings, fields: [...thirdRowFormFields] };
         return thirdRowFormData;
     });
@@ -84,7 +84,6 @@ const SentFromGroups = () => {
                                     </div>
                                 </div>
 
-
                                 {/* 2nd ROW */}
                                 <div className="form-wraper-settings general-settings">
                                     <div className="fr-content-cell-grid">
@@ -104,7 +103,6 @@ const SentFromGroups = () => {
                                         />
                                     </div>
                                 </div>
-
 
                                 {/* 3rd ROW */}
                                 <div className="form-wraper-settings general-settings no-border">

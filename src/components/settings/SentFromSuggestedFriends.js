@@ -29,21 +29,21 @@ const SentFromSuggestedFriends = () => {
 
     // SEGREGATIONS OF 1st Row FORM FIELDS
     const [firstRowFormSetup, setFirstRowFormSetup] = useState(() => {
-        const firstRowFormFields = requestSuggestedFrndsAndFrndsOfFrndsFormSettings.fields.slice(0, 5);
+        const firstRowFormFields = requestSuggestedFrndsAndFrndsOfFrndsFormSettings.fields.slice(0, 4);
         const firstRowFormData = { ...requestSuggestedFrndsAndFrndsOfFrndsFormSettings, fields: [...firstRowFormFields] };
         return firstRowFormData;
     });
 
     // SEGREGATIONS OF 2nd Row FORM FIELDS
     const [secondRowFormSetup, setSecondRowFormSetup] = useState(() => {
-        const secondRowFormFields = requestSuggestedFrndsAndFrndsOfFrndsFormSettings.fields.slice(5, 7);
+        const secondRowFormFields = requestSuggestedFrndsAndFrndsOfFrndsFormSettings.fields.slice(4, 6);
         const secondRowFormData = { ...requestSuggestedFrndsAndFrndsOfFrndsFormSettings, fields: [...secondRowFormFields] };
         return secondRowFormData;
     });
 
     // SEGREGATIONS OF 3rd Row FORM FIELDS
     const [thirdRowFormSetup, setThirdRowFormSetup] = useState(() => {
-        const thirdRowFormFields = requestSuggestedFrndsAndFrndsOfFrndsFormSettings.fields.slice(7, 9);
+        const thirdRowFormFields = requestSuggestedFrndsAndFrndsOfFrndsFormSettings.fields.slice(6, 9);
         const thirdRowFormData = { ...requestSuggestedFrndsAndFrndsOfFrndsFormSettings, fields: [...thirdRowFormFields] };
         return thirdRowFormData;
     });

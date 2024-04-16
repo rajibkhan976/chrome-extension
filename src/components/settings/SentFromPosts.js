@@ -29,21 +29,21 @@ const SentFromPosts = () => {
 
     // SEGREGATIONS OF 1st Row FORM FIELDS
     const [firstRowFormSetup, setFirstRowFormSetup] = useState(() => {
-        const firstRowFormFields = requestPostsSettings.fields.slice(0, 5);
+        const firstRowFormFields = requestPostsSettings.fields.slice(0, 4);
         const firstRowFormData = { ...requestPostsSettings, fields: [...firstRowFormFields] };
         return firstRowFormData;
     });
 
     // SEGREGATIONS OF 2nd Row FORM FIELDS
     const [secondRowFormSetup, setSecondRowFormSetup] = useState(() => {
-        const secondRowFormFields = requestPostsSettings.fields.slice(5, 7);
+        const secondRowFormFields = requestPostsSettings.fields.slice(4, 6);
         const secondRowFormData = { ...requestPostsSettings, fields: [...secondRowFormFields] };
         return secondRowFormData;
     });
 
     // SEGREGATIONS OF 3rd Row FORM FIELDS
     const [thirdRowFormSetup, setThirdRowFormSetup] = useState(() => {
-        const thirdRowFormFields = requestPostsSettings.fields.slice(7, 9);
+        const thirdRowFormFields = requestPostsSettings.fields.slice(6, 9);
         const thirdRowFormData = { ...requestPostsSettings, fields: [...thirdRowFormFields] };
         return thirdRowFormData;
     });

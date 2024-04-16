@@ -180,7 +180,6 @@
     }
 }
 
-
 // CUSTOMISE THE DESIGN FOR NEW UI ON SETITNGS PART FOR REQUEST SETTINGS..
 // .general-settings {
 //     width: 235px;
@@ -194,8 +193,8 @@
     &.group-disabled {
         opacity: 0.5;
         // pointer-events: none;
-        // filter: blur(0.5px);
-    
+        filter: blur(0.3px);
+
         &:hover {
             cursor: not-allowed;
         }
@@ -229,7 +228,7 @@ label.fr-ext-checkbox {
 
     &:not(:last-child)::after {
         position: absolute;
-        content: '';
+        content: "";
         right: -15px;
         height: 100%;
         width: 1px;
@@ -266,7 +265,244 @@ label.fr-ext-checkbox {
     }
 }
 
-// Custom the Styles here..
+
+// // Custom the Styles here..
+// .fr-req-element.fr-req-el-selectInput.fr-req-fieldset {
+//     display: flex;
+//     flex-direction: row;
+// }
+
+// .fr-req-el-selectInput .fr-selectInput-basic {
+//     height: 30px;
+//     width: 80%;
+// }
+
+// .fr-req-element .fr-req-el-selectInput .fr-req-fieldset {
+//     margin-top: 25px;
+
+//     label {
+//         margin-left: 0;
+//     }
+// }
+
+// .fr-req-fieldset {
+//     margin-top: 25px;
+
+//     label {
+//         margin-left: 0;
+//         top: -15px;
+//     }
+// }
+
+// .fr-req-el-selectInput .btn-selectInput {
+//     height: 30px;
+//     width: 50px;
+// }
+
+// .custom-select {
+//     bottom: 130%;
+//     z-index: 99;
+//     left: 82%;
+// }
+
+// .fr-req-el-fillinput .fr-fillinput-basic-labeled,
+// .fr-req-el-selectInput .fr-selectInput-basic-labeled,
+// .fr-req-el-select .fr-select-basic {
+//     border-radius: 5px;
+//     background-color: #000 !important;
+// }
+
+// // Loop up for Given Reactions and Comments
+// .fr-req-element.fr-req-el-checkbox {
+//     display: flex;
+// }
+
+// label.fr-ext-checkbox-ui {
+//     background: #27252c;
+//     border-radius: 5px;
+//     padding: 8px 20px 8px 8px;
+//     margin: 2px;
+// }
+
+// span.fr-ext-checkbox-text {
+//     font-size: 11px;
+//     padding-left: 22px;
+// }
+
+// // CUSTOM CHECKBOX FOR REACTIONS AND COMMENTS SELECTION
+// .checkbox-container {
+//     display: block;
+//     position: relative;
+//     padding-left: 35px;
+//     margin-bottom: 12px;
+//     cursor: pointer;
+
+//     input {
+//         position: absolute;
+//         opacity: 0;
+//         cursor: pointer;
+//         height: 0;
+//         width: 0;
+//     }
+
+//     .checkmark {
+//         position: absolute;
+//         top: 6px;
+//         left: 8px;
+//         height: 15px;
+//         width: 15px;
+//         background-color: #1c1c1e;
+//         border-radius: 3px;
+//         border: 1px solid #b3b3bf;
+
+//         &:after {
+//             content: "";
+//             position: absolute;
+//             display: none;
+//         }
+//     }
+
+//     input:checked ~ .checkmark {
+//         background-color: #0094ff;
+//         border-color: #0094ff;
+//     }
+
+//     input:checked ~ .fr-ext-radio-ui > .fr-ext-checkbox-text {
+//         color: #0094ff !important;
+//     }
+
+//     input:checked ~ .checkmark:after {
+//         display: block;
+//     }
+
+//     .checkmark:after {
+//         left: 4px;
+//         top: 0px;
+//         width: 5px;
+//         height: 10px;
+//         border: solid #fff;
+//         border-width: 0 3px 3px 0;
+//         transform: rotate(45deg);
+//     }
+// }
+
+// // REACTION STYLES..
+// section#reaction-icons-section {
+//     margin-top: 8px;
+
+//     .fr-reaction-icons {
+//         display: inline-flex;
+//         // margin-top: 4px;
+//         vertical-align: middle;
+//         column-gap: 1px;
+//         margin-inline-start: 5px;
+
+//         label {
+//             cursor: pointer;
+//             display: inline-flex;
+//             flex: 0 0 24px;
+//             height: 24px;
+
+//             input {
+//                 display: none;
+//             }
+//             input:checked~.fr-reaction-icon {
+//                 @include theme-aware('border-color', 'active-color');
+//                 background-color: #27465b;
+//             }
+//         }
+//     }
+// }
+
+// .fr-reaction-icon {
+//     padding: 3px;
+//     border-radius: 15px;
+//     height: 100%;
+//     flex: 0 0 100%;
+//     border: 1px solid transparent;
+//     cursor: pointer;
+
+//     &:hover {
+//         // @include theme-aware('border-color', 'active-color');
+//         background-color: #27465b;
+//     }
+// }
+
+// // ...
+// .fr-cell-content-mutual-frnd {
+//     display: inline-flex;
+//     gap: 5px;
+// }
+
+// .fr-req-half-width {
+//     width: 100px;
+// }
+
+// .fr-req-el-stepInput .input-arrows {
+//     top: 1px;
+//     right: 1px;
+//     height: 28px;
+// }
+
+// input.fr-input-basic::-webkit-outer-spin-button,
+// input.fr-input-basic::-webkit-inner-spin-button {
+//     -webkit-appearance: none;
+//     display: none;
+// }
+
+// .fr-cell-header-title {
+//     display: inline-flex;
+//     align-items: center;
+//     font-weight: normal;
+// }
+
+// .fr-ext-radio {
+//     height: 24px;
+// }
+
+// section#reaction-icons-section {
+//     color: gray;
+//     font-size: 12px;
+// }
+
+// .fr-req-element.fr-req-el-radio {
+//     margin-bottom: 6px;
+// }
+
+// // FOOTER BUTTONS..
+// button.btn.btn-theme.settings-save.w-50 {
+//     height: 30px;
+//     width: 90px;
+//     min-height: 30px !important;
+//     border-radius: 3px;
+//     border: 0.5px solid gray;
+// }
+
+// button.btn.btn-theme.w-100.btn-run-friender {
+//     width: 130px;
+//     height: 30px;
+//     min-height: 30px !important;
+//     border-radius: 3px;
+//     border: 0.5px solid gray;
+// }
+
+// // section.section-main.f-1 {
+// //     margin-bottom: -5px;
+// // }
+
+// .custom-selectBox ul {
+//     top: 32px;
+//     left: -4px;
+//     width: 210px;
+// }
+
+// .fr-req-el-disabled {
+//     pointer-events: none;
+// }
+
+
+
+// Custom Styles
 .fr-req-element.fr-req-el-selectInput.fr-req-fieldset {
     display: flex;
     flex-direction: row;
@@ -309,7 +545,7 @@ label.fr-ext-checkbox {
 .fr-req-el-selectInput .fr-selectInput-basic-labeled,
 .fr-req-el-select .fr-select-basic {
     border-radius: 5px;
-    background-color: #000 !important;
+    // background-color: #000 !important;
 }
 
 // Loop up for Given Reactions and Comments
@@ -317,23 +553,27 @@ label.fr-ext-checkbox {
     display: flex;
 }
 
-label.fr-ext-checkbox-ui {
+.fr-ext-checkbox-ui {
     background: #27252c;
     border-radius: 5px;
     padding: 8px 20px 8px 8px;
     margin: 2px;
 }
 
-span.fr-ext-checkbox-text {
+.fr-ext-checkbox-text {
     font-size: 11px;
     padding-left: 22px;
 }
 
-// CUSTOM CHECKBOX FOR REACTIONS AND COMMENTS SELECTION
+.fr-ext-radio-ui {
+    width: 100%;
+}
+
+// Custom Checkbox for Reactions and Comments Selection
 .checkbox-container {
     display: block;
     position: relative;
-    padding-left: 35px;
+    padding-left: 10px;
     margin-bottom: 12px;
     cursor: pointer;
 
@@ -386,13 +626,32 @@ span.fr-ext-checkbox-text {
     }
 }
 
-// REACTION STYLES..
-section#reaction-icons-section {
+.keywords-label-wrapper {
+    justify-content: space-between;
+    font-size: 10px;
+    margin-left: 0;
+    margin-top: -15px;
+    margin-bottom: 5px;
+
+    .clear-tags-btn {
+        color: #FF6A77;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .clear-btn-disabled {
+        color: gray;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+}
+
+// Reaction Styles
+#reaction-icons-section {
     margin-top: 8px;
 
     .fr-reaction-icons {
         display: inline-flex;
-        // margin-top: 4px;
         vertical-align: middle;
         column-gap: 1px;
         margin-inline-start: 5px;
@@ -406,8 +665,9 @@ section#reaction-icons-section {
             input {
                 display: none;
             }
-            input:checked~.fr-reaction-icon {
-                @include theme-aware('border-color', 'active-color');
+
+            input:checked ~ .fr-reaction-icon {
+                border-color: #0094ff;
                 background-color: #27465b;
             }
         }
@@ -423,12 +683,12 @@ section#reaction-icons-section {
     cursor: pointer;
 
     &:hover {
-        // @include theme-aware('border-color', 'active-color');
         background-color: #27465b;
     }
 }
 
-// ...
+// Other Styles
+
 .fr-cell-content-mutual-frnd {
     display: inline-flex;
     gap: 5px;
@@ -444,8 +704,8 @@ section#reaction-icons-section {
     height: 28px;
 }
 
-input.fr-input-basic::-webkit-outer-spin-button,
-input.fr-input-basic::-webkit-inner-spin-button {
+.fr-input-basic::-webkit-outer-spin-button,
+.fr-input-basic::-webkit-inner-spin-button {
     -webkit-appearance: none;
     display: none;
 }
@@ -458,19 +718,24 @@ input.fr-input-basic::-webkit-inner-spin-button {
 
 .fr-ext-radio {
     height: 24px;
+    width: 48%;
+    /* margin-right: 10px; */
+    margin-left: 4px;
 }
 
-section#reaction-icons-section {
+#reaction-icons-section {
     color: gray;
     font-size: 12px;
 }
 
 .fr-req-element.fr-req-el-radio {
     margin-bottom: 6px;
+    width: 100%;
 }
 
-// FOOTER BUTTONS..
-button.btn.btn-theme.settings-save.w-50 {
+// Footer Buttons
+
+.btn.btn-theme.settings-save.w-50 {
     height: 30px;
     width: 90px;
     min-height: 30px !important;
@@ -478,7 +743,7 @@ button.btn.btn-theme.settings-save.w-50 {
     border: 0.5px solid gray;
 }
 
-button.btn.btn-theme.w-100.btn-run-friender {
+.btn.btn-theme.w-100.btn-run-friender {
     width: 130px;
     height: 30px;
     min-height: 30px !important;
@@ -486,16 +751,11 @@ button.btn.btn-theme.w-100.btn-run-friender {
     border: 0.5px solid gray;
 }
 
-// section.section-main.f-1 {
-//     margin-bottom: -5px;
-// }
-
 .custom-selectBox ul {
     top: 32px;
     left: -4px;
     width: 210px;
 }
-
 
 .fr-req-el-disabled {
     pointer-events: none;
