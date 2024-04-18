@@ -695,6 +695,59 @@ const checkHasConversation= async(fb_user_id,friendFbId)=>{
   }     
 }
 
+const getFriendsOfFriends = async (userID, fbDtsg, memberId) => {
+  const payload = {
+    av: userID,
+    __user: userID,
+    __a: 1,
+    __comet_req: 15,
+    fb_dtsg: fbDtsg,
+    fb_api_caller_class: "RelayModern",
+    fb_api_req_friendly_name: "FriendingCometFriendRequestSendMutation",
+    variables: JSON.stringify({
+      "input": {
+        "refs": [null],
+        "friend_requestee_ids": [memberId],
+        "warn_ack_for_ids": [],
+        // "source": source,
+        "actor_id": userID,
+        "client_mutation_id": "1"
+      },
+      "scale": 1
+    }),
+    server_timestamps: true,
+    doc_id: "9086069781410775"
+  };
+
+  let getSentFriendReq = await fetch(
+    "https://www.facebook.com/api/graphql/",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "text/html,application/json",
+        "x-fb-friendly-name": "FriendingCometFriendRequestSendMutation",
+      },
+      body: helper.serialize(payload),
+    }
+  );
+  getSentFriendReq = await getSentFriendReq.text();
+  getSentFriendReq = helper.makeParsable(getSentFriendReq);
+  console.log("getSentFriendReq ::: ", getSentFriendReq);
+  if (getSentFriendReq &&
+    getSentFriendReq.data &&
+    getSentFriendReq.data &&
+    getSentFriendReq.data.friend_request_send &&
+    getSentFriendReq.data.friend_request_send.friend_requestees &&
+    getSentFriendReq.data.friend_request_send.friend_requestees.length > 0) {
+    return {status :  true};
+  } else {
+    console.log(getSentFriendReq && getSentFriendReq.errors && getSentFriendReq.errors[0] && getSentFriendReq.errors[0].description)
+    return {status : false, description : getSentFriendReq && getSentFriendReq.errors && getSentFriendReq.errors[0] && getSentFriendReq.errors[0].description};
+  }
+}
+
+
 const common = {
   getAboutInfo : getAboutInfo,
   getMemberGender : getMemberGender,

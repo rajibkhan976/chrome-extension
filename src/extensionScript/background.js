@@ -1813,6 +1813,7 @@ async function MSQS(){
               // Start a fresh loop with 3 mins and random delay
               manageSendingLoop()
             }else{
+              MSQS();
               console.log("The data has been removed from queue as its expired",queueInfo)
             }
 
@@ -2168,7 +2169,7 @@ const campaignToMsqs = async(campaign, indx) => {
   if(campaignStatus && campaignStatus.status ==="Active"){
     if(campaign && campaign.campaign_contacts && campaign.campaign_contacts.length === 0){
       chrome.alarms.clear("CampaignMin_" + campaign.campaign_id + "_" + indx);
-      await helper.removeDatafromStorage("Campaign_" + campaign.campaign_id)
+      // await helper.removeDatafromStorage("Campaign_" + campaign.campaign_id);
       return;
     }
     // check from message queue 
