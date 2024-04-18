@@ -1978,24 +1978,28 @@ const GroupsRequestForm = ({
             {/* EDITING THE SETTINGS FORM */}
 
             {/* <div className="form-wraper-settings general-settings"> */}
-            <div className="general-settings">
-                <div
-                    className="fr-content-cell-grid"
-                >
-                    {generateFormElements()}
-                </div>
+            <form action="" className='d-flex' onSubmit={(e) => e.preventDefault()}>
+                {/* 1st ROW */}
+                <div className="form-wraper-settings general-settings">
+                    {/* <div className="fr-content-cell-grid"></div> */}
+                        <div
+                            className="fr-content-cell-grid column-setup"
+                        >
+                            {generateFormElements()}
+                        </div>
 
-                {openNotification && (
-                    <ServerMessages
-                        icon={<ServerError />}
-                        type={"error"}
-                        msgText={openNotificationMsg}
-                        headerTxt={"Error"}
-                        openNotification={openNotification}
-                        setOpenNotification={setOpenNotification}
-                    />
-                )}
-            </div>
+                        {openNotification && (
+                            <ServerMessages
+                                icon={<ServerError />}
+                                type={"error"}
+                                msgText={openNotificationMsg}
+                                headerTxt={"Error"}
+                                openNotification={openNotification}
+                                setOpenNotification={setOpenNotification}
+                            />
+                        )}
+                    </div>
+            </form>
 
             {/* FOOTER OF FROM SECTION */}
             {/* <footer className="fr-settings-footer settings-btn-wraper d-flex d-flex-center">

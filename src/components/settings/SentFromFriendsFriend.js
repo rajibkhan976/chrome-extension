@@ -64,69 +64,20 @@ const SentFromFriendsFriend = () => {
                 <div className="main-container d-flex d-flex-column main-settings-container">
                     <section className={`setting-area f-1 d-flex ${editType !== "basic" ? 'settings-show-saved' : 'row-container'}`}>
                         {editType === "basic" ? (
-                            <form action="" className='d-flex' onSubmit={(e) => e.preventDefault()}>
-                                {/* 1st ROW */}
-                                <div className="form-wraper-settings general-settings">
-                                    <div className="fr-content-cell-grid">
-                                        <ModernForm
-                                            formSetup={firstRowFormSetup}
-                                            setFormSetup={setFirstRowFormSetup}
-                                            advcFormAssets={advcFormAssets}
-                                            setAdvcFormAssets={setAdvcFormAssets}
-                                            setrunningScript={setrunningScript}
-                                            setRequestActive={setRequestActive}
-                                            friendReqSet={friendReqSet}
-                                            isRunnable={isRunnable}
-                                            isLoding={isLoding}
-                                            setIsLoding={setIsLoding}
-                                            settingApiPayload={settingApiPayload}
-                                            setSettingApiPayload={setSettingApiPayload}
-                                        />
-                                    </div>
-                                </div>
-
-
-                                {/* 2nd ROW */}
-                                <div className="form-wraper-settings general-settings">
-                                    <div className="fr-content-cell-grid">
-                                        <ModernForm
-                                            formSetup={secondRowFormSetup}
-                                            setFormSetup={setSecondRowFormSetup}
-                                            advcFormAssets={advcFormAssets}
-                                            setAdvcFormAssets={setAdvcFormAssets}
-                                            setrunningScript={setrunningScript}
-                                            setRequestActive={setRequestActive}
-                                            friendReqSet={friendReqSet}
-                                            isRunnable={isRunnable}
-                                            isLoding={isLoding}
-                                            setIsLoding={setIsLoding}
-                                            settingApiPayload={settingApiPayload}
-                                            setSettingApiPayload={setSettingApiPayload}
-                                        />
-                                    </div>
-                                </div>
-
-
-                                {/* 3rd ROW */}
-                                <div className="form-wraper-settings general-settings no-border">
-                                    <div className="fr-content-cell-grid">
-                                        <ModernForm
-                                            formSetup={thirdRowFormSetup}
-                                            setFormSetup={setThirdRowFormSetup}
-                                            advcFormAssets={advcFormAssets}
-                                            setAdvcFormAssets={setAdvcFormAssets}
-                                            setrunningScript={setrunningScript}
-                                            setRequestActive={setRequestActive}
-                                            friendReqSet={friendReqSet}
-                                            isRunnable={isRunnable}
-                                            isLoding={isLoding}
-                                            setIsLoding={setIsLoding}
-                                            settingApiPayload={settingApiPayload}
-                                            setSettingApiPayload={setSettingApiPayload}
-                                        />
-                                    </div>
-                                </div>
-                            </form>
+                            <ModernForm
+                                formSetup={formSetup}
+                                setFormSetup={setFormSetup}
+                                advcFormAssets={advcFormAssets}
+                                setAdvcFormAssets={setAdvcFormAssets}
+                                setrunningScript={setrunningScript}
+                                setRequestActive={setRequestActive}
+                                friendReqSet={friendReqSet}
+                                isRunnable={isRunnable}
+                                isLoding={isLoding}
+                                setIsLoding={setIsLoding}
+                                settingApiPayload={settingApiPayload}
+                                setSettingApiPayload={setSettingApiPayload}
+                            />
                         ) : (
                             <>
 

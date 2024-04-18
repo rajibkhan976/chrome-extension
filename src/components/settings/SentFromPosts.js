@@ -28,25 +28,25 @@ const SentFromPosts = () => {
     const [settingApiPayload, setSettingApiPayload] = useState(fr_Req_Payload);
 
     // SEGREGATIONS OF 1st Row FORM FIELDS
-    const [firstRowFormSetup, setFirstRowFormSetup] = useState(() => {
-        const firstRowFormFields = requestPostsSettings.fields.slice(0, 4);
-        const firstRowFormData = { ...requestPostsSettings, fields: [...firstRowFormFields] };
-        return firstRowFormData;
-    });
+    // const [firstRowFormSetup, setFirstRowFormSetup] = useState(() => {
+    //     const firstRowFormFields = requestPostsSettings.fields.slice(0, 4);
+    //     const firstRowFormData = { ...requestPostsSettings, fields: [...firstRowFormFields] };
+    //     return firstRowFormData;
+    // });
 
-    // SEGREGATIONS OF 2nd Row FORM FIELDS
-    const [secondRowFormSetup, setSecondRowFormSetup] = useState(() => {
-        const secondRowFormFields = requestPostsSettings.fields.slice(4, 6);
-        const secondRowFormData = { ...requestPostsSettings, fields: [...secondRowFormFields] };
-        return secondRowFormData;
-    });
+    // // SEGREGATIONS OF 2nd Row FORM FIELDS
+    // const [secondRowFormSetup, setSecondRowFormSetup] = useState(() => {
+    //     const secondRowFormFields = requestPostsSettings.fields.slice(4, 6);
+    //     const secondRowFormData = { ...requestPostsSettings, fields: [...secondRowFormFields] };
+    //     return secondRowFormData;
+    // });
 
-    // SEGREGATIONS OF 3rd Row FORM FIELDS
-    const [thirdRowFormSetup, setThirdRowFormSetup] = useState(() => {
-        const thirdRowFormFields = requestPostsSettings.fields.slice(6, 9);
-        const thirdRowFormData = { ...requestPostsSettings, fields: [...thirdRowFormFields] };
-        return thirdRowFormData;
-    });
+    // // SEGREGATIONS OF 3rd Row FORM FIELDS
+    // const [thirdRowFormSetup, setThirdRowFormSetup] = useState(() => {
+    //     const thirdRowFormFields = requestPostsSettings.fields.slice(6, 9);
+    //     const thirdRowFormData = { ...requestPostsSettings, fields: [...thirdRowFormFields] };
+    //     return thirdRowFormData;
+    // });
 
     // console.log("FIRSTTTTTT FORM -- ", firstRowFormSetup);
     // console.log("SECONDDDDD FORM -- ", secondRowFormSetup);
@@ -64,69 +64,20 @@ const SentFromPosts = () => {
                 <div className="main-container d-flex d-flex-column main-settings-container">
                     <section className={`setting-area f-1 d-flex ${editType !== "basic" ? 'settings-show-saved' : 'row-container'}`}>
                         {editType === "basic" ? (
-                            <form action="" className='d-flex' onSubmit={(e) => e.preventDefault()}>
-                                {/* 1st ROW */}
-                                <div className="form-wraper-settings general-settings">
-                                    <div className="fr-content-cell-grid">
-                                        <ModernForm
-                                            formSetup={firstRowFormSetup}
-                                            setFormSetup={setFirstRowFormSetup}
-                                            advcFormAssets={advcFormAssets}
-                                            setAdvcFormAssets={setAdvcFormAssets}
-                                            setrunningScript={setrunningScript}
-                                            setRequestActive={setRequestActive}
-                                            friendReqSet={friendReqSet}
-                                            isRunnable={isRunnable}
-                                            isLoding={isLoding}
-                                            setIsLoding={setIsLoding}
-                                            settingApiPayload={settingApiPayload}
-                                            setSettingApiPayload={setSettingApiPayload}
-                                        />
-                                    </div>
-                                </div>
-
-
-                                {/* 2nd ROW */}
-                                <div className="form-wraper-settings general-settings">
-                                    <div className="fr-content-cell-grid">
-                                        <ModernForm
-                                            formSetup={secondRowFormSetup}
-                                            setFormSetup={setSecondRowFormSetup}
-                                            advcFormAssets={advcFormAssets}
-                                            setAdvcFormAssets={setAdvcFormAssets}
-                                            setrunningScript={setrunningScript}
-                                            setRequestActive={setRequestActive}
-                                            friendReqSet={friendReqSet}
-                                            isRunnable={isRunnable}
-                                            isLoding={isLoding}
-                                            setIsLoding={setIsLoding}
-                                            settingApiPayload={settingApiPayload}
-                                            setSettingApiPayload={setSettingApiPayload}
-                                        />
-                                    </div>
-                                </div>
-
-
-                                {/* 3rd ROW */}
-                                <div className="form-wraper-settings general-settings no-border">
-                                    <div className="fr-content-cell-grid">
-                                        <ModernForm
-                                            formSetup={thirdRowFormSetup}
-                                            setFormSetup={setThirdRowFormSetup}
-                                            advcFormAssets={advcFormAssets}
-                                            setAdvcFormAssets={setAdvcFormAssets}
-                                            setrunningScript={setrunningScript}
-                                            setRequestActive={setRequestActive}
-                                            friendReqSet={friendReqSet}
-                                            isRunnable={isRunnable}
-                                            isLoding={isLoding}
-                                            setIsLoding={setIsLoding}
-                                            settingApiPayload={settingApiPayload}
-                                            setSettingApiPayload={setSettingApiPayload}
-                                        />
-                                    </div>
-                                </div>
-                            </form>
+                            <ModernForm
+                                formSetup={formSetup}
+                                setFormSetup={setFormSetup}
+                                advcFormAssets={advcFormAssets}
+                                setAdvcFormAssets={setAdvcFormAssets}
+                                setrunningScript={setrunningScript}
+                                setRequestActive={setRequestActive}
+                                friendReqSet={friendReqSet}
+                                isRunnable={isRunnable}
+                                isLoding={isLoding}
+                                setIsLoding={setIsLoding}
+                                settingApiPayload={settingApiPayload}
+                                setSettingApiPayload={setSettingApiPayload}
+                            />
                         ) : (
                             <>
 

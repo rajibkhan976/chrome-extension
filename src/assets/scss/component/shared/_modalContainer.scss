@@ -566,7 +566,8 @@
     background: transparent;
     border: none;
     color: #bdbdbd;
-    padding: 17px 12px;
+    // padding: 17px 12px;
+    padding: 6px 12px;
     -webkit-appearance: none;
     cursor: pointer;
     border: 1px solid transparent;
@@ -607,7 +608,7 @@
       position: relative;
       display: flex;
       flex-grow: 4;
-      min-width: 200px;
+      // min-width: 200px;
       flex-shrink: 1;
 
       input {

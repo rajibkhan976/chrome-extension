@@ -207,6 +207,24 @@
     &:first-child {
         padding-block-start: 0;
     }
+
+    &:nth-child(4) {
+        padding-bottom: 0;
+        border-bottom: none;
+
+        .fr-req-fieldset {
+            margin-top: 8px;
+
+            label {
+                display: none;
+            }
+
+            .fr-fillinputCF-basic {
+                height: 75px;
+                overflow: auto;
+            }
+        }
+    }
 }
 
 .fr-cell-header {
@@ -759,4 +777,17 @@ label.fr-ext-checkbox {
 
 .fr-req-el-disabled {
     pointer-events: none;
+}
+
+
+.column-setup {
+    column-count: 3;
+    column-gap: 30px;
+    column-rule: 1px solid;
+    @include theme-aware('column-rule-color', 'tooltip-bg');
+    height: 100%;
+
+    > * {
+        break-inside: avoid;
+    }
 }
