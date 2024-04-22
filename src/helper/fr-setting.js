@@ -60,7 +60,7 @@ export const requestGroupsFormSettings = {
       label: "Look up for mutual friends?",
       headerCheckbox: true,
       recursive: true,
-      name: "look_up_mutual_friend",
+      name: "lookup_for_mutual_friend",
       isActive: false,
       valid: true,
       disabled: true,
@@ -70,7 +70,7 @@ export const requestGroupsFormSettings = {
           isLabeled: false,
           valid: true,
           isHalfWidth: true,
-          name: "mutual_friend_condition",
+          name: "lookup_for_mutual_friend_condition",
           value: "=<",
           options: [
             {
@@ -88,7 +88,7 @@ export const requestGroupsFormSettings = {
 
         {
           type: "stepInput",
-          name: "request_limit",
+          name: "mutual_friend_value",
           isLabeled: false,
           isHalfWidth: true,  
           valid: true,
@@ -268,7 +268,7 @@ export const requestGroupsFormSettings = {
     {
       label: "Send message when friend request is sent",
       headerCheckbox: true,
-      name: "send_message",
+      name: "send_message_when_friend_request_sent",
       recursive: true,
       isActive: false,
       valid: true,
@@ -277,7 +277,7 @@ export const requestGroupsFormSettings = {
           type: "customSelect",
           isLabeled: false,
           valid: true,
-          name: "message_group_id",
+          name: "send_message_when_friend_request_sent_message_group_id",
           value: "Select message",
           options: [
             {
@@ -303,7 +303,7 @@ export const requestGroupsFormSettings = {
     {
       label: "Send message when friend request is accepted",
       headerCheckbox: true,
-      name: "send_message_accepted",
+      name: "send_message_when_friend_request_accepted",
       recursive: true,
       isActive: false,
       valid: true,
@@ -312,7 +312,7 @@ export const requestGroupsFormSettings = {
           type: "customSelect",
           isLabeled: false,
           valid: true,
-          name: "message_group_id_accepted",
+          name: "send_message_when_friend_request_accepted_message_group_id",
           value: "Select message",
           options: [
             {
@@ -388,7 +388,7 @@ export const requestPostsSettings = {
       label: "Look up for mutual friends?",
       headerCheckbox: true,
       recursive: true,
-      name: "look_up_mutual_friend",
+      name: "lookup_for_mutual_friend",
       isActive: false,
       valid: true,
       fieldOptions: [
@@ -397,7 +397,7 @@ export const requestPostsSettings = {
           isLabeled: false,
           valid: true,
           isHalfWidth: true,
-          name: "mutual_friend_condition",
+          name: "lookup_for_mutual_friend_condition",
           value: "=<",
           options: [
             {
@@ -415,7 +415,7 @@ export const requestPostsSettings = {
 
         {
           type: "stepInput",
-          name: "request_limit",
+          name: "mutual_friend_value",
           isLabeled: false,
           isHalfWidth: true,  
           valid: true,
@@ -597,7 +597,7 @@ export const requestPostsSettings = {
     {
       label: "Send message when friend request is sent",
       headerCheckbox: true,
-      name: "send_message",
+      name: "send_message_when_friend_request_sent",
       recursive: true,
       isActive: false,
       valid: true,
@@ -606,7 +606,7 @@ export const requestPostsSettings = {
           type: "customSelect",
           isLabeled: false,
           valid: true,
-          name: "message_group_id",
+          name: "send_message_when_friend_request_sent_message_group_id",
           value: "Select message",
           options: [
             {
@@ -632,7 +632,7 @@ export const requestPostsSettings = {
     {
       label: "Send message when friend request is accepted",
       headerCheckbox: true,
-      name: "send_message_accepted",
+      name: "send_message_when_friend_request_accepted",
       recursive: true,
       isActive: false,
       valid: true,
@@ -641,7 +641,7 @@ export const requestPostsSettings = {
           type: "customSelect",
           isLabeled: false,
           valid: true,
-          name: "message_group_id_accepted",
+          name: "send_message_when_friend_request_accepted_message_group_id",
           value: "Select message",
           options: [
             {
@@ -720,7 +720,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
       label: "Look up for mutual friends?",
       headerCheckbox: true,
       recursive: true,
-      name: "look_up_mutual_friend",
+      name: "lookup_for_mutual_friend",
       isActive: false,
       valid: true,
       fieldOptions: [
@@ -729,7 +729,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
           isLabeled: false,
           valid: true,
           isHalfWidth: true,
-          name: "mutual_friend_condition",
+          name: "lookup_for_mutual_friend_condition",
           value: "=<",
           options: [
             {
@@ -747,7 +747,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
 
         {
           type: "stepInput",
-          name: "request_limit",
+          name: "mutual_friend_value",
           isLabeled: false,
           isHalfWidth: true,  
           valid: true,
@@ -929,7 +929,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
     {
       label: "Send message when friend request is sent",
       headerCheckbox: true,
-      name: "send_message",
+      name: "send_message_when_friend_request_sent",
       recursive: true,
       isActive: false,
       valid: true,
@@ -938,7 +938,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
           type: "customSelect",
           isLabeled: false,
           valid: true,
-          name: "message_group_id",
+          name: "send_message_when_friend_request_sent_message_group_id",
           value: "Select message",
           options: [
             {
@@ -964,7 +964,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
     {
       label: "Send message when friend request is accepted",
       headerCheckbox: true,
-      name: "send_message_accepted",
+      name: "send_message_when_friend_request_accepted",
       recursive: true,
       isActive: false,
       valid: true,
@@ -973,7 +973,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
           type: "customSelect",
           isLabeled: false,
           valid: true,
-          name: "message_group_id_accepted",
+          name: "send_message_when_friend_request_accepted_message_group_id",
           value: "Select message",
           options: [
             {
@@ -1478,49 +1478,89 @@ export const requestFormAdvncSettings = {
   ],
 };
 
+/**
+ * PAYLOAD DATA FOR REQUEST SETTINGS
+ */
+// export const fr_Req_Payload = {
+//   look_up_interval: "auto",
+//   request_limit_type: "Infinite",
+//   request_limit: 50,
+//   // look_up_mutual_friend: "No",
+//   // mutual_friends_condition: "less_than",
+//   // mutual_friends_value: "",
+//   gender_filter: false,
+//   gender_filter_value: "male",
+//   country_filter_enabled: false,
+//   country_filter: false,
+//   country_filter_value: [],
+//   tier_filter: false,
+//   tier_filter_value: "Tier1",
+//   keyword: false,
+//   selected_keywords: [],
+//   negative_keyword: false,
+//   selected_negative_keywords: [],
+//   resume_last_search: false,
+//   resume_last_search_position: "",
+//   advanced_settings: false,
+//   send_message: false,
+//   message_group_id: "",
+//   dont_send_friend_requests_prople_ive_been_friends_with_before: false,
+//   dont_send_friend_requests_prople_who_send_me_friend_request_i_rejected: false,
+//   dont_send_friend_requests_prople_i_sent_friend_requests_they_rejected: false,
+//   send_message_when_someone_accept_new_friend_request: false,
+//   send_message_when_someone_accept_new_friend_request_settings: {
+//     message_template_id: 14,
+//     send_message_time: 2,
+//     send_message_time_type: "days",
+//   },
+//   re_friending: false,
+//   re_friending_settings: {
+//     remove_pending_friend_request_after: 2,
+//     time_type: "days",
+//     instantly_resend_friend_request: 2,
+//   },
+//   save_settings_for_future_use: false,
+//   profile_viewed: 0,
+//   friend_request_send: 0,
+//   time_saved: 0,
+// };
+
 export const fr_Req_Payload = {
-  look_up_interval: "auto",
-  request_limit_type: "Infinite",
-  request_limit: 50,
-  // look_up_mutual_friend: "No",
-  // mutual_friends_condition: "less_than",
-  // mutual_friends_value: "",
+  skip_admin: false,
   gender_filter: false,
   gender_filter_value: "male",
   country_filter_enabled: false,
   country_filter: false,
   country_filter_value: [],
   tier_filter: false,
-  tier_filter_value: "Tier1",
+  tier_filter_value: "Tier1", // [] or ""
   keyword: false,
   selected_keywords: [],
   negative_keyword: false,
   selected_negative_keywords: [],
-  resume_last_search: false,
-  resume_last_search_position: "",
   advanced_settings: false,
-  send_message: false,
-  message_group_id: "",
-  dont_send_friend_requests_prople_ive_been_friends_with_before: false,
-  dont_send_friend_requests_prople_who_send_me_friend_request_i_rejected: false,
-  dont_send_friend_requests_prople_i_sent_friend_requests_they_rejected: false,
-  send_message_when_someone_accept_new_friend_request: false,
-  send_message_when_someone_accept_new_friend_request_settings: {
-    message_template_id: 14,
-    send_message_time: 2,
-    send_message_time_type: "days",
-  },
+  send_message_when_friend_request_sent: false,
+  send_message_when_friend_request_sent_message_group_id: "",
+  send_message_when_friend_request_accepted: false,
+  send_message_when_friend_request_accepted_message_group_id: "",
   re_friending: false,
   re_friending_settings: {
     remove_pending_friend_request_after: 2,
     time_type: "days",
     instantly_resend_friend_request: 2,
   },
-  save_settings_for_future_use: false,
   profile_viewed: 0,
-  friend_request_send: 0,
+  added_to_friend_queue: 0,
   time_saved: 0,
+  fbUserId: "",
+  settingsType: 6,
+  lookup_for_mutual_friend: true,
+  lookup_for_mutual_friend_condition: "<",
+  mutual_friend_value: 2,
+  reaction: 12,
+  comment: false,
 };
+
 
 export const defaultFormSettings = {
   label: "Settings",

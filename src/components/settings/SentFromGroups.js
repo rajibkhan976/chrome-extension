@@ -51,6 +51,11 @@ const SentFromGroups = () => {
     // console.log("FIRSTTTTTT FORM -- ", firstRowFormSetup);
     // console.log("SECONDDDDD FORM -- ", secondRowFormSetup);
 
+    // SAVING THE API PAYLOAD TO SERVER
+    const handleSaveSettings = () => {
+        console.log("CLIENT PAYLOAD HERE -- ", settingApiPayload);
+    };
+
 
     return (
         <>
@@ -168,9 +173,10 @@ const SentFromGroups = () => {
                         {editType === "basic" ?
                             <button
                                 className="btn btn-edit inline-btn"
-                                onClick={() => {
+                                onClick={(event) => {
                                     setEditType(null);
                                     setIsEditing(false);
+                                    handleSaveSettings(event);
                                 }}
                             >
                                 <TickIcon /> Save
