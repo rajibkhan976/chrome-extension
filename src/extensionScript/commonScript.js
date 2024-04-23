@@ -38,10 +38,28 @@ const getAboutInfo = async (memberId, fbDtsg, userID) => {
       body: helper.serialize(payload),
     }
   );
+  //console.log("api resppppp", getGroupMemberAbout)
   let getGroupMemberAboutResponse = await getGroupMemberAbout.text();
-  helper.makeParsable(
-    getGroupMemberAboutResponse
-  );
+  getGroupMemberAboutResponse = getGroupMemberAboutResponse.split(`}{`)[0];
+  // console.log("About API caL TEXTS_______________________________",getGroupMemberAboutResponse);
+  // getGroupMemberAboutResponse=getGroupMemberAboutResponse+'}';
+  // getGroupMemberAboutResponse=helper.makeParsable(
+  //   getGroupMemberAboutResponse
+  // );
+  // console.log("About API ca;;;;;;;;;;;;");
+  // console.log("getGroupMemberAboutResponse ::: in api callll ", getGroupMemberAboutResponse);
+
+  const regex = /"Details About (.+?)"/;
+  const match = regex.exec(getGroupMemberAboutResponse);
+  let name;
+  if (match) {
+   // console.log(match);
+    name = match[1];
+  } else {
+    console.log("Name not found");
+    name = ""
+  }
+  return name;
 };
 
 const getMemberGender = async (memberId, fbDtsg, userID, groupId) => {
@@ -369,7 +387,7 @@ const getCollectionToken = async (memberId, fbDtsg, userID, aboutKey = "") => {
   return collectionToken;
 };
 
-const sentFriendRequest = async (userID, fbDtsg, memberId, source = "groups_member_list") => {
+const sentFriendRequest = async (userID, fbDtsg, memberId, source = "groups_member_list",docId="9086069781410775") => {
   const payload = {
     av: userID,
     __user: userID,
@@ -390,7 +408,7 @@ const sentFriendRequest = async (userID, fbDtsg, memberId, source = "groups_memb
       "scale": 1
     }),
     server_timestamps: true,
-    doc_id: "9086069781410775"
+    doc_id: docId
   };
 
   let getSentFriendReq = await fetch(
@@ -746,7 +764,119 @@ const getFriendsOfFriends = async (userID, fbDtsg, memberId) => {
     return {status : false, description : getSentFriendReq && getSentFriendReq.errors && getSentFriendReq.errors[0] && getSentFriendReq.errors[0].description};
   }
 }
+const fetchTopPriorityFrQueueRecords = async (fbUserId)=>{
+  console.log("called fetchTopPriorityFrQueueRecords")
+  const apiurl=`${process.env.REACT_APP_FETCH_TOP_FR_QUEUE_RECORDS}?fbUserId=${fbUserId}`;
+  const requestOptions={
+    method:"GET",
+    headers:{
+      'Content-Type': 'application/json',
+      'Authorization': await helper.getDatafromStorage("fr_token")
+    }
+  }
+  try{
+    console.log("api url",apiurl);
+      let res=await fetch(apiurl,requestOptions);
+      if (!res.ok) {
+        // If response is not ok, throw an error with the status text
+        throw new Error(`HTTP error! Status: ${res.status} - ${res.statusText}`);
+      }
+      const data= await res.json();
+      console.log("api response data",data)
+      return data;
 
+  }catch(error){
+    console.error("API ERROR IN FETCING IN TOP 100 FR QUEUE RECORD:",error);
+    return error;
+  } 
+}
+
+const fetchFrQueueSetting= async (fb_user_id)=>{
+  const apiurl=`${process.env.REACT_APP_FETCH_FR_QUEUE_SETTING}?fb_user_id=${fb_user_id}`;
+  const requestOptions={
+    method:"GET",
+    headers:{
+      'Content-Type': 'application/json',
+      'Authorization': await helper.getDatafromStorage("fr_token")
+    }
+  }
+  try{
+      let res=await fetch(apiurl,requestOptions);
+      if (!res.ok) {
+        // If response is not ok, throw an error with the status text
+        throw new Error(`HTTP error! Status: ${res.status} - ${res.statusText}`);
+      }
+      const data= await res.json();
+      return data;
+
+  }catch(error){
+    console.error("API ERROR IN FETCING IN TOP 100 FR QUEUE RECORD:",error);
+    return error;
+  } 
+
+}
+
+const updateFrQueueStatus = async (payload) => {
+  const apiurl=`${process.env.REACT_APP_UPDATE_FR_QUEUE_STATUS}`;
+  const requestOptions={
+    method:"POST",
+    headers:{
+      'Content-Type': 'application/json',
+      'Authorization': await helper.getDatafromStorage("fr_token")
+    },
+    body:JSON.stringify(payload)
+  }
+  try{
+      let res=await fetch(apiurl,requestOptions);
+      if (!res.ok) {
+        // If response is not ok, throw an error with the status text
+        throw new Error(`HTTP error! Status: ${res.status} - ${res.statusText}`);
+      }
+      const data= await res.json();
+      return data;
+  }catch(error){
+    console.error("API ERROR IN UPDATING FR QUE STATUS",error);
+    return error;
+  }
+}
+
+async function getGenderCountryTierWithName (friendName){
+  return new Promise((resolve,reject)=>{
+    fetch(process.env.REACT_APP_GENDER_COUNTRY_AND_TIER_URL, {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        "name": friendName,
+      }),
+    })
+    .then((response) => response.json())
+    .then((res) => {
+      const resp = res.data ? res.data : res;
+
+      if (!resp.errorType) {
+        
+        resolve({
+          status : true,
+          country : res.body.countryName,
+          tier : res.body.Tiers,
+          gender : res.body.gender
+        })
+      }  
+    })
+    .catch((err) => {
+      resolve({
+        status : false,
+        country : "",
+        tier : "",
+        gender : ""
+      })
+      console.log("err ::: ", err);
+    });
+  })
+}
 
 const common = {
   getAboutInfo : getAboutInfo,
@@ -764,7 +894,12 @@ const common = {
   checkHasConversation:checkHasConversation,
   fetchAllCampaignList : fetchAllCampaignList,
   checkCampaignStatus : checkCampaignStatus,
-  checkMessageStatus : checkMessageStatus
+  checkMessageStatus : checkMessageStatus,
+  fetchTopPriorityFrQueueRecords:fetchTopPriorityFrQueueRecords,
+  fetchFrQueueSetting:fetchFrQueueSetting,
+  updateFrQueueStatus:updateFrQueueStatus,
+  getGenderCountryTierWithName:getGenderCountryTierWithName
+
 };
 
 export default common;

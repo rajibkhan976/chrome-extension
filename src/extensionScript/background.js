@@ -2,6 +2,8 @@
 import helper from "./helper";
 import common from "./commonScript";
 import { settingsType } from "../config/config";
+import { ChromeStorageQueue } from './ChromeStorageQueue.js';
+import generateMessage from "./generateMessage.js";
 const APPURL = process.env.REACT_APP_APP_URL
 const settingApi = process.env.REACT_APP_SETTING_API;
 // const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
@@ -9,10 +11,19 @@ const unfriendApi = "https://www.facebook.com/ajax/profile/removefriendconfirm.p
 const action_url = "https://www.facebook.com/friends/list?opener=fr_sync";
 let sendMessageOnSomeOneAccptMyFR_EvenHasConversation=false;
 let sendMessageOnIAccptFR_EvenHasConversation=false;
+let successColor = "color:green; font-size:16px;"
 const HEADERS = {
   "Content-Type": "application/json",
 };
 let gapBetweenTwoDays = 0;
+// let socket = io(process.env.REACT_APP_SOCKET_URL, {
+//   transports: ["websocket", "polling"], // use WebSocket first, if available
+// });
+
+// * initialize the Queue for friend request 
+const fRQueue = new ChromeStorageQueue('friendRequestQueue');
+const fRFinishedQueue = new ChromeStorageQueue('friendRequestFinishedQueue')
+
 
 const schedulerIntvTime = 10;
 const pendingFRIntvTime = 120;
@@ -402,6 +413,28 @@ chrome.runtime.onMessageExternal.addListener(async function (
     case "update_schedules" : 
       console.log("update_schedules invoked");
       startCampaignScheduler();
+      break;
+
+    case "fRqueSettingUpdate":
+      if(request && request.payload){
+        // console.log("frQueSettingUpdate", request.frQueSetting)
+        let resData=request.payload;
+        console.log("frQueSettingUpdate", resData);
+        let frQueSettings={
+          "runningStatus":resData.frQueueRunning,
+          "requestLimited": resData.requestLimited,
+          "requestLimitValue": resData.requestLimitValue,
+          "timeDelay": 3,
+        }
+
+        FrQueue_Manager();
+
+
+      }
+      sendResponseExternal({
+        status: true,
+        message: "345 satus updated",
+      });
       break;
 
     default:
@@ -928,7 +961,14 @@ chrome.alarms.onAlarm.addListener(async(alarm) => {
             console.log("next campaign :::: ", nextCampaign)
             satrtHourlyScheduler(nextCampaign, indx);
           break;
-        
+            case "frQueueFetchAlarm":
+      console.log("-----------------Friend Request Queue Scheduler------------------", alarm, alarm.name);
+      FrQueue_Manager();
+      break;
+    case "frQueueRunnerAlarm":
+      console.log("-----------------Friend Request Queue Runner Scheduler------------------", alarm, alarm.name);
+      runFriendRequestQueue();
+      break;
       case "CampaignMin" : 
             console.log("-----------------Campaign Min Scheduler------------------", alarm, alarm.name)
             const campaignIdd = alarm && alarm.name && alarm.name.split('_')[1];
@@ -1760,8 +1800,13 @@ async function MSQS(){
     if(dtsg && fr_fbId){
       removeFromQueue(async function (queueInfo) {
           if (queueInfo) {
-
-            if(isDateAndTimeNotPassed(queueInfo.expiration_time)){
+            if(queueInfo.notCampaignMessage){
+              //sending message whch are not from campaign:::::
+              stopSendingLoop();
+              let fbResponse = await   sendMessageViaFacebook(dtsg,queueInfo)
+              handleResponse(queueInfo, fbResponse);
+              manageSendingLoop();
+            }if(isDateAndTimeNotPassed(queueInfo.expiration_time)){
               console.log("The queue info time is not expired",queueInfo)
               // clear the alarm and create a new one for next one
               stopSendingLoop()   
@@ -1940,11 +1985,20 @@ async function handleResponse(queueInfo, response) {
 
 // Function to add a queueInfo to the queue in Chrome storage
 function addToQueue(queueInfo) {
-  chrome.storage.local.get({ messageQueue: [] }, function (result) {
+  if (queueInfo.notCampaignMessage) {
+    chrome.storage.local.get({ messageQueue: [] }, function (result) {
+      const queue = result.messageQueue;
+      queue.unshift(queueInfo);
+      chrome.storage.local.set({ messageQueue: queue });
+    });
+  } else {
+    chrome.storage.local.get({ messageQueue: [] }, function (result) {
       const queue = result.messageQueue;
       queue.push(queueInfo);
       chrome.storage.local.set({ messageQueue: queue });
-  });
+    });
+  }
+
 }
 
 // Function to retrieve and remove the first message from the queue
@@ -2211,3 +2265,237 @@ const campaignToMsqs = async(campaign, indx) => {
     // await helper.removeDatafromStorage("Campaign_" + campaign.campaign_id);
   }
 }
+
+//*Friend request queue: START :::::::::
+function frQueueSettingSetter(runningStatus, requestLimit, requestLimitValue, timeDelay) {
+  let settting = {
+    "runningStatus": runningStatus,
+    "requestLimited": requestLimit,
+    "requestLimitValue": requestLimitValue,
+    "timeDelay": timeDelay,
+  }
+  helper.saveDatainStorage('frQueueSetting', settting);
+}
+
+async function frQueueSentCountInit() {
+  let countObjStr = await helper.getDatafromStorage('frQueueSentCount');
+  if (countObjStr) {
+    console.log("init count: ", countObjStr);
+    let frCurrQueueCount = countObjStr;
+    if (frCurrQueueCount.dateString !== helper.getTodayDate()) {
+      console.log();
+      let countObj = {
+        "count": 0,
+        "dateString": helper.getTodayDate()
+      }
+      helper.saveDatainStorage('frQueueSentCount', countObj);
+    }
+
+  } else {
+    let countObj = {
+      "count": 0,
+      "dateString": helper.getTodayDate()
+    }
+    helper.saveDatainStorage('frQueueSentCount', countObj);
+  }
+
+}
+
+//function to increment frQueueSentCount
+async function frQueSentCountIncrement() {
+  let frCurrQueueCount = await helper.getDatafromStorage('frQueueSentCount');
+  console.log('Increment count call::::::', frCurrQueueCount);
+  if (frCurrQueueCount && frCurrQueueCount.dateString && frCurrQueueCount.dateString === helper.getTodayDate()) {
+
+
+    let countObj = {
+      "count": frCurrQueueCount.count + 1,
+      "dateString": frCurrQueueCount.dateString
+    }
+    console.log('AFTER Increment count ::::::', countObj);
+    helper.saveDatainStorage('frQueueSentCount', countObj);
+
+  } else {
+    let countObj = {
+      "count": 0,
+      "dateString": helper.getTodayDate()
+    }
+    helper.saveDatainStorage('frQueueSentCount', countObj);
+
+  }
+}
+
+// Function to create an alarm that fires every 1 hour
+function frQueFetchAlarm_Start() {
+  chrome.alarms.create("frQueueFetchAlarm", { periodInMinutes: 60 });
+}
+
+// Function to stop the alarm
+function frQueFetchAlarm_Stop() {
+  chrome.alarms.clear("frQueueFetchAlarm");
+}
+function frQueueRunnerAlarm_Start(timeDelay) {
+  chrome.alarms.create("frQueueRunnerAlarm", { periodInMinutes: timeDelay });
+}
+
+function frQueueRunnerAlarm_Stop() {
+  chrome.alarms.clear("frQueueRunnerAlarm");
+
+}
+
+
+//Kill function
+function frQue_Kill() {
+  frQueueRunnerAlarm_Stop();
+  frQueFetchAlarm_Stop()
+}
+
+
+const FrQueue_Manager = async (callFromFetchAlarm = false) => {
+  console.log("%c The FRQueueManager STARTED it's process", successColor);
+  const userFBDetails = await helper.getDatafromStorage('fbTokenAndId');
+  //fetch api call to get the FRQUEUE Settings
+  const settingResp = await common.fetchFrQueueSetting(userFBDetails.userID);
+  const frQueSettings = settingResp.data[0];
+  console.log("FR QueUE Settings", frQueSettings);
+  if (frQueSettings && frQueSettings.run_friend_queue) { // * if the Run true:>
+    //save FR queue setting in local storage
+    frQueueSettingSetter(frQueSettings.run_friend_queue, frQueSettings.request_limited, frQueSettings.request_limit_value, frQueSettings.time_delay);
+    //Init run counter
+    frQueueSentCountInit();
+    //then fetch first 100 data from api:
+    const frQueueResp = await common.fetchTopPriorityFrQueueRecords(userFBDetails.userID);
+    console.log("fr array api RESPONSE:>> ", frQueueResp);
+    const frQueArray = frQueueResp.data;
+    console.log("fr array api");
+    console.log("frque array", frQueArray);
+    if (frQueArray.length > 0) {
+      console.log(`${frQueArray.length} Items Added to FR queue storage`, frQueArray);
+      //RESET FR queue storage:
+      //delete all in FR queue storage
+      await fRQueue.removeAll();
+      //Store data in FR queue:
+      let add = await fRQueue.addBulk(frQueArray);
+      const fr_token = await helper.getDatafromStorage("fr_token")
+      console.log("after add", add)
+      //start FR queue Runner alarm start:
+      console.log("frQueueRunnerAlarm  started DELAY::: ", frQueSettings.time_delay);
+      frQueueRunnerAlarm_Start(frQueSettings.time_delay);
+      //start FR queue fetch alarm start:
+      console.log("frQueueFetchAlarm  started:::");
+      frQueFetchAlarm_Start();
+
+    } else {
+      console.log("No data in FR queue STOPPING ALARMS!!!!!");
+      frQue_Kill();
+      return;
+    }
+  } else { //! if the Run false:>
+    //Kill the FR queue runner
+    console.log("KILLING FR queue AS the FR queue runner is OFF!!!!!")
+    frQue_Kill();
+  }
+}
+
+
+//function to check the current FR queue is eligible to run or not
+async function isFrQueueEligibleToRun() {
+  let frQueCount = await helper.getDatafromStorage('frQueueSentCount');
+  let frQueSettings = await helper.getDatafromStorage('frQueueSetting');
+  console.log("::::::::::Is  Eligible Check ::::::::::::");
+  console.log("frq count:", frQueCount);
+  console.log("frq settings", frQueSettings);
+  if (!frQueSettings.requestLimited) {
+    return true;
+  } else if (frQueSettings.requestLimited && frQueCount && frQueCount.dateString) {
+    if (frQueCount.dateString === helper.getTodayDate()) {
+      if (frQueCount.count <= frQueSettings.requestLimitValue) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+/**
+ * 
+ * @param {*} fbId 
+ * @param {*} message 
+ * @param {*} name 
+ * @param {*} receiverId 
+ * @param {*} memberId 
+ */ 
+const storeInMsqsFront=(fbId,message,name,receiverId,memberId="")=>{
+  const payload={
+    frienderFbId: fbId,
+    message: message,
+    recieverName: name,
+    recieverFbId : receiverId,
+    memberId : memberId,
+    notCampaignMessage:true
+  }
+  addToQueue(payload)
+}
+/**
+ * Function to send friend request by queue
+ */
+const runFriendRequestQueue = async () => {
+  const userFBDetails = await helper.getDatafromStorage('fbTokenAndId');
+  let first = await fRQueue.pullFromQueue();
+  let isEligible = await isFrQueueEligibleToRun();
+  console.log("Is eligible to run", isEligible);
+  if (first && isEligible) {
+    console.log("user's details sending fr request from QUE PULL", first);
+    console.log("userFBDetails: ", userFBDetails);
+    try {
+      const userFbName = await common.getAboutInfo(first.facebook_id, userFBDetails.fbDtsg, userFBDetails.userID);
+      console.log("user FB details nameeeeee:::::", userFbName);
+      const friendGenderCountrytier = await common.getGenderCountryTierWithName(userFbName);
+      console.log("friendGenderCountrytier***************", friendGenderCountrytier);
+      let sentFrReqResponse = await common.sentFriendRequest(userFBDetails.userID, userFBDetails.fbDtsg, first.facebook_id, "profile_button", "7920515821315043");
+      console.log("FB request api call response??", sentFrReqResponse);
+      console.log("friend request sending done for userID: ", first.fb_profile_url);
+      await frQueSentCountIncrement();
+      //update friend request send satus to accepted
+      let updatePayload = { "q_id": first._id, "friendName": userFbName, "gender": friendGenderCountrytier.country };
+      let updateResp;
+      if (!sentFrReqResponse.status) {
+        updatePayload["status"] = 0;
+      } else {
+        updatePayload["status"] = 1;
+        //await helper.sleep(15000);
+        //Sending message on send request
+        if (first.message_group_request_sent && first.message_group_request_sent.message.length > 0) {
+          console.log("Sending message BLOCK Started///");
+          const friendDetails = {
+            friendName: userFbName,
+            friendShortName: userFbName.split(" ")[0],
+            friendGender: friendGenderCountrytier.gender,
+            country: friendGenderCountrytier.country,
+            tier: friendGenderCountrytier.tier
+          }
+          const finalMsg = generateMessage(first.message_group_request_sent.message, friendDetails);
+          console.log("!!!!!!ADDED MESSAGE IN MSQS FROM FR QUEUE!!!!");
+          console.log("final message after generating[[[[[[", finalMsg);
+          storeInMsqsFront(userFBDetails.userID, finalMsg, userFbName, first.facebook_id);
+        }
+      }
+      console.log("UPDATE FR QUEUE status update payload", updatePayload);
+      updateResp = await common.updateFrQueueStatus(updatePayload);
+      console.log("updating response of fr que sent success", updateResp);
+    } catch (error) {
+      //update friend request send satus to rejected
+      const updateResp = await common.updateFrQueueStatus({ "q_id": first._id, "friendName": "NaN", "gender": "NaN", "status": 0 });
+      console.log("updating response of fr que sent rejected", updateResp);
+      console.log("Friend request sent error::::" + error);
+    }
+
+  } else {
+    console.log(":::KILLING the fr queue AS there is No data  OR NOT ELIGIBLE in local QUEUE !!!!!");
+    frQue_Kill();
+    //stop the process
+  }
+}
+//*Calling FrQueue_Manager ON serviceworker load: START :::::::::
+FrQueue_Manager();
+
+// !Friend request queue: END  :::::::::
