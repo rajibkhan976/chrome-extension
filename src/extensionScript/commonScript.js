@@ -62,6 +62,65 @@ const getAboutInfo = async (memberId, fbDtsg, userID) => {
   return name;
 };
 
+
+const getProfileInfo = async (memberId, fbDtsg, userID) => {
+  const payload = {
+    av: userID,
+    __user: userID,
+    __a: 1,
+    __comet_req: 15,
+    fb_dtsg: fbDtsg,
+    fb_api_caller_class: "RelayModern",
+    fb_api_req_friendly_name: "ProfileCometHeaderQuery",
+    variables: JSON.stringify({
+      scale:2,
+      selectedID:memberId,
+      selectedSpaceType:"community",
+      shouldUseFXIMProfilePicEditor:false,
+      userID:memberId}),
+    server_timestamps: true,
+    doc_id: 7538113772922088,
+  };
+
+  const getGroupMemberAbout = await fetch(
+    "https://www.facebook.com/api/graphql/",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "text/html,application/json",
+        "x-fb-friendly-name": "ProfileCometAboutAppSectionQuery",
+      },
+      body: helper.serialize(payload),
+    }
+  );
+  //console.log("api resppppp", getGroupMemberAbout)
+  let getGroupMemberAboutResponse = await getGroupMemberAbout.text();
+  getGroupMemberAboutResponse = getGroupMemberAboutResponse.split(`}{`)[0];
+  // Extract name
+const nameRegex = /"name":\s*"(.*?)"/;
+const nameMatch = nameRegex.exec(getGroupMemberAboutResponse);
+let name;
+if (nameMatch) {
+  name = nameMatch[1]; // Captured group (the name)
+} else {
+  name = "";
+}
+
+// Extract profile picture URL
+const pictureRegex = /"uri":\s*"(.*?)"/g; // Use 'g' for all occurrences
+const pictureMatch = pictureRegex.exec(getGroupMemberAboutResponse);
+let profilePictureUrl;
+if (pictureMatch) {
+  profilePictureUrl = pictureMatch[1].replace(/for\s*\(\s*;\s*;\s*\)\s*;\s*/, ""); // Captured group (the URL)
+} else {
+  profilePictureUrl = "";
+} 
+  return {
+    name: name,
+    profilePictureUrl: profilePictureUrl.replace(/\\/g, '')
+  };
+};
 const getMemberGender = async (memberId, fbDtsg, userID, groupId) => {
   const payload = {
     av: userID,
@@ -810,7 +869,7 @@ const fetchFrQueueSetting= async (fb_user_id)=>{
       return data;
 
   }catch(error){
-    console.error("API ERROR IN FETCING IN TOP 100 FR QUEUE RECORD:",error);
+    console.error("API ERROR IN FETCING FR QUEUE SETTING :",error);
     return error;
   } 
 
@@ -878,6 +937,50 @@ async function getGenderCountryTierWithName (friendName){
   })
 }
 
+function addFriendBtnClick(){
+  const button = document.querySelector('[aria-label="Add friend"][role="button"]');
+  const name=document.querySelectorAll('h1:not([dir="auto"]')[1].textContent
+  const profilePicUrl=document.querySelectorAll('svg[data-visualcompletion="ignore-dynamic"][role="img"]')[1].querySelector('image').getAttribute('xlink:href')
+  let res={ status:false,name: name.length > 0 ? name:"",profilePicUrl:profilePicUrl?profilePicUrl:""};
+    if (button) {
+      console.log("add friend btn: ", button);
+      button.click();
+      res.status=true
+    } else {
+      console.log("Add friend button not found.");// Reject promise with failure status
+    }
+    return res;
+}
+
+const sendFriendRequestByDOMparsing = (profileUrl) => {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.create({ url: profileUrl,active: false, pinned: true, selected: false }, (tab) => {
+      // Close the tab after a delay (adjust as needed)
+      setTimeout(() => {
+        // For demonstration, let's call your function
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          //files: ["contentScript.js"], // Inject the content script
+          func: addFriendBtnClick
+        }).then((injectResults) => { // Access result
+          resolve(injectResults[0]);
+          setTimeout(()=>{
+            chrome.tabs.remove(tab.id);
+          }, 8000)
+        }).catch((err) => {
+          reject({ status: false, error: err });
+          setTimeout(()=>{
+            chrome.tabs.remove(tab.id);
+          }, 8000)
+        })
+       
+      }, 20000);
+    })
+  })
+}
+ 
+
+
 const common = {
   getAboutInfo : getAboutInfo,
   getMemberGender : getMemberGender,
@@ -898,8 +1001,9 @@ const common = {
   fetchTopPriorityFrQueueRecords:fetchTopPriorityFrQueueRecords,
   fetchFrQueueSetting:fetchFrQueueSetting,
   updateFrQueueStatus:updateFrQueueStatus,
-  getGenderCountryTierWithName:getGenderCountryTierWithName
-
+  getGenderCountryTierWithName:getGenderCountryTierWithName,
+  getProfileInfo:getProfileInfo,
+  sendFriendRequestByDOMparsing:sendFriendRequestByDOMparsing
 };
 
 export default common;

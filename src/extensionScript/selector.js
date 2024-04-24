@@ -21,7 +21,8 @@ const selectors = {
     loginBtn : ['button[data-testid="royal_login_button"][name="login"]', 'div[aria-label="Accessible login button"][role="button"]'],
     fbScripts : ['script[type="application/json"][data-sjs]'],
     incoming_requests_1 : ['div[aria-label="Friend requests"][role="navigation"]'],
-    incoming_requests_2 : ['div[aria-label="Friend Requests"][role="navigation"]']
+    incoming_requests_2 : ['div[aria-label="Friend Requests"][role="navigation"]'],
+    fb_profile_addfriend_btn: ['div[aria-label="Add friend"][role="button"]']
 }
 
 export default selectors;
