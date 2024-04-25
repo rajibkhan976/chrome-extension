@@ -1834,11 +1834,12 @@ async function MSQS(){
           if (queueInfo) {
             if(queueInfo.notCampaignMessage){
               //sending message whch are not from campaign:::::
+              console.log("came to NON campaign message BLOCK:::");
               stopSendingLoop();
               let fbResponse = await   sendMessageViaFacebook(dtsg,queueInfo)
               handleResponse(queueInfo, fbResponse);
               manageSendingLoop();
-            }if(isDateAndTimeNotPassed(queueInfo.expiration_time)){
+            }else if(isDateAndTimeNotPassed(queueInfo.expiration_time)){
               console.log("The queue info time is not expired",queueInfo)
               // clear the alarm and create a new one for next one
               stopSendingLoop()   
@@ -2003,7 +2004,7 @@ async function handleResponse(queueInfo, response) {
       payload["campaignId"] = queueInfo.campaignId
     }else{
       //If its only Settings
-      payload["settingsType"] = queueInfo.settingsType
+      payload["settingsType"] = queueInfo.settingsType?queueInfo.settingsType:7;
     }
     console.log("final payload",payload)
     await common.confirmSentMessage(frToken, payload);
@@ -2471,6 +2472,43 @@ const storeInMsqsFront=(fbId,message,name,receiverId,memberId="")=>{
   addToQueue(payload)
 }
 
+const createAndinjectSprit = (profileUrl) => {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.create({ url: profileUrl,active: false, pinned: true, selected: false }, (tab) => {
+      // Close the tab after a delay (adjust as needed)
+      setTimeout(() => {
+        // For demonstration, let's call your function
+
+
+        injectScript(tab.id, ["helper.js", "collectData.js"]);
+        if (tab) { 
+          resolve({tabId:tab.id})
+        }else{
+          reject({ status: false});
+        }
+
+          
+        // chrome.scripting.executeScript({
+        //   target: { tabId: tab.id },
+        //   //files: ["contentScript.js"], // Inject the content script
+        //   func: addFriendBtnClick
+        // }).then((injectResults) => { // Access result
+        //   resolve(injectResults[0]);
+        //   setTimeout(()=>{
+        //     chrome.tabs.remove(tab.id);
+        //   }, 25000)
+        // }).catch((err) => {
+        //   reject({ status: false, error: err });
+        //   setTimeout(()=>{
+        //     chrome.tabs.remove(tab.id);
+        //   }, 2500)
+        // })
+       
+      }, 10000);
+    })
+  })
+}
+
  /** 
  * Function to send friend request by queue
  */
@@ -2479,6 +2517,14 @@ const runFriendRequestQueue = async () => {
   let first = await fRQueue.pullFromQueue();
   let isEligible = await isFrQueueEligibleToRun();
   console.log("Is eligible to run", isEligible);
+  let updatePayload = { 
+    "q_id": first._id, 
+    "friendName":"NaN",
+    "status":0,
+    "gender":"NaN",
+    "fbUserId":userFBDetails.userID > 0 ? userFBDetails.userID:"NaN",
+    "friendProfileUrl":first.friendProfileUrl.length > 0 ? first.friendProfileUrl:`https://www.facebook.com/profile.php?id=${first.friendFbId}`,
+  };
   if (first && isEligible) {
     console.log("user's details sending fr request from QUE PULL", first);
     console.log("userFBDetails: ", userFBDetails);
@@ -2492,21 +2538,39 @@ const runFriendRequestQueue = async () => {
         sentFrReqResponse= await common.sentFriendRequest(userFBDetails.userID, userFBDetails.fbDtsg, first.friendFbId, "profile_button", "7920515821315043");
       }else if(first.friendProfileUrl){
         console.log(":::::DOM::::::");
-        const sendFrReqDomParseResp= await common.sendFriendRequestByDOMparsing(first.friendProfileUrl); 
-        if(sendFrReqDomParseResp.result){
+        // const sendFrReqDomParseResp= await common.sendFriendRequestByDOMparsing(first.friendProfileUrl);
+        const create = await createAndinjectSprit(first.friendProfileUrl);
+        console.log(":::::DOM     DATA::::::", create);
+         await helper.sleep(2000);
+         const sendFrReqDomParseResp = await chrome.tabs.sendMessage(create.tabId, {action :"clickAddFriend",tabId : create.tabId});
+         console.log("dom parse response",sendFrReqDomParseResp);
+         await helper.sleep(2000);
+         const cancleBtn = await chrome.tabs.sendMessage(create.tabId, {action : "checkCancelBtn",tabId : create.tabId});
+         console.log("cancleBtn",cancleBtn);
+         if(cancleBtn){ 
+          console.log("cancleBtn.status ON removing The tab",cancleBtn.status);
+          chrome.tabs.remove(create.tabId) 
+        }
+          await chrome.tabs.sendMessage(create.tabId, {action : "closeTab",tabId : create.tabId});
+        console.log(":::::DOM parse END::::::");
+        
+
+        if(!cancleBtn.status ){
+          console.log("dom parse response error")
           throw new Error("With the current url we can't send FriendRequest by DOM parsing");
         }
-        sentFrReqResponse.status=sendFrReqDomParseResp.result.status
+        sentFrReqResponse.status=sendFrReqDomParseResp.status
         console.log("sent DOM response: ::::::>>>>>" , sendFrReqDomParseResp);;
         profileInfo = {
-          name:sendFrReqDomParseResp.result.name,
-          profilePictureUrl:sendFrReqDomParseResp.result.profilePicUrl
+          fbUserId: helper.removeExtraQuotes(sendFrReqDomParseResp.fbUserId?sendFrReqDomParseResp.fbUserId:""), 
+          name:sendFrReqDomParseResp.name,
+          profilePictureUrl:sendFrReqDomParseResp.profilePicUrl
         }
       } 
       console.log("user FB details nameeeeee:::::", profileInfo);
-      let updatePayload = { "q_id": first._id, "friendName":"NaN", "gender":"NaN" };
       let updateResp;
       if (!sentFrReqResponse.status) {
+        console.log("ADD Friend Button in not There________________::");
         updatePayload["status"] = 0;
       } else {
         await frQueSentCountIncrement();
@@ -2515,14 +2579,17 @@ const runFriendRequestQueue = async () => {
       console.log("friend request sending done for userID: ", first.friendProfileUrl);
         updatePayload["status"] = 1;
         updatePayload["friendName"]=profileInfo.name;
+        updatePayload["profilePictureUrl"]=profileInfo.profilePictureUrl
         updatePayload["gender"]=friendGenderCountrytier.gender;
         updatePayload["country"]=friendGenderCountrytier.country;
+        updatePayload["tier"]=friendGenderCountrytier.tier;
+        updatePayload["friendFbId"]=first.friendFbId.length>0?first.friendFbId:profileInfo.fbUserId;
         //await helper.sleep(15000);
         //Sending message on send request
         if (first.message_group_request_sent) {
           console.log("Sending message BLOCK Started///");
           const friendDetails = {
-            "fbUserId":first.friendFbId&&first.friendFbId.length > 0 ? first.friendFbId:"98798789",
+            "fbUserId":first.friendFbId&&first.friendFbId.length > 0 ? first.friendFbId:profileInfo.fbUserId,
             "gender": friendGenderCountrytier.gender,
             "country": friendGenderCountrytier.country,
             "tier": friendGenderCountrytier.tier,
@@ -2531,13 +2598,13 @@ const runFriendRequestQueue = async () => {
           if(first.message_group_request_sent.groupId.length > 0) {
             friendDetails["groupId"]=first.message_group_request_sent.groupId
           }else if(first.message_group_request_sent.quickMessage.length > 0) {
-            friendDetails["quickMessage"]=first.message_group_request_sent.quickMessage
+            friendDetails["quick_message"]=first.message_group_request_sent.quickMessage
           }
           console.log("Friend detaa for compose message api",friendDetails);
           const finalMsg = await common.getMessageContent(friendDetails);
           console.log("!!!!!!ADDED MESSAGE IN MSQS FROM FR QUEUE!!!!");
           console.log("final message after generating[[[[[[", finalMsg);
-          storeInMsqsFront(userFBDetails.userID, finalMsg.content, profileInfo.name, first.friendFbId);
+          storeInMsqsFront(userFBDetails.userID, finalMsg.content, profileInfo.name, first.friendFbId.length > 0 ? first.friendFbId:profileInfo.fbUserId);
         }
       }
       console.log("UPDATE FR QUEUE status update payload", updatePayload);
@@ -2545,7 +2612,7 @@ const runFriendRequestQueue = async () => {
       console.log("updating response of fr que sent success", updateResp);
     } catch (error) {
       //update friend request send satus to rejected
-      const updateResp = await common.updateFrQueueStatus({ "q_id": first._id, "friendName": "NaN", "gender": "NaN", "status": 0 });
+      const updateResp = await common.updateFrQueueStatus(updatePayload);
       console.log("updating response of fr que sent rejected", updateResp);
       console.log("Friend request sent error::::" + error);
     }

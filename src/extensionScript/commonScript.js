@@ -937,19 +937,25 @@ async function getGenderCountryTierWithName (friendName){
   })
 }
 
-function addFriendBtnClick(){
+function addFriendBtnClick() {
   const button = document.querySelector('[aria-label="Add friend"][role="button"]');
-  const name=document.querySelectorAll('h1:not([dir="auto"]')[1].textContent
-  const profilePicUrl=document.querySelectorAll('svg[data-visualcompletion="ignore-dynamic"][role="img"]')[1].querySelector('image').getAttribute('xlink:href')
-  let res={ status:false,name: name.length > 0 ? name:"",profilePicUrl:profilePicUrl?profilePicUrl:""};
-    if (button) {
-      console.log("add friend btn: ", button);
-      button.click();
-      res.status=true
-    } else {
-      console.log("Add friend button not found.");// Reject promise with failure status
-    }
-    return res;
+  const name = document.querySelectorAll('h1:not([dir="auto"]')[1].textContent
+  const profilePicUrl = document.querySelectorAll('svg[data-visualcompletion="ignore-dynamic"][role="img"]')[1].querySelector('image').getAttribute('xlink:href')
+  let res = { status: false, name: name.length > 0 ? name : "", profilePicUrl: profilePicUrl ? profilePicUrl : ""};
+  let content = document.body.innerHTML;
+  let match = content.match(/"userID":"(\d+)"/);
+  if (match) { 
+    let userID= match[0].split(':')[1];
+    res["fbUserId"]= userID.length > 0? userID:"NA";
+   }
+  if (button) {
+    console.log("add friend btn: ", button);
+    button.click();
+    res.status = true
+  } else {
+    console.log("Add friend button not found.");// Reject promise with failure status
+  }
+  return res;
 }
 
 const sendFriendRequestByDOMparsing = (profileUrl) => {
@@ -966,15 +972,15 @@ const sendFriendRequestByDOMparsing = (profileUrl) => {
           resolve(injectResults[0]);
           setTimeout(()=>{
             chrome.tabs.remove(tab.id);
-          }, 8000)
+          }, 25000)
         }).catch((err) => {
           reject({ status: false, error: err });
           setTimeout(()=>{
             chrome.tabs.remove(tab.id);
-          }, 8000)
+          }, 2500)
         })
        
-      }, 20000);
+      }, 25000);
     })
   })
 }

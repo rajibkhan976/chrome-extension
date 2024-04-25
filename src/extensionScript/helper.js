@@ -477,6 +477,12 @@ const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toStri
 return formattedDate // Outputs YYYY-MM-DD format (e.g., 2024-04-09)
 
 }
+const removeExtraQuotes = (stringWithQuotes) => {
+  if (!stringWithQuotes || !stringWithQuotes.trim()) {
+    return "";
+  }
+  return stringWithQuotes.replace(/^"(.*)"$/u, (_, capturedValue) => capturedValue);
+};
 
 const helper =
 {
@@ -505,6 +511,7 @@ const helper =
   getCurrentDayAndTimein:getCurrentDayAndTimein,
   gapBetweenTowdays:gapBetweenTowdays,
   getTodayDate:getTodayDate,
+  removeExtraQuotes:removeExtraQuotes
 };
 
 export default helper
