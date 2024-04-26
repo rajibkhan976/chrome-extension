@@ -362,7 +362,7 @@
             display: flex;
             align-items: center;
             column-gap: 4px;
-            @include theme-aware('color', 'text-para-color');
+            @include theme-aware("color", "text-para-color");
 
             ul {
                 display: flex;
@@ -402,6 +402,7 @@
     column-gap: 8px;
     border-top: 1px solid;
     @include theme-aware("border-top-color", "border-color");
+    justify-content: space-between;
 
     .btn {
         min-height: 1px;
@@ -423,6 +424,10 @@
             @include theme-aware("stroke", "text-color");
         }
     }
+
+    .setting-footer-btn-section {
+        gap: 10px;
+    }
 }
 
 .btn-run {
@@ -434,4 +439,30 @@
     border: 0.75px solid rgba(255, 255, 255, 0.1);
     @include theme-aware("background-color", "setting-cell-bg");
     @include theme-aware("color", "text-para-color");
+}
+
+.stop-btn {
+    min-height: 1px;
+    height: 30px;
+    padding-inline: 15px;
+    font-weight: 600;
+    border: 0.75px solid #dc0000;
+    background-color: #dc0000;
+    @include border-radius(3px);
+    @include theme-aware("color", "text-color");
+    @include theme-aware("background-color", "#DC0000");
+    @include theme-aware("color", "white");
+
+    span.icon-span {
+        line-height: 30px;
+        margin-right: 4px;
+    }
+    span {
+        line-height: 27px;
+    }
+}
+
+.pause-btn {
+    background-color: #1c1c1e !important;
+    border: 0.75px solid rgb(255 255 255 / 20%);
 }

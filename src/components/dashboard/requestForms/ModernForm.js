@@ -313,7 +313,7 @@ const GroupsRequestForm = ({
                         setIsLoding(false);
 
                         setSettingApiPayload(fr_Req_Payload);
-                        setFormSetup(requestFormSettings);
+                        // setFormSetup(requestFormSettings);
                     }
                 })
                 .catch((err) => {
@@ -1164,7 +1164,7 @@ const GroupsRequestForm = ({
                                 element.options.length <= 0 && (
                                     <div className="fr-req-nomessage-text">
                                         <InfoIcon /> You haven’t created any message group yet.{" "}
-                                        <span>
+                                        <button className="fr-req-nomessage-btn">
                                             <a
                                                 href={`${Webview_URL}/messages/groups`}
                                                 target="_blank"
@@ -1172,7 +1172,7 @@ const GroupsRequestForm = ({
                                                 Create group
                                                 <BoxOutIcon />
                                             </a>
-                                        </span>{" "}
+                                        </button>{" "}
                                     </div>
                                 )}
 
@@ -1214,25 +1214,32 @@ const GroupsRequestForm = ({
                                     onClickOption={handleCustomSelectClick}
                                 />
                             </div>
+
                             {!element.valid && (
                                 <p className="error-msg">Field can't be empty or '0'!</p>
                             )}
 
-                            {element.name === "message_group_id" &&
+                            {(element.name === "send_message_when_friend_request_sent_message_group_id" ||
+                                element.name === "send_message_when_friend_request_accepted_message_group_id") &&
                                 element &&
                                 element.options &&
                                 element.options.length <= 0 && (
                                     <div className="fr-req-nomessage-text">
-                                        <InfoIcon /> You haven’t created any message group yet.{" "}
-                                        <span>
+                                        <div className="fr-req-nomessage-title">
+                                            <InfoIcon />
+                                            <span className="fr-req-title-span">You haven’t created any message group yet.{" "}</span>
+                                        </div>
+
+                                        <div className="fr-req-nomessage-btn">
                                             <a
                                                 href={`${Webview_URL}/messages/groups`}
                                                 target="_blank"
+                                                className="fr-req-nomessage-a"
                                             >
-                                                Create group
-                                                <BoxOutIcon />
+                                                <span>Create group</span>
+                                                <span><BoxOutIcon /></span>
                                             </a>
-                                        </span>{" "}
+                                        </div>{" "}
                                     </div>
                                 )}
                             {element?.fieldOptions &&
@@ -1676,7 +1683,7 @@ const GroupsRequestForm = ({
                         </h5>
                     </header>
 
-                    <div className={`fr-cell-content ${formCell?.name === "look_up_mutual_friend" ? "fr-cell-content-mutual-frnd" : ""}`}>
+                    <div className={`fr-cell-content ${formCell?.name === "lookup_for_mutual_friend" ? "fr-cell-content-mutual-frnd" : ""}`}>
                         {formCell.fieldOptions.map((item, idx) => {
                             if (item.name === "tier_filter_value") {
                                 if (formCell.fieldOptions[0].value === "Tier Level") {
@@ -1742,239 +1749,6 @@ const GroupsRequestForm = ({
             )}
 
 
-            {/* <div className="fr-request-body request-groups h-100">
-                {isLoding && <FriendRequestLoader />}
-                {!isLoding && (
-                    <>
-                        <div className="fr-settings-showcase request-bordered">
-                            <header className="req-settings-header d-flex f-justify-between f-align-center">
-                                <div className="req-header-content d-flex f-align-center">
-                                    <h4>
-                                        Basic settings
-                                        <Tooltip
-                                            textContent="Run Friender with your last saved settings"
-                                            direction="bottom"
-                                            type="info"
-                                        />
-                                    </h4>
-                                    <span className="req-setting-version">
-                                        <a
-                                            href={Webview_URL + "/settings/request-history"}
-                                            target="_blank"
-                                        >
-                                            {friendReqSet &&
-                                                friendReqSet.settings_name &&
-                                                `Version:` +
-                                                utils.firstCharToLowerCase(
-                                                    friendReqSet.settings_name.split("-")[1]
-                                                )}
-                                            &nbsp;
-                                            <ExternalLink />
-                                        </a>
-                                    </span>
-                                </div>
-
-                                <button
-                                    className="btn inline-btn "
-                                    onClick={() => {
-                                        onEditChange("basic");
-                                    }}
-                                >
-                                    <EditIcon />
-                                </button>
-                            </header>
-
-                            <section className="view-req-settings">
-                                <div className="req-setting d-flex f-align-center">
-                                    <figure>
-                                        <IntervalIcon />
-                                    </figure>
-                                    <div className="req-setting-text">
-                                        <h4>
-                                            {settingApiPayload.look_up_interval === "auto"
-                                                ? settingApiPayload.look_up_interval
-                                                : settingApiPayload.look_up_interval === ".5"
-                                                    ? "30 sec"
-                                                    : settingApiPayload.look_up_interval + " min"}{" "}
-                                        </h4>
-                                        <p>Lookup interval</p>
-                                    </div>
-                                </div>
-                                <div className="req-setting d-flex f-align-center">
-                                    <figure>
-                                        <LimitIcon />
-                                    </figure>
-                                    <div className="req-setting-text">
-                                        <h4>
-                                            {capitalizeFirstLetter(
-                                                settingApiPayload.request_limit_type
-                                            )}
-                                        </h4>
-                                        <p>Request limit</p>
-                                    </div>
-                                </div>
-
-
-                                {settingApiPayload.gender_filter ? (
-                                    <div className="req-setting d-flex f-align-center">
-                                        <figure>
-                                            <GenderIcon />
-                                        </figure>
-                                        <div className="req-setting-text">
-                                            <h4>
-                                                {capitalizeFirstLetter(
-                                                    settingApiPayload.gender_filter_value
-                                                )}
-                                            </h4>
-                                            <p>Gender</p>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="req-setting d-flex f-align-center">
-                                        <figure>
-                                            <GenderIcon />
-                                        </figure>
-                                        <div className="req-setting-text">
-                                            <h4>--</h4>
-                                            <p>Gender</p>
-                                        </div>
-                                    </div>
-                                )}
-
-
-                                {settingApiPayload.country_filter_enabled ? (
-                                    <div className="req-setting d-flex f-align-center">
-                                        <figure>
-                                            <TierIcon />
-                                        </figure>
-
-                                        {settingApiPayload.tier_filter && (
-                                            <div className="req-setting-text">
-                                                {settingApiPayload?.tier_filter_value.length === 5 ? (
-                                                    <h4> {settingApiPayload.tier_filter_value[4]}</h4>
-                                                ) : (
-                                                    "N/A"
-                                                )}
-                                                <p>Tier level</p>
-                                            </div>
-                                        )}
-                                        {settingApiPayload.country_filter && (
-                                            <div className="req-setting-text">
-                                                {settingApiPayload.country_filter_value?.length > 0 ? (
-                                                    <h4>
-                                                        {utils.truncateText(
-                                                            settingApiPayload.country_filter_value
-                                                                .map((item) => item)
-                                                                .join(", "),
-                                                            12
-                                                        )}
-                                                    </h4>
-                                                ) : (
-                                                    "N/A"
-                                                )}
-                                                <p>Country level</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div className="req-setting w-100 d-flex f-align-center">
-                                        <figure>
-                                            <TierIcon />
-                                        </figure>
-                                        <div className="req-setting-text">
-                                            --
-                                            <p>Country level</p>
-                                        </div>
-                                    </div>
-                                )}
-                                {settingApiPayload.keyword && (
-                                    <div className="req-setting w-100 d-flex f-align-center">
-                                        <figure>
-                                            <KeywordsIcon />
-                                        </figure>
-                                        <div className="req-setting-text">
-                                            {settingApiPayload.selected_keywords?.length > 0 ? (
-                                                <h4>
-                                                    {utils.truncateText(
-                                                        settingApiPayload.selected_keywords
-                                                            .map((item) => item)
-                                                            .join(", ")
-                                                    )}
-                                                </h4>
-                                            ) : (
-                                                "N/A"
-                                            )}
-                                            <p>Keywords</p>
-                                        </div>
-                                    </div>
-                                )}
-                                {settingApiPayload.negative_keyword && (
-                                    <div className="req-setting w-100 d-flex f-align-center">
-                                        <figure>
-                                            <KeywordsIcon />
-                                        </figure>
-                                        <div className="req-setting-text">
-                                            {settingApiPayload.selected_negative_keywords?.length >
-                                                0 ? (
-                                                <h4>
-                                                    {utils.truncateText(
-                                                        settingApiPayload.selected_negative_keywords
-                                                            .map((item) => item)
-                                                            .join(", ")
-                                                    )}
-                                                </h4>
-                                            ) : (
-                                                "N/A"
-                                            )}
-                                            <p>Negative keywords</p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {settingApiPayload.send_message && (
-                                    <div className="req-setting w-100 d-flex f-align-center">
-                                        <figure>
-                                            <NavMessageIcon color={"#11E6B4"} />
-                                        </figure>
-                                        <div className="req-setting-text">
-                                            <h4>Enabled</h4>
-                                            <p>Send message</p>
-                                        </div>
-                                    </div>
-                                )}
-                            </section>
-                        </div>
-                    </>
-                )}
-
-                {!isLoding && (
-                    <footer className="fr-settings-footer">
-                        {!isPaused ? (
-                            <button
-                                className="btn btn-theme w-100"
-                                onClick={runFrinderHandle}
-                                disabled={isRunnable ? "" : "disabled"}
-                            >
-                                <figure className="btn-ico">
-                                    <Bolt />
-                                </figure>
-                                <span>Run Friender</span>
-                            </button>
-                        ) : (
-                            <AutomationStats
-                                automationrunner={true}
-                                runFrinderHandle={runFrinderHandle}
-                                disabled={isRunnable ? "" : "disabled"}
-                                setrunningScript={setrunningScript}
-                                setRequestActive={setRequestActive}
-                                setIsPaused={setIsPaused}
-                            />
-                        )}
-                    </footer>
-                )}
-            </div> */}
-
-
             {/* EDITING THE SETTINGS FORM */}
 
             {/* <div className="form-wraper-settings general-settings"> */}
@@ -1982,73 +1756,24 @@ const GroupsRequestForm = ({
                 {/* 1st ROW */}
                 <div className="form-wraper-settings general-settings">
                     {/* <div className="fr-content-cell-grid"></div> */}
-                        <div
-                            className="fr-content-cell-grid column-setup"
-                        >
-                            {generateFormElements()}
-                        </div>
-
-                        {openNotification && (
-                            <ServerMessages
-                                icon={<ServerError />}
-                                type={"error"}
-                                msgText={openNotificationMsg}
-                                headerTxt={"Error"}
-                                openNotification={openNotification}
-                                setOpenNotification={setOpenNotification}
-                            />
-                        )}
-                    </div>
-            </form>
-
-            {/* FOOTER OF FROM SECTION */}
-            {/* <footer className="fr-settings-footer settings-btn-wraper d-flex d-flex-center">
-                    <button
-                        className="btn btn-theme settings-save w-100"
-                        onClick={() => {
-                            const isValidated = checkValidity(formSetup, setFormSetup)
-                            if (isValidated.valid) {
-                                setIsEditing(false);
-
-                                setOpenSuccessNotification(true);
-                            } else {
-                                setOpenNotificationMsg(isValidated.errReason)
-                                setOpenNotification(true);
-                            }
-                        }}
+                    <div
+                        className="fr-content-cell-grid column-setup"
                     >
-                        <span>Save</span>
-                    </button>
-
-
-                    <div className="fr-request-body request-groups h-100">
-                        {!isLoding && (
-                            <footer className="fr-settings-footer">
-                                {!isPaused ? (
-                                    <button
-                                        className="btn btn-theme w-100"
-                                        onClick={runFrinderHandle}
-                                        disabled={isRunnable ? "" : "disabled"}
-                                    >
-                                        <figure className="btn-ico">
-                                            <Bolt />
-                                        </figure>
-                                        <span>Run Friender</span>
-                                    </button>
-                                ) : (
-                                    <AutomationStats
-                                        automationrunner={true}
-                                        runFrinderHandle={runFrinderHandle}
-                                        disabled={isRunnable ? "" : "disabled"}
-                                        setrunningScript={setrunningScript}
-                                        setRequestActive={setRequestActive}
-                                        setIsPaused={setIsPaused}
-                                    />
-                                )}
-                            </footer>
-                        )}
+                        {generateFormElements()}
                     </div>
-                </footer> */}
+
+                    {openNotification && (
+                        <ServerMessages
+                            icon={<ServerError />}
+                            type={"error"}
+                            msgText={openNotificationMsg}
+                            headerTxt={"Error"}
+                            openNotification={openNotification}
+                            setOpenNotification={setOpenNotification}
+                        />
+                    )}
+                </div>
+            </form>
         </>
     );
 };

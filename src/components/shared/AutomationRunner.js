@@ -4,7 +4,55 @@ import Lottie from "react-lottie-player";
 import helper from "../../extensionScript/helper";
 import "../../assets/scss/pages/_automation-runner.scss";
 import AutomationStats from "./AutomationStats";
+import { BoxOutIcon } from '../../assets/icons/Icons';
+
+
 const AutomationRunner = ({ setrunningScript, setRequestActive }) => {
+  const [fRProgress, setFRProgress] = useState(0);
+  const [profileViewed, setProfileViewed] = useState(0);
+
+  chrome.runtime.onMessage.addListener(
+    async (request, sender, sendResponse) => {
+      // console.log("request ::: ****************************** ", request);
+      switch (request.action) {
+        case "FRSendCount":
+          setFRProgress(request.FriendRequestCount);
+          break;
+
+        case "profile_viewed":
+          setProfileViewed(request.profile_viewed);
+          break;
+
+
+        case "stop":
+          // setModalOpen(false);
+          setrunningScript(false);
+          setRequestActive("groups");
+          break;
+
+        default:
+          break;
+      }
+    }
+  );
+
+  useEffect(() => {
+    (async () => {
+      const frsentcount = await helper.getDatafromStorage("FRSendCount");
+      const profile_viewed = await helper.getDatafromStorage("profile_viewed");
+      // console.log("frsentcount ::::::::::::: ", frsentcount)
+      // console.log("profile_viewed ::::::::::::: ", profile_viewed)
+      if (frsentcount !== null || !helper.isEmptyObj(frsentcount)) {
+        // console.log("frsentcount ::: ", frsentcount);
+        setFRProgress(frsentcount);
+      }
+      if (profile_viewed !== null || !helper.isEmptyObj(profile_viewed)) {
+        // console.log("profile_viewed ::: ", profile_viewed);
+        setProfileViewed(profile_viewed);
+      }
+    })();
+  }, []);
+
   // const [fRProgress, setFRProgress] = useState(0);
   // const [profileViewed, setProfileViewed] = useState(0);
   const PORTAL_URL = process.env.REACT_APP_APP_URL;
@@ -12,19 +60,19 @@ const AutomationRunner = ({ setrunningScript, setRequestActive }) => {
   //   async (request, sender, sendResponse) => {
   //     // console.log("request ::: ****************************** ", request);
   //     switch (request.action) {
-        // case "FRSendCount":
-        //   setFRProgress(request.FriendRequestCount);
-        //   break;
+  // case "FRSendCount":
+  //   setFRProgress(request.FriendRequestCount);
+  //   break;
 
-        // case "profile_viewed":
-        //   setProfileViewed(request.profile_viewed);
-        //   break;
+  // case "profile_viewed":
+  //   setProfileViewed(request.profile_viewed);
+  //   break;
 
-        // case "stop":
-        //   setModalOpen(false);
-        //   setrunningScript(false);
-        //   setRequestActive("groups");
-        //   break;
+  // case "stop":
+  //   setModalOpen(false);
+  //   setrunningScript(false);
+  //   setRequestActive("groups");
+  //   break;
 
   //       default:
   //         break;
@@ -70,7 +118,7 @@ const AutomationRunner = ({ setrunningScript, setRequestActive }) => {
 
   return (
     <div className="friender-running-wraper">
-      
+
       <div className="animation-wraper">
         <figure>
           <Lottie
@@ -81,7 +129,18 @@ const AutomationRunner = ({ setrunningScript, setRequestActive }) => {
             style={{ width: "255px", height: "147px" }}
           />
         </figure>
+
+        {true && <div className="loader-wraper">
+          <p>Making friends based on your choices</p>
+          <div class="progressbar">
+            <div
+              class="progress-status"
+              style={{ width: (fRProgress / profileViewed) * 100 + "%" }}
+            ></div>
+          </div>
+        </div>}
       </div>
+
       {/* <div className="loader-wraper">
         <p>Making friends based on your choices</p>
         <div class="progressbar">
@@ -91,6 +150,7 @@ const AutomationRunner = ({ setrunningScript, setRequestActive }) => {
           ></div>
         </div>
       </div> */}
+
       <AutomationStats
         // profileViewed={profileViewed}
         // fRProgress={fRProgress}
@@ -103,12 +163,16 @@ const AutomationRunner = ({ setrunningScript, setRequestActive }) => {
           {" "}
           <a href={PORTAL_URL + "/friends/pending-request"} target="_blank">
             <span>View your results</span>
+            <span className="result-view-icon"><BoxOutIcon /></span>
           </a>{" "}
         </p>
       </AutomationStats>
-      <div className="note-inline text-center">
+
+
+
+      {/* <div className="note-inline text-center">
         Pause and modify your choice anytime and Run again
-      </div>
+      </div> */}
     </div>
   );
 };

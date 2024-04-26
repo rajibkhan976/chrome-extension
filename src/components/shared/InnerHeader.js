@@ -11,42 +11,43 @@ const InnherHeader = (props) => {
     setActiveTooltip(props.activePageTextTooltip)
     setSubheader(props.subHeaderText)
   }, [location, props.subHeaderText, props.activePageTextTooltip])
-    return (
-        <header className="header-inner d-flex f-align-center f-justify-between">
-        {/* {requestActive && requestActive != null && (
+  
+  return (
+    <header className="header-inner d-flex f-align-center f-justify-between">
+      {/* {requestActive && requestActive != null && (
           <button
             className="btn btn-go-back"
             onClick={() => setRequestActive(null)}
           ></button>
         )} */}
-        {props.goBackTo && 
-            <Link
-                to={props.goBackTo}
-                className="btn btn-go-back"
-            />
-        }
-        <p
-        //   style={{
-        //     marginRight: requestActive && requestActive != null ? "auto" : 0,
-        //     marginLeft: requestActive && requestActive != null ? "10px" : 0,
-        //   }}
-        >
-          {/* {requestActive === 'groups' ? 'Facebook groups' : requestActive === 'friendsfriend' ? 'Friends Friends' : 'Sent Friend Request from'} */}
-          {subHeader}
+      {props.goBackTo &&
+        <Link
+          to={props.goBackTo}
+          className="btn btn-go-back"
+        />
+      }
+      <p
+      //   style={{
+      //     marginRight: requestActive && requestActive != null ? "auto" : 0,
+      //     marginLeft: requestActive && requestActive != null ? "10px" : 0,
+      //   }}
+      >
+        {/* {requestActive === 'groups' ? 'Facebook groups' : requestActive === 'friendsfriend' ? 'Friends Friends' : 'Sent Friend Request from'} */}
+        {subHeader}
 
-          <Tooltip 
-              type="info"
-              textContent={activeTooltip} 
-              direction="bottom" 
-          />
-        </p>
+        <Tooltip
+          type="info"
+          textContent={activeTooltip}
+          direction="bottom"
+        />
+      </p>
 
-        {/* <Tooltip 
+      {/* <Tooltip 
             textContent={props.activePageTextTooltip} 
             direction="left" 
         /> */}
-      </header>
-    );
+    </header>
+  );
 }
- 
+
 export default InnherHeader;

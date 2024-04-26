@@ -248,7 +248,7 @@ export const ChevronDownArrowIcon = ({ size = 24 }) => {
 
 
 
-export const BoxOutIcon = () => {
+export const BoxOutIcon = ({ color = "#222226" }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -258,13 +258,13 @@ export const BoxOutIcon = () => {
       viewBox="0 0 10 11"
     >
       <path
-        stroke="#0094FF"
+        stroke={color}
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M8.499 6.863v.916c0 .943 0 1.415-.293 1.707-.293.293-.764.293-1.707.293h-3.5c-.943 0-1.414 0-1.707-.293C.999 9.194.999 8.722.999 7.78v-3.5c0-.943 0-1.414.293-1.707.293-.293.764-.293 1.707-.293h.917"
       ></path>
       <path
-        fill="#0094FF"
+        fill={color}
         d="M8.75 2.03v-.5h.5v.5h-.5zM5.154 6.54a.5.5 0 01-.725-.688l.725.688zM8.25 4.53v-2.5h1v2.5h-1zm.5-2h-2.5v-1h2.5v1zm.363-.156L5.154 6.54l-.725-.688 3.958-4.167.726.689z"
       ></path>
     </svg>

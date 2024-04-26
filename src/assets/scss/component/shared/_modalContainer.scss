@@ -403,21 +403,52 @@
     margin-top: 10px;
     border-radius: 5px;
     padding: 5px 10px;
-    font-size: 10px;
-    display: flex;
-    align-items: center;
+    font-size: 9px;
+    // display: flex;
+    // align-items: center;
+    // color: var(--foundation-color-yellow-yellow-6, #f2ba2a);
 
-    color: var(--foundation-color-yellow-yellow-6, #f2ba2a);
     span {
-      color: var(--dark-primary-blue, #0094ff);
+      // color: var(--dark-primary-blue, #0094ff);
+      color: #222226;
       margin-left: 10px;
       display: flex;
       align-items: center;
       a {
-        color: var(--dark-primary-blue, #0094ff);
+        // color: var(--dark-primary-blue, #0094ff);
+        color: #222226;
       }
       svg {
         margin-left: 5px;
+      }
+    }
+
+    .fr-req-nomessage-title {
+      display: inline-flex;
+      // align-items: flex-start;
+      align-items: center;
+
+      span.fr-req-title-span {
+        color: var(--foundation-color-yellow-yellow-6, #f2ba2a) !important;
+        margin-left: 3px;
+      }
+    }
+
+    .fr-req-nomessage-btn {
+      margin-top: 5px;
+      margin-left: 15px;
+      background-color: var(--dark-primary-blue, #0094ff);
+      color: #222226;
+      height: 24px;
+      width: 104px;
+      border-radius: 10px;
+      align-items: center;
+      display: flex;
+      padding: 5px;
+
+      .fr-req-nomessage-a {
+        display: inline-flex;
+        gap: 4px;
       }
     }
   }
@@ -875,15 +906,18 @@
 
 .suggestion_box_main {
   position: absolute;
-  top: 25px;
+  // top: 25px;
+  bottom: 36px;
+  left: -13px;
   max-height: 165px;
-  width: 300px;
+  width: 217px;
   z-index: 100;
   overflow: auto;
   border: 1px solid;
   border-radius: 5px;
   @include theme-aware("border-color", "main-container-bg");
   @include theme-aware("background-color", "modal-bg-color");
+
   ul {
     padding: 7px 8px;
     li {

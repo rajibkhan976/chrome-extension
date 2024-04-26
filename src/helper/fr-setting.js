@@ -280,21 +280,21 @@ export const requestGroupsFormSettings = {
           name: "send_message_when_friend_request_sent_message_group_id",
           value: "Select message",
           options: [
-            {
-              selected: true,
-              label: "message 1",
-              value: "message_1",
-            },
-            {
-              selected: false,
-              label: "message 2",
-              value: "message_2",
-            },
-            {
-              selected: false,
-              label: "message 3",
-              value: "message_3",
-            },
+            // {
+            //   selected: true,
+            //   label: "message 1",
+            //   value: "message_1",
+            // },
+            // {
+            //   selected: false,
+            //   label: "message 2",
+            //   value: "message_2",
+            // },
+            // {
+            //   selected: false,
+            //   label: "message 3",
+            //   value: "message_3",
+            // },
           ],
         },
       ],
@@ -1535,7 +1535,7 @@ export const fr_Req_Payload = {
   tier_filter: false,
   tier_filter_value: "Tier1", // [] or ""
   keyword: false,
-  selected_keywords: [],
+  selected_keywords: [], 
   negative_keyword: false,
   selected_negative_keywords: [],
   advanced_settings: false,
