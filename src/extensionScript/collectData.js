@@ -103,7 +103,7 @@ function addFriendBtnClick(sendResponse) {
     const name = document.querySelectorAll('h1:not([dir="auto"]');
     let res = { status: false,};
     if(name){
-        res["name"]=name[0].innerText?name[0].innerText:name[0].textContent;
+        res["name"]=name[0].innerText?name[0].innerText!=='Notifications'?name[0].innerText:name[1].innerText:name[0].textContent;
     }
     const profilePicUrl = document.querySelectorAll('svg[data-visualcompletion="ignore-dynamic"][role="img"]');
     if(profilePicUrl && 
