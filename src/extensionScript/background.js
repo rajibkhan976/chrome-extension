@@ -961,13 +961,13 @@ chrome.alarms.onAlarm.addListener(async(alarm) => {
             console.log("next campaign :::: ", nextCampaign)
             satrtHourlyScheduler(nextCampaign, indx);
           break;
-            case "frQueueFetchAlarm":
+    case "frQueueFetchAlarm":
       console.log("-----------------Friend Request Queue Scheduler------------------", alarm, alarm.name);
       FrQueue_Manager();
       break;
     case "frQueueRunnerAlarm":
       console.log("-----------------Friend Request Queue Runner Scheduler------------------", alarm, alarm.name);
-      runFriendRequestQueue();
+       runFriendRequestQueue();
       break;
       case "CampaignMin" : 
             console.log("-----------------Campaign Min Scheduler------------------", alarm, alarm.name)
@@ -1554,14 +1554,14 @@ const sendMessageAcceptOrReject= async() => {
           console.log("fetchSentFRLogForReject ::: ", JSON.stringify(fetchSentFRLogForReject));
         }
 
-        if(fetchSentFRLog.length > 0) {
-          fetchSentFRLogForAcceptFromFrQueue=fetchSentFRLog.filter(el => el 
-            && el.friendRequestStatus
-            && el.friendRequestStatus.toLocaleLowerCase()
-            && el.friendRequestStatus.toLocaleLowerCase().trim() === "accepted" 
-            && el.message_group_request_accepted !== null);
-          console.log("fetchSentFRLogForReject ::: ", JSON.stringify(fetchSentFRLogForAcceptFromFrQueue));
-        }
+        // if(fetchSentFRLog.length > 0) {
+        //   fetchSentFRLogForAcceptFromFrQueue=fetchSentFRLog.filter(el => el 
+        //     && el.friendRequestStatus
+        //     && el.friendRequestStatus.toLocaleLowerCase()
+        //     && el.friendRequestStatus.toLocaleLowerCase().trim() === "accepted" 
+        //     && el.message_group_request_accepted !== null);
+        //   console.log("fetchSentFRLogForReject ::: ", JSON.stringify(fetchSentFRLogForAcceptFromFrQueue));
+        // }
         // fbUserId = await helper.getDatafromStorage("fbTokenAndId");
         InitiateSendMessages(fbDtsg, userId, fetchSentFRLogForAccept, fetchSentFRLogForReject, fetchIncomingLog, fetchIncomingFRLogForAccept, fetchIncomingFRLogForReject,fetchSentFRLogForAcceptFromFrQueue);
       }else{
@@ -1579,11 +1579,34 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
   sendMessageToPortalScript({action: "fr_update", content: "Sending Messages..."});
   sendMessageToPortalScript({action: "fr_isSyncing", content: "active", type: "cookie"});
   if(sentFRLogForAccept && sentFRLogForAccept.length > 0){
-    const message_payload = {
-    "fbUserId" : userId,
-    "friendFbId": sentFRLogForAccept[0].friendFbId,
-    "settingsType": settingsType.whenAcceptedByMember
+    let message_payload
+    if(sentFRLogForAccept[0].message_group_request_accepted){
+      console.log("Sending Message on FRQUS accepted::>",);
+      console.log("The raw message body",sentFRLogForAccept[0].message_group_request_accepted);
+      message_payload = {
+        "fbUserId" : userId,
+        "friendFbId": sentFRLogForAccept[0].friendFbId,
+        "gender": sentFRLogForAccept[0].gender?sentFRLogForAccept[0].gender:"NaN",
+        "country": sentFRLogForAccept[0].country?sentFRLogForAccept[0].country:"NaN",
+        "tier": sentFRLogForAccept[0].tier?sentFRLogForAccept[0].tier:"NaN",
+        "friendName": sentFRLogForAccept[0].friendName?sentFRLogForAccept[0].friendName:"NaN",
+        }
+        if(sentFRLogForAccept[0].message_group_request_accepted.groupId){
+          message_payload["groupId"]=sentFRLogForAccept[0].message_group_request_accepted.groupId
+        }else{
+          message_payload["quick_message"]=sentFRLogForAccept[0].message_group_request_accepted.quickMessage
+        }   
+
+    }else{
+      console.log("Sending Message on accepted ON SETTING::>",);
+      message_payload = {
+        "fbUserId" : userId,
+        "friendFbId": sentFRLogForAccept[0].friendFbId,
+        "settingsType": settingsType.whenAcceptedByMember
+        }
+
     }
+     
 
     const conversationStatus=await common.checkHasConversation(userId,sentFRLogForAccept[0].friendFbId)
     //console.log("ConversationStatus_______^^^^(0)^^^^______",conversationStatus);
@@ -2300,29 +2323,35 @@ const campaignToMsqs = async(campaign, indx) => {
 }
 
 //*Friend request queue: START :::::::::
-function frQueueSettingSetter(runningStatus, requestLimit, requestLimitValue, timeDelay) {
-  let settting = {
-    "runningStatus": runningStatus,
-    "requestLimited": requestLimit,
-    "requestLimitValue": requestLimitValue,
-    "timeDelay": timeDelay,
-  }
-  helper.saveDatainStorage('frQueueSetting', settting);
+async function frQueueSettingSetter(frQueSettings) {
+  console.log("frQueueSettingSetter setting before ::::: ", frQueSettings);
+    let settting = {
+      "runningStatus":frQueSettings.run_friend_queue,
+      "requestLimited":frQueSettings.request_limited,
+      "requestLimitValue":frQueSettings.request_limit_value ,
+      "timeDelay":frQueSettings.timeDelay,
+    }
+    console.log("New FRQUE setting set ::::: ", settting);
+    const resp = await helper.saveDatainStorage('frQueueSetting', settting);
+    return resp;
 }
 
-async function frQueueSentCountInit(userFbId) {
-  let countObjStr = await helper.getDatafromStorage('frQueueSentCount');
-  if (countObjStr) {
-    console.log("init count: ", countObjStr);
-    let frCurrQueueCount = countObjStr;
-    if (frCurrQueueCount.dateString !== helper.getTodayDate() || frCurrQueueCount.userFbId!==userFbId) {
-      console.log();
+async function frQueueSentCountInit(userFbId,frQueSettings) {
+  let frCurrQueueCount = await helper.getDatafromStorage('frQueueSentCount');
+  let frQueLocalSettings = await helper.getDatafromStorage('frQueueSetting');
+  let resp;
+  if (frCurrQueueCount && frQueLocalSettings) {
+    console.log("Init count::: ", frCurrQueueCount);
+    console.log("Local old Setting::: ", frQueLocalSettings);
+    console.log("Queue new seeting from api",frQueSettings);
+    if (( !frQueLocalSettings.runningStatus && frQueSettings.run_friend_queue ) || frCurrQueueCount.userFbId!==userFbId) {
       let countObj = {
         "count": 0,
         "dateString": helper.getTodayDate(),
         "userFbId": userFbId
       }
-      helper.saveDatainStorage('frQueueSentCount', countObj);
+      console.log("RE init count::: ",countObj);
+      resp = await helper.saveDatainStorage('frQueueSentCount', countObj);
     }
 
   } else {
@@ -2331,31 +2360,27 @@ async function frQueueSentCountInit(userFbId) {
       "dateString": helper.getTodayDate(),
       "userFbId": userFbId
     }
-    helper.saveDatainStorage('frQueueSentCount', countObj);
+    resp = await helper.saveDatainStorage('frQueueSentCount', countObj);
   }
-
+  return resp;
 }
 
 //function to increment frQueueSentCount
-async function frQueSentCountIncrement() {
+async function frQueSentCountIncrement(userFbId) {
   let frCurrQueueCount = await helper.getDatafromStorage('frQueueSentCount');
   console.log('Increment count call::::::', frCurrQueueCount);
-  if (frCurrQueueCount && frCurrQueueCount.dateString && frCurrQueueCount.dateString === helper.getTodayDate()) {
-
-
-    let countObj = {
-      "count": frCurrQueueCount.count + 1,
-      "dateString": frCurrQueueCount.dateString
-    }
-    console.log('AFTER Increment count ::::::', countObj);
-    helper.saveDatainStorage('frQueueSentCount', countObj);
+  if (frCurrQueueCount ) {
+    frCurrQueueCount["count"]=frCurrQueueCount.count + 1
+    console.log('AFTER Increment count ::::::', frCurrQueueCount);
+    await helper.saveDatainStorage('frQueueSentCount', frCurrQueueCount);
 
   } else {
     let countObj = {
       "count": 0,
-      "dateString": helper.getTodayDate()
+      "dateString": helper.getTodayDate(),
+      "userFbId":userFbId
     }
-    helper.saveDatainStorage('frQueueSentCount', countObj);
+    await helper.saveDatainStorage('frQueueSentCount', countObj);
 
   }
 }
@@ -2394,10 +2419,11 @@ const FrQueue_Manager = async (callFromFetchAlarm = false) => {
   const frQueSettings = settingResp.data[0];
   console.log("FR QueUE Settings", frQueSettings);
   if (frQueSettings && frQueSettings.run_friend_queue) { // * if the Run true:>
-    //save FR queue setting in local storage
-    frQueueSettingSetter(frQueSettings.run_friend_queue, frQueSettings.request_limited, frQueSettings.request_limit_value, frQueSettings.time_delay);
     //Init run counter
-    frQueueSentCountInit(userFBDetails.userID);
+    let countInitRes = await frQueueSentCountInit(userFBDetails.userID, frQueSettings);
+    //save FR queue setting in local storage
+    console.log("Count", countInitRes);
+    await frQueueSettingSetter(frQueSettings);
     //then fetch first 100 data from api:
     const frQueueResp = await common.fetchTopPriorityFrQueueRecords(userFBDetails.userID);
     console.log("fr array api RESPONSE:>> ", frQueueResp);
@@ -2412,14 +2438,14 @@ const FrQueue_Manager = async (callFromFetchAlarm = false) => {
       //Store data in FR queue:
       let add = await fRQueue.addBulk(frQueArray);
       const fr_token = await helper.getDatafromStorage("fr_token")
-      console.log("after add", add)
+      console.log("after add", add);
       //start FR queue Runner alarm start:
       console.log("frQueueRunnerAlarm  started DELAY::: ", frQueSettings.time_delay);
       frQueueRunnerAlarm_Start(frQueSettings.time_delay);
       //start FR queue fetch alarm start:
       console.log("frQueueFetchAlarm  started:::");
       frQueFetchAlarm_Start();
-      runFriendRequestQueue();
+     // runFriendRequestQueue();
 
     } else {
       console.log("No data in FR queue STOPPING ALARMS!!!!!");
@@ -2428,6 +2454,8 @@ const FrQueue_Manager = async (callFromFetchAlarm = false) => {
     }
   } else { //! if the Run false:>
     //Kill the FR queue runner
+    console.log("Before kill settings ",frQueSettings)
+    await frQueueSettingSetter(frQueSettings);
     console.log("KILLING FR queue AS the FR queue runner is OFF!!!!!")
     frQue_Kill();
   }
@@ -2435,7 +2463,7 @@ const FrQueue_Manager = async (callFromFetchAlarm = false) => {
 
 
 //function to check the current FR queue is eligible to run or not
-async function isFrQueueEligibleToRun() {
+async function isFrQueueEligibleToRun(userFbID,) {
   let frQueCount = await helper.getDatafromStorage('frQueueSentCount');
   let frQueSettings = await helper.getDatafromStorage('frQueueSetting');
   console.log("::::::::::Is  Eligible Check ::::::::::::");
@@ -2443,13 +2471,21 @@ async function isFrQueueEligibleToRun() {
   console.log("frq settings", frQueSettings);
   if (!frQueSettings.requestLimited) {
     return true;
-  } else if (frQueSettings.requestLimited && frQueCount && frQueCount.dateString) {
-    if (frQueCount.dateString === helper.getTodayDate()) {
-      if (frQueCount.count <= frQueSettings.requestLimitValue) {
-        return true;
-      }
+  } else if (frQueSettings.requestLimited && frQueCount) {
+    if (frQueCount.count < frQueSettings.requestLimitValue) {
+      return true;
     }
   }
+  console.log(":::::::::: FRQ LIMIT END  ::::::::::::");
+  const frQueuePayload = {
+    "fb_user_id": userFbID,
+    "run_friend_queue": false,
+    "request_limited": frQueSettings.requestLimited,
+    "request_limit_value": frQueSettings.requestLimitValue,
+    "time_delay":frQueSettings.timeDelay
+  }
+  console.log("new frQueue setting after end LIMIT", frQueuePayload);
+  await common.storeFrQueueSetting(frQueuePayload);
   return false;
 }
 /**
@@ -2485,25 +2521,7 @@ const createAndinjectSprit = (profileUrl) => {
           resolve({tabId:tab.id})
         }else{
           reject({ status: false});
-        }
-
-          
-        // chrome.scripting.executeScript({
-        //   target: { tabId: tab.id },
-        //   //files: ["contentScript.js"], // Inject the content script
-        //   func: addFriendBtnClick
-        // }).then((injectResults) => { // Access result
-        //   resolve(injectResults[0]);
-        //   setTimeout(()=>{
-        //     chrome.tabs.remove(tab.id);
-        //   }, 25000)
-        // }).catch((err) => {
-        //   reject({ status: false, error: err });
-        //   setTimeout(()=>{
-        //     chrome.tabs.remove(tab.id);
-        //   }, 2500)
-        // })
-       
+        } 
       }, 10000);
     })
   })
@@ -2515,7 +2533,7 @@ const createAndinjectSprit = (profileUrl) => {
 const runFriendRequestQueue = async () => {
   const userFBDetails = await helper.getDatafromStorage('fbTokenAndId');
   let first = await fRQueue.pullFromQueue();
-  let isEligible = await isFrQueueEligibleToRun();
+  let isEligible = await isFrQueueEligibleToRun(userFBDetails.userID,);
   console.log("Is eligible to run", isEligible);
   let updatePayload = { 
     "q_id": first._id, 
@@ -2532,29 +2550,28 @@ const runFriendRequestQueue = async () => {
      let profileInfo;
      // await helper.sleep(10000);
       let sentFrReqResponse={status:false};
-      if(first.friendFbId.length > 0){
-        console.log("with IDDDDD")
+     if(first.friendFbId.length > 0){
+        console.log(":::FR WITH GRAPH API:::")
         profileInfo=await common.getProfileInfo(first.friendFbId, userFBDetails.fbDtsg, userFBDetails.userID);
-        sentFrReqResponse= await common.sentFriendRequest(userFBDetails.userID, userFBDetails.fbDtsg, first.friendFbId, "profile_button", "7920515821315043");
-      }else if(first.friendProfileUrl){
+        await helper.sleep(7000);
+        if(profileInfo)sentFrReqResponse= await common.sentFriendRequest(userFBDetails.userID, userFBDetails.fbDtsg, first.friendFbId, "profile_button", "7920515821315043");
+      }else if(first.friendProfileUrl.length > 0){
         console.log(":::::DOM::::::");
         // const sendFrReqDomParseResp= await common.sendFriendRequestByDOMparsing(first.friendProfileUrl);
         const create = await createAndinjectSprit(first.friendProfileUrl);
         console.log(":::::DOM     DATA::::::", create);
-         await helper.sleep(2000);
+         await helper.sleep(6000);
          const sendFrReqDomParseResp = await chrome.tabs.sendMessage(create.tabId, {action :"clickAddFriend",tabId : create.tabId});
          console.log("dom parse response",sendFrReqDomParseResp);
-         await helper.sleep(2000);
+         await helper.sleep(5000);
          const cancleBtn = await chrome.tabs.sendMessage(create.tabId, {action : "checkCancelBtn",tabId : create.tabId});
          console.log("cancleBtn",cancleBtn);
          if(cancleBtn){ 
           console.log("cancleBtn.status ON removing The tab",cancleBtn.status);
-          chrome.tabs.remove(create.tabId) 
+          chrome.tabs.remove(create.tabId);
         }
           await chrome.tabs.sendMessage(create.tabId, {action : "closeTab",tabId : create.tabId});
         console.log(":::::DOM parse END::::::");
-        
-
         if(!cancleBtn.status ){
           console.log("dom parse response error")
           throw new Error("With the current url we can't send FriendRequest by DOM parsing");
@@ -2566,14 +2583,14 @@ const runFriendRequestQueue = async () => {
           name:sendFrReqDomParseResp.name,
           profilePictureUrl:sendFrReqDomParseResp.profilePicUrl
         }
-      } 
+      }
       console.log("user FB details nameeeeee:::::", profileInfo);
       let updateResp;
       if (!sentFrReqResponse.status) {
         console.log("ADD Friend Button in not There________________::");
         updatePayload["status"] = 0;
       } else {
-        await frQueSentCountIncrement();
+        await frQueSentCountIncrement(userFBDetails.userID);
         const friendGenderCountrytier = await common.getGenderCountryTierWithName(profileInfo.name);
       console.log("friendGenderCountrytier***************", friendGenderCountrytier);
       console.log("friend request sending done for userID: ", first.friendProfileUrl);
