@@ -1973,9 +1973,13 @@ let sendMessageViaFacebook = async (dtsg,queueInfo,alt = false) => {
           );
 
           const response = await a.text();
+          if(response.includes('Chats are not available on mobile browsers'))
+          {
+            console.log('Chats are not available on mobile browsers');
+            return false
+          }
           if (!alt && response.includes("You cannot perform that action")) {
             console.log("Executing alternate message sending");
-            // resolve(false);
             // asynchronously it will resolve the send message in alt way
            return await sendMessageViaFacebook(dtsg,queueInfo,true);
           } else  if(alt && response.includes("You cannot perform that action")) {
@@ -2087,6 +2091,11 @@ const storeInMsqs = async ( fbId, receiverId, name, message, settingsType, exp_t
   // store above payload in msqs
   addToQueue(payload)
 }
+
+/**
+ * CAMPAIGN SCHEDULER AND IMPLEMENTATION START
+ * @returns 
+ */
 
 const startCampaignScheduler = async () => {
   console.log("logged in ??? ", helper.isEmptyObj(helper.getDatafromStorage('fr_token')));
@@ -2264,7 +2273,8 @@ const satrtHourlyScheduler = async(campaign, indx) => {
     // console.log("Campaign Is inactive");
     chrome.alarms.clear("Campaign_" + campaign.campaign_id + "_" + indx);
     chrome.alarms.clear("CampaignMin_" + campaign.campaign_id + "_" + indx);
-    // await helper.removeDatafromStorage("Campaign_" + campaign.campaign_id);
+    delete campaign.campaign_contacts
+    await helper.saveDatainStorage("Campaign_" + campaign.campaign_id, campaign);
   }
 }
 
@@ -2279,7 +2289,8 @@ const campaignToMsqs = async(campaign, indx) => {
   if(campaignStatus && campaignStatus.status ==="Active"){
     if(campaign && campaign.campaign_contacts && campaign.campaign_contacts.length === 0){
       chrome.alarms.clear("CampaignMin_" + campaign.campaign_id + "_" + indx);
-      // await helper.removeDatafromStorage("Campaign_" + campaign.campaign_id);
+      delete campaign.campaign_contacts
+      await helper.saveDatainStorage("Campaign_" + campaign.campaign_id, campaign);
       return;
     }
     // check from message queue 
@@ -2318,7 +2329,8 @@ const campaignToMsqs = async(campaign, indx) => {
     console.log("Campaign Is inactive");
     chrome.alarms.clear("Campaign_" + campaign.campaign_id + indx);
     chrome.alarms.clear("CampaignMin_" + campaign.campaign_id + "_" +  indx);
-    // await helper.removeDatafromStorage("Campaign_" + campaign.campaign_id);
+    delete campaign.campaign_contacts
+    await helper.saveDatainStorage("Campaign_" + campaign.campaign_id, campaign);
   }
 }
 
