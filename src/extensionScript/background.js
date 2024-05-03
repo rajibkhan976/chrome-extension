@@ -1519,7 +1519,7 @@ const sendMessageAcceptOrReject= async() => {
               && el.friendRequestStatus.toLocaleLowerCase()
               && el.friendRequestStatus.toLocaleLowerCase().trim() === "pending" 
               && el.is_incoming === true 
-              && (el.message_sending_status !== "Send" 
+              && (el.message_sending_status !== "send" 
               || el.message_sending_setting_type !== settingsType.whenRecievesRequest));
             console.log("fetchIncomingLog ::: ", JSON.stringify(fetchIncomingLog))
         }
@@ -1529,7 +1529,7 @@ const sendMessageAcceptOrReject= async() => {
             && el.friendRequestStatus.toLocaleLowerCase()
             && el.friendRequestStatus.toLocaleLowerCase().trim() === "accepted" 
             && el.is_incoming === true
-            && (el.message_sending_status !== "Send" 
+            && (el.message_sending_status !== "send" 
             || el.message_sending_setting_type !== settingsType.whenAcceptedByUser));
           console.log("fetchIncomingFRLogForAccept ::: ", JSON.stringify(fetchIncomingFRLogForAccept));
         }
@@ -1539,7 +1539,7 @@ const sendMessageAcceptOrReject= async() => {
             && el.friendRequestStatus.toLocaleLowerCase()
             && el.friendRequestStatus.toLocaleLowerCase().trim() === "rejected" 
             && el.is_incoming === true
-            && (el.message_sending_status !== "Send" 
+            && (el.message_sending_status !== "send" 
             || el.message_sending_setting_type !== settingsType.whenRejectedByUser));
           console.log("fetchIncomingFRLogForReject ::: ", JSON.stringify(fetchIncomingFRLogForReject));
         }
@@ -1549,7 +1549,7 @@ const sendMessageAcceptOrReject= async() => {
             && el.friendRequestStatus.toLocaleLowerCase()
             && el.friendRequestStatus.toLocaleLowerCase().trim() === "accepted" 
             && el.is_incoming !== true
-            && (el.message_sending_status !== "Send" 
+            && (el.message_sending_status !== "send" 
             || el.message_sending_setting_type !== settingsType.whenAcceptedByMember));
           console.log("fetchSentFRLogForAccept ::: ", JSON.stringify(fetchSentFRLogForAccept));
         }
@@ -1559,7 +1559,7 @@ const sendMessageAcceptOrReject= async() => {
             && el.friendRequestStatus.toLocaleLowerCase()
             && el.friendRequestStatus.toLocaleLowerCase().trim() === "rejected" 
             && el.is_incoming !== true
-            && (el.message_sending_status !== "Send" 
+            && (el.message_sending_status !== "send" 
             || el.message_sending_setting_type !== settingsType.whenRejectedByMember));
           console.log("fetchSentFRLogForReject ::: ", JSON.stringify(fetchSentFRLogForReject));
         }
@@ -1985,11 +1985,11 @@ let sendMessageViaFacebook = async (dtsg,queueInfo,alt = false) => {
           );
 
           const response = await a.text();
-          if(response.includes('Chats are not available on mobile browsers'))
-          {
-            console.log('Chats are not available on mobile browsers');
-            return false
-          }
+          // if(response.includes('Chats are not available on mobile browsers'))
+          // {
+          //   console.log('Chats are not available on mobile browsers');
+          //   return false
+          // }
           if (!alt && response.includes("You cannot perform that action")) {
             console.log("Executing alternate message sending");
             // asynchronously it will resolve the send message in alt way
