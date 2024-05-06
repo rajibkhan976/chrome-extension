@@ -9,8 +9,10 @@ const settingApi = process.env.REACT_APP_SETTING_API;
 // const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
 const unfriendApi = "https://www.facebook.com/ajax/profile/removefriendconfirm.php?dpr=1";
 const action_url = "https://www.facebook.com/friends/list?opener=fr_sync";
-let sendMessageOnSomeOneAccptMyFR_EvenHasConversation=false;
-let sendMessageOnIAccptFR_EvenHasConversation=false;
+chrome.storage.local.set({
+  sendMessageOnSomeOneAccptMyFR_EvenHasConversation: false,
+  sendMessageOnIAccptFR_EvenHasConversation: false
+});
 let successColor = "color:green; font-size:16px;"
 const HEADERS = {
   "Content-Type": "application/json",
@@ -244,7 +246,9 @@ chrome.runtime.onMessageExternal.addListener(async function (
   chrome.storage.local.set({ senExternalResponse: sendResponseExternal });
   switch (request.action) {
     case "frienderLogin" : 
+      //console.log("frienderLogin_+_+_+_+_+_+_+_+_+_+_+_+", request.userPlan, request);
       await helper.saveDatainStorage("fr_token", request.frLoginToken)
+      await helper.saveDatainStorage("user_plan", request.userPlan);
       // getCampaignList()
       chrome.alarms.clear("scheduler")
       chrome.alarms.create("scheduler", {periodInMinutes: schedulerIntvTime})
@@ -1485,8 +1489,11 @@ const sendMessageAcceptOrReject= async() => {
     })
     let settings = await settingResp.json();
     settings = settings && settings.data ? settings.data[0] : {};
-    sendMessageOnSomeOneAccptMyFR_EvenHasConversation = settings && settings.send_message_if_conservation_occured_when_someone_accept_new_friend_request;
-    sendMessageOnIAccptFR_EvenHasConversation = settings && settings.send_message_if_conservation_occured_when_accept_incoming_friend_request;
+    await helper.saveDatainStorage("sendMessageOnSomeOneAccptMyFR_EvenHasConversation",
+      settings && settings.send_message_if_conservation_occured_when_someone_accept_new_friend_request,
+    );
+    await helper.saveDatainStorage("sendMessageOnIAccptFR_EvenHasConversation",
+      settings && settings.send_message_if_conservation_occured_when_accept_incoming_friend_request);
     // console.log("settings ::: ", settings);
     if(settings.send_message_when_someone_accept_new_friend_request || 
       settings.send_message_when_reject_friend_request ||
@@ -1613,6 +1620,7 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
     // send message to user
     // console.log("sendMessageOnIAccptFR_EvenHasConversation",sendMessageOnIAccptFR_EvenHasConversation);
     // console.log("has converse in i am accepting",conversationStatus);
+    const sendMessageOnSomeOneAccptMyFR_EvenHasConversation=await helper.getDatafromStorage("sendMessageOnSomeOneAccptMyFR_EvenHasConversation")
     if(sendMessageOnSomeOneAccptMyFR_EvenHasConversation || !conversationStatus.hasConversation){
       const messageContent = await common.getMessageContent( message_payload )
       console.log("messageContent ::: ", messageContent);
@@ -1672,6 +1680,7 @@ const InitiateSendMessages = async(fbDtsg, userId, sentFRLogForAccept = [], sent
       // send message to user
       // console.log("sendMessageOnIAccptFR_EvenHasConversation",sendMessageOnIAccptFR_EvenHasConversation);
       // console.log("has converse in i am accepting",conversationStatus);
+      const sendMessageOnIAccptFR_EvenHasConversation=await helper.getDatafromStorage("sendMessageOnIAccptFR_EvenHasConversation")
       if(sendMessageOnIAccptFR_EvenHasConversation || !conversationStatus.hasConversation){
         const messageContent = await common.getMessageContent( message_payload );
         if(messageContent.status){
@@ -2424,6 +2433,12 @@ function frQue_Kill() {
 
 
 const FrQueue_Manager = async (callFromFetchAlarm = false) => {
+  const userPlan= await helper.getDatafromStorage('user_plan')
+  if(userPlan !=2||userPlan!=3){
+    console.log("Free user can't use FRQUE feature");
+    frQue_Kill();
+    return;
+  }
   console.log("%c The FRQueueManager STARTED it's process", successColor);
   const userFBDetails = await helper.getDatafromStorage('fbTokenAndId');
   //fetch api call to get the FRQUEUE Settings
@@ -2475,7 +2490,11 @@ const FrQueue_Manager = async (callFromFetchAlarm = false) => {
 
 
 //function to check the current FR queue is eligible to run or not
-async function isFrQueueEligibleToRun(userFbID,) {
+async function isFrQueueEligibleToRun(userFbID,friendFbId) {
+  const friendShipStatus =await common.fetchFriendshipStatus({"fbUserId":userFbID,"friendFbId":friendFbId});
+  if(friendShipStatus.is_data_found){
+    return false;
+  }
   let frQueCount = await helper.getDatafromStorage('frQueueSentCount');
   let frQueSettings = await helper.getDatafromStorage('frQueueSetting');
   console.log("::::::::::Is  Eligible Check ::::::::::::");
@@ -2545,7 +2564,7 @@ const createAndinjectSprit = (profileUrl) => {
 const runFriendRequestQueue = async () => {
   const userFBDetails = await helper.getDatafromStorage('fbTokenAndId');
   let first = await fRQueue.pullFromQueue();
-  let isEligible = await isFrQueueEligibleToRun(userFBDetails.userID,);
+  let isEligible = await isFrQueueEligibleToRun(userFBDetails.userID,first.friendFbId);
   console.log("Is eligible to run", isEligible);
   let updatePayload = { 
     "q_id": first._id, 
@@ -2599,7 +2618,7 @@ const runFriendRequestQueue = async () => {
       console.log("user FB details nameeeeee:::::", profileInfo);
       let updateResp;
       if (!sentFrReqResponse.status) {
-        console.log("ADD Friend Button in not There________________::");
+        console.log("ADD Friend Button is not There________________::");
         updatePayload["status"] = 0;
       } else {
         await frQueSentCountIncrement(userFBDetails.userID);
@@ -2615,7 +2634,9 @@ const runFriendRequestQueue = async () => {
         updatePayload["friendFbId"]=first.friendFbId.length>0?first.friendFbId:profileInfo.fbUserId;
         //await helper.sleep(15000);
         //Sending message on send request
-        if (first.message_group_request_sent) {
+        const userPlan= await helper.getDatafromStorage('user_plan')
+        console.log("user plan before sending message::",userPlan);
+        if (first.message_group_request_sent && userPlan==3) {
           console.log("Sending message BLOCK Started///");
           const friendDetails = {
             "fbUserId":first.friendFbId&&first.friendFbId.length > 0 ? first.friendFbId:profileInfo.fbUserId,

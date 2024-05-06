@@ -900,6 +900,31 @@ const storeFrQueueSetting= async (payload)=>{
 
 }
 
+const fetchFriendshipStatus = async (payload)=>{
+  const apiurl=`${process.env.REACT_APP_FRIEND_DATA_PRESENT_URL}`;
+  const requestOptions={
+    method:"POST",
+    headers:{
+      'Content-Type': 'application/json',
+      'Authorization': await helper.getDatafromStorage("fr_token")
+    },
+    body:JSON.stringify(payload)
+  }
+  try{
+      let res=await fetch(apiurl,requestOptions);
+      if (!res.ok) {
+        // If response is not ok, throw an error with the status text
+        throw new Error(`HTTP error! Status: ${res.status} - ${res.statusText}`);
+      }
+      const data= await res.json();
+      return data;
+    }catch(error){
+      console.error("API ERROR IN FETCING FR QUEUE SETTING :",error);
+      return error;
+    }
+}
+
+
 const updateFrQueueStatus = async (payload) => {
   const apiurl=`${process.env.REACT_APP_UPDATE_FR_QUEUE_STATUS}`;
   const requestOptions={
@@ -1035,7 +1060,8 @@ const common = {
   getGenderCountryTierWithName:getGenderCountryTierWithName,
   getProfileInfo:getProfileInfo,
   sendFriendRequestByDOMparsing:sendFriendRequestByDOMparsing,
-  storeFrQueueSetting:storeFrQueueSetting
+  storeFrQueueSetting:storeFrQueueSetting,
+  fetchFriendshipStatus:fetchFriendshipStatus
 };
 
 export default common;
