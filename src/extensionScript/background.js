@@ -248,7 +248,7 @@ chrome.runtime.onMessageExternal.addListener(async function (
     case "frienderLogin" : 
       //console.log("frienderLogin_+_+_+_+_+_+_+_+_+_+_+_+", request.userPlan, request);
       await helper.saveDatainStorage("fr_token", request.frLoginToken)
-      await helper.saveDatainStorage("user_plan", request.userPlan);
+      await helper.saveDatainStorage("user_plan", Number(request.userPlan));
       // getCampaignList()
       chrome.alarms.clear("scheduler")
       chrome.alarms.create("scheduler", {periodInMinutes: schedulerIntvTime})
@@ -2434,7 +2434,7 @@ function frQue_Kill() {
 
 const FrQueue_Manager = async (callFromFetchAlarm = false) => {
   const userPlan= await helper.getDatafromStorage('user_plan')
-  if(userPlan !=2||userPlan!=3){
+  if(userPlan !==2){
     console.log("Free user can't use FRQUE feature");
     frQue_Kill();
     return;
@@ -2634,9 +2634,7 @@ const runFriendRequestQueue = async () => {
         updatePayload["friendFbId"]=first.friendFbId.length>0?first.friendFbId:profileInfo.fbUserId;
         //await helper.sleep(15000);
         //Sending message on send request
-        const userPlan= await helper.getDatafromStorage('user_plan')
-        console.log("user plan before sending message::",userPlan);
-        if (first.message_group_request_sent && userPlan==3) {
+        if (first.message_group_request_sent) {
           console.log("Sending message BLOCK Started///");
           const friendDetails = {
             "fbUserId":first.friendFbId&&first.friendFbId.length > 0 ? first.friendFbId:profileInfo.fbUserId,
