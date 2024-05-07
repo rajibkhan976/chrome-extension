@@ -2491,10 +2491,6 @@ const FrQueue_Manager = async (callFromFetchAlarm = false) => {
 
 //function to check the current FR queue is eligible to run or not
 async function isFrQueueEligibleToRun(userFbID,friendFbId) {
-  const friendShipStatus =await common.fetchFriendshipStatus({"fbUserId":userFbID,"friendFbId":friendFbId});
-  if(friendShipStatus.is_data_found){
-    return false;
-  }
   let frQueCount = await helper.getDatafromStorage('frQueueSentCount');
   let frQueSettings = await helper.getDatafromStorage('frQueueSetting');
   console.log("::::::::::Is  Eligible Check ::::::::::::");
@@ -2513,7 +2509,7 @@ async function isFrQueueEligibleToRun(userFbID,friendFbId) {
     "run_friend_queue": false,
     "request_limited": frQueSettings.requestLimited,
     "request_limit_value": frQueSettings.requestLimitValue,
-    "time_delay":frQueSettings.timeDelay
+    "time_delay": frQueSettings.timeDelay
   }
   console.log("new frQueue setting after end LIMIT", frQueuePayload);
   await common.storeFrQueueSetting(frQueuePayload);
@@ -2539,7 +2535,7 @@ const storeInMsqsFront=(fbId,message,name,receiverId,memberId="")=>{
   addToQueue(payload)
 }
 
-const createAndinjectSprit = (profileUrl) => {
+const createAndinjectScript = (profileUrl) => {
   return new Promise((resolve, reject) => {
     chrome.tabs.create({ url: profileUrl,active: false, pinned: true, selected: false }, (tab) => {
       // Close the tab after a delay (adjust as needed)
@@ -2583,15 +2579,35 @@ const runFriendRequestQueue = async () => {
       let sentFrReqResponse={status:false};
      if(first.friendFbId.length > 0){
         console.log(":::FR WITH GRAPH API:::")
-        profileInfo=await common.getProfileInfo(first.friendFbId, userFBDetails.fbDtsg, userFBDetails.userID);
+        const friendShipStatus = await common.fetchFriendshipStatus({
+          "queueId": first._id,
+          "fbUserId":userFBDetails.userID,
+          "friendFbId":first.friendFbId
+        });
+        if(friendShipStatus.is_data_found){
+          console.log("USER IS ALREADY PRESENT IN YOUR FR LIST ::");
+          throw new Error("The user is already present in Feind list");
+         }
+        profileInfo = await common.getProfileInfo(first.friendFbId, userFBDetails.fbDtsg, userFBDetails.userID);
         await helper.sleep(7000);
         if(profileInfo)sentFrReqResponse= await common.sentFriendRequest(userFBDetails.userID, userFBDetails.fbDtsg, first.friendFbId, "profile_button", "7920515821315043");
       }else if(first.friendProfileUrl.length > 0){
         console.log(":::::DOM::::::");
         // const sendFrReqDomParseResp= await common.sendFriendRequestByDOMparsing(first.friendProfileUrl);
-        const create = await createAndinjectSprit(first.friendProfileUrl);
-        console.log(":::::DOM     DATA::::::", create);
+        const create = await createAndinjectScript(first.friendProfileUrl);
+        console.log(":::::DOM DATA::::::", create);
          await helper.sleep(6000);
+         const userData = await chrome.tabs.sendMessage(create.tabId, {action :"getUserFbId",tabId : create.tabId});
+         const friendShipStatus = await common.fetchFriendshipStatus({
+          "queueId": first._id,
+          "fbUserId":userFBDetails.userID,
+          "friendFbId":helper.removeExtraQuotes(userData.fbUserId)
+        });
+         if(friendShipStatus.is_data_found){
+          console.log("USER IS ALREADY PRESENT IN YOUR FR LIST ::");
+          throw new Error("The user is already present in Feind list");
+         }
+         await helper.sleep(500);
          const sendFrReqDomParseResp = await chrome.tabs.sendMessage(create.tabId, {action :"clickAddFriend",tabId : create.tabId});
          console.log("dom parse response",sendFrReqDomParseResp);
          await helper.sleep(5000);

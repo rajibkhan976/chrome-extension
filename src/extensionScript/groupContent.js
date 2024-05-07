@@ -547,27 +547,30 @@ const fetchOtherInfosOfMember = async (
         await common.UpdateSettingsAfterFR(fr_token, { ...requestInfo, "profile_viewed": profile_viewed, "friend_request_send": countMember, "time_saved": timeSaved, is_settings_stop : false });
         await helper.saveDatainStorage("FRSendCount", countMember);
         // console.log("groupSettings.send_message ::: ", groupSettings, groupSettings.send_message);
-        if(groupSettings.send_message){
+        const userPlan = await helper.getDatafromStorage('user_plan');
+        if(userPlan >= 2){
+          if(groupSettings.send_message){
 
-          await helper.sleep(3000);
-          // console.log('settingsType :::: ', settingsType)
-          const body = {
-            "fbUserId":userID,
-            "friendFbId": groupMemberInfo.memberId,
-            "settingsType": settingsType.whenFRSendToMember,
-            "settings_id" : groupSettings.settingsId,
-            // "groupId" : groupSettings && groupSettings.send_message_when_reject_friend_request_groupSettings &&
-            //   groupSettings.send_message_when_reject_friend_request_groupSettings.length > 0 &&
-            //   groupSettings.send_message_when_reject_friend_request_groupSettings[0].message_group_id,
-            // "quick_message" : groupSettings && groupSettings.send_message_when_reject_friend_request_groupSettings &&
-            //   groupSettings.send_message_when_reject_friend_request_groupSettings.length ?
-            //   groupSettings.send_message_when_reject_friend_request_settings[0].messengerText : null
-          };
-          // fr_token = await helper.getDatafromStorage("fr_token");
-          const messageContent = await common.getMessageContent( body);
-          // console.log("messageContent in content ::: ", messageContent);
-          if(messageContent.status){
-            chrome.runtime.sendMessage({ "action": "sendMessage","fbDtsg" : fbDtsg, "userId" : userID,  "recieverId": groupMemberInfo.memberId, "name" :  groupMemberInfo.memberName, "message": messageContent.content, "settingsType": settingsType.whenFRSendToMember});
+            await helper.sleep(3000);
+            // console.log('settingsType :::: ', settingsType)
+            const body = {
+              "fbUserId":userID,
+              "friendFbId": groupMemberInfo.memberId,
+              "settingsType": settingsType.whenFRSendToMember,
+              "settings_id" : groupSettings.settingsId,
+              // "groupId" : groupSettings && groupSettings.send_message_when_reject_friend_request_groupSettings &&
+              //   groupSettings.send_message_when_reject_friend_request_groupSettings.length > 0 &&
+              //   groupSettings.send_message_when_reject_friend_request_groupSettings[0].message_group_id,
+              // "quick_message" : groupSettings && groupSettings.send_message_when_reject_friend_request_groupSettings &&
+              //   groupSettings.send_message_when_reject_friend_request_groupSettings.length ?
+              //   groupSettings.send_message_when_reject_friend_request_settings[0].messengerText : null
+            };
+            // fr_token = await helper.getDatafromStorage("fr_token");
+            const messageContent = await common.getMessageContent( body);
+            // console.log("messageContent in content ::: ", messageContent);
+            if(messageContent.status){
+              chrome.runtime.sendMessage({ "action": "sendMessage","fbDtsg" : fbDtsg, "userId" : userID,  "recieverId": groupMemberInfo.memberId, "name" :  groupMemberInfo.memberName, "message": messageContent.content, "settingsType": settingsType.whenFRSendToMember});
+            }
           }
         }
         chrome.runtime.sendMessage({ "action": "FRSendCount", "FriendRequestCount": countMember });

@@ -16,6 +16,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse)=>{
         case "checkCancelBtn" :
             checkCancleRequest(sendResponse);
             break;
+        case "getUserFbId" :
+            getFbUserId(sendResponse);
+            break;
         case "closeTab":
             if(request.tabId){
                 chrome.tabs.remove(request.tabId);
@@ -135,5 +138,17 @@ function addFriendBtnClick(sendResponse) {
     if(button){
         res.status = true;
     }
+    sendResponse(res);
+  }
+
+
+  function getFbUserId(sendResponse) {
+    let res = { status: false,};
+    let content = document.body.innerHTML;
+    let match = content.match(/"userID":"(\d+)"/);
+    if (match) { 
+      let userID= match[0].split(':')[1];
+      res["fbUserId"]= userID.length > 0? userID:"NA";
+     }
     sendResponse(res);
   }

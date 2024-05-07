@@ -50,6 +50,37 @@
       z-index: 1;
     }
   }
+
+  &.btn-theme-gray {
+    @include theme-aware('background-color', 'btn-disabled');
+    @include border-radius(10px);
+    @include flexCenter();
+    opacity: 0.7;
+    pointer-events: none;
+    min-height: 40px;
+
+    figure {
+      margin-right: 5px;
+    }
+    span {
+      @include theme-aware("color", "text-color");
+    }
+
+    &:hover {
+      @include theme-aware("background-color", "active-color");
+    }
+
+    &:disabled {
+      @include theme-aware('background-color', 'btn-disabled');
+      opacity: 0.7;
+      pointer-events: none;
+
+      span {
+        @include theme-aware('color', 'disabled-text');
+      }
+    }
+  }
+
 }
 
 .btn-stop {

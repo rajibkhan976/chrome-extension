@@ -108,13 +108,17 @@ const GroupsRequestForm = ({
   const [openNotificationMsg, setOpenNotificationMsg] = useState("");
   const [openSuccessNotification, setOpenSuccessNotification] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+  const [userPlan, setUserPlan] = useState(0);
   // useEffect(() => {
   //   console.log("NEW edit type settinggggg::: ", settingApiPayload);
   // }, [settingApiPayload]);
   const [isPaused, setIsPaused] = useState(null);
-
+  
   useEffect(() => {
     (async () => {
+      const plan = await helper.getDatafromStorage('user_plan');
+      console.log("userplan++++++",setUserPlan);
+      setUserPlan(plan);
       const isPauedThenRun = await helper.getDatafromStorage("runAction");
       // console.log("isPauedThenRun ::: ", isPauedThenRun)
       setIsPaused(isPauedThenRun === "pause" ? true : false);
@@ -1887,6 +1891,8 @@ const GroupsRequestForm = ({
         {!isLoding && (
           <footer className="fr-settings-footer">
             {!isPaused ? (
+
+              userPlan>=2?(
               <button
                 className="btn btn-theme w-100"
                 onClick={runFrinderHandle}
@@ -1896,7 +1902,18 @@ const GroupsRequestForm = ({
                   <Bolt />
                 </figure>
                 <span>Run Friender</span>
-              </button>
+              </button>):(
+                 <button
+                 className="btn btn-theme-gray w-100"
+                 onClick={runFrinderHandle}
+                 disabled={isRunnable ? "" : "disabled"}
+               >
+                 <figure className="btn-ico">
+                   <Bolt />
+                 </figure>
+                 <span>Run Friender</span>
+               </button>
+              )
             ) : (
               <AutomationStats
                 automationrunner={true}
