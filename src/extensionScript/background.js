@@ -2434,7 +2434,7 @@ function frQue_Kill() {
 
 const FrQueue_Manager = async (callFromFetchAlarm = false) => {
   const userPlan= await helper.getDatafromStorage('user_plan')
-  if(userPlan !==2){
+  if(userPlan < 2){
     console.log("Free user can't use FRQUE feature");
     frQue_Kill();
     return;
