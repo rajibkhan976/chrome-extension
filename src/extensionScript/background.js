@@ -353,7 +353,10 @@ chrome.runtime.onMessageExternal.addListener(async function (
     case "logout" : 
 
     // Function to clear MSQS alarm
-      stopSendingLoop()
+      stopSendingLoop();
+    // KIll FRQUE 
+      frQue_Kill();
+      
 
       chrome.alarms.clear("scheduler");
       chrome.alarms.clear("pendingFR");
