@@ -399,7 +399,11 @@
   }
 
   .fr-req-nomessage-text {
-    background: linear-gradient(90deg, rgba(255, 230, 0, 0.15) 0%, rgba(255, 230, 0, 0) 100%);
+    background: linear-gradient(
+      90deg,
+      rgba(255, 230, 0, 0.15) 0%,
+      rgba(255, 230, 0, 0) 100%
+    );
     margin-top: 10px;
     border-radius: 5px;
     padding: 5px 10px;
@@ -561,7 +565,10 @@
         }
 
         &:hover {
-          @include theme-aware("background-color", "input-hover-button-background");
+          @include theme-aware(
+            "background-color",
+            "input-hover-button-background"
+          );
         }
       }
     }
@@ -598,7 +605,8 @@
     border: none;
     color: #bdbdbd;
     // padding: 17px 12px;
-    padding: 6px 12px;
+    // padding: 6px 12px;
+    padding: 10px 0;
     -webkit-appearance: none;
     cursor: pointer;
     border: 1px solid transparent;
@@ -606,25 +614,44 @@
     flex-direction: row;
     align-items: flex-start;
     flex-wrap: wrap;
-    gap: 10px;
+    // gap: 10px;
     @include theme-aware("background-color", "main-container-bg");
     @include border-radius(5px);
     // background-image: url("../../../svg/arrow-down-filled.svg");
     // background-repeat: no-repeat;
     // background-position: right 15px center;
+    // height: 85px;
 
     &:hover,
     &:focus {
       @include theme-aware("border-color", "active-color");
       @include theme-aware("background-color", "select-basic-hover-bg");
     }
+
+    .fr-fillinputCF-basic-keys {
+      width: 100%;
+      height: 33px;
+      overflow: auto;
+      width: 100%;
+      background: transparent;
+      color: #bdbdbd;
+      -webkit-appearance: none;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      grid-gap: 5px;
+    }
+
     span {
       @include theme-aware("background-color", "tooltip-bg");
-      padding: 2px 10px;
-      height: 20px;
+      padding: 2px 8px;
+      height: 18px;
       font-weight: 700;
-      font-size: 12px;
-      line-height: 16px;
+      font-size: 10px;
+      line-height: 13px;
       letter-spacing: 0.02em;
       text-align: center;
       border-radius: 100px;
@@ -641,6 +668,7 @@
       flex-grow: 4;
       // min-width: 200px;
       flex-shrink: 1;
+      padding: 0 5px;
 
       input {
         @include theme-aware("color", "text-color");
@@ -648,12 +676,16 @@
         height: 25px;
         width: 100%;
         background-color: transparent;
-        padding: 0px 0 5px 0;
+        // padding: 0px 0 5px 0;
         &:focus {
           outline: transparent;
         }
       }
     }
+  }
+
+  .fr-fillinputCF-basic-p-5 {
+    padding: 5px;
   }
 
   .fr-fillinputCF-basic-labeled {
@@ -694,6 +726,8 @@
     // background-image: url("../../../svg/arrow-down-filled.svg");
     // background-repeat: no-repeat;
     // background-position: right 15px center;
+    height: 75px;
+    overflow: auto;
 
     &:hover,
     &:focus {
@@ -907,8 +941,8 @@
 .suggestion_box_main {
   position: absolute;
   // top: 25px;
-  bottom: 36px;
-  left: -13px;
+  bottom: 40px;
+  left: -1px;
   max-height: 165px;
   width: 217px;
   z-index: 100;
@@ -934,6 +968,12 @@
     }
   }
 }
+.suggestion_box_main_2 {
+  @extend .suggestion_box_main;
+  bottom: 66px;
+  left: -6px;
+}
+
 .fr-req-fieldset {
   margin-top: 14px;
 
@@ -1652,7 +1692,7 @@
     &:before {
       width: 130px;
       overflow-wrap: break-word;
-      content: "Synced on \A" attr(data-text);
+      content: "Synced on \A"attr(data-text);
       text-align: center;
       letter-spacing: -0.3px;
     }

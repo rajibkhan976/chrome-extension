@@ -219,10 +219,10 @@
                 display: none;
             }
 
-            .fr-fillinputCF-basic {
-                height: 75px;
-                // overflow: auto;
-            }
+            // .fr-fillinputCF-basic {
+            //     height: 75px;
+            //     overflow: auto;
+            // }
         }
     }
 }
@@ -282,7 +282,6 @@ label.fr-ext-checkbox {
         background-color: #2b2b2d !important;
     }
 }
-
 
 // // Custom the Styles here..
 // .fr-req-element.fr-req-el-selectInput.fr-req-fieldset {
@@ -518,8 +517,6 @@ label.fr-ext-checkbox {
 //     pointer-events: none;
 // }
 
-
-
 // Custom Styles
 .fr-req-element.fr-req-el-selectInput.fr-req-fieldset {
     display: flex;
@@ -592,7 +589,7 @@ label.fr-ext-checkbox {
     display: block;
     position: relative;
     padding-left: 10px;
-    margin-bottom: 12px;
+    // margin-bottom: 12px;
     cursor: pointer;
 
     input {
@@ -652,7 +649,7 @@ label.fr-ext-checkbox {
     margin-bottom: 5px;
 
     .clear-tags-btn {
-        color: #FF6A77;
+        color: #ff6a77;
         font-weight: bold;
         cursor: pointer;
     }
@@ -666,7 +663,7 @@ label.fr-ext-checkbox {
 
 // Reaction Styles
 #reaction-icons-section {
-    margin-top: 8px;
+    margin-top: 5px;
 
     .fr-reaction-icons {
         display: inline-flex;
@@ -779,15 +776,44 @@ label.fr-ext-checkbox {
     pointer-events: none;
 }
 
-
 .column-setup {
     column-count: 3;
     column-gap: 30px;
     column-rule: 1px solid;
-    @include theme-aware('column-rule-color', 'tooltip-bg');
+    @include theme-aware("column-rule-color", "tooltip-bg");
     height: 100%;
 
     > * {
         break-inside: avoid;
     }
+}
+
+.tooltip-box {
+    position: relative;
+}
+
+.tooltip-container {
+    opacity: 0;
+    display: inline-grid;
+    position: absolute;
+    background-color: #fff;
+    color: #000;
+    z-index: 9999;
+    min-height: 30px;
+    width: 100px;
+    border-radius: 5px;
+    /* text-align: center; */
+    justify-content: center;
+    align-items: center;
+    font-size: 10px;
+    padding: 4px;
+}
+
+.tooltip-box:hover .tooltip-container {
+    opacity: 1;
+}
+
+.fr-select-options-mutial-frnds {
+    text-decoration: underline;
+    font-size: 15px;
 }

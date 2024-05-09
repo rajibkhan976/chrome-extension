@@ -71,17 +71,17 @@ export const requestGroupsFormSettings = {
           valid: true,
           isHalfWidth: true,
           name: "lookup_for_mutual_friend_condition",
-          value: "=<",
+          // value: "=<",
           options: [
             {
-              selected: true,
-              label: "=<",
-              value: "less and equal",
+              selected: false,
+              label: "<",
+              value: "<",
             },
             {
               selected: false,
-              label: "=>",
-              value: "greater and equal",
+              label: ">",
+              value: ">",
             },
           ],
         },
@@ -111,10 +111,10 @@ export const requestGroupsFormSettings = {
           isLabeled: false,
           valid: true,
           name: "gender_filter_value",
-          value: "male",
+          // value: "male",
           options: [
             {
-              selected: true,
+              selected: false,
               label: "Male",
               value: "male",
             },
@@ -398,17 +398,17 @@ export const requestPostsSettings = {
           valid: true,
           isHalfWidth: true,
           name: "lookup_for_mutual_friend_condition",
-          value: "=<",
+          // value: "=<",
           options: [
             {
               selected: true,
-              label: "=<",
-              value: "less and equal",
+              label: "<",
+              value: "<",
             },
             {
               selected: false,
-              label: "=>",
-              value: "greater and equal",
+              label: ">",
+              value: ">",
             },
           ],
         },
@@ -420,7 +420,7 @@ export const requestPostsSettings = {
           isHalfWidth: true,  
           valid: true,
           // inLabel: "Number of request",
-          value: 0,
+          value: 10,
         },
       ]
     },
@@ -438,7 +438,7 @@ export const requestPostsSettings = {
           isLabeled: false,
           valid: true,
           name: "gender_filter_value",
-          value: "male",
+          // value: "male",
           options: [
             {
               selected: true,
@@ -725,22 +725,22 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
       valid: true,
       fieldOptions: [
         {
-          type: "customSelect",
+          type: "select",
           isLabeled: false,
           valid: true,
           isHalfWidth: true,
           name: "lookup_for_mutual_friend_condition",
-          value: "=<",
+          // value: "=<",
           options: [
             {
-              selected: true,
-              label: "=<",
-              value: "less and equal",
+              selected: false,
+              label: "<",
+              value: "<",
             },
             {
               selected: false,
-              label: "=>",
-              value: "greater and equal",
+              label: ">",
+              value: ">",
             },
           ],
         },
@@ -752,7 +752,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
           isHalfWidth: true,  
           valid: true,
           // inLabel: "Number of request",
-          value: 0,
+          value: 10,
         },
       ]
     },
@@ -770,7 +770,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
           isLabeled: false,
           valid: true,
           name: "gender_filter_value",
-          value: "male",
+          // value: "male",
           options: [
             {
               selected: true,
@@ -1528,7 +1528,7 @@ export const requestFormAdvncSettings = {
 export const fr_Req_Payload = {
   skip_admin: false,
   gender_filter: false,
-  gender_filter_value: "male",
+  gender_filter_value: "",
   country_filter_enabled: false,
   country_filter: false,
   country_filter_value: [],
@@ -1554,10 +1554,12 @@ export const fr_Req_Payload = {
   time_saved: 0,
   fbUserId: "",
   settingsType: 6,
-  lookup_for_mutual_friend: true,
+  lookup_for_mutual_friend: false,
   lookup_for_mutual_friend_condition: "<",
   mutual_friend_value: 2,
-  reaction: 12,
+  // reaction: 12,
+  reaction: false,
+  reaction_type: ["like", "love", "care", "wow", "haha", "sad", "angry"],
   comment: false,
 };
 

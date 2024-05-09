@@ -84,7 +84,7 @@ const SentFromPosts = () => {
                                     setIsEditing(false);
                                     handleSaveSettings(event);
                                 }}
-                            >
+                        >
                                 <TickIcon /> Save
                             </button>
                             :

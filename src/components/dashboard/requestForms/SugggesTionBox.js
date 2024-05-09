@@ -1,7 +1,7 @@
 import { memo } from "react";
 import useOutSideClick from "../../../helper/useOutSideClick";
 
-const SugggesTionBox = ({ fillInputChange, clickFun, element }) => {
+const SugggesTionBox = ({ fillInputChange, clickFun, element, isKeywords = false }) => {
 
   // dataArray = country_list.filter(item=>item.includes(inputTxt));
   // console.log("this the suggestion box", inputTxt);
@@ -24,7 +24,7 @@ const SugggesTionBox = ({ fillInputChange, clickFun, element }) => {
         // autoFocus
       />
       {isComponentVisible && (
-        <div className="suggestion_box_main">
+        <div className={!isKeywords ? "suggestion_box_main" : "suggestion_box_main_2"}>
           <ul>
             {element.sggArray
               .filter((item) =>

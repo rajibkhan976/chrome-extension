@@ -74,6 +74,9 @@ export const findData = (child, parent, level) => {
         return false;
     }
     const mainData = parent.fieldOptions[0];
+
+    console.log("Founded main data -- ", mainData);
+
     if (child.type === mainData.type && child.name === mainData.name) {
         return level;
     } else {
@@ -98,7 +101,6 @@ export const changeData = (item, level, val, setIsValid) => {
         fieldOptions: [changeData(item.fieldOptions[0], level - 1, val)],
     };
 };
-
 
 // COMPONENT..
 const GroupsRequestForm = ({
@@ -128,6 +130,8 @@ const GroupsRequestForm = ({
     //   console.log("NEW edit type settinggggg::: ", settingApiPayload);
     // }, [settingApiPayload]);
     const [isPaused, setIsPaused] = useState(null);
+    const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+    // const [isTooltipVisible, setIsTooltipVisible] = useState(false);
 
     useEffect(() => {
         (async () => {
@@ -483,6 +487,7 @@ const GroupsRequestForm = ({
     };
 
 
+    // SELECT OPTIONS CHANGE HANDLE..
     const selectValueChange = (val, ele) => {
         let formSetPlaceholder = { ...formSetup };
 
@@ -518,6 +523,7 @@ const GroupsRequestForm = ({
                 }
             }),
         };
+
         setFormSetup(newObj);
         generateFormElements();
     };
@@ -780,25 +786,62 @@ const GroupsRequestForm = ({
         }
     };
 
+    // HANDLE INPUT VALUE CHANGE ON MUTUAL FRIENDS FIELD..
+    const handleValueChangeMutualFriend = (element, value) => {
+        let formSetPlaceholder = { ...formSetup };
+
+        const newObj = {
+            ...formSetPlaceholder,
+            fields: formSetPlaceholder?.fields?.map((formItem) => {
+                if (formItem.name === "lookup_for_mutual_friend") {
+                    const fields = formItem.fieldOptions[1];
+                    fields.value = value;
+
+                    formItem?.fieldOptions?.map(field => {
+                        if (field.name === "mutual_friend_value") {
+                            field.value = value;
+                        }
+                        return field;
+                    })
+                    return formItem;
+
+                } else {
+                    return formItem;
+                }
+            })
+        };
+
+        setFormSetup(newObj);
+        generateFormElements();
+    };
+
     //::::use this function for recursive fields
     const inputValueChange = (ele, val) => {
+        console.log("Element -- ", ele);
+        console.log("Value -- ", val);
+
         let formSetPlaceholder = { ...formSetup };
-        formSetPlaceholder.fields.forEach((formItem, idx) => {
-            const found = findData(ele, formItem, 1);
 
-            if (found) {
-                const newObj = changeData(formItem, found, val);
+        let newPlaceholder = {
+            ...formSetPlaceholder,
+            fields: formSetPlaceholder.fields.forEach((formItem, idx) => {
+                const found = findData(ele, formItem, 1);
 
-                setSettingApiPayload((prevState) => ({
-                    ...prevState,
-                    [ele.name]: val,
-                }));
+                if (found) {
+                    const newObj = changeData(formItem, found, val);
 
-                formSetPlaceholder.fields[idx] = newObj;
-            }
-        });
+                    setSettingApiPayload((prevState) => ({
+                        ...prevState,
+                        [ele.name]: val,
+                    }));
 
-        setFormSetup(formSetPlaceholder);
+                    formSetPlaceholder.fields[idx] = newObj;
+                }
+            })
+        };
+
+        // setFormSetup(formSetPlaceholder);
+        setFormSetup(newPlaceholder);
         generateFormElements();
     };
 
@@ -1010,6 +1053,14 @@ const GroupsRequestForm = ({
         generateAdvncForm();
     };
 
+    // HANDLE MOUSE MOVE ON TOOLTIP MOVING WITH CURSOR
+    const handleMouseMove = (event) => {
+        const { offsetX, offsetY, movementX, movementY } = event.nativeEvent;
+        const x = (offsetX - movementX) + 20, y = (offsetY - movementY) + 30;
+        setTooltipPosition({ x, y });
+        // setIsTooltipVisible(true);
+    };
+
 
     const generateAdvncForm = () => {
         const generateAdvncFormElemnts = (element, idx) => {
@@ -1138,12 +1189,11 @@ const GroupsRequestForm = ({
                         >
                             {element.isLabeled ? <label>{element.inLabel}</label> : ""}
                             <select
-                                className={` ${element.isLabeled
-                                    ? "fr-select-basic fr-select-basic-labeled"
-                                    : "fr-select-basic"
-                                    }`}
+                                className={`${element.isLabeled ? "fr-select-basic fr-select-basic-labeled" : "fr-select-basic"}
+                                        ${element?.name === "lookup_for_mutual_friend_condition" ? 'fr-select-options-mutial-frnds' : ''}
+                                    `}
                                 value={element.value}
-                                // {element&&element.option.length>0?disabled}
+                                // {element&&element.opti on.length>0?disabled}
                                 disabled={
                                     element && element.options && element.options.length <= 0
                                         ? true
@@ -1443,7 +1493,7 @@ const GroupsRequestForm = ({
                             <input
                                 type="number"
                                 maxlength="6"
-                                min={1}
+                                min={0}
                                 max={9999}
                                 step="1"
                                 className={
@@ -1455,8 +1505,12 @@ const GroupsRequestForm = ({
                                 onChange={(e) => {
                                     if (element.name === "tier_filter_value") {
                                         fillInputChange(e.target.value, element);
+
+                                    } else if (element.name === "mutual_friend_value") {
+                                        handleValueChangeMutualFriend(element, e.target.value);
+
                                     } else {
-                                        inputValueChange(element, parseFloat(e.target.value));
+                                        inputValueChange(element, e.target.value);
                                     }
                                 }}
                                 onKeyDown={(e) => {
@@ -1497,33 +1551,34 @@ const GroupsRequestForm = ({
                             {element.isLabeled ? <label>{element.inLabel}</label> : ""}
 
                             <div
-                                className={
-                                    element.isLabeled
-                                        ? "fr-fillinputCF-basic fr-fillinputCF-basic-labeled"
-                                        : "fr-fillinputCF-basic"
-                                }
+                                className={`${element.isLabeled ? 'fr-fillinputCF-basic fr-fillinputCF-basic-labeled' : 'fr-fillinputCF-basic'}
+                                    ${element?.valueArr.length > 0 ? 'fr-fillinputCF-basic-p-5' : ''}
+                                `}
                                 onClick={() => {
                                     countyRef.current.focus();
                                 }}
                             >
-                                {element.valueArr.map((item, idx) => {
-                                    return (
-                                        <span
-                                            key={idx}
-                                            onClick={() => {
-                                                removeTag(idx, element);
-                                            }}
-                                        >
-                                            {item}
-                                        </span>
-                                    );
-                                })}
+                                <div className={element?.valueArr.length > 0 ? "fr-fillinputCF-basic-keys" : ""}>
+                                    {element.valueArr.map((item, idx) => {
+                                        return (
+                                            <span
+                                                key={idx}
+                                                onClick={() => {
+                                                    removeTag(idx, element);
+                                                }}
+                                            >
+                                                {item}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
                                 {/* </div><div className="fillinputCF-input-sugg"> */}
 
                                 <SugggesTionBox
                                     fillInputChange={fillInputChange}
                                     clickFun={suggestionClick}
                                     element={element}
+                                    isKeywords={element?.valueArr.length > 0 ? true : false}
                                 />
                             </div>
                             {!element.valid && (
@@ -1667,7 +1722,22 @@ const GroupsRequestForm = ({
         // Wrapping the form elements in a div..
         return formSetup.fields.map((formCell, i) => {
             return (
-                <div key={i} className={`fr-setting-cell ${formCell?.disabled ? 'group-disabled' : ''}`}>
+                <div
+                    key={i}
+                    className={`fr-setting-cell ${formCell?.disabled ? 'group-disabled tooltip-box' : ''}`}
+                    onMouseMove={handleMouseMove}
+                >
+
+                    {formCell?.disabled && (
+                        <div
+                            className="tooltip-container"
+                            style={{ left: `${tooltipPosition.x}px`, top: `${tooltipPosition.y}px` }}
+                        >
+                            Feature disabled on this page
+                        </div>
+                        // <MouseTracker offset={{ x: tooltipPosition.x, y: tooltipPosition.y }}>Some Text</MouseTracker>
+                    )}
+
                     <header className="fr-cell-header">
                         <h5 className={`fr-cell-header-title`}>
                             {formCell.headerCheckbox && (
@@ -1750,7 +1820,6 @@ const GroupsRequestForm = ({
 
 
             {/* EDITING THE SETTINGS FORM */}
-
             {/* <div className="form-wraper-settings general-settings"> */}
             <form action="" className='d-flex' onSubmit={(e) => e.preventDefault()}>
                 {/* 1st ROW */}

@@ -325,9 +325,9 @@ const SentFromGroups = () => {
             />
             <section className="section-main f-1">
                 <div className="main-container d-flex d-flex-column main-settings-container">
-                    <section 
+                    <section
                         className={`setting-area f-1 d-flex ${editType !== "basic" ? 'settings-show-saved' : 'row-container'}`}
-                        style={isRunnable ? {background: 'none'} : {}}    
+                        style={isRunnable ? { background: 'none' } : {}}
                     >
                         {/* RENDERING MAIN CONTENT HERE */}
                         {renderContent()}
@@ -342,7 +342,7 @@ const SentFromGroups = () => {
                         </div>
 
                         <div className='d-flex f-justify-end f-align-center setting-footer-btn-section'>
-                           {renderActionButtons()}
+                            {renderActionButtons()}
                         </div>
                     </footer>
                 </div>
