@@ -45,6 +45,9 @@ const SentFromGroups = () => {
     const [isPaused, setIsPaused] = useState(null);
     const settingsType = 8;
 
+    useEffect(()=>{
+        console.log("groups.................")
+    }, [])
     // FETCH SETTINGS DATA FROM LOCAL STORAGE..
     const fetchSetingsLocalData = async () => {
         return await helper.getDatafromStorage('groupSettingsPayload');
@@ -385,6 +388,9 @@ const SentFromGroups = () => {
                         Authorization: fr_token,
                     },
                 });
+                
+                console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
+                chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
             } catch (error) {
                 console.log("ERROR WHILE UPDATE SETTINGS - ", error);
             }
@@ -406,6 +412,9 @@ const SentFromGroups = () => {
                         Authorization: fr_token,
                     },
                 });
+                
+                console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
+                chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : payload})
             } catch (error) {
                 console.log("ERROR WHILE SAVE SETTINGS - ", error);
             }
@@ -447,6 +456,8 @@ const SentFromGroups = () => {
 
         await helper.saveDatainStorage('groupSettingsPayload', payload);
         await saveToAPI(payload);
+        // console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
+        // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup"})
     };
 
 

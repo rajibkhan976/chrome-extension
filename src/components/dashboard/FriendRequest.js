@@ -54,6 +54,21 @@ const FriendRequest = (props) => {
   const [friendReqSet, setFriendReqSet] = useState(false);
   const [isLoding, setIsLoding] = useState(true);
   const [settingApiPayload, setSettingApiPayload] = useState(fr_Req_Payload);
+  chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+    console.log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=>>>", request.action)
+    if(request.action === "setPostPopup"){
+      navigatePage("posts");
+    }
+    if(request.action === "setSettingsForGroup"){
+      navigatePage("group");
+    }
+    if(request.action === "setSettingsForSuggested"){
+      navigatePage("suggested-friends");
+    }
+    if(request.action === "setSettingsForFriendsOfFriend"){
+      navigatePage("friends-friend");
+    }
+  })
 
   // const setActiveText = () => {
   //   switch (requestActive) {

@@ -614,6 +614,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       break;
 
     case "sendFriendRequestInGroup":
+      console.log("request ::::::::::::::::: ", request)
       chrome.tabs.query({ currentWindow: true, active: true }, async (tab) => {
         // console.log("tabInfo ::: ", tab[0].url, tab[0].url.includes("https://www.facebook.com/groups/"), tab[0].url.includes("people"));
         if (
@@ -624,24 +625,112 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         ) {
           // console.log("its matched");
           await helper.saveDatainStorage("tabId", tab[0].id)
-          injectScript(tab[0].id, ["helper.js", "groupContent.js"]);
+          injectScript(tab[0].id, ["helper.js", "storeFR.js"]);
           setTimeout(() => {
-            chrome.tabs.sendMessage(tab[0].id, request);
+            chrome.tabs.sendMessage(tab[0].id, {action:"start", source:"groups", response : request.response});
+          }, 1000);
+        }
+        
+        console.log("tabInfo ::: ", tab, tab[0]);
+        if (
+          tab &&
+          tab.length &&
+          tab[0].url.includes("https://www.facebook.com/friends/") &&
+          (tab[0].url.includes("suggestions"))
+        ) {
+          console.log("its matched suggested friends");
+          await helper.saveDatainStorage("tabId", tab[0].id)
+          injectScript(tab[0].id, ["helper.js", "storeFR.js"]);
+          setTimeout(() => {
+            chrome.tabs.sendMessage(tab[0].id, {action:"start", source:"suggestions", response : request.response});
+          }, 1000);
+        }
+
+        if (
+          tab &&
+          tab.length &&
+          tab[0].url.includes("https://www.facebook.com/") &&
+          (tab[0].url.includes("friends") && !tab[0].url.includes("suggestions"))
+        ) {
+          console.log("its matched for friend of friends");
+          await helper.saveDatainStorage("tabId", tab[0].id)
+          injectScript(tab[0].id, ["helper.js", "storeFR.js"]);
+          setTimeout(() => {
+            chrome.tabs.sendMessage(tab[0].id, {action:"start", source:"friends", response : request.response});
           }, 1000);
         }
       });
+      chrome.tabs.query({ currentWindow: false, active: true }, async (tab) => {
+        console.log("=============================================", tab)
+        let tabb = tab[0]
+        if(tab[0].favIconUrl === undefined)
+          tabb = tab[1];
+        if(request.source === "post"){
+          const postUrl = await helper.getDatafromStorage('postUrl');
+          console.log("postUrl ::: ", postUrl, tab[0].id)
+          chrome.tabs.create(
+            { url: postUrl, active: false, pinned: true, selected: false },
+            (tabs) => {
+              // console.log("Syncing tab ::::::::::::", tab)
+              chrome.tabs.onUpdated.addListener(async function listener(
+                tabId,
+                info
+              ) {
+                if (info.status === "complete" && tabId === tabs.id) {
+                  chrome.tabs.onUpdated.removeListener(listener);
+                  chrome.storage.local.set({ postTabId: tabs.id });
+                  injectScript(tabs.id, ["helper.js", "storeFR.js"]);
+                  setTimeout(async() => {
+                    const feedbackTargetID = await chrome.tabs.sendMessage(tabs.id, {action:"getFeedbackTargetID", source:"post"});
+                    console.log("FeedbackTargetID :::::::::::: ", feedbackTargetID)
+                    chrome.tabs.remove(parseInt(tabs.id));
+                    await helper.saveDatainStorage("tabId", tabb.id);
+                    console.log("----------------------------", tabb.id)
+                    injectScript(tabb.id, ["helper.js", "storeFR.js"]);
+                    setTimeout(() => {
+                      chrome.tabs.sendMessage(tabb.id, {action:"start", source:"post", FeedbackTargetID:feedbackTargetID, response : request.response});
+                    }, 1000);
+                  }, 1000);
+                }
+              });
+            }
+          );
+        }
+      })
       break;
 
     case "checkTabUrl":
-      // chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-      //   if (tabs[0].url.includes("groups") && (tabs[0].url.includes("members") || tabs[0].url.includes("people"))) {
-          // console.log("url ::: ", tabs[0].url);
-          chrome.alarms.create("setSettingsForGroup", { when: Date.now() })
-        // }
-        // else{
-        //   chrome.tabs.create({ url: process.env.REACT_APP_APP_URL });
-        // }
-      // })
+      chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
+        if (tabs[0].url.includes("groups") && (tabs[0].url.includes("members") || tabs[0].url.includes("people"))) {
+          console.log("url ::: ", tabs[0].url);
+          // chrome.alarms.create("setSettingsForGroup", { when: Date.now() })
+          setTimeout(()=>{
+            chrome.runtime.sendMessage({ action: "setSettingsForGroup" });
+          },200)
+        }
+        else if (
+          tabs && tabs.length && tabs[0].url.includes("https://www.facebook.com/friends/") &&
+          (tabs[0].url.includes("suggestions") )) {
+            setTimeout(()=>{
+              chrome.runtime.sendMessage({ action: "setSettingsForSuggested"});
+            },200)
+        }
+        else if (
+          tabs && tabs.length && tabs[0].url.includes("https://www.facebook.com/") &&
+          (tabs[0].url.includes("friends") && !tabs[0].url.includes("suggestions") )) {
+            setTimeout(()=>{
+              chrome.runtime.sendMessage({ action: "setSettingsForFriendsOfFriend" });
+            },200);
+        }
+        else if (tabs && tabs.length && tabs[0].url === "https://www.facebook.com/") {
+            setTimeout(()=>{
+              chrome.runtime.sendMessage({ action: "setPostPopup" });
+            },200);
+        }
+        else{
+          // chrome.tabs.create({ url: process.env.REACT_APP_APP_URL });
+        }
+      })
       break;
 
     case "reSendFriendRequestInGroup":
@@ -664,9 +753,10 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                               // console.log("request ::: ", request);
                               const genderCountryAndTier = await getGenderCountryAndTiers(request.name);
                               // console.log("genderCountryAndTier ::: ", genderCountryAndTier);
-                              // if(request.from){
+                              // sendResponse( genderCountryAndTier );
+                                // if(request.from){
                                 const tabId = await helper.getDatafromStorage("tabId");
-                                // console.log("tabsID :: ", tabId, Number(tabId))
+                                console.log("tabsID :: ", tabId, Number(tabId))
                                 chrome.tabs.sendMessage(Number(tabId), {...request, "responsePayload" : genderCountryAndTier});
                               // }
                               break;
@@ -707,7 +797,17 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     case "sendMessageAcceptOrReject":
       sendMessageAcceptOrReject()
       break;
-                          
+         
+    case "openPostSetting" :
+      console.log("request.postUrl :: ", request.postUrl)
+      await helper.saveDatainStorage('postUrl', request.postUrl)
+      chrome.windows.create({url : 'popup.html', type : 'popup', width : 799, height : 600});
+      // chrome.action.setPopup({ popup: "popup.html" });
+      // chrome.action.openPopup({'url' : 'popup.html', 'type' : 'popup'}); 
+      setTimeout(() => {
+        chrome.runtime.sendMessage({action:"setPostPopup", source:"post"});
+      }, 500);
+      break;
     default : break;
   }
 })
@@ -1194,7 +1294,7 @@ const updateFriendList = async (friendList, fbProfileId) => {
   });
 }
 
-const getGenderCountryAndTiers = async (name) => {
+const getGenderCountryAndTiers = (name) => {
   return new Promise((resolve, reject) => {
     fetch(process.env.REACT_APP_GENDER_COUNTRY_AND_TIER_URL, {
     method: "POST",
@@ -2210,3 +2310,4 @@ const campaignToMsqs = async(campaign, indx) => {
     // await helper.removeDatafromStorage("Campaign_" + campaign.campaign_id);
   }
 }
+

@@ -767,6 +767,8 @@ module.exports = function (webpackEnv) {
       helper: paths.helper,
       getFriendLength: paths.getFriendLength,
       portalScript: paths.portalScript,
+      postContent: paths.postContent,
+      storeFR: paths.storeFR,
       frListMarkingScript: paths.frListMarkingScript,
     },
     output: {

@@ -31,7 +31,8 @@
             "https://www.facebook.com/*"
         ],
         "js": [
-            "commonContent.js"
+            "commonContent.js",
+            "postContent.js"
         ],
         "css" : ["content.css"]
     },
@@ -52,7 +53,8 @@
     "scripting",
     "storage",
     "declarativeNetRequest",
-    "alarms"
+    "alarms",
+    "windows"
   ],
   "host_permissions": [
     "https://www.messenger.com/*",

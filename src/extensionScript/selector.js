@@ -21,7 +21,22 @@ const selectors = {
     loginBtn : ['button[data-testid="royal_login_button"][name="login"]', 'div[aria-label="Accessible login button"][role="button"]'],
     fbScripts : ['script[type="application/json"][data-sjs]'],
     incoming_requests_1 : ['div[aria-label="Friend requests"][role="navigation"]'],
-    incoming_requests_2 : ['div[aria-label="Friend Requests"][role="navigation"]']
+    incoming_requests_2 : ['div[aria-label="Friend Requests"][role="navigation"]'],
+    ariaLabel : [
+        'div[aria-label="Actions for this post"]',
+        'div[aria-label="Mga aksyon para sa post na ito"]',
+        'div[aria-label="Tindakan untuk postingan ini"]',
+        'div[aria-label="Ações para esta publicação"]',
+        'div[aria-label="Actions pour cette publication"]',
+        'div[aria-label="Acties voor dit bericht"]',
+        'div[aria-label="Handlungen für diesen Beitrag"]',
+        'div[aria-label="Действия для этой публикации"]',
+        'div[aria-label="この投稿へのアクション"]',
+        'div[aria-label="इस पोस्ट के लिए एक्शन"]',
+        'div[aria-label="Azioni per questo post"]',
+        'div[aria-label="Bu gönderi için eylemler"]',
+        'div[aria-label="Handlinger for dette innlegget"]',
+    ]
 }
 
 export default selectors;

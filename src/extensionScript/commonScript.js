@@ -695,6 +695,36 @@ const checkHasConversation= async(fb_user_id,friendFbId)=>{
   }     
 }
 
+const storeInFRQS = async (payload) => {
+  HEADERS.authorization = await helper.getDatafromStorage("fr_token");
+  let frqsResponse = await fetch(
+    process.env.REACT_APP_STORE_IN_FRIENDS_QUEUE,
+    {
+      method: "POST",
+      headers: HEADERS,
+      body: JSON.stringify(payload),
+    }
+  );
+  frqsResponse = await frqsResponse.json();
+  console.log("frqsResponse ::: ", frqsResponse);
+  return frqsResponse;
+}
+
+const checkAvailability = async (userId, friend_fb_id) => {
+  HEADERS.authorization = await helper.getDatafromStorage("fr_token");
+  let isAvailable = await fetch(
+    process.env.REACT_APP_AVAILIBILITY_OF_MEMBER + "?fb_user_id=" + userId + '&friendFbId=' + friend_fb_id,
+    {
+      method: "GET",
+      headers: HEADERS,
+    }
+  );
+  
+  isAvailable = await isAvailable.json();
+  // console.log("isAvailable ::: ", isAvailable);
+  return isAvailable && isAvailable.userData;
+}
+
 const common = {
   getAboutInfo : getAboutInfo,
   getMemberGender : getMemberGender,
@@ -711,7 +741,9 @@ const common = {
   checkHasConversation:checkHasConversation,
   fetchAllCampaignList : fetchAllCampaignList,
   checkCampaignStatus : checkCampaignStatus,
-  checkMessageStatus : checkMessageStatus
+  checkMessageStatus : checkMessageStatus,
+  storeInFRQS : storeInFRQS,
+  checkAvailability : checkAvailability
 };
 
 export default common;

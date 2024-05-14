@@ -301,6 +301,9 @@ const SentFromFriendsFriend = () => {
                         Authorization: fr_token,
                     },
                 });
+                
+                console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
+                chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
             } catch (error) {
                 console.log("ERROR WHILE UPDATE SETTINGS - ", error);
             }
@@ -322,6 +325,9 @@ const SentFromFriendsFriend = () => {
                         Authorization: fr_token,
                     },
                 });
+                
+                console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
+                chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : payload})
             } catch (error) {
                 console.log("ERROR WHILE SAVE SETTINGS - ", error);
             }
@@ -361,6 +367,8 @@ const SentFromFriendsFriend = () => {
 
         await helper.saveDatainStorage('frndsOfFrndsSettingsPayload', payload);
         await saveToAPI(payload);
+        // console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
+        // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup"})
     };
 
 

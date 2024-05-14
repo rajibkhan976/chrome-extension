@@ -303,6 +303,9 @@ const SentFromSuggestedFriends = () => {
                         Authorization: fr_token,
                     },
                 });
+                
+                console.log("==== RUN FRIENDER ACTION CLICKED NOW ====", updatePayload)
+                chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
             } catch (error) {
                 console.log("ERROR WHILE UPDATE SETTINGS - ", error);
             }
@@ -324,6 +327,9 @@ const SentFromSuggestedFriends = () => {
                         Authorization: fr_token,
                     },
                 });
+                
+                console.log("==== RUN FRIENDER ACTION CLICKED NOW ====", payload)
+                chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : payload})
             } catch (error) {
                 console.log("ERROR WHILE SAVE SETTINGS - ", error);
             }
@@ -365,6 +371,8 @@ const SentFromSuggestedFriends = () => {
 
         await helper.saveDatainStorage('suggested', payload);
         await saveToAPI(payload);
+        // console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
+        // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup"})
     };
 
 
@@ -594,7 +602,6 @@ const SentFromSuggestedFriends = () => {
         }
     };
 
-
     return (
         <>
             <InnherHeader
@@ -613,8 +620,8 @@ const SentFromSuggestedFriends = () => {
                         {renderContent()}
                     </section>
 
-                    <footer className="setting-footer d-flex f-align-center">
-                        <div
+                    <footer className="setting-footer d-flex f-justify-end f-align-center">
+                    <div
                             className="note-inline text-center"
                             style={!isRunnable ? { visibility: 'hidden' } : { visibility: 'visible' }}
                         >
@@ -622,7 +629,7 @@ const SentFromSuggestedFriends = () => {
                         </div>
 
                         <div className='d-flex f-justify-end f-align-center setting-footer-btn-section'>
-                            {renderActionButtons()}
+                           {renderActionButtons()}
                         </div>
                     </footer>
                 </div>
