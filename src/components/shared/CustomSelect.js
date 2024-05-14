@@ -2,8 +2,8 @@ import React from "react";
 import useOutSideClick from "../../helper/useOutSideClick";
 
 function CustomSelect({ element, onClickOption }) {
-  const { clickedRef, isComponentVisible, setIsComponentVisible } =
-  useOutSideClick(false);
+  const { clickedRef, isComponentVisible, setIsComponentVisible } = useOutSideClick(false);
+
   return (
     <span
       className="custom-select"

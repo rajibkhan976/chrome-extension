@@ -243,7 +243,7 @@ const GroupsRequestForm = ({
       if (resSettings?.data) {
         const profileSettings = await getProfileSettings();
         //console.log("profile my seetingsss data :::", profileSettings)
-        // const isPauedThenRun = await helper.getDatafromStorage("runAction");
+        // const isPauedThenRun = await helper.getDatafromStorage("runAction"); 
         // console.log("isPauedThenRun ::: ", isPauedThenRun);
         if (isPauedThenRun === "pause") {
           // console.log("rerun...................");

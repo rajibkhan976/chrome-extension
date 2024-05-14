@@ -115,26 +115,28 @@ const FindValidInRec = (data) => {
     return { obj: data, unValid: false };
   }
   const mainData = data.fieldOptions[0];
-  if (mainData.value <= 0 || mainData.value.length === 0||!mainData.valid) {
+  if (mainData.value <= 0 || mainData.value.length === 0 || !mainData.valid) {
     mainData.valid = false;
     return { obj: { ...data, fieldOptions: [{ ...mainData }] }, unValid: true };
   } else {
     return FindValidInRec(mainData);
   }
 };
+
 export const checkValidity = (dataObj, setdata) => {
   //console.log("direct data obj:____>>", dataObj);
   let time = 0;
-  let reason = "Invalid input field" 
+  let reason = "Invalid input field"
   let valid = true;
   let data = { ...dataObj };
+  
   for (const fidx in data.fields) {
     // if(data.fields[fidx].label==="Request Limit"){
     //  console.log("this reccccccc",FindValidInRec(data.fields[fidx]));
     // }
-    if(data.fields[fidx].label === "Look up interval")
+    if (data.fields[fidx].label === "Look up interval")
       time = data.fields[fidx].fieldOptions[0].value;
-    if(data.fields[fidx].label === "Send message" && data.fields[fidx].isActive && (time === "auto" || time < 3 )){
+    if (data.fields[fidx].label === "Send message" && data.fields[fidx].isActive && (time === "auto" || time < 3)) {
       // console.log("data.fields[fidx].label ::: ", data.fields[fidx])
       valid = false;
       data.fields[fidx].valid = false;
@@ -189,14 +191,14 @@ export const checkValidity = (dataObj, setdata) => {
     } else {
       if (data.fields[fidx].recursive) {
         if (
-          data.fields[fidx].fieldOptions[0].value ==="Limited"
+          data.fields[fidx].fieldOptions[0].value === "Limited"
         ) {
-          
+
           const recValue = FindValidInRec(data.fields[fidx]);
           if (recValue.unValid) {
             valid = false;
             //console.log(recValue);
-             //data.fields[fidx] = recValue.obj;
+            //data.fields[fidx] = recValue.obj;
           }
         }
       } else {
@@ -209,7 +211,7 @@ export const checkValidity = (dataObj, setdata) => {
     }
   }
   setdata(data);
-  return {valid : valid, errReason : reason};
+  return { valid: valid, errReason: reason };
 };
 
 export const removeEle = (mainObj, removeArr) => {

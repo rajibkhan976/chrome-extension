@@ -116,6 +116,7 @@ const GroupsRequestForm = ({
     setIsLoding,
     settingApiPayload,
     setSettingApiPayload,
+    settingsType = null,
 }) => {
     //:::::::
     const countyRef = useRef(null);
@@ -131,6 +132,7 @@ const GroupsRequestForm = ({
     // }, [settingApiPayload]);
     const [isPaused, setIsPaused] = useState(null);
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+    const [selectedReactionIcons, setSelectedReactionIcon] = useState([]);
     // const [isTooltipVisible, setIsTooltipVisible] = useState(false);
 
     useEffect(() => {
@@ -300,7 +302,7 @@ const GroupsRequestForm = ({
     const resetToDefaultSetting = async () => {
         const isPauedThenRun = await helper.getDatafromStorage("runAction");
         if (isPauedThenRun !== "pause") {
-            getFrndReqSet()
+            getFrndReqSet(settingsType)
                 .then((res) => {
                     const apiObj = res.data.data;
                     // console.log("The api of friend req set>>>///||||\\\\:::", apiObj);
@@ -422,6 +424,8 @@ const GroupsRequestForm = ({
     const checkboxOptionChange = (element, option) => {
         let formSetPlaceholder = { ...formSetup };
 
+        console.log("Option here for the active checkbox ::: ", option);
+
         const newOptions = element?.options?.map((item) => {
             if (item.text === option.text) {
                 item.isActive = !item.isActive;
@@ -438,6 +442,11 @@ const GroupsRequestForm = ({
                 return item;
             }),
         };
+
+        setSettingApiPayload(prevState => ({
+            ...prevState,
+            reaction: option?.isActive,
+        }));
 
         setFormSetup(newObj);
         generateFormElements();
@@ -786,6 +795,53 @@ const GroupsRequestForm = ({
         }
     };
 
+    // HANDLE REACTION ICONS TO BE CHANGE WITH CLICK
+    const handleReactionIconChange = (event, iconName, element) => {
+        const isChecked = event.target.checked;
+        let formSetPlaceholder = { ...formSetup };
+
+        if (isChecked) {
+            setSelectedReactionIcon(prevIcons => [...prevIcons, iconName]);
+        } else {
+            setSelectedReactionIcon(prevIcons => prevIcons.filter((icon) => icon !== iconName));
+        }
+
+        const newObj = {
+            ...formSetPlaceholder,
+            fields: formSetPlaceholder.fields.map((formItem) => {
+                console.log("FORM ITEM -- ", formItem);
+
+                if (formItem.name === "given_reactions") {
+                    const fields = formItem.fieldOptions[0];
+                    const option = fields?.options[0];
+
+                    fields.value = [...selectedReactionIcons];
+                    option.value = [...selectedReactionIcons];
+
+                    formItem?.fieldOptions?.map(field => {
+                        if (field.name === "given_reaction_fields") {
+                            field.value = [...selectedReactionIcons];
+                        }
+                        return fields;
+                    })
+
+                    return formItem;
+
+                } else {
+                    return formItem; 
+                }
+            })
+        };
+
+        setSettingApiPayload(prevState => ({
+            ...prevState,
+            reaction_type: [...selectedReactionIcons],
+        }));
+
+        setFormSetup(newObj);
+        generateFormElements();
+    };
+
     // HANDLE INPUT VALUE CHANGE ON MUTUAL FRIENDS FIELD..
     const handleValueChangeMutualFriend = (element, value) => {
         let formSetPlaceholder = { ...formSetup };
@@ -1061,7 +1117,6 @@ const GroupsRequestForm = ({
         // setIsTooltipVisible(true);
     };
 
-
     const generateAdvncForm = () => {
         const generateAdvncFormElemnts = (element, idx) => {
             switch (element.type) {
@@ -1310,7 +1365,8 @@ const GroupsRequestForm = ({
                                                 type="checkbox"
                                                 className="given-reactions-checkbox"
                                                 name={element.name}
-                                                defaultChecked={optionCheckbox.text === element.value}
+                                                defaultChecked={optionCheckbox?.isActive}
+                                                value={optionCheckbox?.isActive}
                                                 onChange={() => checkboxOptionChange(element, optionCheckbox)}
                                             />
 
@@ -1334,7 +1390,7 @@ const GroupsRequestForm = ({
                                 }
                             </div>
 
-                            {console.log("element.options", element?.options[0])}
+                            {/* {console.log("element.options", element?.options[0])} */}
 
                             {/* Reaction Icons */}
                             {element?.options[0]?.isActive === true && (
@@ -1343,43 +1399,43 @@ const GroupsRequestForm = ({
 
                                     <div className="fr-reaction-icons f-1">
                                         <label>
-                                            <input type="checkbox" />
+                                            <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "like", element)} />
                                             <span className="fr-reaction-icon">
                                                 <LikeReactionIcon />
                                             </span>
                                         </label>
                                         <label>
-                                            <input type="checkbox" />
+                                            <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "love", element)} />
                                             <span className="fr-reaction-icon">
                                                 <LoveReactionIcon />
                                             </span>
                                         </label>
                                         <label>
-                                            <input type="checkbox" />
+                                            <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "care", element)} />
                                             <span className="fr-reaction-icon">
                                                 <CareReactionIcon />
                                             </span>
                                         </label>
                                         <label>
-                                            <input type="checkbox" />
+                                            <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "haha", element)} />
                                             <span className="fr-reaction-icon">
                                                 <HahaReactionIcon />
                                             </span>
                                         </label>
                                         <label>
-                                            <input type="checkbox" />
+                                            <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "wow", element)} />
                                             <span className="fr-reaction-icon">
                                                 <WowReactionIcon />
                                             </span>
                                         </label>
                                         <label>
-                                            <input type="checkbox" />
+                                            <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "sad", element)} />
                                             <span className="fr-reaction-icon">
                                                 <SadReactionIcon />
                                             </span>
                                         </label>
                                         <label>
-                                            <input type="checkbox" />
+                                            <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "angry", element)} />
                                             <span className="fr-reaction-icon">
                                                 <AngryReactionIcon />
                                             </span>
@@ -1600,8 +1656,6 @@ const GroupsRequestForm = ({
                                 <div>
                                     {element.isLabeled ? <span>{element.inLabel}</span> : ""}
                                 </div>
-
-                                {console.log("ELEMENET -- ", element)}
 
                                 <div>
                                     {/* CROSS BUTTON TO REMOVE TAG */}

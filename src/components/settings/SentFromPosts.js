@@ -1,20 +1,38 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import InnherHeader from "../shared/InnerHeader";
 import {
     fr_Req_Payload,
     requestFormAdvncSettings,
-    requestFormSettings,
     requestPostsSettings
 } from '../../helper/fr-setting';
 import ModernForm from '../dashboard/requestForms/ModernForm';
 import { Bolt, CheckIcon, GenderIcon, KeywordsIcon, MessageSettingIcon, SkipAdmin, TierIcon, LikeReaction, LoveReaction } from '../shared/SVGAsset';
 import { LookupSocialIcon, EditSingleIcon, TickIcon } from '../../assets/icons/Icons';
 import AutomationStats from '../shared/AutomationStats';
-import { getFrndReqSet, getProfileSettings, PostFriendResSet } from "../../service/FriendRequest";
+import { getFrndReqSet, getKeyWords, getProfileSettings, PostFriendResSet, saveFrndReqSettings, updateFrndReqSettings } from "../../service/FriendRequest";
 import helper from '../../extensionScript/helper';
 import common from '../../extensionScript/commonScript';
 import AutomationRunner from '../shared/AutomationRunner';
+import {
+    capitalizeFirstLetter,
+    checkValidity,
+    removeEle,
+    syncFromApi,
+    syncPayload
+} from '../../helper/syncData';
+import { removeforBasic } from '../dashboard/FriendRequest';
+import { fetchMesssageGroups } from '../../service/messages/MessagesServices';
+import {
+    LikeReactionIcon,
+    LoveReactionIcon,
+    CareReactionIcon,
+    HahaReactionIcon,
+    WowReactionIcon,
+    SadReactionIcon,
+    AngryReactionIcon
+} from '../../assets/icons/reactionIcons';
 
 
 const SentFromPosts = () => {
@@ -31,7 +49,224 @@ const SentFromPosts = () => {
     const [friendReqSet, setFriendReqSet] = useState(false);
     const [isLoding, setIsLoding] = useState(true);
     const [settingApiPayload, setSettingApiPayload] = useState(fr_Req_Payload);
+    const [settingSyncApiPayload, setSettingSyncApiPayload] = useState(null);
     const [isPaused, setIsPaused] = useState(null);
+    const settingsType = 9;
+
+
+    // FETCH SETTINGS DATA..
+    // useEffect(() => {
+    //     if (editType !== "basic") {
+    //         (async () => {
+    //             const runningSettings = await helper.getDatafromStorage("postSettingsPayload");
+
+    //             if (runningSettings) {
+    //                 setSettingApiPayload(runningSettings);
+    //                 setSettingSyncApiPayload(runningSettings);
+    //                 syncFromApi(runningSettings, formSetup, setFormSetup);
+    //                 setIsLoding(false);
+    //             }
+    //         })();
+    //     }
+    // }, [editType, formSetup]);
+
+    useEffect(() => {
+        // console.log("i am re rendered......");
+        (async () => {
+            const allGroups = await fetchMesssageGroups();
+            injectAGroupsOptionToFormSettings(allGroups.data.data)
+        })()
+
+        // console.log("all groups", allGroups.data);
+        getKeyWords()
+            .then((res) => {
+                //console.log("inside key_____>>", res);
+                const resdata = res.data.data;
+                // console.log("ressssssssssss", resdata.length);
+                if (resdata.length > 0) {
+                    // console.log("hii data respwWWW>>>:", resdata);
+                    let formSetPlaceholder = { ...formSetup };
+
+                    const newObj = {
+                        ...formSetPlaceholder,
+                        fields: formSetPlaceholder.fields.map((item) => {
+                            return {
+                                ...item,
+                                fieldOptions: item.fieldOptions.map((itemCh) => {
+                                    if (
+                                        "selectInput" === itemCh.type &&
+                                        "selected_keywords" === itemCh.name
+                                    ) {
+                                        itemCh.options = [];
+                                        resdata.forEach((item) => {
+                                            if (item.keyword_type === 1) {
+                                                itemCh.options.push({
+                                                    //selected: false,
+                                                    label: item.title,
+                                                    value: item.title,
+                                                    keys: item.keywords.split(","),
+                                                });
+                                            }
+                                        });
+                                    } else if (
+                                        "selectInput" === itemCh.type &&
+                                        "selected_negative_keywords" === itemCh.name
+                                    ) {
+                                        itemCh.options = [];
+                                        resdata.forEach((item) => {
+                                            if (item.keyword_type === 2) {
+                                                itemCh.options.push({
+                                                    // selected: false,
+                                                    label: item.title,
+                                                    value: item.title,
+                                                    keys: item.keywords.split(","),
+                                                });
+                                            }
+                                        });
+                                    }
+
+                                    return itemCh;
+                                }),
+                            };
+                        }),
+                    };
+                    setFormSetup(newObj);
+                    //  generateFormElements();
+                    // data.forEach((item)=>
+
+                    // syncKeyWord({ name: "selected_keywords",
+                    // type: "selectInput",
+                    // inLabel: item.title,
+                    // value:  item.title,
+                    // valueArr:item.keywords,
+                    // options:[]}))
+                }
+            })
+            .catch((err) => {
+                console.log("Error in fetching keyword API", err);
+            });
+
+        ///Fetching data of friend request setting fron api
+        (async () => {
+            setIsLoding(true);
+            const runningStatus = await helper.getDatafromStorage("runAction");
+            const runningSettings = await helper.getDatafromStorage("postSettingsPayload");
+
+            if (runningStatus === "pause" || runningStatus === "running") {
+                if (runningSettings) {
+                    let curr_settingObj = JSON.parse(runningSettings);
+                    curr_settingObj = { ...curr_settingObj, is_settings_stop: false }
+                    setSettingApiPayload(curr_settingObj);
+                    setSettingSyncApiPayload(curr_settingObj);
+                    syncFromApi(curr_settingObj, formSetup, setFormSetup);
+
+                    setIsLoding(false);
+                }
+
+            } else {
+                // getting frndReq settings 9 means for post settings..
+                getFrndReqSet(settingsType)
+                    .then((res) => {
+                        const apiObj = res.data.data;
+                        // console.log("The api of friend req set>>>///||||\\\\:::", apiObj);
+                        setFriendReqSet(apiObj[0]);
+                        if (apiObj?.length > 0) {
+                            syncPayload(apiObj[0], { ...settingApiPayload, is_settings_stop: false }, setSettingApiPayload);
+                            removeEle(apiObj[0], removeforBasic).then((response) => {
+                                const apiCoreResponse = apiObj[0];
+
+                                (async () => {
+                                    if (apiCoreResponse?._id) {
+                                        await helper.saveDatainStorage("postSettingId", {
+                                            settingsId: apiCoreResponse?._id,
+                                        });
+                                        response.settingsId = apiCoreResponse?._id;
+                                    }
+                                })();
+
+                                syncFromApi(response, formSetup, setFormSetup);
+                                setSettingSyncApiPayload(response);
+                                // setSettingApiPayload(response);
+
+                                setIsLoding(false);
+                            });
+                            // generateFormElements();
+                        } else {
+                            setIsLoding(false);
+                        }
+                    })
+                    .catch((err) => {
+                        console.log("Error happened in Setting api call:::", err);
+                    });
+            }
+
+            // if (props.settingPage === "setSettingsForGroup") {
+            //     setRequestActive("groups");
+            //     setIsRunnable(true);
+
+            //     // console.log("runningStatus ::: ", runningStatus);
+            //     if (runningStatus === "running") {
+            //         // console.log("runningrunningrunning", requestActive);
+            //         setrunningScript(true);
+            //     }
+            // }
+            requestPostsSettings && setFormSetup(requestPostsSettings);
+            requestFormAdvncSettings && setAdvcFormAssets(requestFormAdvncSettings);
+        })();
+    }, []);
+
+
+    /**
+     * 
+     * @param {*} groupsArr 
+     */
+    const injectAGroupsOptionToFormSettings = (groupsArr) => {
+        if (groupsArr.length > 0) {
+            // console.log("hii data respwWWW>>>:", resdata);
+            let formSetPlaceholder = { ...formSetup };
+
+            const newObj = {
+                ...formSetPlaceholder,
+                fields: formSetPlaceholder.fields.map((item) => {
+                    return {
+                        ...item,
+                        fieldOptions: item.name !== "send_message_when_friend_request_sent" && item.name !== "send_message_when_friend_request_accepted" ? item.fieldOptions : item.fieldOptions.map((itemCh) => {
+                            // console.log("Got itemch name....>", itemCh.name);
+                            // console.log("groups array", groupsArr);
+                            itemCh.options = [];
+                            groupsArr.forEach((item) => {
+                                itemCh.options.push({
+                                    //selected: false,
+                                    label: item.group_name,
+                                    value: item._id,
+                                    id: item._id,
+                                });
+
+                            });
+                            return itemCh;
+                        }),
+                    };
+                }),
+            };
+            setFormSetup(newObj);
+        }
+    }
+
+    // FETCH SETTINGS DATA FROM LOCAL STORAGE..
+    const fetchSetingsLocalData = async () => {
+        return await helper.getDatafromStorage('postSettingsPayload');
+    };
+
+    // FETCH SETTINGS DATA..
+    useEffect(() => {
+        if (editType !== "basic") {
+            (async () => {
+                const localData = await fetchSetingsLocalData();
+                console.log("Local Data -- ", localData);
+                setSettingSyncApiPayload(localData);
+            })();
+        }
+    }, [editType]);
 
 
     // RUN FRIENDER HANDLE FUNCTION..
@@ -54,21 +289,153 @@ const SentFromPosts = () => {
     };
 
 
+    // SAVE / UPDATE TO API..
+    const saveToAPI = async (payload) => {
+        const fr_token = await helper.getDatafromStorage("fr_token");
+        const postSettingId = await helper.getDatafromStorage("postSettingId");
+
+        if (postSettingId?.settingsId) {
+            const updatePayload = {
+                ...payload,
+                settingsId: postSettingId?.settingsId,
+            };
+
+            try {
+                await axios.post(`${process.env.REACT_APP_UPDATE_FRIEND_REQUEST_SETTINGS}`, updatePayload, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: fr_token,
+                    },
+                });
+            } catch (error) {
+                console.log("ERROR WHILE UPDATE SETTINGS - ", error);
+            }
+
+            // updateFrndReqSettings(groupSettingsId?.settingsId, payload)
+            //     .then((res) => {
+            //         console.log("Update Res - ", res);
+            //     })
+            //     .catch(err => {
+            //         console.log("ERROR WHILE UPDATE SETTINGS - ", err);
+            //     });
+
+        } else {
+
+            try {
+                await axios.post(`${process.env.REACT_APP_SAVE_FRIEND_REQUEST_SETTINGS}`, payload, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: fr_token,
+                    },
+                });
+            } catch (error) {
+                console.log("ERROR WHILE SAVE SETTINGS - ", error);
+            }
+
+            // saveFrndReqSettings(payload)
+            //     .then((res) => {
+            //         console.log("Save Res - ", res);
+            //     })
+            //    .catch(err => {
+            //         console.log("ERROR WHILE SAVE SETTINGS - ", err);
+            //     });
+        }
+    };
+
+
 
     // RUN FRIENDER BUTTON ACTION HANDLE
-    const handleRunFrienderAction = () => {
-        // runFrinderHandle();
+    const handleRunFrienderAction = async () => {
+        // Write Extension run code for this runFrienderHandle() function..
+        runFrinderHandle();
         setIsRunnable(true);
+
         // Have to send message to the chrome runtime with payload data..
-        console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
+        const fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
+
+        const payload = {
+            ...settingApiPayload,
+            fbUserId: fbTokenAndId?.userID,
+            settings_type: settingsType,
+        };
+
+        if (payload?.settingsType) {
+            delete payload.settingsType;
+        }
+        
+        if (payload?.mutual_friend_value) {
+            payload.mutual_friend_value = `${payload.mutual_friend_value}`;
+        }
+
+        await helper.saveDatainStorage('postSettingsPayload', payload);
+        await saveToAPI(payload);
     };
 
 
     // SAVING THE API PAYLOAD TO SERVER
-    const handleSaveSettings = () => {
+    const handleSaveSettings = async () => {
         // Have to send payload to save via API from here..
         console.log("CLIENT PAYLOAD HERE -- ", settingApiPayload);
+
+        const fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
+
+        const payload = {
+            ...settingApiPayload,
+            fbUserId: fbTokenAndId?.userID,
+            settings_type: settingsType,
+        };
+
+        if (payload?.settingsType) {
+            delete payload.settingsType;
+        }
+        
+        if (payload?.mutual_friend_value) {
+            payload.mutual_friend_value = `${payload.mutual_friend_value}`;
+        }
+
+        await helper.saveDatainStorage('postSettingsPayload', payload);
+        await saveToAPI(payload);
     };
+
+
+    // Function to get icon component based on icon name
+    const getIconComponent = (iconName) => {
+        switch (iconName) {
+            case 'like':
+                return <LikeReactionIcon />;
+
+            case 'love':
+                return <LoveReactionIcon />;
+
+            case 'angry':
+                return <AngryReactionIcon />;
+
+            case 'haha':
+                return <HahaReactionIcon />;
+
+            case 'care':
+                return <CareReactionIcon />;
+
+            case 'wow':
+                return <WowReactionIcon />;
+
+            case 'sad':
+                return <SadReactionIcon />;
+
+            default:
+                return null; // Return null for unrecognized icon names
+        }
+    };
+
+    // Function to render selected icons
+    // const renderSelectedIcons = (selectedIcons) => {
+    //     return selectedIcons.map((iconName, index) => (
+    //         <span key={index} className="fr-reaction-icon">
+    //             {getIconComponent(iconName)}
+    //         </span>
+    //     ));
+    // };
+
 
     // RENDERING THE ACTION BUTTONS..
     const renderActionButtons = () => {
@@ -84,7 +451,7 @@ const SentFromPosts = () => {
                                     setIsEditing(false);
                                     handleSaveSettings(event);
                                 }}
-                        >
+                            >
                                 <TickIcon /> Save
                             </button>
                             :
@@ -190,6 +557,7 @@ const SentFromPosts = () => {
                     setIsLoding={setIsLoding}
                     settingApiPayload={settingApiPayload}
                     setSettingApiPayload={setSettingApiPayload}
+                    settingsType={9}
                 />
             ) : (
                 <>
@@ -202,12 +570,17 @@ const SentFromPosts = () => {
                             <div className="setting-content">
                                 <h6>Look up for given</h6>
                                 <div className="fb-requirements">
-                                    {<ul className="reactions">
-                                        <li><LikeReaction /></li>
-                                        <li><LoveReaction /></li>
-                                    </ul>}
-                                    {<span>&</span>}
-                                    {<span>Comments</span>}
+                                    <ul className="reactions">
+                                        {/* <li><LikeReaction /></li>
+                                        <li><LoveReaction /></li> */}
+                                        {console.log("Reaction Type -- ", settingSyncApiPayload?.reaction_type)}
+                                        {settingSyncApiPayload?.reaction_type && settingSyncApiPayload?.reaction_type.length && settingSyncApiPayload?.reaction_type?.map((item, index) => (
+                                            <li key={index}>
+                                                {getIconComponent(item)}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    {settingSyncApiPayload?.comment && <span>& Comments</span>}
                                 </div>
                             </div>
                         </div>
@@ -217,7 +590,7 @@ const SentFromPosts = () => {
                             </figure>
                             <div className="setting-content">
                                 <h6>Gender</h6>
-                                <p>{'Male'}</p>
+                                <p>{settingSyncApiPayload?.gender_filter_value}</p>
                             </div>
                         </div>
                         <div className="setting-show d-flex">
@@ -226,7 +599,7 @@ const SentFromPosts = () => {
                             </figure>
                             <div className="setting-content">
                                 <h6>Country</h6>
-                                <p>{'Tier 3'}</p>
+                                <p>{settingSyncApiPayload?.tier_filter_value}</p>
                             </div>
                         </div>
                         <div className="setting-show d-flex">
@@ -235,7 +608,11 @@ const SentFromPosts = () => {
                             </figure>
                             <div className="setting-content">
                                 <h6>Skip Admin</h6>
-                                <p>{'Yes'}</p>
+                                {!settingSyncApiPayload?.skip_admin ? (
+                                    <p>No</p>
+                                ) : (
+                                    <p>Yes</p>
+                                )}
                             </div>
                         </div>
                     </div>

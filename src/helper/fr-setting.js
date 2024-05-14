@@ -315,21 +315,21 @@ export const requestGroupsFormSettings = {
           name: "send_message_when_friend_request_accepted_message_group_id",
           value: "Select message",
           options: [
-            {
-              selected: true,
-              label: "message 1",
-              value: "message_1",
-            },
-            {
-              selected: false,
-              label: "message 2",
-              value: "message_2",
-            },
-            {
-              selected: false,
-              label: "message 3",
-              value: "message_3",
-            }
+            // {
+            //   selected: true,
+            //   label: "message 1",
+            //   value: "message_1",
+            // },
+            // {
+            //   selected: false,
+            //   label: "message 2",
+            //   value: "message_2",
+            // },
+            // {
+            //   selected: false,
+            //   label: "message 3",
+            //   value: "message_3",
+            // }
           ]
         }
       ]
@@ -368,16 +368,20 @@ export const requestPostsSettings = {
           type: "checkbox",
           isLabeled: false,
           valid: true,
-          name: "given_reaction_fields",
-          value: "",
+          name: "reaction",
+          value: [],
           options: [
             {
               text: "Reaction",
               isActive: false,
+              name: 'reaction_type',
+              value: [],
             },
             {
               text: "Comment",
+              name: 'comment',
               isActive: false,
+              value: false,
             },
           ],
         },
@@ -1543,358 +1547,358 @@ export const fr_Req_Payload = {
   send_message_when_friend_request_sent_message_group_id: "",
   send_message_when_friend_request_accepted: false,
   send_message_when_friend_request_accepted_message_group_id: "",
-  re_friending: false,
-  re_friending_settings: {
-    remove_pending_friend_request_after: 2,
-    time_type: "days",
-    instantly_resend_friend_request: 2,
-  },
-  profile_viewed: 0,
-  added_to_friend_queue: 0,
-  time_saved: 0,
+  // re_friending: false,
+  // re_friending_settings: {
+  //   remove_pending_friend_request_after: 2,
+  //   time_type: "days",
+  //   instantly_resend_friend_request: 2,
+  // },
+  // profile_viewed: 0,
+  // added_to_friend_queue: 0,
+  // time_saved: 0,
   fbUserId: "",
-  settingsType: 6,
+  settingsType: 8,
   lookup_for_mutual_friend: false,
   lookup_for_mutual_friend_condition: "<",
   mutual_friend_value: 2,
   // reaction: 12,
   reaction: false,
-  reaction_type: ["like", "love", "care", "wow", "haha", "sad", "angry"],
+  reaction_type: [], // ["like", "love", "care", "wow", "haha", "sad", "angry"]
   comment: false,
 };
 
 
-export const defaultFormSettings = {
-  label: "Settings",
-  uniqueId: "generalSettings",
-  name: "settings",
-  method: null,
-  id: "generalSettings",
-  action: null,
-  autocomplete: "off",
-  fields: [
-    {
-      label: "Look up interval",
-      headerCheckbox: false,
-      recursive: true,
-      valid: true,
-      fieldOptions: [
-        {
-          type: "select",
-          name: "look_up_interval",
-          value: "1",
-          isLabeled: false,
-          valid: true,
-          options: [
-            {
-              label: "Auto(15-18 sec)",
-              value: "auto",
-            },
-            {
-              label: "30 sec",
-              value: ".5",
-            },
-            {
-              label: "1 min",
-              value: "1",
-            },
-            {
-              label: "3 min",
-              value: "1",
-            },
-            {
-              label: "5 min",
-              value: "5",
-            },
-            {
-              label: "10 min",
-              value: "10",
-            },
-            {
-              label: "15 min",
-              value: "15",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      label: "Request Limit",
-      headerCheckbox: false,
-      recursive: true,
-      valid: true,
-      fieldOptions: [
-        {
-          type: "radio",
-          isLabeled: false,
-          valid: true,
-          name: "request_limit_type",
-          value: "Infinite",
-          options: [
-            {
-              text: "Limited",
-            },
-            {
-              text: "Infinite",
-            },
-          ],
+// export const defaultFormSettings = {
+//   label: "Settings",
+//   uniqueId: "generalSettings",
+//   name: "settings",
+//   method: null,
+//   id: "generalSettings",
+//   action: null,
+//   autocomplete: "off",
+//   fields: [
+//     {
+//       label: "Look up interval",
+//       headerCheckbox: false,
+//       recursive: true,
+//       valid: true,
+//       fieldOptions: [
+//         {
+//           type: "select",
+//           name: "look_up_interval",
+//           value: "1",
+//           isLabeled: false,
+//           valid: true,
+//           options: [
+//             {
+//               label: "Auto(15-18 sec)",
+//               value: "auto",
+//             },
+//             {
+//               label: "30 sec",
+//               value: ".5",
+//             },
+//             {
+//               label: "1 min",
+//               value: "1",
+//             },
+//             {
+//               label: "3 min",
+//               value: "1",
+//             },
+//             {
+//               label: "5 min",
+//               value: "5",
+//             },
+//             {
+//               label: "10 min",
+//               value: "10",
+//             },
+//             {
+//               label: "15 min",
+//               value: "15",
+//             },
+//           ],
+//         },
+//       ],
+//     },
+//     {
+//       label: "Request Limit",
+//       headerCheckbox: false,
+//       recursive: true,
+//       valid: true,
+//       fieldOptions: [
+//         {
+//           type: "radio",
+//           isLabeled: false,
+//           valid: true,
+//           name: "request_limit_type",
+//           value: "Infinite",
+//           options: [
+//             {
+//               text: "Limited",
+//             },
+//             {
+//               text: "Infinite",
+//             },
+//           ],
 
-          fieldOptions: [
-            {
-              type: "input",
-              name: "request_limit",
-              isLabeled: true,
-              valid: true,
-              inLabel: "up to",
-              value: "",
-            },
-          ],
-        },
-      ],
-    },
-    // {
-    //   label: "Look Up for Mutual friends?",
-    //   headerCheckbox: false,
-    //   recursive: true,
-    //   valid: true,
-    //   fieldOptions: [
-    //     {
-    //       type: "radioSml",
-    //       isLabeled: false,
-    //       name: "look_up_mutual_friend",
-    //       valid: true,
-    //       value: "No",
-    //       options: [
-    //         {
-    //           text: "Yes",
-    //         },
-    //         {
-    //           text: "No",
-    //         },
-    //       ],
-    //       fieldOptions: [
-    //         {
-    //           type: "select",
-    //           isLabeled: true,
-    //           inLabel: "Mutual friends",
-    //           valid: true,
-    //           value: "less_than",
-    //           name: "mutual_friends_condition",
-    //           options: [
-    //             {
-    //               selected: true,
-    //               value: "equals",
-    //               label: "Equals to",
-    //             },
-    //             {
-    //               selected: false,
-    //               value: "less_than",
-    //               label: "Less than",
-    //             },
-    //             {
-    //               selected: false,
-    //               value: "more_than",
-    //               label: "More than",
-    //             },
-    //           ],
-    //           fieldOptions: [
-    //             {
-    //               type: "input",
-    //               name: "mutual_friends_value",
-    //               valid: true,
-    //               isLabeled: true,
-    //               inLabel: "up to",
-    //               value: 1,
-    //             },
-    //           ],
-    //         },
-    //       ],
-    //     },
-    //   ],
-    // },
-    {
-      label: "Gender filter",
-      headerCheckbox: true,
-      recursive: true,
-      name: "gender_filter",
-      isActive: false,
-      valid: true,
-      fieldOptions: [
-        {
-          type: "select",
-          isLabeled: false,
-          valid: true,
-          name: "gender_filter_value",
-          value: "male",
-          options: [
-            {
-              selected: true,
-              label: "Male",
-              value: "male",
-            },
-            {
-              selected: false,
-              label: "Female",
-              value: "female",
-            },
-            {
-              selected: false,
-              label: "Others",
-              value: "others",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      label: "Country Filter",
-      headerCheckbox: true,
-      isActive: false,
-      recursive: false,
-      valid: true,
-      name: "country_filter_enabled",
-      fieldOptions: [
-        {
-          type: "radio",
-          isLabeled: false,
-          valid: true,
-          name: "country_filter",
-          value: "Tier Level",
-          options: [
-            {
-              text: "Tier Level",
-            },
-            {
-              text: "Country Level",
-            },
-          ],
-        },
-        {
-          type: "fillinputCF",
-          isLabeled: true,
-          inLabel: "Select Tier",
-          valid: true,
-          name: "tier_filter_value",
-          sggArray: tier_list,
-          valueArr: [],
-          value: "",
-        },
-        {
-          type: "fillinputCF",
-          isLabeled: true,
-          inLabel: "Select Country",
-          sggArray: country_list,
-          valid: true,
-          name: "country_filter_value",
-          valueArr: [],
-          value: "",
-        },
-      ],
-    },
-    {
-      label: "Keywords",
-      headerCheckbox: true,
-      name: "keyword",
-      recursive: false,
-      valid: true,
-      isActive: false,
-      fieldOptions: [
-        {
-          type: "selectInput",
-          isLabeled: true,
-          valid: true,
-          name: "selected_keywords",
-          inLabel: "Title",
-          value: "",
-          valueArr: [],
-          options: [],
-        },
-        {
-          type: "fillinput",
-          color: "#005911",
-          valid: true,
-          isLabeled: true,
-          inLabel: "Select keywords",
-          name: "selected_keywords",
-          sggArray: [],
-          valueArr: [],
-          value: "",
-        },
-      ],
-    },
-    {
-      label: "Negative Keywords",
-      headerCheckbox: true,
-      name: "negative_keyword",
-      recursive: false,
-      isActive: false,
-      valid: true,
-      fieldOptions: [
-        {
-          type: "selectInput",
-          isLabeled: true,
-          valid: true,
-          inLabel: "Title",
-          name: "selected_negative_keywords",
-          fieldCount: 1,
-          sggArray: [],
-          valueArr: [],
-          value: "",
-          options: [],
-        },
-        {
-          type: "fillinput",
-          color: "#92000D",
-          isLabeled: true,
-          valid: true,
-          inLabel: "Select keywords",
-          sggArray: demo_list,
-          fieldCount: 2,
-          name: "selected_negative_keywords",
-          valueArr: [],
-          value: "",
-        },
-      ],
-    },
-    {
-      label: "Resume from last search",
-      headerCheckbox: true,
-      name: "resume_last_search",
-      recursive: true,
-      valid: true,
-      isActive: false,
-      fieldOptions: [
-        {
-          type: "input",
-          isLabeled: true,
-          inLabel: "Your last search member's position",
-          name: "resume_last_search_position",
-          valid: true,
-          value: "",
-          // type: "radioSml",
-          // isLabeled: false,
-          // name: "resume_last_search_position",
-          // options: [
-          //   {
-          //     text: "Yes",
-          //     active: true,
-          //   },
-          //   {
-          //     text: "No",
-          //     active: false,
-          //   },
-          // ],
-          // fieldOptions: [
-          //   {
-          //     type: "input",
-          //     isLabeled: true,
-          //     inLabel: "Your last search member's position",
-          //     name: "resume_last_search_position",
-          //     value: "",
-          //   },
-          // ],
-        },
-      ],
-    },
-  ],
-};
+//           fieldOptions: [
+//             {
+//               type: "input",
+//               name: "request_limit",
+//               isLabeled: true,
+//               valid: true,
+//               inLabel: "up to",
+//               value: "",
+//             },
+//           ],
+//         },
+//       ],
+//     },
+//     // {
+//     //   label: "Look Up for Mutual friends?",
+//     //   headerCheckbox: false,
+//     //   recursive: true,
+//     //   valid: true,
+//     //   fieldOptions: [
+//     //     {
+//     //       type: "radioSml",
+//     //       isLabeled: false,
+//     //       name: "look_up_mutual_friend",
+//     //       valid: true,
+//     //       value: "No",
+//     //       options: [
+//     //         {
+//     //           text: "Yes",
+//     //         },
+//     //         {
+//     //           text: "No",
+//     //         },
+//     //       ],
+//     //       fieldOptions: [
+//     //         {
+//     //           type: "select",
+//     //           isLabeled: true,
+//     //           inLabel: "Mutual friends",
+//     //           valid: true,
+//     //           value: "less_than",
+//     //           name: "mutual_friends_condition",
+//     //           options: [
+//     //             {
+//     //               selected: true,
+//     //               value: "equals",
+//     //               label: "Equals to",
+//     //             },
+//     //             {
+//     //               selected: false,
+//     //               value: "less_than",
+//     //               label: "Less than",
+//     //             },
+//     //             {
+//     //               selected: false,
+//     //               value: "more_than",
+//     //               label: "More than",
+//     //             },
+//     //           ],
+//     //           fieldOptions: [
+//     //             {
+//     //               type: "input",
+//     //               name: "mutual_friends_value",
+//     //               valid: true,
+//     //               isLabeled: true,
+//     //               inLabel: "up to",
+//     //               value: 1,
+//     //             },
+//     //           ],
+//     //         },
+//     //       ],
+//     //     },
+//     //   ],
+//     // },
+//     {
+//       label: "Gender filter",
+//       headerCheckbox: true,
+//       recursive: true,
+//       name: "gender_filter",
+//       isActive: false,
+//       valid: true,
+//       fieldOptions: [
+//         {
+//           type: "select",
+//           isLabeled: false,
+//           valid: true,
+//           name: "gender_filter_value",
+//           value: "male",
+//           options: [
+//             {
+//               selected: true,
+//               label: "Male",
+//               value: "male",
+//             },
+//             {
+//               selected: false,
+//               label: "Female",
+//               value: "female",
+//             },
+//             {
+//               selected: false,
+//               label: "Others",
+//               value: "others",
+//             },
+//           ],
+//         },
+//       ],
+//     },
+//     {
+//       label: "Country Filter",
+//       headerCheckbox: true,
+//       isActive: false,
+//       recursive: false,
+//       valid: true,
+//       name: "country_filter_enabled",
+//       fieldOptions: [
+//         {
+//           type: "radio",
+//           isLabeled: false,
+//           valid: true,
+//           name: "country_filter",
+//           value: "Tier Level",
+//           options: [
+//             {
+//               text: "Tier Level",
+//             },
+//             {
+//               text: "Country Level",
+//             },
+//           ],
+//         },
+//         {
+//           type: "fillinputCF",
+//           isLabeled: true,
+//           inLabel: "Select Tier",
+//           valid: true,
+//           name: "tier_filter_value",
+//           sggArray: tier_list,
+//           valueArr: [],
+//           value: "",
+//         },
+//         {
+//           type: "fillinputCF",
+//           isLabeled: true,
+//           inLabel: "Select Country",
+//           sggArray: country_list,
+//           valid: true,
+//           name: "country_filter_value",
+//           valueArr: [],
+//           value: "",
+//         },
+//       ],
+//     },
+//     {
+//       label: "Keywords",
+//       headerCheckbox: true,
+//       name: "keyword",
+//       recursive: false,
+//       valid: true,
+//       isActive: false,
+//       fieldOptions: [
+//         {
+//           type: "selectInput",
+//           isLabeled: true,
+//           valid: true,
+//           name: "selected_keywords",
+//           inLabel: "Title",
+//           value: "",
+//           valueArr: [],
+//           options: [],
+//         },
+//         {
+//           type: "fillinput",
+//           color: "#005911",
+//           valid: true,
+//           isLabeled: true,
+//           inLabel: "Select keywords",
+//           name: "selected_keywords",
+//           sggArray: [],
+//           valueArr: [],
+//           value: "",
+//         },
+//       ],
+//     },
+//     {
+//       label: "Negative Keywords",
+//       headerCheckbox: true,
+//       name: "negative_keyword",
+//       recursive: false,
+//       isActive: false,
+//       valid: true,
+//       fieldOptions: [
+//         {
+//           type: "selectInput",
+//           isLabeled: true,
+//           valid: true,
+//           inLabel: "Title",
+//           name: "selected_negative_keywords",
+//           fieldCount: 1,
+//           sggArray: [],
+//           valueArr: [],
+//           value: "",
+//           options: [],
+//         },
+//         {
+//           type: "fillinput",
+//           color: "#92000D",
+//           isLabeled: true,
+//           valid: true,
+//           inLabel: "Select keywords",
+//           sggArray: demo_list,
+//           fieldCount: 2,
+//           name: "selected_negative_keywords",
+//           valueArr: [],
+//           value: "",
+//         },
+//       ],
+//     },
+//     {
+//       label: "Resume from last search",
+//       headerCheckbox: true,
+//       name: "resume_last_search",
+//       recursive: true,
+//       valid: true,
+//       isActive: false,
+//       fieldOptions: [
+//         {
+//           type: "input",
+//           isLabeled: true,
+//           inLabel: "Your last search member's position",
+//           name: "resume_last_search_position",
+//           valid: true,
+//           value: "",
+//           // type: "radioSml",
+//           // isLabeled: false,
+//           // name: "resume_last_search_position",
+//           // options: [
+//           //   {
+//           //     text: "Yes",
+//           //     active: true,
+//           //   },
+//           //   {
+//           //     text: "No",
+//           //     active: false,
+//           //   },
+//           // ],
+//           // fieldOptions: [
+//           //   {
+//           //     type: "input",
+//           //     isLabeled: true,
+//           //     inLabel: "Your last search member's position",
+//           //     name: "resume_last_search_position",
+//           //     value: "",
+//           //   },
+//           // ],
+//         },
+//       ],
+//     },
+//   ],
+// };
