@@ -73,6 +73,19 @@ const SentFromPosts = () => {
     useEffect(() => {
         // console.log("i am re rendered......");
         (async () => {
+            const runningStatus = await helper.getDatafromStorage("runAction_post");
+            if(runningStatus === "running"){
+                console.log("yeah, running.");
+                setIsRunnable(true);
+            }
+            else if(runningStatus === "pause"){
+                setEditType("basic");
+                setIsRunnable(false)
+            }
+            else{
+                setIsRunnable(false)
+                setEditType("null");
+            }
             const allGroups = await fetchMesssageGroups();
             injectAGroupsOptionToFormSettings(allGroups.data.data)
         })()
@@ -149,7 +162,7 @@ const SentFromPosts = () => {
         ///Fetching data of friend request setting fron api
         (async () => {
             setIsLoding(true);
-            const runningStatus = await helper.getDatafromStorage("runAction");
+            const runningStatus = await helper.getDatafromStorage("runAction_post");
             const runningSettings = await helper.getDatafromStorage("postSettingsPayload");
 
             if (runningStatus === "pause" || runningStatus === "running") {
@@ -275,15 +288,19 @@ const SentFromPosts = () => {
     };
 
     // STOP RUN THE FRIENDER HANDLER..
-    const stopFrinderHandle = () => {
+    const stopFrinderHandle = async () => {
         console.log(" ==== [ STOP FRIENDER ] ==== ");
+        await helper.saveDatainStorage("runAction_post", "");
+        chrome.runtime.sendMessage({action:"stop", source:"post"})
         setEditType(null);
         setIsRunnable(false);
     };
 
     // PAUSE SENDING FR AND EDIT HANDLE FUNCTION..
-    const pauseSendingPRAndEdit = () => {
+    const pauseSendingPRAndEdit = async () => {
         console.log(" ==== [ PAUSED AND RETURN EDIT SCREEN ] ==== ");
+        await helper.saveDatainStorage("runAction_post", "pause");
+        chrome.runtime.sendMessage({action:"pause", source:"post"})
         setEditType("basic");
         setIsRunnable(false);
     };
@@ -309,7 +326,16 @@ const SentFromPosts = () => {
                 });
                 
                 console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
-                chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", source:"post", response : updatePayload})
+                
+                const runningStatus = await helper.getDatafromStorage("runAction_post")
+                await helper.saveDatainStorage("runAction_post", "running");
+                if(runningStatus === "pause"){
+                    chrome.runtime.sendMessage({action:"reSendFriendRequestInGroup", response : updatePayload, source:"post"})
+                }
+                else {
+                    chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload, source:"post"})
+                }
+                // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", source:"post", response : updatePayload})
             } catch (error) {
                 console.log("ERROR WHILE UPDATE SETTINGS - ", error);
             }
@@ -333,7 +359,16 @@ const SentFromPosts = () => {
                 });
                 
                 console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
-                chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", source:"post", response : payload})
+                
+                const runningStatus = await helper.getDatafromStorage("runAction_post")
+                await helper.saveDatainStorage("runAction_post", "running");
+                if(runningStatus === "pause"){
+                    chrome.runtime.sendMessage({action:"reSendFriendRequestInGroup", response : payload, source:"post"})
+                }
+                else {
+                    chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : payload, source:"post"})
+                }
+                // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", source:"post", response : payload})
             } catch (error) {
                 console.log("ERROR WHILE SAVE SETTINGS - ", error);
             }
@@ -402,7 +437,7 @@ const SentFromPosts = () => {
         }
 
         await helper.saveDatainStorage('postSettingsPayload', payload);
-        await saveToAPI(payload);
+        // await saveToAPI(payload);
     };
 
 

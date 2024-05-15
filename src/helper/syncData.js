@@ -88,13 +88,13 @@ export const syncFromApi = (apiObj, uiObj, setUiObj) => {
 };
 
 export const syncPayload = (apiObj, payloadObj, setPayload) => {
-  console.log("payload sync started", payloadObj);
+  // console.log("payload sync started", payloadObj);
   const newObj = { ...payloadObj };
   Object.entries(newObj).forEach(([key]) => {
     newObj[key] = apiObj[key];
   });
 
-  console.log("payload sync ended", newObj);
+  // console.log("payload sync ended", newObj);
   setPayload(newObj);
 };
 const FindInValid = (data) => {

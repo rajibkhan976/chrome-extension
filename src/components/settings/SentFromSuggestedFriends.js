@@ -67,6 +67,18 @@ const SentFromSuggestedFriends = () => {
     useEffect(() => {
         // console.log("i am re rendered......");
         (async () => {
+            const runningStatus = await helper.getDatafromStorage("runAction_suggestions");
+            if(runningStatus === "running"){
+                setIsRunnable(true);
+            }
+            else if(runningStatus === "pause"){
+                setEditType("basic");
+                setIsRunnable(false)
+            }
+            else{
+                setIsRunnable(false)
+                setEditType("null");
+            }
             const allGroups = await fetchMesssageGroups();
             injectAGroupsOptionToFormSettings(allGroups.data.data)
         })()
@@ -143,7 +155,7 @@ const SentFromSuggestedFriends = () => {
         ///Fetching data of friend request setting fron api
         (async () => {
             setIsLoding(true);
-            const runningStatus = await helper.getDatafromStorage("runAction");
+            const runningStatus = await helper.getDatafromStorage("runAction_suggestions");
             const runningSettings = await helper.getDatafromStorage("suggestedFrndsSettingsPayload");
 
             if (runningStatus === "pause" || runningStatus === "running") {
@@ -270,15 +282,19 @@ const SentFromSuggestedFriends = () => {
     };
 
     // STOP RUN THE FRIENDER HANDLER..
-    const stopFrinderHandle = () => {
+    const stopFrinderHandle = async () => {
         console.log(" ==== [ STOP FRIENDER ] ==== ");
+        await helper.saveDatainStorage("runAction_suggestions", "");
+        chrome.runtime.sendMessage({action:"stop", source:"suggestions"})
         setEditType(null);
         setIsRunnable(false);
     };
 
     // PAUSE SENDING FR AND EDIT HANDLE FUNCTION..
-    const pauseSendingPRAndEdit = () => {
+    const pauseSendingPRAndEdit = async () => {
         console.log(" ==== [ PAUSED AND RETURN EDIT SCREEN ] ==== ");
+        await helper.saveDatainStorage("runAction_suggestions", "pause");
+        chrome.runtime.sendMessage({action:"pause", source:"suggestions"})
         setEditType("basic");
         setIsRunnable(false);
     };
@@ -303,9 +319,16 @@ const SentFromSuggestedFriends = () => {
                         Authorization: fr_token,
                     },
                 });
-                
                 console.log("==== RUN FRIENDER ACTION CLICKED NOW ====", updatePayload)
-                chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
+                const runningStatus = await helper.getDatafromStorage("runAction_suggestions")
+                await helper.saveDatainStorage("runAction_suggestions", "runAction_suggestions");
+                if(runningStatus === "pause"){
+                    chrome.runtime.sendMessage({action:"reSendFriendRequestInGroup", response : updatePayload, source:"suggestions"})
+                }
+                else {
+                    chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
+                }
+                // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
             } catch (error) {
                 console.log("ERROR WHILE UPDATE SETTINGS - ", error);
             }
@@ -327,9 +350,15 @@ const SentFromSuggestedFriends = () => {
                         Authorization: fr_token,
                     },
                 });
-                
                 console.log("==== RUN FRIENDER ACTION CLICKED NOW ====", payload)
-                chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : payload})
+                const runningStatus = await helper.getDatafromStorage("runAction_suggestions")
+                await helper.saveDatainStorage("runAction_suggestions", "running");
+                if(runningStatus === "pause"){
+                    chrome.runtime.sendMessage({action:"reSendFriendRequestInGroup", response : payload, source:"suggestions"})
+                }
+                else {
+                    chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : payload})
+                }
             } catch (error) {
                 console.log("ERROR WHILE SAVE SETTINGS - ", error);
             }
@@ -398,7 +427,7 @@ const SentFromSuggestedFriends = () => {
         }
 
         await helper.saveDatainStorage('groupSettingsPayload', payload);
-        await saveToAPI(payload);
+        // await saveToAPI(payload);
     };
 
 

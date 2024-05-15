@@ -66,18 +66,23 @@ function attachClickEvent(menueButton) {
   
       // const postObjElArr = $(this).closest('div[aria-labelledby^="jsc_c_"]');//(".x1ja2u2z.x1n2onr6"); // immeiate post of the clicked three dots
   
-      const postObjElArr = $(this).closest('div[role="article"]')
-        // .parent()
-        // .parent()
-        // .parent()
-        // .parent()
-        // .parent()
-        // .parent()
-        // .parent()
-        // .parent()
-        // .parent();
+      let postObjElArr = $(this).closest('div[role="article"]');
+      if(postObjElArr.length === 0)
+        postObjElArr = $(this).closest('div[class="x1a2a7pz"]');
+      if(postObjElArr.length === 0)
+        postObjElArr = $(this).parent()
+                      .parent()
+                      .parent()
+                      .parent()
+                      .parent()
+                      .parent()
+                      .parent()
+                      .parent()
+                      .parent()
+                      .parent()
+                      .parent();
   
-    //   console.log("postObjElArr : ", postObjElArr);
+      console.log("postObjElArr : ", postObjElArr);
       if (PPInterval) {
         clearInterval(PPInterval);
       }

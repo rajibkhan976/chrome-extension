@@ -664,7 +664,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
           (tab[0].url.includes("members") || tab[0].url.includes("people"))
         ) {
           // console.log("its matched");
-          await helper.saveDatainStorage("tabId", tab[0].id)
+          await helper.saveDatainStorage("groupTabId", tab[0].id)
           injectScript(tab[0].id, ["helper.js", "storeFR.js"]);
           setTimeout(() => {
             chrome.tabs.sendMessage(tab[0].id, {action:"start", source:"groups", response : request.response});
@@ -679,7 +679,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
           (tab[0].url.includes("suggestions"))
         ) {
           console.log("its matched suggested friends");
-          await helper.saveDatainStorage("tabId", tab[0].id)
+          await helper.saveDatainStorage("suggestedTabId", tab[0].id)
           injectScript(tab[0].id, ["helper.js", "storeFR.js"]);
           setTimeout(() => {
             chrome.tabs.sendMessage(tab[0].id, {action:"start", source:"suggestions", response : request.response});
@@ -693,7 +693,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
           (tab[0].url.includes("friends") && !tab[0].url.includes("suggestions"))
         ) {
           console.log("its matched for friend of friends");
-          await helper.saveDatainStorage("tabId", tab[0].id)
+          await helper.saveDatainStorage("FriendTabId", tab[0].id)
           injectScript(tab[0].id, ["helper.js", "storeFR.js"]);
           setTimeout(() => {
             chrome.tabs.sendMessage(tab[0].id, {action:"start", source:"friends", response : request.response});
@@ -724,11 +724,11 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                     const feedbackTargetID = await chrome.tabs.sendMessage(tabs.id, {action:"getFeedbackTargetID", source:"post"});
                     console.log("FeedbackTargetID :::::::::::: ", feedbackTargetID)
                     chrome.tabs.remove(parseInt(tabs.id));
-                    await helper.saveDatainStorage("tabId", tabb.id);
+                    await helper.saveDatainStorage("PostTabId", tabb.id);
                     console.log("----------------------------", tabb.id)
                     injectScript(tabb.id, ["helper.js", "storeFR.js"]);
                     setTimeout(() => {
-                      chrome.tabs.sendMessage(tabb.id, {action:"start", source:"post", FeedbackTargetID:feedbackTargetID, response : request.response});
+                      chrome.tabs.sendMessage(tabb.id, {action:"start", source:"post", feedbackTargetID:feedbackTargetID, response : request.response});
                     }, 1000);
                   }, 1000);
                 }
@@ -763,9 +763,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             },200);
         }
         else if (tabs && tabs.length && tabs[0].url === "https://www.facebook.com/") {
-            setTimeout(()=>{
-              chrome.runtime.sendMessage({ action: "setPostPopup" });
-            },200);
+            // setTimeout(()=>{
+            //   chrome.runtime.sendMessage({ action: "setPostPopup" });
+            // },200);
         }
         else{
           // chrome.tabs.create({ url: process.env.REACT_APP_APP_URL });
@@ -774,18 +774,54 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       break;
 
     case "reSendFriendRequestInGroup":
-      const currentTabId = await helper.getDatafromStorage("tabId");
+      let currentTabId;
+      if(request.source === "post"){
+        currentTabId = await helper.getDatafromStorage("PostTabId");
+      }
+      if(request.source === "suggestions"){
+        currentTabId = await helper.getDatafromStorage("suggestedTabId");
+      }
+      if(request.source === "groups"){
+        currentTabId = await helper.getDatafromStorage("groupTabId");
+      }
+      if(request.source === "friends"){
+        currentTabId = await helper.getDatafromStorage("FriendTabId");
+      }
       chrome.tabs.sendMessage(Number(currentTabId), request);
       break;
 
     case "stop":
-      const currentFBTabId = await helper.getDatafromStorage("tabId");
+      let currentFBTabId;
+      if(request.source === "post"){
+        currentFBTabId = await helper.getDatafromStorage("PostTabId");
+      }
+      if(request.source === "suggestions"){
+        currentFBTabId = await helper.getDatafromStorage("suggestedTabId");
+      }
+      if(request.source === "groups"){
+        currentFBTabId = await helper.getDatafromStorage("groupTabId");
+      }
+      if(request.source === "friends"){
+        currentFBTabId = await helper.getDatafromStorage("FriendTabId");
+      }
       chrome.tabs.sendMessage(Number(currentFBTabId), request);
       break;
 
     case "pause":
       // console.log("Paused.")
-      const currentFBTabIdIs = await helper.getDatafromStorage("tabId");
+      let currentFBTabIdIs;
+      if(request.source === "post"){
+        currentFBTabIdIs = await helper.getDatafromStorage("PostTabId");
+      }
+      if(request.source === "suggestions"){
+        currentFBTabIdIs = await helper.getDatafromStorage("suggestedTabId");
+      }
+      if(request.source === "groups"){
+        currentFBTabIdIs = await helper.getDatafromStorage("groupTabId");
+      }
+      if(request.source === "friends"){
+        currentFBTabIdIs = await helper.getDatafromStorage("FriendTabId");
+      }
       chrome.tabs.sendMessage(Number(currentFBTabIdIs), request);
       break;
 
@@ -839,14 +875,19 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       break;
          
     case "openPostSetting" :
-      console.log("request.postUrl :: ", request.postUrl)
+      // const postPopupId = await helper.getDatafromStorage("postPopupId");
+      // if(postPopupId) chrome.tabs.remove(parseInt(postPopupId));
+      // console.log("request.postUrl :: ", request.postUrl)
       await helper.saveDatainStorage('postUrl', request.postUrl)
-      chrome.windows.create({url : 'popup.html', type : 'popup', width : 799, height : 600});
+      chrome.windows.create({url : 'popup.html', type : 'popup', width : 799, height : 600}, async res => {
+        console.log("res", res.tabs[0]);
+        await helper.saveDatainStorage('postPopupId', res.tabs[0].id)
+        setTimeout(() => {
+          chrome.runtime.sendMessage({action:"setPostPopup", source:"post"});
+        }, 500);
+      });
       // chrome.action.setPopup({ popup: "popup.html" });
       // chrome.action.openPopup({'url' : 'popup.html', 'type' : 'popup'}); 
-      setTimeout(() => {
-        chrome.runtime.sendMessage({action:"setPostPopup", source:"post"});
-      }, 500);
       break;
     default : break;
   }
@@ -1091,7 +1132,20 @@ chrome.alarms.onAlarm.addListener(async(alarm) => {
 });
 
 chrome.tabs.onUpdated.addListener(async (tabID, changeInfo, tab) => {
-  const CurrentTabId = await helper.getDatafromStorage("tabId");
+  // console.log("tab",  tab);
+  let CurrentTabId;
+  if(tab.url.includes("https://www.facebook.com/")){
+    CurrentTabId = await helper.getDatafromStorage("PostTabId");
+  }
+  if(tab.url.includes("https://www.facebook.com/friends/") && tab.url.includes("suggestions")){
+    CurrentTabId = await helper.getDatafromStorage("suggestedTabId");
+  }
+  if(tab.url.includes("https://www.facebook.com/groups/") && (tab.url.includes("members") || tab.url.includes("people"))){
+    CurrentTabId = await helper.getDatafromStorage("groupTabId");
+  }
+  if(tab.url.includes("https://www.facebook.com/") && (tab.url.includes("friends") && !tab.url.includes("suggestions"))){
+    CurrentTabId = await helper.getDatafromStorage("FriendTabId");
+  }
   const CurrentTabsId = await helper.getDatafromStorage("tabsId");
   markFriendRequestList(tabID, changeInfo, tab);
 
@@ -1122,22 +1176,49 @@ const markFriendRequestList=(tabID, changeInfo, tab)=>{
 }
 
 
-chrome.tabs.onRemoved.addListener(async (tabID) => {
-  
-  const CurrentTabId = await helper.getDatafromStorage("tabId");
-  // const CurrentTabsId = await helper.getDatafromStorage("tabsId");
-  if (tabID === Number(CurrentTabId)) {
-    stopRunningScript()
+chrome.tabs.onRemoved.addListener(async (tabID, removeInfo) => {
+  // console.log("on close tab", removeInfo);
+  // let CurrentTabId = await helper.getDatafromStorage("tabId");
+  const groupTabId = await helper.getDatafromStorage("groupTabId");
+  const postTabId = await helper.getDatafromStorage("PostTabId");
+  const friendTabId = await helper.getDatafromStorage("FriendTabId");
+  const suggestedTabId = await helper.getDatafromStorage("suggestedTabId");
+
+  if (tabID === Number(groupTabId) ) {
+    stopRunningScript("sendFR", "groups")
   }
+  if (tabID === Number(postTabId) || tabID === Number(friendTabId)) {
+      stopRunningScript("sendFR", "post")
+  }
+  if (tabID === Number(friendTabId)) {
+    stopRunningScript("sendFR", "friends")
+  }
+  if (tabID === Number(suggestedTabId)) {
+    stopRunningScript("sendFR", "suggestions")
+  }
+})
 
-}
-)
-
-const stopRunningScript = async (action = "sendFR") => {
+const stopRunningScript = async (action = "sendFR", source) => {
   if (action === "sendFR") {
-    await helper.removeDatafromStorage("runAction");
-    await helper.removeDatafromStorage("FRSendCount");
-    await helper.removeDatafromStorage("profile_viewed");
+    switch(source){
+      case "groups" :
+        await helper.removeDatafromStorage("runAction_group");
+        break;
+      case "post" :
+        await helper.removeDatafromStorage("runAction_post");
+        break;
+      case "friends" :
+        await helper.removeDatafromStorage("runAction_friend");
+        break;
+      case "suggestions" :
+        await helper.removeDatafromStorage("runAction_suggestions");
+        break;
+      default : 
+        break;
+    }
+    // await helper.removeDatafromStorage("runAction");
+    // await helper.removeDatafromStorage("FRSendCount");
+    // await helper.removeDatafromStorage("profile_viewed");
   }
   if (action === "syncFriends") {
     // await helper.removeDatafromStorage("friendLength");

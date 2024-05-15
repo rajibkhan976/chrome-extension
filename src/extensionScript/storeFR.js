@@ -10,8 +10,7 @@ let memberContact = {},
     page_info={}, 
     memberCount = 0, 
     queueCount = 0, 
-    // contributors_page_info = {}, 
-    // common_page_info = {}, 
+    shoudIstop = false,
     sessionToken = "",
     feedbackTargetID = "",
     groupSettings = {},
@@ -34,81 +33,93 @@ let memberContact = {},
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     switch (request.action) {
-    case "start" : 
-        console.log("Lest start -----------------");
+        case "reSendFriendRequestInGroup":
+            shoudIstop = false;
+        case "start" : 
+            console.log("Lest start -----------------");
 
-        // set dtsg userid
-        const fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
-        fbDtsg = fbTokenAndId.fbDtsg;
-        userID = fbTokenAndId.userID;
+            // set dtsg userid
+            const fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
+            fbDtsg = fbTokenAndId.fbDtsg;
+            userID = fbTokenAndId.userID;
 
-        // group setting assigned
-        groupSettings = request.response;
-        console.log("groupSettings ::: ", groupSettings);
+            // group setting assigned
+            groupSettings = request.response;
+            console.log("groupSettings ::: ", groupSettings);
 
-        // get advance settings
-        HEADERS.authorization = await helper.getDatafromStorage("fr_token"); 
-        let reqBody = {
-            "token": HEADERS.authorization,
-            "fbUserId": userID
-        }
-        let settingResp = await fetch(process.env.REACT_APP_SETTING_API, {
-            method: 'POST',
-            headers: HEADERS,
-            body: JSON.stringify(reqBody)
-          })
-        profileMysettings = await settingResp.json();
-        profileMysettings = profileMysettings && profileMysettings.data ? profileMysettings.data[0] : {};
-        console.log("profileMysettings ::: ", profileMysettings);
-
-        // get important info from DOM SCRIPT
-        if(request.source === "friends"){
-            const content = document.body.innerHTML;
-            const match = content.match(/"userID":"(\d+)"/);
-            if (match) {
-                contactId = match[0].split(':')[1];
-                contactId = contactId.length > 0 ? contactId.replaceAll(`"`, "") : "NA";
-                console.log(contactId);
+            // get advance settings
+            HEADERS.authorization = await helper.getDatafromStorage("fr_token"); 
+            let reqBody = {
+                "token": HEADERS.authorization,
+                "fbUserId": userID
             }
-            let match_token = content.match(/"collection":{"app_section":{"id":"[^},]*\}/);
-            console.log(match_token)
-            if (match_token) {
-                // console.log(match_token[0]);
-                sessionToken = match_token[0];
-                sessionToken = `{${sessionToken}}}`;
-                sessionToken = JSON.parse(sessionToken);
-                sessionToken = sessionToken.collection.app_section.id
-                // console.log(sessionToken);
-            }
-        }
+            let settingResp = await fetch(process.env.REACT_APP_SETTING_API, {
+                method: 'POST',
+                headers: HEADERS,
+                body: JSON.stringify(reqBody)
+            })
+            profileMysettings = await settingResp.json();
+            profileMysettings = profileMysettings && profileMysettings.data ? profileMysettings.data[0] : {};
+            console.log("profileMysettings ::: ", profileMysettings);
 
-        // start fetching
-        startStoringContactInfo( request.source)
-        break;
-    case "getGenderCountryAndTier" : 
-        memberContact = {...memberContact, gender : request.responsePayload.gender, country : request.responsePayload.countryName, tier : request.responsePayload.Tiers}
-        // console.log("memberContact ::: ", memberContact);
-        validatePayload(memberContact, request.source);
-        break;
-    case "getFeedbackTargetID" : 
-        if(request.source === "post"){
-            const content = document.body.innerHTML;
-            let match_token = content.match(/,"feedback":{"id":"[^,]*,/);
-            match_token = match_token[0].replaceAll(",", "")
-            match_token = `{${match_token}}}`
-            match_token = JSON.parse(match_token);
-            console.log(match_token);
-            feedbackTargetID = match_token.feedback.id;
-            console.log(feedbackTargetID);
-            sendResponse(feedbackTargetID)
-        }
-        break;
-    default : 
-        break;
-  }
+            // get important info from DOM SCRIPT
+            if(request.source === "friends"){
+                const content = document.body.innerHTML;
+                const match = content.match(/"userID":"(\d+)"/);
+                if (match) {
+                    contactId = match[0].split(':')[1];
+                    contactId = contactId.length > 0 ? contactId.replaceAll(`"`, "") : "NA";
+                    console.log(contactId);
+                }
+                let match_token = content.match(/"collection":{"app_section":{"id":"[^},]*\}/);
+                console.log(match_token)
+                if (match_token) {
+                    // console.log(match_token[0]);
+                    sessionToken = match_token[0];
+                    sessionToken = `{${sessionToken}}}`;
+                    sessionToken = JSON.parse(sessionToken);
+                    sessionToken = sessionToken.collection.app_section.id
+                    // console.log(sessionToken);
+                }
+            }
+            if(request.feedbackTargetID)
+                if(request.source === "post"){
+                    feedbackTargetID = request.feedbackTargetID
+                }
+
+            // start fetching
+            startStoringContactInfo( request.source)
+            break;
+        case "getGenderCountryAndTier" : 
+            memberContact = {...memberContact, gender : request.responsePayload.gender, country : request.responsePayload.countryName, tier : request.responsePayload.Tiers}
+            // console.log("memberContact ::: ", memberContact);
+            validatePayload(memberContact, request.source);
+            break;
+        case "getFeedbackTargetID" : 
+            if(request.source === "post"){
+                const content = document.body.innerHTML;
+                let match_token = content.match(/,"feedback":{"id":"[^,]*,/);
+                match_token = match_token[0].replaceAll(",", "")
+                match_token = `{${match_token}}}`
+                match_token = JSON.parse(match_token);
+                console.log(match_token);
+                feedbackTargetID = match_token.feedback.id;
+                console.log(feedbackTargetID);
+                sendResponse(feedbackTargetID)
+            }
+            break;
+        case "stop":
+            shoudIstop = true;
+            if(request.source !== "post")
+                window.location.reload();
+            break;
+        default : 
+            break;
+    }
 });
 
 const startStoringContactInfo = async ( source ) => {
+    if(shoudIstop) return;
     console.log("startStoringContactInfo");
     console.log("contacts ::: ", contacts);
     if(contacts.length === 0){
@@ -123,6 +134,7 @@ const startStoringContactInfo = async ( source ) => {
 }
 
 const makePayload = async ( source, cursor = null) => {
+    if(shoudIstop) return;
     switch (source){
         case "suggestions" : 
             fb_api_req_friendly_name = "FriendingCometSuggestionsRootQuery"
@@ -179,6 +191,7 @@ const makePayload = async ( source, cursor = null) => {
         default : 
             break;
     }
+    if(shoudIstop) return;
     const payload = {
         av: userID,
         __user: userID,
@@ -198,7 +211,9 @@ const makePayload = async ( source, cursor = null) => {
 };
 
 const getContactList = async( source, cursor = null ) => {
+    if(shoudIstop) return;
     const payload = await makePayload( source, cursor)
+    if(shoudIstop) return;
     let memberlist = await fetch(
         "https://www.facebook.com/api/graphql/",
         {
@@ -214,6 +229,7 @@ const getContactList = async( source, cursor = null ) => {
     memberlist = await memberlist.text();
     // console.log(memberlist);
     // if(memberlist.includes(""))
+    if(shoudIstop) return;
     memberlist = await helper.makeParsable(memberlist)
     console.log(memberlist);
     if (source === "suggestions"){
@@ -269,8 +285,10 @@ const getContactList = async( source, cursor = null ) => {
                 memberArr = [...memberArr, memberlist.group_admin_profiles.edges]
             }
             memberArr = [...memberArr, ...memberlist.new_members.edges]
-            memberArr = [...memberArr, ...memberlist.paginated_member_sections[0].group.contributors.edges]
-            memberArr = [...memberArr, ...memberlist.paginated_member_sections[2].group.group_member_discovery.edges]
+            if(memberlist.paginated_member_sections[0])
+                memberArr = [...memberArr, ...memberlist.paginated_member_sections[0].group.contributors.edges]
+            if(memberlist.paginated_member_sections[2])
+                memberArr = [...memberArr, ...memberlist.paginated_member_sections[2].group.group_member_discovery.edges]
             memberlist = memberArr
         }
     }
@@ -292,14 +310,17 @@ const getContactList = async( source, cursor = null ) => {
             }
         }
     }
+    if(shoudIstop) return;
     console.log("memberlist ::: ", memberlist);
     return memberlist;
 }
 
 const arrangeArray = async (response, source) => {
+    if(shoudIstop) return;
     let arr = [], can_request = "";
     console.log("response  --------------> ", response);
     for(let el in response){
+        if(shoudIstop) return;
         memberCount++;
         if(source === "suggestions"){
             can_request = response[el] && response[el].node && response[el].node.friendship_status;
@@ -385,6 +406,7 @@ const arrangeArray = async (response, source) => {
 }
 
 const proceedOneByOne = async ( source ) => {
+    if(shoudIstop) return;
     if(contacts.length === 0) startStoringContactInfo( source )
     else{
         console.log("contacts ::::::::::::::::::::::: ", contacts[0]);
@@ -407,6 +429,7 @@ const proceedOneByOne = async ( source ) => {
 
 const validatePayload = async ( payload, source ) => {
     // console.log(payload);
+    if(shoudIstop) return;
     queueCount++;
     let isEligible = true
     if (isEligible && groupSettings.gender_filter) {
@@ -417,6 +440,7 @@ const validatePayload = async ( payload, source ) => {
           isEligible = false;
         }
     }
+    if(shoudIstop) return;
     if (isEligible && groupSettings.country_filter_enabled) {
         if (groupSettings.country_filter) {
           if (!groupSettings.country_filter_value.includes(payload.country))
@@ -431,6 +455,7 @@ const validatePayload = async ( payload, source ) => {
           }
         }
     }
+    if(shoudIstop) return;
     if(isEligible){
         if(groupSettings.lookup_for_mutual_friend){
             if(groupSettings.lookup_for_mutual_friend_condition === "<"){
@@ -446,6 +471,7 @@ const validatePayload = async ( payload, source ) => {
     }
 
 
+    if(shoudIstop) return;
     if(isEligible && (groupSettings.keyword || groupSettings.negative_keyword)){
         let isNegetivekeyWordMatched = false,
         iskeyWordMatched = false
@@ -484,6 +510,7 @@ const validatePayload = async ( payload, source ) => {
     console.log("is elible?", isEligible);
     
     // ----------------- START CHECKING ADVANCE SETTINGS-------------------------
+    if(shoudIstop) return;
     if (isEligible && profileMysettings && profileMysettings.dont_send_friend_requests_prople_ive_been_friends_with_before){
         const isExFriends = await helper.fetchExFriends(userID, payload.friendFbId)
         // console.log("isExFriends ::: ", isExFriends)
@@ -491,6 +518,7 @@ const validatePayload = async ( payload, source ) => {
           isEligible = false;
     }
 
+    if(shoudIstop) return;
     if (isEligible && profileMysettings && 
         (profileMysettings.dont_send_friend_requests_prople_i_sent_friend_requests_they_rejected 
         || profileMysettings.dont_send_friend_requests_prople_who_send_me_friend_request_i_rejected)){
@@ -503,8 +531,10 @@ const validatePayload = async ( payload, source ) => {
           if(isRejectedFriends && isRejectedFriends.isRejected && isRejectedFriends.is_incoming)
             isEligible = false;
         }
-      }
-      if (isEligible && profileMysettings && profileMysettings.avoid_sending_friend_request_to_restricted_people){
+    }
+
+    if(shoudIstop) return;
+    if (isEligible && profileMysettings && profileMysettings.avoid_sending_friend_request_to_restricted_people){
         const isRestricted = await common.fetchRestrictedFbProfile({ "facebookUserId":userID, "peopleFbId":payload.friendFbId});
         console.log("isRestricted ::: ", isRestricted)
         if(isRestricted)
@@ -512,6 +542,7 @@ const validatePayload = async ( payload, source ) => {
     }
         
       //check for user re-friending  
+    if(shoudIstop) return;
     if (isEligible) {
         payload.refriending = false;
         if (profileMysettings && profileMysettings.re_friending) {
@@ -554,6 +585,7 @@ const validatePayload = async ( payload, source ) => {
           }
     }
     
+    if(shoudIstop) return;
     if(isEligible){
         payload = {
             ...payload,
@@ -570,11 +602,16 @@ const validatePayload = async ( payload, source ) => {
             "send_message_when_friend_request_accepted_message_group_id": groupSettings.send_message_when_friend_request_accepted_message_group_id,
             "settings_type" : groupSettings.settings_type
         }
+        if(source === "post"){
+            const postUrl = await helper.getDatafromStorage('postUrl');
+            payload.sourceUrl = postUrl;
+        }
         // console.log(payload);
         const response = await common.storeInFRQS(payload);
     }
     // console.log("response ::: ", response);
     // if(response.message === "Record created")
+    if(shoudIstop) return;
     if(page_info.has_next_page)
         startStoringContactInfo( source );
 }
@@ -584,14 +621,6 @@ const validatePayload = async ( payload, source ) => {
 // {"count":10,"cursor":null,"feedbackTargetID":"ZmVlZGJhY2s6MjczODkyNDgyMjU0MzAz","reactionID":"1678524932434102","scale":1,"id":"ZmVlZGJhY2s6MjczODkyNDgyMjU0MzAz"}
 // {"count":10,"cursor":null,"feedbackTargetID":"ZmVlZGJhY2s6MjczODkyNDgyMjU0MzAz","reactionID":"1635855486666999","scale":1,"id":"ZmVlZGJhY2s6MjczODkyNDgyMjU0MzAz"}
 // {"feedbackTargetID":"ZmVlZGJhY2s6MjM4OTM5ODEyNDE2MjM3","scale":1}
-// "reactionID":"908563459236466" // sad // 7311826188912908
-// "reactionID":"1635855486666999" // like // 7311826188912908 // 7311826188912908
-// "reactionID":"1678524932434102" // love // 7311826188912908 // 7311826188912908
-// "reactionID":"613557422527858" // care // 7311826188912908 // 7311826188912908
-// "reac9tionID":"115940658764963" // haha // 7311826188912908
-// "reactionID":"444813342392137" // angry // 7311826188912908
-// "reactionID":"478547315650144" // wow // 7311826188912908
-
 // doc_id = 7346782002075872 // all
 
 
