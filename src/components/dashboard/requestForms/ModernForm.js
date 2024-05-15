@@ -73,9 +73,8 @@ export const findData = (child, parent, level) => {
     if (!parent.fieldOptions) {
         return false;
     }
-    const mainData = parent.fieldOptions[0];
 
-    console.log("Founded main data -- ", mainData);
+    const mainData = parent.fieldOptions[level];
 
     if (child.type === mainData.type && child.name === mainData.name) {
         return level;
@@ -117,16 +116,25 @@ const GroupsRequestForm = ({
     settingApiPayload,
     setSettingApiPayload,
     settingsType = null,
+    modalOpen,
+    setModalOpen,
+    setEditType,
+    handleSaveSettings = () => { },
+    openSuccessNotification,
+    setOpenSuccessNotification,
+    openErrorNotification,
+    setOpenErrorNotification,
+    openNotificationMsg
 }) => {
     //:::::::
     const countyRef = useRef(null);
 
     const [isEditing, setIsEditing] = useState(false);
-    const [editType, setEditType] = useState("basic");
-    const [openNotification, setOpenNotification] = useState(false);
-    const [openNotificationMsg, setOpenNotificationMsg] = useState("");
-    const [openSuccessNotification, setOpenSuccessNotification] = useState("");
-    const [modalOpen, setModalOpen] = useState(false);
+    // const [editType, setEditType] = useState("basic");
+    // const [openNotification, setOpenNotification] = useState(false);
+    // const [openNotificationMsg, setOpenNotificationMsg] = useState("");
+    // const [openSuccessNotification, setOpenSuccessNotification] = useState("");
+    // const [modalOpen, setModalOpen] = useState(false);
     // useEffect(() => {
     //   console.log("NEW edit type settinggggg::: ", settingApiPayload);
     // }, [settingApiPayload]);
@@ -166,6 +174,7 @@ const GroupsRequestForm = ({
     };
 
     const stepInputIncrementHandle = (element) => {
+        console.log("element - ", element);
         if (element.name === "tier_filter_value") {
             fillInputChangeStepwise(element, "+");
         } else {
@@ -300,46 +309,59 @@ const GroupsRequestForm = ({
 
 
     const resetToDefaultSetting = async () => {
-        const isPauedThenRun = await helper.getDatafromStorage("runAction");
-        if (isPauedThenRun !== "pause") {
-            getFrndReqSet(settingsType)
-                .then((res) => {
-                    const apiObj = res.data.data;
-                    // console.log("The api of friend req set>>>///||||\\\\:::", apiObj);
-                    // setFriendReqSet(apiObj[0]);
-                    if (apiObj?.length > 0) {
-                        syncPayload(apiObj[0], settingApiPayload, setSettingApiPayload);
-                        removeEle(apiObj[0], removeforBasic).then((response) => {
-                            // console.log("[[[[[[[[[[_____>>>>after rrrreeemove", response);
-                            syncFromApi(response, formSetup, setFormSetup);
-                            setIsLoding(false);
-                        });
-                        // generateFormElements();
-                    } else {
-                        setIsLoding(false);
+        // const isPauedThenRun = await helper.getDatafromStorage("runAction");
+        // if (isPauedThenRun !== "pause") {
+        //     getFrndReqSet(settingsType)
+        //         .then((res) => {
+        //             const apiObj = res.data.data;
+        //             // console.log("The api of friend req set>>>///||||\\\\:::", apiObj);
+        //             // setFriendReqSet(apiObj[0]);
+        //             if (apiObj?.length > 0) {
+        //                 syncPayload(apiObj[0], settingApiPayload, setSettingApiPayload);
+        //                 removeEle(apiObj[0], removeforBasic).then((response) => {
+        //                     // console.log("[[[[[[[[[[_____>>>>after rrrreeemove", response);
+        //                     syncFromApi(response, formSetup, setFormSetup);
+        //                     setIsLoding(false);
+        //                 });
+        //                 // generateFormElements();
+        //             } else {
+        //                 setIsLoding(false);
 
-                        setSettingApiPayload(fr_Req_Payload);
-                        // setFormSetup(requestFormSettings);
-                    }
-                })
-                .catch((err) => {
-                    // console.log("Error happened in Setting api call:::", err);
-                });
-        } else {
-            const runningSettings = await helper.getDatafromStorage(
-                "curr_reqSettings"
-            );
-            if (runningSettings) {
-                const curr_settingObj = JSON.parse(runningSettings);
-                setSettingApiPayload(curr_settingObj);
+        //                 setSettingApiPayload(fr_Req_Payload);
+        //                 // setFormSetup(requestFormSettings);
+        //             }
+        //         })
+        //         .catch((err) => {
+        //             // console.log("Error happened in Setting api call:::", err);
+        //         });
+        // } else {
+        //     let runningSettings = null;
 
-                syncFromApi(curr_settingObj, formSetup, setFormSetup);
+        //     if (settingsType === 8) {
+        //         runningSettings = await helper.getDatafromStorage("groupSettingsPayload");
+        //     }
 
-                setIsLoding(false);
-            }
-        }
-        setModalOpen(false);
-        setIsEditing(false);
+        //     if (settingsType === 9) {
+        //         runningSettings = await helper.getDatafromStorage("postSettingsPayload");
+        //     }
+
+        //     if (settingsType === 10) {
+        //         runningSettings = await helper.getDatafromStorage("suggestedFrndsSettingsPayload");
+        //     }
+
+        //     if (settingsType === 11) {
+        //         runningSettings = await helper.getDatafromStorage("frndsOfFrndsSettingsPayload");
+        //     }
+
+        //     if (runningSettings) {
+        //         // const curr_settingObj = JSON.parse(runningSettings);
+        //         setSettingApiPayload(runningSettings);
+        //         syncFromApi(runningSettings, formSetup, setFormSetup);
+        //         setIsLoding(false);
+        //     }
+        // }
+        // setModalOpen(false);
+        // setIsEditing(false);
     };
 
 
@@ -424,12 +446,11 @@ const GroupsRequestForm = ({
     const checkboxOptionChange = (element, option) => {
         let formSetPlaceholder = { ...formSetup };
 
-        console.log("Option here for the active checkbox ::: ", option);
-
         const newOptions = element?.options?.map((item) => {
             if (item.text === option.text) {
                 item.isActive = !item.isActive;
             }
+
             return item;
         });
 
@@ -443,10 +464,21 @@ const GroupsRequestForm = ({
             }),
         };
 
-        setSettingApiPayload(prevState => ({
-            ...prevState,
-            reaction: option?.isActive,
-        }));
+        if (option?.name === "reaction_type") {
+            console.log("reaction - ", option);
+            setSettingApiPayload(prevState => ({
+                ...prevState,
+                reaction: option?.isActive,
+            }));
+        }
+
+        if (option?.name === "comment") {
+            console.log("comment - ", option);
+            setSettingApiPayload(prevState => ({
+                ...prevState,
+                comment: option?.isActive,
+            }));
+        }
 
         setFormSetup(newObj);
         generateFormElements();
@@ -503,7 +535,7 @@ const GroupsRequestForm = ({
         const newObj = {
             ...formSetPlaceholder,
             fields: formSetPlaceholder?.fields?.map((formItem, idx) => {
-                const found = findData(ele, formItem, 1);
+                const found = findData(ele, formItem, 0);
 
                 if (found) {
                     const newObj = changeData(formItem, found, val);
@@ -747,6 +779,7 @@ const GroupsRequestForm = ({
                 };
             }),
         };
+
         fillInputChange("", ele);
         setFormSetup(newObj);
         generateFormElements();
@@ -799,28 +832,29 @@ const GroupsRequestForm = ({
     const handleReactionIconChange = (event, iconName, element) => {
         const isChecked = event.target.checked;
         let formSetPlaceholder = { ...formSetup };
+        let reactionState = [...selectedReactionIcons];
 
         if (isChecked) {
-            setSelectedReactionIcon(prevIcons => [...prevIcons, iconName]);
+            reactionState.push(iconName);
         } else {
-            setSelectedReactionIcon(prevIcons => prevIcons.filter((icon) => icon !== iconName));
+            reactionState = reactionState.filter(icon => icon !== iconName);
         }
+        
+        setSelectedReactionIcon(reactionState);
 
         const newObj = {
             ...formSetPlaceholder,
             fields: formSetPlaceholder.fields.map((formItem) => {
-                console.log("FORM ITEM -- ", formItem);
-
                 if (formItem.name === "given_reactions") {
                     const fields = formItem.fieldOptions[0];
                     const option = fields?.options[0];
 
-                    fields.value = [...selectedReactionIcons];
-                    option.value = [...selectedReactionIcons];
+                    fields.value = [...reactionState];
+                    option.value = [...reactionState];
 
                     formItem?.fieldOptions?.map(field => {
                         if (field.name === "given_reaction_fields") {
-                            field.value = [...selectedReactionIcons];
+                            field.value = [...reactionState];
                         }
                         return fields;
                     })
@@ -828,14 +862,14 @@ const GroupsRequestForm = ({
                     return formItem;
 
                 } else {
-                    return formItem; 
+                    return formItem;
                 }
             })
         };
 
         setSettingApiPayload(prevState => ({
             ...prevState,
-            reaction_type: [...selectedReactionIcons],
+            reaction_type: [...reactionState],
         }));
 
         setFormSetup(newObj);
@@ -849,21 +883,37 @@ const GroupsRequestForm = ({
         const newObj = {
             ...formSetPlaceholder,
             fields: formSetPlaceholder?.fields?.map((formItem) => {
-                if (formItem.name === "lookup_for_mutual_friend") {
-                    const fields = formItem.fieldOptions[1];
-                    fields.value = value;
+                return {
+                    ...formItem,
+                    fieldOptions: formItem.fieldOptions?.map((itemCh) => {
+                        if (itemCh.name === "mutual_friend_value") {
+                            itemCh.value = value;
 
-                    formItem?.fieldOptions?.map(field => {
-                        if (field.name === "mutual_friend_value") {
-                            field.value = value;
+                            setSettingApiPayload(prevState => ({
+                                ...prevState,
+                                mutual_friend_value: value
+                            }));
                         }
-                        return field;
+                        return itemCh;
                     })
-                    return formItem;
-
-                } else {
-                    return formItem;
                 }
+
+                // if (formItem.name === "lookup_for_mutual_friend") {
+                //     // const fields = formItem.fieldOptions[1];
+                //     // fields.value = value;
+
+                //     formItem?.fieldOptions?.map(field => {
+                //         if (field.name === "mutual_friend_value") {
+                //             field.value = value;
+                //         }
+                //         return field;
+                //     })
+
+                //     return formItem;
+
+                // } else {
+                //     return formItem;
+                // }
             })
         };
 
@@ -873,9 +923,6 @@ const GroupsRequestForm = ({
 
     //::::use this function for recursive fields
     const inputValueChange = (ele, val) => {
-        console.log("Element -- ", ele);
-        console.log("Value -- ", val);
-
         let formSetPlaceholder = { ...formSetup };
 
         let newPlaceholder = {
@@ -901,34 +948,65 @@ const GroupsRequestForm = ({
         generateFormElements();
     };
 
+    
+    /**
+     * INCREASE OR DECREASE VALLUE STEP WISE HERE..
+     * @param {*} ele 
+     * @param {*} type 
+     */
     const inputValueChangeStepWise = (ele, type) => {
-        if (ele.value - 1 < 1 && type !== "+") return;
+        // if (value - 1 < 1 && type !== "+") return;
+
         let formSetPlaceholder = { ...formSetup };
-        formSetPlaceholder.fields.forEach((formItem, idx) => {
-            //Recursive function to find the object
-            const found = findData(ele, formItem, 1);
 
-            if (found) {
-                //Recursive function to change the value of object
-                const currValue = parseInt(ele.value)
-                const newObj = changeData(
-                    formItem,
-                    found,
-                    type === "+" ? currValue + 1 : currValue - 1
-                );
+        const newObjPlaceholder = {
+            ...formSetPlaceholder,
+            fields: formSetPlaceholder?.fields?.map((formItem, idx) => {
+                return {
+                    ...formItem,
+                    fieldOptions: formItem?.fieldOptions?.map(item => {
+                        // console.log("Item - ", item);
+                        if (item?.name === "mutual_friend_value") {
+                            const currValue = parseInt(ele.value)
+                            item.value = type === "+" ? currValue + 1 : currValue - 1;
 
-                setSettingApiPayload((prevState) => ({
-                    ...prevState,
-                    [ele.name]: type === "+" ? currValue + 1 : currValue - 1,
-                }));
+                            setSettingApiPayload((prevState) => ({
+                                ...prevState,
+                                [ele.name]: type === "+" ? currValue + 1 : currValue - 1,
+                            }));
+                        }
+                        return item;
+                    })
+                }
+            })
+        };
 
-                formSetPlaceholder.fields[idx] = newObj;
-            }
-        });
+        // //Recursive function to find the object
+        // const found = findData(ele, formItem, 0);
 
-        setFormSetup(formSetPlaceholder);
+        // console.log("FOUND - ", found);
+
+        // if (found) {
+        //     //Recursive function to change the value of object
+        //     const currValue = parseInt(ele.value)
+        //     const newObj = changeData(
+        //         formItem,
+        //         found,
+        //         type === "+" ? currValue + 1 : currValue - 1
+        //     );
+
+        //     setSettingApiPayload((prevState) => ({
+        //         ...prevState,
+        //         [ele.name]: type === "+" ? currValue + 1 : currValue - 1,
+        //     }));
+
+        //     formSetPlaceholder.fields[idx] = newObj;
+        // }
+
+        setFormSetup(newObjPlaceholder);
         generateFormElements();
     };
+
 
     useEffect(() => { }, [settingApiPayload]);
 
@@ -1036,78 +1114,78 @@ const GroupsRequestForm = ({
 
 
     //////////////////////////////////advance setting handles/////////////////
-    const adnvcCheckHandle = (ele) => {
-        const newObj = {
-            ...advcFormAssets,
-            fields: advcFormAssets.fields.map((item) => {
-                if (item.label === ele.label) {
-                    return {
-                        ...item,
-                        isActive: !ele.isActive,
-                    };
-                } else {
-                    return item;
-                }
-            }),
-        };
+    // const adnvcCheckHandle = (ele) => {
+    //     const newObj = {
+    //         ...advcFormAssets,
+    //         fields: advcFormAssets.fields.map((item) => {
+    //             if (item.label === ele.label) {
+    //                 return {
+    //                     ...item,
+    //                     isActive: !ele.isActive,
+    //                 };
+    //             } else {
+    //                 return item;
+    //             }
+    //         }),
+    //     };
 
-        setAdvcFormAssets(newObj);
-        generateAdvncForm();
-    };
-
-
-    const advInputChange = (value, ele) => {
-        const newObj = {
-            ...advcFormAssets,
-            fields: advcFormAssets.fields.map((item) => {
-                if (item.fieldOptions) {
-                    return {
-                        ...item,
-                        fieldOptions: item.fieldOptions.map((itemCh) => {
-                            if (ele.type === itemCh.type && ele.label === itemCh.label) {
-                                itemCh.value = value;
-                            }
-                            return itemCh;
-                        }),
-                    };
-                } else {
-                    return {
-                        ...item,
-                    };
-                }
-            }),
-        };
-
-        setAdvcFormAssets(newObj);
-        generateAdvncForm();
-    };
+    //     setAdvcFormAssets(newObj);
+    //     generateAdvncForm();
+    // };
 
 
-    const advSelectChange = (value, ele) => {
-        const newObj = {
-            ...advcFormAssets,
-            fields: advcFormAssets.fields.map((item) => {
-                if (item.fieldOptions) {
-                    return {
-                        ...item,
-                        fieldOptions: item.fieldOptions.map((itemCh) => {
-                            if (ele.type === itemCh.type && ele.label === itemCh.label) {
-                                itemCh.selectValue = value;
-                            }
-                            return itemCh;
-                        }),
-                    };
-                } else {
-                    return {
-                        ...item,
-                    };
-                }
-            }),
-        };
+    // const advInputChange = (value, ele) => {
+    //     const newObj = {
+    //         ...advcFormAssets,
+    //         fields: advcFormAssets.fields.map((item) => {
+    //             if (item.fieldOptions) {
+    //                 return {
+    //                     ...item,
+    //                     fieldOptions: item.fieldOptions.map((itemCh) => {
+    //                         if (ele.type === itemCh.type && ele.label === itemCh.label) {
+    //                             itemCh.value = value;
+    //                         }
+    //                         return itemCh;
+    //                     }),
+    //                 };
+    //             } else {
+    //                 return {
+    //                     ...item,
+    //                 };
+    //             }
+    //         }),
+    //     };
 
-        setAdvcFormAssets(newObj);
-        generateAdvncForm();
-    };
+    //     setAdvcFormAssets(newObj);
+    //     generateAdvncForm();
+    // };
+
+
+    // const advSelectChange = (value, ele) => {
+    //     const newObj = {
+    //         ...advcFormAssets,
+    //         fields: advcFormAssets.fields.map((item) => {
+    //             if (item.fieldOptions) {
+    //                 return {
+    //                     ...item,
+    //                     fieldOptions: item.fieldOptions.map((itemCh) => {
+    //                         if (ele.type === itemCh.type && ele.label === itemCh.label) {
+    //                             itemCh.selectValue = value;
+    //                         }
+    //                         return itemCh;
+    //                     }),
+    //                 };
+    //             } else {
+    //                 return {
+    //                     ...item,
+    //                 };
+    //             }
+    //         }),
+    //     };
+
+    //     setAdvcFormAssets(newObj);
+    //     generateAdvncForm();
+    // };
 
     // HANDLE MOUSE MOVE ON TOOLTIP MOVING WITH CURSOR
     const handleMouseMove = (event) => {
@@ -1117,115 +1195,115 @@ const GroupsRequestForm = ({
         // setIsTooltipVisible(true);
     };
 
-    const generateAdvncForm = () => {
-        const generateAdvncFormElemnts = (element, idx) => {
-            switch (element.type) {
-                case "select":
-                    return (
-                        <div className="fr-advsetting-el-container" key={idx}>
-                            {element.label && <label>{element.label}</label>}
-                            <div className="fr-advsetting-el-body">
-                                <select
-                                    value={element.value}
-                                    onChange={(e) => {
-                                        advSelectChange(e.target.value, element);
-                                    }}
-                                    className={`fr-advsetting-el-${element.type}`}
-                                >
-                                    {element?.options?.map((item, index) => {
-                                        return (
-                                            <option value={item.value} key={"fr-select" + index}>
-                                                {item.label}
-                                            </option>
-                                        );
-                                    })}
-                                </select>
-                            </div>
-                        </div>
-                    );
-                case "inputSelect":
-                    return (
-                        <div className="fr-advsetting-el-container" key={idx}>
-                            {element.label && <label>{element.label}</label>}
-                            <div className="fr-advsetting-el-body">
-                                <div className={`fr-advsetting-el-${element.type}`}>
-                                    <input
-                                        maxlength="6"
-                                        type="number"
-                                        value={element.value}
-                                        onChange={(e) => {
-                                            advInputChange(e.target.value, element);
-                                        }}
-                                        autoFocus
-                                    />
-                                    <select
-                                        value={element.selectValue}
-                                        onChange={(e) => {
-                                            advSelectChange(e.target.value, element);
-                                        }}
-                                    >
-                                        {element.options.map((item, index) => {
-                                            return (
-                                                <option
-                                                    value={item.selectValue}
-                                                    key={"fr-select" + index}
-                                                >
-                                                    {item.label}
-                                                </option>
-                                            );
-                                        })}
-                                    </select>
-                                </div>
+    // const generateAdvncForm = () => {
+    //     const generateAdvncFormElemnts = (element, idx) => {
+    //         switch (element.type) {
+    //             case "select":
+    //                 return (
+    //                     <div className="fr-advsetting-el-container" key={idx}>
+    //                         {element.label && <label>{element.label}</label>}
+    //                         <div className="fr-advsetting-el-body">
+    //                             <select
+    //                                 value={element.value}
+    //                                 onChange={(e) => {
+    //                                     advSelectChange(e.target.value, element);
+    //                                 }}
+    //                                 className={`fr-advsetting-el-${element.type}`}
+    //                             >
+    //                                 {element?.options?.map((item, index) => {
+    //                                     return (
+    //                                         <option value={item.value} key={"fr-select" + index}>
+    //                                             {item.label}
+    //                                         </option>
+    //                                     );
+    //                                 })}
+    //                             </select>
+    //                         </div>
+    //                     </div>
+    //                 );
+    //             case "inputSelect":
+    //                 return (
+    //                     <div className="fr-advsetting-el-container" key={idx}>
+    //                         {element.label && <label>{element.label}</label>}
+    //                         <div className="fr-advsetting-el-body">
+    //                             <div className={`fr-advsetting-el-${element.type}`}>
+    //                                 <input
+    //                                     maxlength="6"
+    //                                     type="number"
+    //                                     value={element.value}
+    //                                     onChange={(e) => {
+    //                                         advInputChange(e.target.value, element);
+    //                                     }}
+    //                                     autoFocus
+    //                                 />
+    //                                 <select
+    //                                     value={element.selectValue}
+    //                                     onChange={(e) => {
+    //                                         advSelectChange(e.target.value, element);
+    //                                     }}
+    //                                 >
+    //                                     {element.options.map((item, index) => {
+    //                                         return (
+    //                                             <option
+    //                                                 value={item.selectValue}
+    //                                                 key={"fr-select" + index}
+    //                                             >
+    //                                                 {item.label}
+    //                                             </option>
+    //                                         );
+    //                                     })}
+    //                                 </select>
+    //                             </div>
 
-                                {element.suffix && element.suffix}
-                            </div>
-                        </div>
-                    );
-                case "input":
-                    return (
-                        <div className="fr-advsetting-el-container" key={idx}>
-                            {element.label && <label>{element.label}</label>}
-                            <div className={`fr-advsetting-el-body`}>
-                                <input
-                                    className={`fr-advsetting-el-${element.type}`}
-                                    value={element.value}
-                                    type={"number"}
-                                    onChange={(e) => {
-                                        advInputChange(e.target.value, element);
-                                    }}
-                                />
-                                {element.suffix && element.suffix}
-                            </div>
-                        </div>
-                    );
-                default:
-                    return <></>;
-            }
-        };
+    //                             {element.suffix && element.suffix}
+    //                         </div>
+    //                     </div>
+    //                 );
+    //             case "input":
+    //                 return (
+    //                     <div className="fr-advsetting-el-container" key={idx}>
+    //                         {element.label && <label>{element.label}</label>}
+    //                         <div className={`fr-advsetting-el-body`}>
+    //                             <input
+    //                                 className={`fr-advsetting-el-${element.type}`}
+    //                                 value={element.value}
+    //                                 type={"number"}
+    //                                 onChange={(e) => {
+    //                                     advInputChange(e.target.value, element);
+    //                                 }}
+    //                             />
+    //                             {element.suffix && element.suffix}
+    //                         </div>
+    //                     </div>
+    //                 );
+    //             default:
+    //                 return <></>;
+    //         }
+    //     };
 
-        return advcFormAssets.fields.map((fromItem, idx) => {
-            return (
-                <div className="fr-advsetting-container">
-                    <div className="fr-advsetting-cell" key={idx}>
-                        <div className="fr-advsetting-left">
-                            <Checkbox
-                                onCheckChange={() => adnvcCheckHandle(fromItem)}
-                                isChecked={fromItem.isActive}
-                            />
-                        </div>
-                        <div className="fr-advsetting-right">
-                            <h5>{fromItem.label}</h5>
-                            {fromItem.fieldOptions &&
-                                fromItem.isActive &&
-                                fromItem.fieldOptions.map((item, idx) => {
-                                    return generateAdvncFormElemnts(item, idx);
-                                })}
-                        </div>
-                    </div>
-                </div>
-            );
-        });
-    };
+    //     return advcFormAssets.fields.map((fromItem, idx) => {
+    //         return (
+    //             <div className="fr-advsetting-container">
+    //                 <div className="fr-advsetting-cell" key={idx}>
+    //                     <div className="fr-advsetting-left">
+    //                         <Checkbox
+    //                             onCheckChange={() => adnvcCheckHandle(fromItem)}
+    //                             isChecked={fromItem.isActive}
+    //                         />
+    //                     </div>
+    //                     <div className="fr-advsetting-right">
+    //                         <h5>{fromItem.label}</h5>
+    //                         {fromItem.fieldOptions &&
+    //                             fromItem.isActive &&
+    //                             fromItem.fieldOptions.map((item, idx) => {
+    //                                 return generateAdvncFormElemnts(item, idx);
+    //                             })}
+    //                     </div>
+    //                 </div>
+    //             </div>
+    //         );
+    //     });
+    // };
 
 
     //////////:::::Generating General::::://////////////
@@ -1395,48 +1473,50 @@ const GroupsRequestForm = ({
                             {/* Reaction Icons */}
                             {element?.options[0]?.isActive === true && (
                                 <section id="reaction-icons-section" className="d-flex f-align-center">
+
                                     <span>Choose: </span>
+                                    {console.log("API payload -- ", settingApiPayload, settingApiPayload?.reaction_type?.includes('like'))}
 
                                     <div className="fr-reaction-icons f-1">
                                         <label>
                                             <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "like", element)} />
-                                            <span className="fr-reaction-icon">
+                                            <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('like') ? 'currently-using-icon' : ''}`}>
                                                 <LikeReactionIcon />
                                             </span>
                                         </label>
                                         <label>
                                             <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "love", element)} />
-                                            <span className="fr-reaction-icon">
+                                            <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('love') ? 'currently-using-icon' : ''}`}>
                                                 <LoveReactionIcon />
                                             </span>
                                         </label>
                                         <label>
                                             <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "care", element)} />
-                                            <span className="fr-reaction-icon">
+                                            <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('care') ? 'currently-using-icon' : ''}`}>
                                                 <CareReactionIcon />
                                             </span>
                                         </label>
                                         <label>
                                             <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "haha", element)} />
-                                            <span className="fr-reaction-icon">
+                                            <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('haha') ? 'currently-using-icon' : ''}`}>
                                                 <HahaReactionIcon />
                                             </span>
                                         </label>
                                         <label>
                                             <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "wow", element)} />
-                                            <span className="fr-reaction-icon">
+                                            <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('wow') ? 'currently-using-icon' : ''}`}>
                                                 <WowReactionIcon />
                                             </span>
                                         </label>
                                         <label>
                                             <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "sad", element)} />
-                                            <span className="fr-reaction-icon">
+                                            <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('sad') ? 'currently-using-icon' : ''}`}>
                                                 <SadReactionIcon />
                                             </span>
                                         </label>
                                         <label>
                                             <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "angry", element)} />
-                                            <span className="fr-reaction-icon">
+                                            <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('angry') ? 'currently-using-icon' : ''}`}>
                                                 <AngryReactionIcon />
                                             </span>
                                         </label>
@@ -1846,11 +1926,15 @@ const GroupsRequestForm = ({
                 open={modalOpen}
                 setOpen={setModalOpen}
                 ModalFun={() => {
-                    if (checkValidity(formSetup, setFormSetup)) {
+                    const validation = checkValidity(formSetup, setFormSetup);
+
+                    if (validation?.valid === true) {
                         setIsEditing(false);
                         setOpenSuccessNotification(true);
+                        handleSaveSettings();
+                        setEditType(null);
                     } else {
-                        setOpenNotification(false);
+                        setOpenErrorNotification(false);
                     }
                     setModalOpen(false);
                 }}
@@ -1858,6 +1942,8 @@ const GroupsRequestForm = ({
                 cancelBtnTxt={"Don't Save"}
                 resetFn={() => {
                     resetToDefaultSetting();
+                    setEditType(null);
+                    setModalOpen(false);
                 }}
             />
 
@@ -1885,14 +1971,14 @@ const GroupsRequestForm = ({
                         {generateFormElements()}
                     </div>
 
-                    {openNotification && (
+                    {openErrorNotification && (
                         <ServerMessages
                             icon={<ServerError />}
                             type={"error"}
                             msgText={openNotificationMsg}
                             headerTxt={"Error"}
-                            openNotification={openNotification}
-                            setOpenNotification={setOpenNotification}
+                            openNotification={openErrorNotification}
+                            setOpenNotification={setOpenErrorNotification}
                         />
                     )}
                 </div>

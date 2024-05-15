@@ -9,7 +9,7 @@ import {
 } from '../../helper/fr-setting';
 import ModernForm from '../dashboard/requestForms/ModernForm';
 import { Bolt, CheckIcon, GenderIcon, MessageSettingIcon, TierIcon } from '../shared/SVGAsset';
-import { MutualFriendsIcon, EditSingleIcon, LessThanEquals, TickIcon } from '../../assets/icons/Icons';
+import { MutualFriendsIcon, EditSingleIcon, LessThanEquals, TickIcon, ServerSuccess, ServerError } from '../../assets/icons/Icons';
 import AutomationStats from '../shared/AutomationStats';
 import { getFrndReqSet, getKeyWords, getProfileSettings, PostFriendResSet, saveFrndReqSettings, updateFrndReqSettings } from "../../service/FriendRequest";
 import helper from '../../extensionScript/helper';
@@ -20,10 +20,13 @@ import {
     checkValidity,
     removeEle,
     syncFromApi,
+    syncFromNewAPi,
     syncPayload
 } from '../../helper/syncData';
 import { removeforBasic } from '../dashboard/FriendRequest';
 import { fetchMesssageGroups } from '../../service/messages/MessagesServices';
+import ServerMessages from '../shared/ServerMessages';
+
 
 
 const SentFromFriendsFriend = () => {
@@ -42,7 +45,14 @@ const SentFromFriendsFriend = () => {
     const [settingApiPayload, setSettingApiPayload] = useState(fr_Req_Payload);
     const [settingSyncApiPayload, setSettingSyncApiPayload] = useState(null);
     const [isPaused, setIsPaused] = useState(null);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [readyToBack, setReadyToBack] = useState(false);
+    const [openSuccessNotification, setOpenSuccessNotification] = useState(false);
+    const [openErrorNotification, setOpenErrorNotification] = useState(false);
+    const [openNotificationMsg, setOpenNotificationMsg] = useState("");
     const settingsType = 11;
+    const [sendFrndReqGroupName, setSendFrndReqGroupName] = useState("");
+    const [acceptReqGroupName, setAcceptReqGroupName] = useState("");
 
 
     // FETCH SETTINGS DATA..
@@ -66,16 +76,16 @@ const SentFromFriendsFriend = () => {
         // console.log("i am re rendered......");
         (async () => {
             const runningStatus = await helper.getDatafromStorage("runAction_friend");
-            if(runningStatus === "running"){
+            if (runningStatus === "running") {
                 setIsRunnable(true);
             }
-            else if(runningStatus === "pause"){
+            else if (runningStatus === "pause") {
                 setEditType("basic");
                 setIsRunnable(false)
             }
-            else{
+            else {
                 setIsRunnable(false)
-                setEditType("null");
+                setEditType(null);
             }
             const allGroups = await fetchMesssageGroups();
             injectAGroupsOptionToFormSettings(allGroups.data.data)
@@ -163,7 +173,7 @@ const SentFromFriendsFriend = () => {
 
                     setSettingApiPayload(curr_settingObj);
                     setSettingSyncApiPayload(curr_settingObj);
-                    syncFromApi(curr_settingObj, formSetup, setFormSetup);
+                    syncFromNewAPi(curr_settingObj, formSetup, setFormSetup);
                     setIsLoding(false);
                 }
 
@@ -186,11 +196,12 @@ const SentFromFriendsFriend = () => {
                                     }
                                 })();
 
-                                syncFromApi(response, formSetup, setFormSetup);
+                                syncFromNewAPi(response, formSetup, setFormSetup);
                                 setSettingSyncApiPayload(response);
                                 // setSettingApiPayload(response);
-
                                 setIsLoding(false);
+                                setGroupName(response?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
+                                setGroupName(response?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
                             });
                             // generateFormElements();
                         } else {
@@ -198,7 +209,7 @@ const SentFromFriendsFriend = () => {
                         }
                     })
                     .catch((err) => {
-                        // console.log("Error happened in Setting api call:::", err);
+                        console.log("Error happened in Setting api call:::", err);
                     });
             }
 
@@ -253,6 +264,40 @@ const SentFromFriendsFriend = () => {
             };
             setFormSetup(newObj);
         }
+    };
+
+
+
+    /**
+     * GETTING THE GROUP NAME BY ID AND SET TO STATE
+     * @param {*} groupId 
+     * @param {*} setState 
+     */
+    const setGroupName = (groupId, setState) => {
+        (async () => {
+            const fr_token = await helper.getDatafromStorage("fr_token");
+
+            if (groupId && groupId !== 'undefined' || groupId !== undefined) {
+                try {
+                    const response = await axios.get(`${process.env.REACT_APP_FETCH_MESSAGE_GROUP}/${groupId}`, {
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: fr_token,
+                        },
+                    });
+
+                    const data = response?.data?.data?.length ? response?.data?.data[0] : null;
+
+                    if (data) {
+                        console.log("Data -- ", data);
+                        setState(data?.group_name);
+                    }
+
+                } catch (error) {
+                    console.log("ERR - ", error);
+                }
+            };
+        })();
     }
 
 
@@ -282,9 +327,9 @@ const SentFromFriendsFriend = () => {
 
     // STOP RUN THE FRIENDER HANDLER..
     const stopFrinderHandle = async () => {
-        console.log(" ==== [ STOP FRIENDER ] ==== "); 
+        console.log(" ==== [ STOP FRIENDER ] ==== ");
         await helper.saveDatainStorage("runAction_friend", "")
-        chrome.runtime.sendMessage({action:"stop", source:"friends"})
+        chrome.runtime.sendMessage({ action: "stop", source: "friends" })
         setEditType(null);
         setIsRunnable(false);
     };
@@ -293,14 +338,14 @@ const SentFromFriendsFriend = () => {
     const pauseSendingPRAndEdit = async () => {
         console.log(" ==== [ PAUSED AND RETURN EDIT SCREEN ] ==== ");
         await helper.saveDatainStorage("runAction_friend", "pause")
-        chrome.runtime.sendMessage({action:"pause", source:"friends"})
+        chrome.runtime.sendMessage({ action: "pause", source: "friends" })
         setEditType("basic");
         setIsRunnable(false);
     };
 
 
     // SAVE / UPDATE TO API..
-    const saveToAPI = async (payload) => {
+    const saveToAPI = async (payload, silentSave = false, isRunnable = null) => {
         const fr_token = await helper.getDatafromStorage("fr_token");
         const frndsOfFrndsSettingId = await helper.getDatafromStorage("frndsOfFrndsSettingId");
 
@@ -317,20 +362,35 @@ const SentFromFriendsFriend = () => {
                         Authorization: fr_token,
                     },
                 });
-                
-                console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
-                
-                const runningStatus = await helper.getDatafromStorage("runAction_friend")
-                await helper.saveDatainStorage("runAction_friend", "running");
-                if(runningStatus === "pause"){
-                    chrome.runtime.sendMessage({action:"reSendFriendRequestInGroup", response : payload, source:"friends"})
+
+                if (isRunnable === "RUN") {
+                    console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
+
+                    const runningStatus = await helper.getDatafromStorage("runAction_friend")
+                    await helper.saveDatainStorage("runAction_friend", "running");
+                    if (runningStatus === "pause") {
+                        chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: payload, source: "friends" })
+                    }
+                    else {
+                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })
+                    }
+                    // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
                 }
-                else {
-                    chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : payload})
+
+                setReadyToBack(true);
+                setEditType(null);
+                setIsEditing(false);
+
+                if (!silentSave) {
+                    setOpenSuccessNotification(true);
                 }
-                // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
+
             } catch (error) {
                 console.log("ERROR WHILE UPDATE SETTINGS - ", error);
+                setOpenNotificationMsg("Can not update the settings!");
+                setOpenErrorNotification(true);
+                setEditType("basic");
+                setIsEditing(true);
             }
 
             // updateFrndReqSettings(groupSettingsId?.settingsId, payload)
@@ -350,20 +410,35 @@ const SentFromFriendsFriend = () => {
                         Authorization: fr_token,
                     },
                 });
-                
-                console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
-                
-                const runningStatus = await helper.getDatafromStorage("runAction_friend")
-                await helper.saveDatainStorage("runAction_friend", "running");
-                if(runningStatus === "pause"){
-                    chrome.runtime.sendMessage({action:"reSendFriendRequestInGroup", response : payload, source:"friends"})
+
+                if (isRunnable === "RUN") {
+                    console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
+
+                    const runningStatus = await helper.getDatafromStorage("runAction_friend")
+                    await helper.saveDatainStorage("runAction_friend", "running");
+                    if (runningStatus === "pause") {
+                        chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: payload, source: "friends" })
+                    }
+                    else {
+                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })
+                    }
+                    // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : payload})
                 }
-                else {
-                    chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : payload})
+
+                setReadyToBack(true);
+                setEditType(null);
+                setIsEditing(false);
+
+                if (!silentSave) {
+                    setOpenSuccessNotification(true);
                 }
-                // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : payload})
+
             } catch (error) {
                 console.log("ERROR WHILE SAVE SETTINGS - ", error);
+                setOpenNotificationMsg("Can not save the settings!");
+                setOpenErrorNotification(true);
+                setEditType("basic");
+                setIsEditing(true);
             }
 
             // saveFrndReqSettings(payload)
@@ -378,10 +453,6 @@ const SentFromFriendsFriend = () => {
 
     // RUN FRIENDER BUTTON ACTION HANDLE
     const handleRunFrienderAction = async () => {
-        // Write Extension run code for this runFrienderHandle() function..
-        runFrinderHandle();
-        setIsRunnable(true);
-
         // Have to send message to the chrome runtime with payload data..
         const fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
 
@@ -399,8 +470,19 @@ const SentFromFriendsFriend = () => {
             payload.mutual_friend_value = `${payload.mutual_friend_value}`;
         }
 
+        // Checkpoint validation..
+        const validity = checkValidity(formSetup, setFormSetup);
+
+        if (!validity?.valid) {
+            return false;
+        }
+
+        // Write Extension run code for this runFrienderHandle() function..
+        runFrinderHandle();
+        setIsRunnable(true);
+
         await helper.saveDatainStorage('frndsOfFrndsSettingsPayload', payload);
-        await saveToAPI(payload);
+        await saveToAPI(payload, true, "RUN");
         // console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
         // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup"})
     };
@@ -427,8 +509,16 @@ const SentFromFriendsFriend = () => {
             payload.mutual_friend_value = `${payload.mutual_friend_value}`;
         }
 
+        // Checkpoint validation..
+        const validity = checkValidity(formSetup, setFormSetup);
+
+        if (!validity?.valid) {
+            return false;
+        }
+
+
         await helper.saveDatainStorage('frndsOfFrndsSettingsPayload', payload);
-        // await saveToAPI(payload);
+        await saveToAPI(payload);
     };
 
 
@@ -442,8 +532,8 @@ const SentFromFriendsFriend = () => {
                             <button
                                 className="btn btn-edit inline-btn"
                                 onClick={(event) => {
-                                    setEditType(null);
-                                    setIsEditing(false);
+                                    // setEditType(null);
+                                    // setIsEditing(false);
                                     handleSaveSettings(event);
                                 }}
                             >
@@ -552,6 +642,15 @@ const SentFromFriendsFriend = () => {
                     settingApiPayload={settingApiPayload}
                     setSettingApiPayload={setSettingApiPayload}
                     settingsType={11}
+                    modalOpen={modalOpen}
+                    setModalOpen={setModalOpen}
+                    handleSaveSettings={handleSaveSettings}
+                    setEditType={setEditType}
+                    openSuccessNotification={openSuccessNotification}
+                    setOpenSuccessNotification={setOpenSuccessNotification}
+                    openErrorNotification={openErrorNotification}
+                    setOpenErrorNotification={setOpenErrorNotification}
+                    openNotificationMsg={openNotificationMsg}
                 />
             ) : (
                 <>
@@ -592,7 +691,7 @@ const SentFromFriendsFriend = () => {
                             </figure>
                             <div className="setting-content">
                                 <h6>Selected message for sent friend request</h6>
-                                <p>{'Dynamic Discourse'}</p>
+                                <p>{sendFrndReqGroupName ? sendFrndReqGroupName : ''}</p>
                             </div>
                         </div>
                         <div className="setting-show d-flex">
@@ -601,7 +700,7 @@ const SentFromFriendsFriend = () => {
                             </figure>
                             <div className="setting-content">
                                 <h6>Selected message for accepted friend request</h6>
-                                <p>{'The Conversation Connoisseurs'}</p>
+                                <p>{acceptReqGroupName ? acceptReqGroupName : ''}</p>
                             </div>
                         </div>
                     </div>
@@ -617,11 +716,22 @@ const SentFromFriendsFriend = () => {
         }
     };
 
+    // Function to open modal and go back
+    const handleGoBack = () => {
+        if (editType === null || readyToBack) {
+            navigate(-1);
+            setModalOpen(false);
+        } else {
+            setModalOpen(true);
+        }
+    };
+
     return (
         <>
             <InnherHeader
                 goBackTo="/"
                 subHeaderText="Friends friend settings"
+                handleGoBack={handleGoBack}
                 activePageTextTooltip="Friender's Friend Queue feature gathers Facebook profiles from chosen facebook Groups, letting users send friend requests conveniently later"
             />
 
@@ -649,6 +759,29 @@ const SentFromFriendsFriend = () => {
                     </footer>
                 </div>
             </section>
+
+            {openSuccessNotification && (
+                <ServerMessages
+                    icon={<ServerSuccess />}
+                    type={"success"}
+                    msgText={"Successfully Saved Friends of Friend Settings"}
+                    headerTxt={"Congratulations!"}
+                    openNotification={openSuccessNotification}
+                    setOpenNotification={setOpenSuccessNotification}
+                />
+            )}
+
+
+            {openErrorNotification && (
+                <ServerMessages
+                    icon={<ServerError />}
+                    type={"error"}
+                    msgText={openNotificationMsg}
+                    headerTxt={"Error"}
+                    openNotification={openErrorNotification}
+                    setOpenNotification={setOpenErrorNotification}
+                />
+            )}
         </>
     );
 }

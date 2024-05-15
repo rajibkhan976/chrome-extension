@@ -537,7 +537,7 @@ label.fr-ext-checkbox {
 }
 
 .fr-req-fieldset {
-    margin-top: 25px;
+    margin-top: 21px;
 
     label {
         margin-left: 0;
@@ -702,6 +702,11 @@ label.fr-ext-checkbox {
     }
 }
 
+.currently-using-icon {
+    background-color: #27465b;
+    border-color: #0094ff;
+}
+
 // Other Styles
 
 .fr-cell-content-mutual-frnd {
@@ -769,7 +774,8 @@ label.fr-ext-checkbox {
 .custom-selectBox ul {
     top: 32px;
     left: -4px;
-    width: 210px;
+    // width: 210px;
+    width: 220px;
 }
 
 .fr-req-el-disabled {

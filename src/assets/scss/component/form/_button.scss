@@ -108,3 +108,18 @@
   border: 1px solid;
   border-radius: 10px;
 }
+
+.btn-new-outline {
+  @extend .btn-primary-outline;
+  font-weight: unset;
+  border-radius: 5px;
+  border: 0.3px solid gray;
+}
+
+.btn-new-stop {
+  @extend .btn-stop;
+  font-weight: unset;
+  border-radius: 5px;
+  padding: 11px 35px;
+  width: 95px;
+}

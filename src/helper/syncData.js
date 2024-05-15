@@ -20,20 +20,25 @@ const FindData = (child, parent, level) => {
   }
 };
 
-export const syncFromApi = (apiObj, uiObj, setUiObj) => {
-  // var startTime = performance.now();
-  // console.log("sycning started......before obj", uiObj);
+export const syncFromNewAPi = (apiObj, uiObj, setUiObj) => {
   const newFromObj = { ...uiObj };
+
+  console.log("API keys and ui Obj NEW - ", apiObj, uiObj);
+
   Object.entries(apiObj).forEach(([apiKey, apiValue]) => {
     for (const i in newFromObj.fields) {
       const fieldItem = newFromObj.fields[i];
       if (fieldItem.name === apiKey) {
         fieldItem.isActive = apiValue;
 
+        console.log("newFormObj - before - ", newFromObj.fields[i], fieldItem, i);
+
         newFromObj.fields[i] = fieldItem;
         break;
+
       } else {
         if (fieldItem.recursive) {
+          console.log("NAME - ", apiKey);
           const found = FindData({ name: apiKey }, fieldItem, 1);
           // console.log("is recursive:::");
           if (found) {
@@ -41,7 +46,9 @@ export const syncFromApi = (apiObj, uiObj, setUiObj) => {
             newFromObj.fields[i] = newObj;
             break;
           }
+
         } else {
+
           const newObj = {
             ...fieldItem,
             fieldOptions: fieldItem.fieldOptions.map((itemCh) => {
@@ -54,20 +61,102 @@ export const syncFromApi = (apiObj, uiObj, setUiObj) => {
                   // console.log("split case api value", apiValue);
                   itemCh.valueArr = apiValue;
                   itemCh.valid = true;
+
                 } else if (itemCh.name === "country_filter") {
                   if (apiValue === true) {
                     itemCh.value = "Country Level";
                     itemCh.valid = true;
+
                   } else {
                     itemCh.value = "Tier Level";
                     itemCh.valid = true;
                   }
+
                 } else {
                   itemCh.value = apiValue;
                   itemCh.valid = true;
                 }
 
-                //itemCh.value = apiValue;
+                // itemCh.value = apiValue;
+              }
+
+              console.log("returned the value - ", itemCh);
+              return itemCh;
+            }),
+          };
+
+          console.log("NewObj - ", newObj);
+          newFromObj.fields[i] = newObj;
+        }
+      }
+    }
+  });
+  console.log("NEWWW ", newFromObj);
+  setUiObj(newFromObj);
+};
+
+export const syncFromApi = (apiObj, uiObj, setUiObj) => {
+  // var startTime = performance.now();
+  // console.log("sycning started......before obj", uiObj);
+  const newFromObj = { ...uiObj };
+
+  console.log("API keys and ui Obj - ", apiObj, uiObj);
+
+  Object.entries(apiObj).forEach(([apiKey, apiValue]) => {
+    for (const i in newFromObj.fields) {
+      const fieldItem = newFromObj.fields[i];
+      if (fieldItem.name === apiKey) {
+        fieldItem.isActive = apiValue;
+
+        newFromObj.fields[i] = fieldItem;
+        break;
+
+      } else {
+        if (fieldItem.recursive) {
+          console.log("NAME - ", apiKey);
+          const found = FindData({ name: apiKey }, fieldItem, 1);
+          // console.log("is recursive:::");
+          if (found) {
+            const newObj = ChangeData(fieldItem, found, apiValue);
+            newFromObj.fields[i] = newObj;
+            break;
+          }
+
+        } else {
+
+          const newObj = {
+            ...fieldItem,
+            fieldOptions: fieldItem.fieldOptions.map((itemCh) => {
+              if (apiKey === itemCh.name) {
+                if (
+                  itemCh.type === "fillinput" ||
+                  itemCh.type === "fillinputCF" ||
+                  itemCh.type === "selectInput"
+                ) {
+                  // console.log("split case api value", apiValue);
+                  itemCh.valueArr = apiValue;
+                  itemCh.valid = true;
+
+                } else if (itemCh.name === "country_filter") {
+                  if (apiValue === true) {
+                    itemCh.value = "Country Level";
+                    itemCh.valid = true;
+
+                  } else {
+                    itemCh.value = "Tier Level";
+                    itemCh.valid = true;
+                  }
+
+                } else if (itemCh.name === "mutual_friend_value") {
+                  itemCh.value = apiValue;
+                  itemCh.valid = true;
+
+                } else {
+                  itemCh.value = apiValue;
+                  itemCh.valid = true;
+                }
+
+                // itemCh.value = apiValue;
               }
               return itemCh;
             }),
@@ -77,7 +166,7 @@ export const syncFromApi = (apiObj, uiObj, setUiObj) => {
       }
     }
   });
-  // console.log(">>>>+++=====---=========;;;;newFromObj end ????", newFromObj);
+  console.log(">>>>+++=====---=========;;;;newFromObj end ????", newFromObj);
   setUiObj(newFromObj);
   // var endTime = performance.now();
   // console.log(
@@ -129,13 +218,13 @@ export const checkValidity = (dataObj, setdata) => {
   let reason = "Invalid input field"
   let valid = true;
   let data = { ...dataObj };
-  
+
   for (const fidx in data.fields) {
     // if(data.fields[fidx].label==="Request Limit"){
     //  console.log("this reccccccc",FindValidInRec(data.fields[fidx]));
     // }
-    if (data.fields[fidx].label === "Look up interval")
-      time = data.fields[fidx].fieldOptions[0].value;
+    // if (data.fields[fidx].label === "Look up interval")
+    //   time = data.fields[fidx].fieldOptions[0].value;
     if (data.fields[fidx].label === "Send message" && data.fields[fidx].isActive && (time === "auto" || time < 3)) {
       // console.log("data.fields[fidx].label ::: ", data.fields[fidx])
       valid = false;

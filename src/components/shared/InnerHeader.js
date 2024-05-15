@@ -11,7 +11,7 @@ const InnherHeader = (props) => {
     setActiveTooltip(props.activePageTextTooltip)
     setSubheader(props.subHeaderText)
   }, [location, props.subHeaderText, props.activePageTextTooltip])
-  
+
   return (
     <header className="header-inner d-flex f-align-center f-justify-between">
       {/* {requestActive && requestActive != null && (
@@ -22,7 +22,8 @@ const InnherHeader = (props) => {
         )} */}
       {props.goBackTo &&
         <Link
-          to={props.goBackTo}
+          // to={props.goBackTo}
+          onClick={props?.handleGoBack}
           className="btn btn-go-back"
         />
       }

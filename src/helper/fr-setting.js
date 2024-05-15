@@ -59,7 +59,7 @@ export const requestGroupsFormSettings = {
     {
       label: "Look up for mutual friends?",
       headerCheckbox: true,
-      recursive: true,
+      recursive: false,
       name: "lookup_for_mutual_friend",
       isActive: false,
       valid: true,
@@ -74,7 +74,7 @@ export const requestGroupsFormSettings = {
           // value: "=<",
           options: [
             {
-              selected: false,
+              selected: true,
               label: "<",
               value: "<",
             },
@@ -93,7 +93,7 @@ export const requestGroupsFormSettings = {
           isHalfWidth: true,  
           valid: true,
           // inLabel: "Number of request",
-          value: 10,
+          value: "10",
         },
       ]
     },
@@ -111,10 +111,10 @@ export const requestGroupsFormSettings = {
           isLabeled: false,
           valid: true,
           name: "gender_filter_value",
-          // value: "male",
+          value: "male",
           options: [
             {
-              selected: false,
+              selected: true,
               label: "Male",
               value: "male",
             },
@@ -369,7 +369,7 @@ export const requestPostsSettings = {
           isLabeled: false,
           valid: true,
           name: "reaction",
-          value: [],
+          // value: false,
           options: [
             {
               text: "Reaction",
@@ -381,7 +381,6 @@ export const requestPostsSettings = {
               text: "Comment",
               name: 'comment',
               isActive: false,
-              value: false,
             },
           ],
         },
@@ -391,7 +390,7 @@ export const requestPostsSettings = {
     {
       label: "Look up for mutual friends?",
       headerCheckbox: true,
-      recursive: true,
+      recursive: false,
       name: "lookup_for_mutual_friend",
       isActive: false,
       valid: true,
@@ -424,7 +423,7 @@ export const requestPostsSettings = {
           isHalfWidth: true,  
           valid: true,
           // inLabel: "Number of request",
-          value: 10,
+          value: "10",
         },
       ]
     },
@@ -723,7 +722,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
     {
       label: "Look up for mutual friends?",
       headerCheckbox: true,
-      recursive: true,
+      recursive: false,
       name: "lookup_for_mutual_friend",
       isActive: false,
       valid: true,
@@ -737,7 +736,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
           // value: "=<",
           options: [
             {
-              selected: false,
+              selected: true,
               label: "<",
               value: "<",
             },
@@ -756,7 +755,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
           isHalfWidth: true,  
           valid: true,
           // inLabel: "Number of request",
-          value: 10,
+          value: "10",
         },
       ]
     },
@@ -1560,7 +1559,7 @@ export const fr_Req_Payload = {
   settingsType: 8,
   lookup_for_mutual_friend: false,
   lookup_for_mutual_friend_condition: "<",
-  mutual_friend_value: 2,
+  mutual_friend_value: "10",
   // reaction: 12,
   reaction: false,
   reaction_type: [], // ["like", "love", "care", "wow", "haha", "sad", "angry"]

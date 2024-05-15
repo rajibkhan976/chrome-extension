@@ -135,6 +135,7 @@ export const getFrndReqSet = (settingsType = null) => {
     };
     // console.log("fbTokenAndId?.userID :::: ", fbTokenAndId?.userID)
     const fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
+    console.log("FB USER ID -- ", fbTokenAndId);
     const body = {
       fbUserId: fbTokenAndId?.userID,
       settings_type: settingsType,

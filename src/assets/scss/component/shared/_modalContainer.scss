@@ -12,8 +12,9 @@
   z-index: 99;
 
   .fr-ext-modal-overlay {
-    opacity: 0.5;
-    @include theme-aware("background", "modal-bg");
+    opacity: 0.8;
+    // @include theme-aware("background", "modal-bg");
+    background-color: #222226;
     position: absolute;
     inset: 0;
   }
@@ -399,11 +400,7 @@
   }
 
   .fr-req-nomessage-text {
-    background: linear-gradient(
-      90deg,
-      rgba(255, 230, 0, 0.15) 0%,
-      rgba(255, 230, 0, 0) 100%
-    );
+    background: linear-gradient(90deg, rgba(255, 230, 0, 0.15) 0%, rgba(255, 230, 0, 0) 100%);
     margin-top: 10px;
     border-radius: 5px;
     padding: 5px 10px;
@@ -565,10 +562,7 @@
         }
 
         &:hover {
-          @include theme-aware(
-            "background-color",
-            "input-hover-button-background"
-          );
+          @include theme-aware("background-color", "input-hover-button-background");
         }
       }
     }
@@ -1321,8 +1315,9 @@
   // justify-content:center;
   // align-items: center;
   .fr-ext-modal-overlay {
-    opacity: 0.5;
-    @include theme-aware("background", "modal-bg");
+    opacity: 0.8;
+    // @include theme-aware("background", "modal-bg");
+    background-color: #222226;
     position: absolute;
     inset: 0;
     bottom: 34px;
@@ -1336,8 +1331,9 @@
   @include theme-aware("background-color", "body-color");
   // box-shadow: 0px -5px 40px 10px $themeBlack1;
   overflow: hidden;
-  max-height: 474px;
-  height: 204px;
+  // max-height: 474px;
+  // height: 204px;
+  height: 95px;
   @include border-radius(10px 10px 0 0);
   opacity: 1;
   // position:relative;
@@ -1388,10 +1384,10 @@
       cursor: pointer;
     }
     .modal-header {
-      padding-top: 5px;
-      font-weight: 600;
-      font-size: 20px;
-      line-height: 27px;
+      // padding-top: 5px;
+      // font-weight: 600;
+      font-size: 14px;
+      line-height: 15px;
       // &.delete-type {
       //   display: flex;
       //   align-items: center;
@@ -1403,7 +1399,7 @@
     }
     .modal-content {
       font-weight: 400;
-      font-size: 14px;
+      font-size: 12px;
       line-height: 20px;
       margin-top: 10px;
       /* or 143% */
@@ -1413,9 +1409,10 @@
       color: $themeDefaultPrimary3;
     }
     .modal-buttons {
-      margin-top: 30px;
+      // margin-top: 30px;
       display: flex;
       justify-content: end;
+      margin-top: -45px;
     }
   }
 }
@@ -1466,13 +1463,13 @@
   ul {
     z-index: 9;
     position: absolute;
-    top: 45px;
-    left: -189px;
-    width: 221px;
-    padding: 5px;
+    top: 30px;
+    left: -130px;
+    width: 162px;
+    padding: 0px;
     max-height: 175px;
     overflow-y: auto;
-    border-radius: 10px;
+    border-radius: 5px;
     border: 1px solid #313037;
     //@include theme-aware("border-color", "$themeBlack3");
     @include theme-aware("background-color", "drop-background");
@@ -1692,7 +1689,7 @@
     &:before {
       width: 130px;
       overflow-wrap: break-word;
-      content: "Synced on \A"attr(data-text);
+      content: "Synced on \A" attr(data-text);
       text-align: center;
       letter-spacing: -0.3px;
     }
