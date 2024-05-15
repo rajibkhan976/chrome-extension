@@ -1065,7 +1065,30 @@ const sendFriendRequestByDOMparsing = (profileUrl) => {
   })
 }
  
-
+const getProfileSettings = async ()=>{
+  const apiurl=`${process.env.REACT_APP_SETTING_API}`;
+  const fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
+  const requestOptions={
+    method:"POST",
+    headers:{
+      'Content-Type': 'application/json',
+      'Authorization': await helper.getDatafromStorage("fr_token")
+    },
+    body:JSON.stringify({ fbUserId: fbTokenAndId.userID})
+  }
+  try{
+      let res=await fetch(apiurl,requestOptions);
+      if (!res.ok) {
+        // If response is not ok, throw an error with the status text
+        throw new Error(`HTTP error! Status: ${res.status} - ${res.statusText}`);
+      }
+      const data= await res.json();
+      return data;
+    }catch(error){
+      console.error("API ERROR IN FETCING FR PROFILE SETTING :",error);
+      return error;
+    }
+}  
 
 const common = {
   getAboutInfo : getAboutInfo,
@@ -1093,7 +1116,8 @@ const common = {
   getProfileInfo:getProfileInfo,
   sendFriendRequestByDOMparsing:sendFriendRequestByDOMparsing,
   storeFrQueueSetting:storeFrQueueSetting,
-  fetchFriendshipStatus:fetchFriendshipStatus
+  fetchFriendshipStatus:fetchFriendshipStatus,
+  getProfileSettings:getProfileSettings
 };
 
 export default common;

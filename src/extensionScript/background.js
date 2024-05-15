@@ -2738,6 +2738,45 @@ const createAndinjectScript = (profileUrl) => {
   })
 }
 
+
+/**
+ * function to check setting eligibility
+ * @param {*} userID 
+ * @param {*} memberId 
+ * @returns 
+ */
+ const profileSettingCheck = async (userID,memberId) =>{
+   let profileMysettings = await common.getProfileSettings();
+   profileMysettings= profileMysettings && profileMysettings.data ? profileMysettings.data[0] : {};
+   console.log("profile setting",profileMysettings);
+   if (profileMysettings && profileMysettings.dont_send_friend_requests_prople_ive_been_friends_with_before){
+    const isExFriends = await helper.fetchExFriends(userID,memberId)
+     console.log("isExFriends ::: ", isExFriends)
+    if(isExFriends){return false} 
+  }
+
+
+if (profileMysettings && 
+    (profileMysettings.dont_send_friend_requests_prople_i_sent_friend_requests_they_rejected 
+    || profileMysettings.dont_send_friend_requests_prople_who_send_me_friend_request_i_rejected)){
+      const isRejectedFriends = await helper.fetchRejectedFriends(userID,memberId)
+       console.log("isRejectedFriends ::: ", isRejectedFriends)
+      // console.log("isRejectedFriends isRejected ::: ", isRejectedFriends.isRejected)
+      // console.log("isRejectedFriends is_incoming ::: ", isRejectedFriends.is_incoming)
+    if(profileMysettings.dont_send_friend_requests_prople_i_sent_friend_requests_they_rejected ){
+      if(isRejectedFriends && isRejectedFriends.isRejected && !isRejectedFriends.is_incoming) return false;
+    }
+    if(profileMysettings.dont_send_friend_requests_prople_who_send_me_friend_request_i_rejected ){
+      if(isRejectedFriends && isRejectedFriends.isRejected && isRejectedFriends.is_incoming)return false;
+    }
+  }
+
+  if ( profileMysettings && profileMysettings.avoid_sending_friend_request_to_restricted_people){
+    const isRestricted = await common.fetchRestrictedFbProfile({ "facebookUserId":userID, "peopleFbId":memberId});
+    console.log("isRestricted ::: ", isRestricted)
+    if(isRestricted)return false;
+  }
+ }
  /** 
  * Function to send friend request by queue
  */
@@ -2768,7 +2807,8 @@ const runFriendRequestQueue = async () => {
           "fbUserId":userFBDetails.userID,
           "friendFbId":first.friendFbId
         });
-        if(friendShipStatus.is_data_found){
+        const settingEligibility =  profileSettingCheck(userFBDetails.userID,first.friendFbId );
+        if(friendShipStatus.is_data_found || !settingEligibility){
           console.log("USER IS ALREADY PRESENT IN YOUR FR LIST ::");
           throw new Error("The user is already present in Feind list");
          }
@@ -2782,12 +2822,14 @@ const runFriendRequestQueue = async () => {
         console.log(":::::DOM DATA::::::", create);
          await helper.sleep(6000);
          const userData = await chrome.tabs.sendMessage(create.tabId, {action :"getUserFbId",tabId : create.tabId});
+         const friendFBId=helper.removeExtraQuotes(userData.fbUserId);
          const friendShipStatus = await common.fetchFriendshipStatus({
           "queueId": first._id,
           "fbUserId":userFBDetails.userID,
-          "friendFbId":helper.removeExtraQuotes(userData.fbUserId)
+          "friendFbId":friendFBId
         });
-         if(friendShipStatus.is_data_found){
+        const settingEligibility =  profileSettingCheck(userFBDetails.userID,friendFBId);
+         if(friendShipStatus.is_data_found || !settingEligibility ){
           console.log("USER IS ALREADY PRESENT IN YOUR FR LIST ::");
           throw new Error("The user is already present in Feind list");
          }
