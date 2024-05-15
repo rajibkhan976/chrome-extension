@@ -467,6 +467,22 @@ const gapBetweenTowdays = (today, upcomingDay) => {
       }
   }
 }
+const getTodayDate = ()=>{
+  const today = new Date();
+const year = today.getFullYear();
+const month = today.getMonth() + 1; // Months are zero-indexed (January = 0)
+const day = today.getDate();
+
+const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+return formattedDate // Outputs YYYY-MM-DD format (e.g., 2024-04-09)
+
+}
+const removeExtraQuotes = (stringWithQuotes) => {
+  if (!stringWithQuotes || !stringWithQuotes.trim()) {
+    return "";
+  }
+  return stringWithQuotes.replace(/^"(.*)"$/u, (_, capturedValue) => capturedValue);
+};
 
 const helper =
 {
@@ -493,7 +509,9 @@ const helper =
   debounce:debounce,
   getAllKeysFromStorage:getAllKeysFromStorage,
   getCurrentDayAndTimein:getCurrentDayAndTimein,
-  gapBetweenTowdays:gapBetweenTowdays
+  gapBetweenTowdays:gapBetweenTowdays,
+  getTodayDate:getTodayDate,
+  removeExtraQuotes:removeExtraQuotes
 };
 
 export default helper

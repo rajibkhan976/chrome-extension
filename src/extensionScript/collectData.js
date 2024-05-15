@@ -10,7 +10,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse)=>{
         case "getUserId" : 
             getprofileDataofURL(sendResponse);
             break;
-        
+        case "clickAddFriend" :
+            addFriendBtnClick(sendResponse);
+            break
+        case "checkCancelBtn" :
+            checkCancleRequest(sendResponse);
+            break;
+        case "getUserFbId" :
+            getFbUserId(sendResponse);
+            break;
+        case "closeTab":
+            if(request.tabId){
+                chrome.tabs.remove(request.tabId);
+            }
+            break;
         default : break;
     }
 });
@@ -86,3 +99,56 @@ const getprofileDataofURL = (sendResponse) => {
             sendResponse({status : false,  isFbLoggedin : true}); 
     }
 }
+
+
+function addFriendBtnClick(sendResponse) {
+    const button = document.querySelector('[aria-label="Add friend"][role="button"]');
+    const name = document.querySelectorAll('h1:not([dir="auto"]');
+    let res = { status: false,};
+    if(name){
+        res["name"]=name[0].innerText?name[0].innerText!=='Notifications'?name[0].innerText:name[1].innerText:name[0].textContent;
+    }
+    const profilePicUrl = document.querySelectorAll('svg[data-visualcompletion="ignore-dynamic"][role="img"]');
+    if(profilePicUrl && 
+        profilePicUrl[1].querySelector('image') &&
+         profilePicUrl[1].querySelector('image').getAttribute('xlink:href')){
+        res["profilePicUrl"]=profilePicUrl[1].querySelector('image').getAttribute('xlink:href');
+    }
+    let content = document.body.innerHTML;
+    let match = content.match(/"userID":"(\d+)"/);
+    if (match) { 
+      let userID= match[0].split(':')[1];
+      res["fbUserId"]= userID.length > 0? userID:"NA";
+     }
+    if (button) {
+      console.log("add friend btn: ", button);
+      button.click();
+      res.status = true
+    } else {
+      console.log("Add friend button not found.");// Reject promise with failure status
+    }
+    sendResponse(res);
+  }
+
+  const checkCancleRequest = (sendResponse)=>{
+    const button = document.querySelector('[aria-label="Cancel request"][role="button"]');
+    let res={
+        status:false
+    };
+    if(button){
+        res.status = true;
+    }
+    sendResponse(res);
+  }
+
+
+  function getFbUserId(sendResponse) {
+    let res = { status: false,};
+    let content = document.body.innerHTML;
+    let match = content.match(/"userID":"(\d+)"/);
+    if (match) { 
+      let userID= match[0].split(':')[1];
+      res["fbUserId"]= userID.length > 0? userID:"NA";
+     }
+    sendResponse(res);
+  }

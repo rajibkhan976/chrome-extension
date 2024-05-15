@@ -38,12 +38,89 @@ const getAboutInfo = async (memberId, fbDtsg, userID) => {
       body: helper.serialize(payload),
     }
   );
+  //console.log("api resppppp", getGroupMemberAbout)
   let getGroupMemberAboutResponse = await getGroupMemberAbout.text();
-  helper.makeParsable(
-    getGroupMemberAboutResponse
-  );
+  getGroupMemberAboutResponse = getGroupMemberAboutResponse.split(`}{`)[0];
+  // console.log("About API caL TEXTS_______________________________",getGroupMemberAboutResponse);
+  // getGroupMemberAboutResponse=getGroupMemberAboutResponse+'}';
+  // getGroupMemberAboutResponse=helper.makeParsable(
+  //   getGroupMemberAboutResponse
+  // );
+  // console.log("About API ca;;;;;;;;;;;;");
+  // console.log("getGroupMemberAboutResponse ::: in api callll ", getGroupMemberAboutResponse);
+
+  const regex = /"Details About (.+?)"/;
+  const match = regex.exec(getGroupMemberAboutResponse);
+  let name;
+  if (match) {
+   // console.log(match);
+    name = match[1];
+  } else {
+    console.log("Name not found");
+    name = ""
+  }
+  return name;
 };
 
+
+const getProfileInfo = async (memberId, fbDtsg, userID) => {
+  const payload = {
+    av: userID,
+    __user: userID,
+    __a: 1,
+    __comet_req: 15,
+    fb_dtsg: fbDtsg,
+    fb_api_caller_class: "RelayModern",
+    fb_api_req_friendly_name: "ProfileCometHeaderQuery",
+    variables: JSON.stringify({
+      scale:2,
+      selectedID:memberId,
+      selectedSpaceType:"community",
+      shouldUseFXIMProfilePicEditor:false,
+      userID:memberId}),
+    server_timestamps: true,
+    doc_id: 7538113772922088,
+  };
+
+  const getGroupMemberAbout = await fetch(
+    "https://www.facebook.com/api/graphql/",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "text/html,application/json",
+        "x-fb-friendly-name": "ProfileCometAboutAppSectionQuery",
+      },
+      body: helper.serialize(payload),
+    }
+  );
+  //console.log("api resppppp", getGroupMemberAbout)
+  let getGroupMemberAboutResponse = await getGroupMemberAbout.text();
+  getGroupMemberAboutResponse = getGroupMemberAboutResponse.split(`}{`)[0];
+  // Extract name
+const nameRegex = /"name":\s*"(.*?)"/;
+const nameMatch = nameRegex.exec(getGroupMemberAboutResponse);
+let name;
+if (nameMatch) {
+  name = nameMatch[1]; // Captured group (the name)
+} else {
+  name = "";
+}
+
+// Extract profile picture URL
+const pictureRegex = /"uri":\s*"(.*?)"/g; // Use 'g' for all occurrences
+const pictureMatch = pictureRegex.exec(getGroupMemberAboutResponse);
+let profilePictureUrl;
+if (pictureMatch) {
+  profilePictureUrl = pictureMatch[1].replace(/for\s*\(\s*;\s*;\s*\)\s*;\s*/, ""); // Captured group (the URL)
+} else {
+  profilePictureUrl = "";
+} 
+  return {
+    name: name,
+    profilePictureUrl: profilePictureUrl.replace(/\\/g, '')
+  };
+};
 const getMemberGender = async (memberId, fbDtsg, userID, groupId) => {
   const payload = {
     av: userID,
@@ -369,7 +446,7 @@ const getCollectionToken = async (memberId, fbDtsg, userID, aboutKey = "") => {
   return collectionToken;
 };
 
-const sentFriendRequest = async (userID, fbDtsg, memberId, source = "groups_member_list") => {
+const sentFriendRequest = async (userID, fbDtsg, memberId, source = "groups_member_list",docId="9086069781410775") => {
   const payload = {
     av: userID,
     __user: userID,
@@ -390,7 +467,7 @@ const sentFriendRequest = async (userID, fbDtsg, memberId, source = "groups_memb
       "scale": 1
     }),
     server_timestamps: true,
-    doc_id: "9086069781410775"
+    doc_id: docId
   };
 
   let getSentFriendReq = await fetch(
@@ -725,6 +802,271 @@ const checkAvailability = async (userId, friend_fb_id) => {
   return isAvailable && isAvailable.userData;
 }
 
+const getFriendsOfFriends = async (userID, fbDtsg, memberId) => {
+  const payload = {
+    av: userID,
+    __user: userID,
+    __a: 1,
+    __comet_req: 15,
+    fb_dtsg: fbDtsg,
+    fb_api_caller_class: "RelayModern",
+    fb_api_req_friendly_name: "FriendingCometFriendRequestSendMutation",
+    variables: JSON.stringify({
+      "input": {
+        "refs": [null],
+        "friend_requestee_ids": [memberId],
+        "warn_ack_for_ids": [],
+        // "source": source,
+        "actor_id": userID,
+        "client_mutation_id": "1"
+      },
+      "scale": 1
+    }),
+    server_timestamps: true,
+    doc_id: "9086069781410775"
+  };
+
+  let getSentFriendReq = await fetch(
+    "https://www.facebook.com/api/graphql/",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Accept: "text/html,application/json",
+        "x-fb-friendly-name": "FriendingCometFriendRequestSendMutation",
+      },
+      body: helper.serialize(payload),
+    }
+  );
+  getSentFriendReq = await getSentFriendReq.text();
+  getSentFriendReq = helper.makeParsable(getSentFriendReq);
+  console.log("getSentFriendReq ::: ", getSentFriendReq);
+  if (getSentFriendReq &&
+    getSentFriendReq.data &&
+    getSentFriendReq.data &&
+    getSentFriendReq.data.friend_request_send &&
+    getSentFriendReq.data.friend_request_send.friend_requestees &&
+    getSentFriendReq.data.friend_request_send.friend_requestees.length > 0) {
+    return {status :  true};
+  } else {
+    console.log(getSentFriendReq && getSentFriendReq.errors && getSentFriendReq.errors[0] && getSentFriendReq.errors[0].description)
+    return {status : false, description : getSentFriendReq && getSentFriendReq.errors && getSentFriendReq.errors[0] && getSentFriendReq.errors[0].description};
+  }
+}
+const fetchTopPriorityFrQueueRecords = async (fbUserId)=>{
+  console.log("called fetchTopPriorityFrQueueRecords")
+  const apiurl=`${process.env.REACT_APP_FETCH_TOP_FR_QUEUE_RECORDS}?fbUserId=${fbUserId}`;
+  const requestOptions={
+    method:"GET",
+    headers:{
+      'Content-Type': 'application/json',
+      'Authorization': await helper.getDatafromStorage("fr_token")
+    }
+  }
+  try{
+    console.log("api url",apiurl);
+      let res=await fetch(apiurl,requestOptions);
+      if (!res.ok) {
+        // If response is not ok, throw an error with the status text
+        throw new Error(`HTTP error! Status: ${res.status} - ${res.statusText}`);
+      }
+      const data= await res.json();
+      console.log("api response data",data)
+      return data;
+
+  }catch(error){
+    console.error("API ERROR IN FETCING IN TOP 100 FR QUEUE RECORD:",error);
+    return error;
+  } 
+}
+
+const fetchFrQueueSetting= async (fb_user_id)=>{
+  const apiurl=`${process.env.REACT_APP_FETCH_FR_QUEUE_SETTING}?fb_user_id=${fb_user_id}`;
+  const requestOptions={
+    method:"GET",
+    headers:{
+      'Content-Type': 'application/json',
+      'Authorization': await helper.getDatafromStorage("fr_token")
+    }
+  }
+  try{
+      let res=await fetch(apiurl,requestOptions);
+      if (!res.ok) {
+        // If response is not ok, throw an error with the status text
+        throw new Error(`HTTP error! Status: ${res.status} - ${res.statusText}`);
+      }
+      const data= await res.json();
+      return data;
+
+  }catch(error){
+    console.error("API ERROR IN FETCING FR QUEUE SETTING :",error);
+    return error;
+  } 
+
+}
+const storeFrQueueSetting= async (payload)=>{
+  const apiurl=`${process.env.REACT_APP_APP_STORE_FR_QUEUE_SETTING}`;
+  const requestOptions={
+    method:"POST",
+    headers:{
+      'Content-Type': 'application/json',
+      'Authorization': await helper.getDatafromStorage("fr_token")
+    },
+    body:JSON.stringify(payload)
+  }
+  try{
+      let res=await fetch(apiurl,requestOptions);
+      if (!res.ok) {
+        // If response is not ok, throw an error with the status text
+        throw new Error(`HTTP error! Status: ${res.status} - ${res.statusText}`);
+      }
+      const data= await res.json();
+      return data;
+
+  }catch(error){
+    console.error("API ERROR IN FETCING FR QUEUE SETTING :",error);
+    return error;
+  } 
+
+}
+
+const fetchFriendshipStatus = async (payload)=>{
+  const apiurl=`${process.env.REACT_APP_FRIEND_DATA_PRESENT_URL}`;
+  const requestOptions={
+    method:"POST",
+    headers:{
+      'Content-Type': 'application/json',
+      'Authorization': await helper.getDatafromStorage("fr_token")
+    },
+    body:JSON.stringify(payload)
+  }
+  try{
+      let res=await fetch(apiurl,requestOptions);
+      if (!res.ok) {
+        // If response is not ok, throw an error with the status text
+        throw new Error(`HTTP error! Status: ${res.status} - ${res.statusText}`);
+      }
+      const data= await res.json();
+      return data;
+    }catch(error){
+      console.error("API ERROR IN FETCING FR QUEUE SETTING :",error);
+      return error;
+    }
+}
+
+
+const updateFrQueueStatus = async (payload) => {
+  const apiurl=`${process.env.REACT_APP_UPDATE_FR_QUEUE_STATUS}`;
+  const requestOptions={
+    method:"POST",
+    headers:{
+      'Content-Type': 'application/json',
+      'Authorization': await helper.getDatafromStorage("fr_token")
+    },
+    body:JSON.stringify(payload)
+  }
+  try{
+      let res=await fetch(apiurl,requestOptions);
+      if (!res.ok) {
+        // If response is not ok, throw an error with the status text
+        throw new Error(`HTTP error! Status: ${res.status} - ${res.statusText}`);
+      }
+      const data= await res.json();
+      return data;
+  }catch(error){
+    console.error("API ERROR IN UPDATING FR QUE STATUS",error);
+    return error;
+  }
+}
+
+async function getGenderCountryTierWithName (friendName){
+  return new Promise((resolve,reject)=>{
+    fetch(process.env.REACT_APP_GENDER_COUNTRY_AND_TIER_URL, {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        "name": friendName,
+      }),
+    })
+    .then((response) => response.json())
+    .then((res) => {
+      const resp = res.data ? res.data : res;
+
+      if (!resp.errorType) {
+        
+        resolve({
+          status : true,
+          country : res.body.countryName,
+          tier : res.body.Tiers,
+          gender : res.body.gender
+        })
+      }  
+    })
+    .catch((err) => {
+      resolve({
+        status : false,
+        country : "",
+        tier : "",
+        gender : ""
+      })
+      console.log("err ::: ", err);
+    });
+  })
+}
+
+function addFriendBtnClick() {
+  const button = document.querySelector('[aria-label="Add friend"][role="button"]');
+  const name = document.querySelectorAll('h1:not([dir="auto"]')[1].textContent
+  const profilePicUrl = document.querySelectorAll('svg[data-visualcompletion="ignore-dynamic"][role="img"]')[1].querySelector('image').getAttribute('xlink:href')
+  let res = { status: false, name: name.length > 0 ? name : "", profilePicUrl: profilePicUrl ? profilePicUrl : ""};
+  let content = document.body.innerHTML;
+  let match = content.match(/"userID":"(\d+)"/);
+  if (match) { 
+    let userID= match[0].split(':')[1];
+    res["fbUserId"]= userID.length > 0? userID:"NA";
+   }
+  if (button) {
+    console.log("add friend btn: ", button);
+    button.click();
+    res.status = true
+  } else {
+    console.log("Add friend button not found.");// Reject promise with failure status
+  }
+  return res;
+}
+
+const sendFriendRequestByDOMparsing = (profileUrl) => {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.create({ url: profileUrl,active: false, pinned: true, selected: false }, (tab) => {
+      // Close the tab after a delay (adjust as needed)
+      setTimeout(() => {
+        // For demonstration, let's call your function
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          //files: ["contentScript.js"], // Inject the content script
+          func: addFriendBtnClick
+        }).then((injectResults) => { // Access result
+          resolve(injectResults[0]);
+          setTimeout(()=>{
+            chrome.tabs.remove(tab.id);
+          }, 25000)
+        }).catch((err) => {
+          reject({ status: false, error: err });
+          setTimeout(()=>{
+            chrome.tabs.remove(tab.id);
+          }, 2500)
+        })
+       
+      }, 25000);
+    })
+  })
+}
+ 
+
+
 const common = {
   getAboutInfo : getAboutInfo,
   getMemberGender : getMemberGender,
@@ -743,7 +1085,15 @@ const common = {
   checkCampaignStatus : checkCampaignStatus,
   checkMessageStatus : checkMessageStatus,
   storeInFRQS : storeInFRQS,
-  checkAvailability : checkAvailability
+  checkAvailability : checkAvailability,
+  fetchTopPriorityFrQueueRecords:fetchTopPriorityFrQueueRecords,
+  fetchFrQueueSetting:fetchFrQueueSetting,
+  updateFrQueueStatus:updateFrQueueStatus,
+  getGenderCountryTierWithName:getGenderCountryTierWithName,
+  getProfileInfo:getProfileInfo,
+  sendFriendRequestByDOMparsing:sendFriendRequestByDOMparsing,
+  storeFrQueueSetting:storeFrQueueSetting,
+  fetchFriendshipStatus:fetchFriendshipStatus
 };
 
 export default common;

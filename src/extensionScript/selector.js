@@ -36,7 +36,8 @@ const selectors = {
         'div[aria-label="Azioni per questo post"]',
         'div[aria-label="Bu gönderi için eylemler"]',
         'div[aria-label="Handlinger for dette innlegget"]',
-    ]
+    ],
+    fb_profile_addfriend_btn: ['div[aria-label="Add friend"][role="button"]']
 }
 
 export default selectors;
