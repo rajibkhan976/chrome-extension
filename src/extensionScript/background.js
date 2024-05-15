@@ -386,7 +386,19 @@ chrome.runtime.onMessageExternal.addListener(async function (
         }
       }
 
-      const currentFBTabId = await helper.getDatafromStorage("tabId");
+      let currentFBTabId;
+      if(request.source === "post"){
+        currentFBTabId = await helper.getDatafromStorage("PostTabId");
+      }
+      if(request.source === "suggestions"){
+        currentFBTabId = await helper.getDatafromStorage("suggestedTabId");
+      }
+      if(request.source === "groups"){
+        currentFBTabId = await helper.getDatafromStorage("groupTabId");
+      }
+      if(request.source === "friends"){
+        currentFBTabId = await helper.getDatafromStorage("FriendTabId");
+      }
       chrome.tabs.sendMessage(Number(currentFBTabId), {"action" : "stop"});
       break;
     case "deletePendingFR" : 
@@ -702,39 +714,39 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       });
       chrome.tabs.query({ currentWindow: false, active: true }, async (tab) => {
         console.log("=============================================", tab)
-        let tabb = tab[0]
-        if(tab[0].favIconUrl === undefined)
-          tabb = tab[1];
         if(request.source === "post"){
-          const postUrl = await helper.getDatafromStorage('postUrl');
-          console.log("postUrl ::: ", postUrl, tab[0].id)
-          chrome.tabs.create(
-            { url: postUrl, active: false, pinned: true, selected: false },
-            (tabs) => {
-              // console.log("Syncing tab ::::::::::::", tab)
-              chrome.tabs.onUpdated.addListener(async function listener(
-                tabId,
-                info
-              ) {
-                if (info.status === "complete" && tabId === tabs.id) {
-                  chrome.tabs.onUpdated.removeListener(listener);
-                  chrome.storage.local.set({ postTabId: tabs.id });
-                  injectScript(tabs.id, ["helper.js", "storeFR.js"]);
-                  setTimeout(async() => {
-                    const feedbackTargetID = await chrome.tabs.sendMessage(tabs.id, {action:"getFeedbackTargetID", source:"post"});
-                    console.log("FeedbackTargetID :::::::::::: ", feedbackTargetID)
-                    chrome.tabs.remove(parseInt(tabs.id));
-                    await helper.saveDatainStorage("PostTabId", tabb.id);
-                    console.log("----------------------------", tabb.id)
-                    injectScript(tabb.id, ["helper.js", "storeFR.js"]);
-                    setTimeout(() => {
-                      chrome.tabs.sendMessage(tabb.id, {action:"start", source:"post", feedbackTargetID:feedbackTargetID, response : request.response});
+          let tabb = tab[0]
+          if(tab[0].favIconUrl === undefined)
+            tabb = tab[1];
+            const postUrl = await helper.getDatafromStorage('postUrl');
+            console.log("postUrl ::: ", postUrl, tab[0].id)
+            chrome.tabs.create(
+              { url: postUrl, active: false, pinned: true, selected: false },
+              (tabs) => {
+                // console.log("Syncing tab ::::::::::::", tab)
+                chrome.tabs.onUpdated.addListener(async function listener(
+                  tabId,
+                  info
+                ) {
+                  if (info.status === "complete" && tabId === tabs.id) {
+                    chrome.tabs.onUpdated.removeListener(listener);
+                    chrome.storage.local.set({ postTabId: tabs.id });
+                    injectScript(tabs.id, ["helper.js", "storeFR.js"]);
+                    setTimeout(async() => {
+                      const feedbackTargetID = await chrome.tabs.sendMessage(tabs.id, {action:"getFeedbackTargetID", source:"post"});
+                      console.log("FeedbackTargetID :::::::::::: ", feedbackTargetID)
+                      chrome.tabs.remove(parseInt(tabs.id));
+                      await helper.saveDatainStorage("PostTabId", tabb.id);
+                      console.log("----------------------------", tabb.id)
+                      injectScript(tabb.id, ["helper.js", "storeFR.js"]);
+                      setTimeout(() => {
+                        chrome.tabs.sendMessage(tabb.id, {action:"start", source:"post", feedbackTargetID:feedbackTargetID, response : request.response});
+                      }, 1000);
                     }, 1000);
-                  }, 1000);
-                }
-              });
-            }
-          );
+                  }
+                });
+              }
+            );
         }
       })
       break;
@@ -768,7 +780,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             // },200);
         }
         else{
-          // chrome.tabs.create({ url: process.env.REACT_APP_APP_URL });
+          chrome.tabs.create({ url: process.env.REACT_APP_APP_URL });
         }
       })
       break;
@@ -831,9 +843,21 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                               // console.log("genderCountryAndTier ::: ", genderCountryAndTier);
                               // sendResponse( genderCountryAndTier );
                                 // if(request.from){
-                                const tabId = await helper.getDatafromStorage("tabId");
-                                console.log("tabsID :: ", tabId, Number(tabId))
-                                chrome.tabs.sendMessage(Number(tabId), {...request, "responsePayload" : genderCountryAndTier});
+                                let genderTabId;
+                                if(request.source === "post"){
+                                  genderTabId = await helper.getDatafromStorage("PostTabId");
+                                }
+                                if(request.source === "suggestions"){
+                                  genderTabId = await helper.getDatafromStorage("suggestedTabId");
+                                }
+                                if(request.source === "groups"){
+                                  genderTabId = await helper.getDatafromStorage("groupTabId");
+                                }
+                                if(request.source === "friends"){
+                                  genderTabId = await helper.getDatafromStorage("FriendTabId");
+                                }
+                                console.log("tabsID :: ", genderTabId, Number(genderTabId))
+                                chrome.tabs.sendMessage(Number(genderTabId), {...request, "responsePayload" : genderCountryAndTier});
                               // }
                               break;
 

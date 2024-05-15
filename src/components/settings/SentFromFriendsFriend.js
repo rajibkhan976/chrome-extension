@@ -362,6 +362,7 @@ const SentFromFriendsFriend = () => {
                         Authorization: fr_token,
                     },
                 });
+<<<<<<< Updated upstream
 
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
@@ -383,6 +384,18 @@ const SentFromFriendsFriend = () => {
 
                 if (!silentSave) {
                     setOpenSuccessNotification(true);
+=======
+                
+                console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
+                
+                const runningStatus = await helper.getDatafromStorage("runAction_friend")
+                await helper.saveDatainStorage("runAction_friend", "running");
+                if(runningStatus === "pause"){
+                    chrome.runtime.sendMessage({action:"reSendFriendRequestInGroup", response : updatePayload, source:"friends"})
+                }
+                else {
+                    chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
+>>>>>>> Stashed changes
                 }
 
             } catch (error) {

@@ -456,6 +456,7 @@ const SentFromGroups = () => {
                         Authorization: fr_token,
                     },
                 });
+<<<<<<< Updated upstream
 
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
@@ -468,6 +469,16 @@ const SentFromGroups = () => {
                     else {
                         chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })
                     }
+=======
+                console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
+                const runningStatus = await helper.getDatafromStorage("runAction_group")
+                await helper.saveDatainStorage("runAction_group", "running");
+                if(runningStatus === "pause"){
+                    chrome.runtime.sendMessage({action:"reSendFriendRequestInGroup", response : updatePayload, source:"groups"})
+                }
+                else {
+                    chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
+>>>>>>> Stashed changes
                 }
                 // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
 

@@ -120,6 +120,16 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 
 const startStoringContactInfo = async ( source ) => {
     if(shoudIstop) return;
+    if(source === "post"){
+        console.log("groupSettings.reaction ::: ", groupSettings.reaction);
+        console.log("groupSettings.reaction_type ::: ", groupSettings.reaction_type);
+        if(groupSettings.comment)
+            return;
+        if(!groupSettings.reaction)
+            return;
+        else if(groupSettings.reaction_type && groupSettings.reaction_type.length === 0)
+            return;
+    }
     console.log("startStoringContactInfo");
     console.log("contacts ::: ", contacts);
     if(contacts.length === 0){
@@ -285,9 +295,11 @@ const getContactList = async( source, cursor = null ) => {
                 memberArr = [...memberArr, memberlist.group_admin_profiles.edges]
             }
             memberArr = [...memberArr, ...memberlist.new_members.edges]
-            if(memberlist.paginated_member_sections[0])
-                memberArr = [...memberArr, ...memberlist.paginated_member_sections[0].group.contributors.edges]
-            if(memberlist.paginated_member_sections[2])
+            if(memberlist.paginated_member_sections[0] && memberlist.paginated_member_sections[0].__typename === "GroupContributorsSection")
+                memberArr = [...memberArr, ...memberlist.paginated_member_sections[0].group.contributors.edges]            
+            if(memberlist.paginated_member_sections[1] && memberlist.paginated_member_sections[1].__typename === "GroupThingsInCommonSection")
+                memberArr = [...memberArr, ...memberlist.paginated_member_sections[1].group.group_member_discovery.edges]
+            if(memberlist.paginated_member_sections[2] && memberlist.paginated_member_sections[2].__typename === "GroupThingsInCommonSection")
                 memberArr = [...memberArr, ...memberlist.paginated_member_sections[2].group.group_member_discovery.edges]
             memberlist = memberArr
         }
@@ -440,6 +452,7 @@ const validatePayload = async ( payload, source ) => {
           isEligible = false;
         }
     }
+    console.log("isEligible after gender checking::: ", isEligible);
     if(shoudIstop) return;
     if (isEligible && groupSettings.country_filter_enabled) {
         if (groupSettings.country_filter) {
@@ -455,6 +468,7 @@ const validatePayload = async ( payload, source ) => {
           }
         }
     }
+    console.log("isEligible after country tier checking::: ", isEligible);
     if(shoudIstop) return;
     if(isEligible){
         if(groupSettings.lookup_for_mutual_friend){
@@ -472,6 +486,7 @@ const validatePayload = async ( payload, source ) => {
 
 
     if(shoudIstop) return;
+    console.log("isEligible after mutual friend checking::: ", isEligible);
     if(isEligible && (groupSettings.keyword || groupSettings.negative_keyword)){
         let isNegetivekeyWordMatched = false,
         iskeyWordMatched = false
@@ -507,7 +522,7 @@ const validatePayload = async ( payload, source ) => {
             isEligible = false;
         }
     }
-    console.log("is elible?", isEligible);
+    console.log("isEligible after keyword checking::: ", isEligible);
     
     // ----------------- START CHECKING ADVANCE SETTINGS-------------------------
     if(shoudIstop) return;
@@ -517,6 +532,8 @@ const validatePayload = async ( payload, source ) => {
         if(isExFriends)
           isEligible = false;
     }
+    console.log("isEligible after ex friend checking::: ", isEligible);
+
 
     if(shoudIstop) return;
     if (isEligible && profileMysettings && 
@@ -532,6 +549,8 @@ const validatePayload = async ( payload, source ) => {
             isEligible = false;
         }
     }
+    console.log("isEligible after rejected checking::: ", isEligible);
+
 
     if(shoudIstop) return;
     if (isEligible && profileMysettings && profileMysettings.avoid_sending_friend_request_to_restricted_people){
@@ -540,6 +559,7 @@ const validatePayload = async ( payload, source ) => {
         if(isRestricted)
           isEligible = false;
     }
+    console.log("isEligible after restrcted checking::: ", isEligible);
         
       //check for user re-friending  
     if(shoudIstop) return;
@@ -584,6 +604,7 @@ const validatePayload = async ( payload, source ) => {
             }
           }
     }
+    console.log("isEligible after refriending checking::: ", isEligible);
     
     if(shoudIstop) return;
     if(isEligible){
