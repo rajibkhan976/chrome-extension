@@ -191,9 +191,13 @@
     padding-block: 10px;
 
     &.group-disabled {
-        opacity: 0.5;
         // pointer-events: none;
-        filter: blur(0.3px);
+        z-index: 99;
+
+        > *:not(.tooltip-container) {
+            opacity: 0.5;
+            filter: blur(0.3px);
+        }
 
         &:hover {
             cursor: not-allowed;
@@ -224,6 +228,10 @@
             //     overflow: auto;
             // }
         }
+    }
+
+    &:nth-child(6) {
+        border-bottom: none;
     }
 }
 

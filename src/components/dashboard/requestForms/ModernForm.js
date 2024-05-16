@@ -1116,7 +1116,13 @@ const GroupsRequestForm = ({
     // HANDLE MOUSE MOVE ON TOOLTIP MOVING WITH CURSOR
     const handleMouseMove = (event) => {
         const { offsetX, offsetY, movementX, movementY } = event.nativeEvent;
-        const x = (offsetX - movementX) + 20, y = (offsetY - movementY) + 30;
+        let x = (offsetX - movementX) + 20, y = (offsetY - movementY) + 30;
+        // console.log(':::::::', event.target.classList?.substring);
+        
+            if (y > event.target.clientHeight) {
+                // console.log('here', y);
+                y = event.target.clientHeight - 35
+            }
         setTooltipPosition({ x, y });
         // setIsTooltipVisible(true);
     };
