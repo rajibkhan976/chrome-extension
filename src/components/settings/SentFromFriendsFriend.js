@@ -53,6 +53,7 @@ const SentFromFriendsFriend = () => {
     const settingsType = 11;
     const [sendFrndReqGroupName, setSendFrndReqGroupName] = useState("");
     const [acceptReqGroupName, setAcceptReqGroupName] = useState("");
+    const [stats, setStats] = useState({queueCount : 0, memberCount : 0, source: "friends" });
 
 
     // FETCH SETTINGS DATA..
@@ -77,7 +78,11 @@ const SentFromFriendsFriend = () => {
             const runningStatus = await helper.getDatafromStorage("runAction_friend");
             if (runningStatus === "running") {
                 setIsRunnable(true);
-            }
+            const showCount = await helper.getDatafromStorage("showCount");
+            console.log("showCount :: ", showCount);
+            if(showCount && showCount.source === "friends")
+                setStats(showCount)
+        }
             else if (runningStatus === "pause") {
                 setEditType("basic");
                 setIsRunnable(false)
@@ -322,7 +327,7 @@ const SentFromFriendsFriend = () => {
         if (editType !== "basic") {
             (async () => {
                 const localData = await fetchSetingsLocalData();
-                console.log("Local Data -- ", localData);
+                // console.log("Local Data -- ", localData);
                 setSettingSyncApiPayload(localData);
             })();
         }
@@ -378,10 +383,10 @@ const SentFromFriendsFriend = () => {
                     const runningStatus = await helper.getDatafromStorage("runAction_friend")
                     await helper.saveDatainStorage("runAction_friend", "running");
                     if (runningStatus === "pause") {
-                        chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: payload, source: "friends" })
+                        chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: updatePayload, source: "friends" })
                     }
                     else {
-                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })
+                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: updatePayload })
                     }
                     // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
                 }
@@ -733,6 +738,8 @@ const SentFromFriendsFriend = () => {
                 <AutomationRunner
                     setrunningScript={setrunningScript}
                     setRequestActive={setRequestActive}
+                    statistics={stats}
+                    source={"friends"}
                 />
             );
         }

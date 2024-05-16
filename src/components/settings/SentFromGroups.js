@@ -53,6 +53,7 @@ const SentFromGroups = () => {
     const settingsType = 8;
     const [sendFrndReqGroupName, setSendFrndReqGroupName] = useState("");
     const [acceptReqGroupName, setAcceptReqGroupName] = useState("");
+    const [stats, setStats] = useState({queueCount : 0, memberCount : 0, source: "groups" });
 
     useEffect(() => {
         (async () => {
@@ -61,6 +62,10 @@ const SentFromGroups = () => {
             console.log("runningStatus :::************************ ", runningStatus);
             if (runningStatus === "running") {
                 setIsRunnable(true);
+                const showCount = await helper.getDatafromStorage("showCount");
+                console.log("showCount :: ", showCount);
+                if(showCount && showCount.source === "groups")
+                    setStats(showCount)
             }
             else if (runningStatus === "pause") {
                 setEditType("basic");
@@ -464,11 +469,12 @@ const SentFromGroups = () => {
                     await helper.saveDatainStorage("runAction_group", "running");
 
                     if (runningStatus === "pause") {
-                        chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: payload, source: "groups" })
+                        chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: updatePayload, source: "groups" })
                     }
                     else {
-                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })
+                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: updatePayload })
                     }
+
                 }
                 // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
 
@@ -862,6 +868,8 @@ const SentFromGroups = () => {
                 <AutomationRunner
                     setrunningScript={setrunningScript}
                     setRequestActive={setRequestActive}
+                    statistics={stats}
+                    source={"groups"}
                 />
             );
         }

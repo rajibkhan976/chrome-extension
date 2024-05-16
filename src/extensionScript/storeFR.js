@@ -1,4 +1,5 @@
 // import selectors from "./selector";
+import selectors from "./selector";
 import common from "./commonScript";
 import helper from "./helper";
 // import common from "./commonScript";
@@ -14,6 +15,7 @@ let memberContact = {},
     sessionToken = "",
     feedbackTargetID = "",
     groupSettings = {},
+    groupName ="",
     profileMysettings = {};
 
     const comment = true;
@@ -37,7 +39,10 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             shoudIstop = false;
         case "start" : 
             console.log("Lest start -----------------");
-
+            if(request.action === "start"){
+                console.log("starting-----------------------------------------------------------------");
+                await helper.saveDatainStorage("showCount", {queueCount : 0, memberCount : 0, source: request.source })
+            }
             // set dtsg userid
             const fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
             fbDtsg = fbTokenAndId.fbDtsg;
@@ -82,6 +87,17 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                     // console.log(sessionToken);
                 }
             }
+            if(request.source === "groups"){
+                const groupNameInterval = setInterval(() => {
+                    const groupNameDiv = document.querySelector(selectors.main_component).querySelector(selectors.group_name)
+                    // console.log("groupNameDiv ::: ", groupNameDiv);
+                    if(groupNameDiv !== null){
+                    clearInterval(groupNameInterval)
+                    groupName = groupNameDiv.textContent;
+                    // console.log("group name ::: ", groupName);
+                    }
+                },500)
+            }
             if(request.feedbackTargetID)
                 if(request.source === "post"){
                     feedbackTargetID = request.feedbackTargetID
@@ -109,6 +125,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             }
             break;
         case "stop":
+            await helper.saveDatainStorage("showCount", {queueCount : 0, memberCount : 0, source: request.source })
             shoudIstop = true;
             if(request.source !== "post")
                 window.location.reload();
@@ -334,6 +351,8 @@ const arrangeArray = async (response, source) => {
     for(let el in response){
         if(shoudIstop) return;
         memberCount++;
+        chrome.runtime.sendMessage({action : "showCount", paylaod : {queueCount : queueCount, memberCount : memberCount, source: source }})
+        await helper.saveDatainStorage("showCount", {queueCount : queueCount, memberCount : memberCount, source: source })
         if(source === "suggestions"){
             can_request = response[el] && response[el].node && response[el].node.friendship_status;
         }
@@ -626,13 +645,24 @@ const validatePayload = async ( payload, source ) => {
         if(source === "post"){
             const postUrl = await helper.getDatafromStorage('postUrl');
             payload.sourceUrl = postUrl;
+            payload.sourceName = "Request from post."
+        }
+        if(source === "suggestions"){
+            payload.sourceName = "Request from suggested friends."
+        }
+        if(source === "friends"){
+            payload.sourceName = "Request from friends of friend."
         }
         // console.log(payload);
         const response = await common.storeInFRQS(payload);
+        
+        chrome.runtime.sendMessage({action : "showCount", paylaod : {queueCount : queueCount, memberCount : memberCount, source: source }})
+        await helper.saveDatainStorage("showCount", {queueCount : queueCount, memberCount : memberCount, source: source })
     }
     // console.log("response ::: ", response);
-    // if(response.message === "Record created")
     if(shoudIstop) return;
+    await helper.sleep(15*1000)
+    console.log("----------------------------------------------------------------------------------------");
     if(page_info.has_next_page)
         startStoringContactInfo( source );
 }

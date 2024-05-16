@@ -61,7 +61,7 @@ export const syncFromNewAPi = (apiObj, uiObj, setUiObj) => {
 
       } else {
         if (fieldItem.recursive) {
-          console.log("NAME - ", apiKey);
+          // console.log("NAME - ", apiKey);
           const found = FindData({ name: apiKey }, fieldItem, 1);
           // console.log("is recursive:::");
           if (found) {
@@ -136,7 +136,7 @@ export const syncFromApi = (apiObj, uiObj, setUiObj) => {
 
       } else {
         if (fieldItem.recursive) {
-          console.log("NAME - ", apiKey);
+          // console.log("NAME - ", apiKey);
           const found = FindData({ name: apiKey }, fieldItem, 1);
           // console.log("is recursive:::");
           if (found) {

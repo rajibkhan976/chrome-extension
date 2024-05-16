@@ -8,10 +8,12 @@ const AutomationStats = (props) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [fRProgress, setFRProgress] = useState(0);
   const [profileViewed, setProfileViewed] = useState(0);
+  const [stats, setStats] = useState(props.stats);
+  const [source]= useState(props.source ? props.source : "")
 
   chrome.runtime.onMessage.addListener(
     async (request, sender, sendResponse) => {
-      // console.log("request ::: ****************************** ", request);
+      console.log("request ::: ***************Stats*************** ", request);
       switch (request.action) {
         case "FRSendCount":
           setFRProgress(request.FriendRequestCount);
@@ -28,14 +30,31 @@ const AutomationStats = (props) => {
           props.setRequestActive("groups");
           break;
 
+          case "showCount":
+            console.log("showCount", request, request.paylaod);
+            console.log("showCount.paylaod.source", request.paylaod.source);
+            if(request.paylaod.source === source){
+                setStats(request.paylaod)
+            }
+
         default:
           break;
       }
     }
   );
 
+useEffect(()=>{
+  console.log("stats ---------------------->> ", stats);
+}, [stats])
+
   useEffect(() => {
     (async () => {
+      console.log("Automation stats ====================> ", props);
+      
+      const showCount = await helper.getDatafromStorage("showCount");
+      console.log("showCount :: local storage :::::::: ", showCount);
+      if(showCount && showCount.source === source)
+          setStats(showCount)
       const frsentcount = await helper.getDatafromStorage("FRSendCount");
       const profile_viewed = await helper.getDatafromStorage("profile_viewed");
       // console.log("frsentcount ::::::::::::: ", frsentcount)
@@ -91,11 +110,11 @@ const AutomationStats = (props) => {
 
       <div className="progress-infos-wraper d-flex d-flex-center">
         <div className="progress-infos profile-viewed">
-          <h4>{profileViewed}</h4>
+          <h4>{stats.memberCount}</h4>
           <p>Profile viewed</p>
         </div>
         <div className="progress-infos request-sent">
-          <h4>{fRProgress}</h4>
+          <h4>{stats.queueCount}</h4>
           <p>Friend request sent</p>
         </div>
       </div>

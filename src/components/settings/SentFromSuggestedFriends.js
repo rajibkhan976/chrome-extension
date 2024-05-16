@@ -53,6 +53,7 @@ const SentFromSuggestedFriends = () => {
     const settingsType = 10;
     const [sendFrndReqGroupName, setSendFrndReqGroupName] = useState("");
     const [acceptReqGroupName, setAcceptReqGroupName] = useState("");
+    const [stats, setStats] = useState({queueCount : 0, memberCount : 0, source: "source" });
 
 
     // FETCH SETTINGS DATA..
@@ -77,6 +78,10 @@ const SentFromSuggestedFriends = () => {
             const runningStatus = await helper.getDatafromStorage("runAction_suggestions");
             if (runningStatus === "running") {
                 setIsRunnable(true);
+                const showCount = await helper.getDatafromStorage("showCount");
+                console.log("showCount :: ", showCount);
+                if(showCount && showCount.source === "suggestions")
+                    setStats(showCount)
             }
             else if (runningStatus === "pause") {
                 setEditType("basic");
@@ -322,7 +327,7 @@ const SentFromSuggestedFriends = () => {
         if (editType !== "basic") {
             (async () => {
                 const localData = await fetchSetingsLocalData();
-                console.log("Local Data -- ", localData);
+                // console.log("Local Data -- ", localData);
                 setSettingSyncApiPayload(localData);
             })();
         }
@@ -735,6 +740,8 @@ const SentFromSuggestedFriends = () => {
                 <AutomationRunner
                     setrunningScript={setrunningScript}
                     setRequestActive={setRequestActive}
+                    statistics={stats}
+                    source={"suggestions"}
                 />
             );
         }

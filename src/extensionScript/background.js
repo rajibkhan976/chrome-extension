@@ -666,7 +666,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       break;
 
     case "sendFriendRequestInGroup":
-      console.log("request ::::::::::::::::: ", request)
+      // console.log("request ::::::::::::::::: ", request)
       chrome.tabs.query({ currentWindow: true, active: true }, async (tab) => {
         // console.log("tabInfo ::: ", tab[0].url, tab[0].url.includes("https://www.facebook.com/groups/"), tab[0].url.includes("people"));
         if (
@@ -713,7 +713,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         }
       });
       chrome.tabs.query({ currentWindow: false, active: true }, async (tab) => {
-        console.log("=============================================", tab)
+        // console.log("=============================================", tab)
         if(request.source === "post"){
           let tabb = tab[0]
           if(tab[0].favIconUrl === undefined)
@@ -753,6 +753,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 
     case "checkTabUrl":
       chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
+        console.log("tabs ::::::::::: ", tabs);
         if (tabs[0].url.includes("groups") && (tabs[0].url.includes("members") || tabs[0].url.includes("people"))) {
           console.log("url ::: ", tabs[0].url);
           // chrome.alarms.create("setSettingsForGroup", { when: Date.now() })
@@ -780,7 +781,8 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             // },200);
         }
         else{
-          chrome.tabs.create({ url: process.env.REACT_APP_APP_URL });
+          if(!tabs[0].url.includes("chrome-extension://"))
+            chrome.tabs.create({ url: process.env.REACT_APP_APP_URL });
         }
       })
       break;
@@ -899,9 +901,13 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       break;
          
     case "openPostSetting" :
-      // const postPopupId = await helper.getDatafromStorage("postPopupId");
-      // if(postPopupId) chrome.tabs.remove(parseInt(postPopupId));
-      // console.log("request.postUrl :: ", request.postUrl)
+      const postPopupId = await helper.getDatafromStorage("postPopupId");
+      console.log("postPopupId ::: ", postPopupId);
+      if(postPopupId) {
+        chrome.tabs.remove(parseInt(postPopupId));
+        stopRunningScript("sendFR", "post")
+      }
+      console.log("request.postUrl :: ", request.postUrl)
       await helper.saveDatainStorage('postUrl', request.postUrl)
       chrome.windows.create({url : 'popup.html', type : 'popup', width : 799, height : 600}, async res => {
         console.log("res", res.tabs[0]);
@@ -1176,7 +1182,7 @@ chrome.tabs.onUpdated.addListener(async (tabID, changeInfo, tab) => {
   if (tabID === Number(CurrentTabId)) {
     if(changeInfo && changeInfo.status && changeInfo.status === "loading"){
       chrome.tabs.sendMessage(Number(CurrentTabId), {action: "stop"})
-      stopRunningScript();
+      stopRunningScript("sendFR", "all");
     }
   }
   if (tabID === Number(CurrentTabsId)) {
@@ -1227,15 +1233,29 @@ const stopRunningScript = async (action = "sendFR", source) => {
     switch(source){
       case "groups" :
         await helper.removeDatafromStorage("runAction_group");
+        await helper.saveDatainStorage("showCount", {queueCount : 0, memberCount : 0, source: source })
         break;
       case "post" :
         await helper.removeDatafromStorage("runAction_post");
+        await helper.saveDatainStorage("showCount", {queueCount : 0, memberCount : 0, source: source })
         break;
       case "friends" :
         await helper.removeDatafromStorage("runAction_friend");
+        await helper.saveDatainStorage("showCount", {queueCount : 0, memberCount : 0, source: source })
         break;
       case "suggestions" :
         await helper.removeDatafromStorage("runAction_suggestions");
+        await helper.saveDatainStorage("showCount", {queueCount : 0, memberCount : 0, source: source })
+        break;
+      case "all" : 
+        await helper.removeDatafromStorage("runAction_group");
+        await helper.removeDatafromStorage("runAction_post");
+        await helper.removeDatafromStorage("runAction_friend");
+        await helper.removeDatafromStorage("runAction_suggestions");
+        await helper.saveDatainStorage("showCount", {queueCount : 0, memberCount : 0, source: "friends" })
+        await helper.saveDatainStorage("showCount", {queueCount : 0, memberCount : 0, source: "groups" })
+        await helper.saveDatainStorage("showCount", {queueCount : 0, memberCount : 0, source: "post" })
+        await helper.saveDatainStorage("showCount", {queueCount : 0, memberCount : 0, source: "suggestions" })
         break;
       default : 
         break;
@@ -2315,12 +2335,12 @@ const storeInMsqs = async ( fbId, receiverId, name, message, settingsType, exp_t
  */
 
 const startCampaignScheduler = async () => {
-  console.log("logged in ??? ", helper.isEmptyObj(helper.getDatafromStorage('fr_token')));
+  // console.log("logged in ??? ", helper.isEmptyObj(helper.getDatafromStorage('fr_token')));
   //check logged in or not
   if(!helper.isEmptyObj(helper.getDatafromStorage('fr_token')))
     return;
   //clear storage
-  console.log("lets start FETCHING CAMPAIGN");
+  // console.log("lets start FETCHING CAMPAIGN");
   const campaignListFromStore = await helper.getAllKeysFromStorage('Campaign_');
   // console.log("campaignListFromStore ::: ", campaignListFromStore);
   if(campaignListFromStore.length > 0){

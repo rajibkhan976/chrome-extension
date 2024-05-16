@@ -55,7 +55,7 @@ const FriendRequest = (props) => {
   const [isLoding, setIsLoding] = useState(true);
   const [settingApiPayload, setSettingApiPayload] = useState(fr_Req_Payload);
   chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-    console.log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=>>>", request.action)
+    // console.log("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-=-=-=-=-=>>>", request.action)
     if(request.action === "setPostPopup"){
       navigatePage("posts");
     }

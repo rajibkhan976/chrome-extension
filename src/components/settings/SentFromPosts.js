@@ -61,6 +61,7 @@ const SentFromPosts = () => {
     const settingsType = 9;
     const [sendFrndReqGroupName, setSendFrndReqGroupName] = useState("");
     const [acceptReqGroupName, setAcceptReqGroupName] = useState("");
+    const [stats, setStats] = useState({queueCount : 0, memberCount : 0, source: "post" });
 
 
     // FETCH SETTINGS DATA..
@@ -87,6 +88,10 @@ const SentFromPosts = () => {
             if (runningStatus === "running") {
                 console.log("yeah, running.");
                 setIsRunnable(true);
+                const showCount = await helper.getDatafromStorage("showCount");
+                console.log("showCount :: ", showCount);
+                if(showCount && showCount.source === "post")
+                    setStats(showCount)
             }
             else if (runningStatus === "pause") {
                 setEditType("basic");
@@ -797,6 +802,8 @@ const SentFromPosts = () => {
                 <AutomationRunner
                     setrunningScript={setrunningScript}
                     setRequestActive={setRequestActive}
+                    statistics={stats}
+                    source={"post"}
                 />
             );
         }
