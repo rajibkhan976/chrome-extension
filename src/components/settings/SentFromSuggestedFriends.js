@@ -382,7 +382,7 @@ const SentFromSuggestedFriends = () => {
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====", updatePayload)
                     const runningStatus = await helper.getDatafromStorage("runAction_suggestions")
-                    await helper.saveDatainStorage("runAction_suggestions", "runAction_suggestions");
+                    await helper.saveDatainStorage("runAction_suggestions", "running");
                     if (runningStatus === "pause") {
                         chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: updatePayload, source: "suggestions" })
                     }
