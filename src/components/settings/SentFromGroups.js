@@ -53,7 +53,7 @@ const SentFromGroups = () => {
     const settingsType = 8;
     const [sendFrndReqGroupName, setSendFrndReqGroupName] = useState("");
     const [acceptReqGroupName, setAcceptReqGroupName] = useState("");
-    const [stats, setStats] = useState({queueCount : 0, memberCount : 0, source: "groups" });
+    const [stats, setStats] = useState({ queueCount: 0, memberCount: 0, source: "groups" });
 
     useEffect(() => {
         (async () => {
@@ -64,7 +64,7 @@ const SentFromGroups = () => {
                 setIsRunnable(true);
                 const showCount = await helper.getDatafromStorage("showCount");
                 console.log("showCount :: ", showCount);
-                if(showCount && showCount.source === "groups")
+                if (showCount && showCount.source === "groups")
                     setStats(showCount)
             }
             else if (runningStatus === "pause") {
@@ -770,7 +770,7 @@ const SentFromGroups = () => {
                             <div className="setting-content">
                                 <h6>Gender</h6>
                                 {/* <p>{'Male'}</p> */}
-                                <p>{settingSyncApiPayload?.gender_filter_value}</p>
+                                <p>{settingSyncApiPayload?.gender_filter ? settingSyncApiPayload?.gender_filter_value : 'N/A'}</p>
                             </div>
                         </div>
                         <div className="setting-show d-flex">
@@ -780,7 +780,22 @@ const SentFromGroups = () => {
                             <div className="setting-content">
                                 <h6>Country</h6>
                                 {/* <p>{'Tier 3'}</p> */}
-                                <p>{settingSyncApiPayload?.tier_filter_value}</p>
+                                <p>
+                                    {settingSyncApiPayload?.tier_filter || settingSyncApiPayload?.country_filter_value?.length ? (
+                                        <>
+                                            <p>{settingSyncApiPayload?.tier_filter_value}</p>
+                                            {settingSyncApiPayload?.country_filter_value?.length > 0 && ''}
+                                            {settingSyncApiPayload?.country_filter_value?.map((value, index) => (
+                                                <React.Fragment key={index}>
+                                                    {value}
+                                                    {index < settingSyncApiPayload.country_filter_value.length - 1 ? ', ' : ''}
+                                                </React.Fragment>
+                                            ))}
+                                        </>
+                                    ) : (
+                                        'N/A'
+                                    )}
+                                </p>
                             </div>
                         </div>
                         <div className="setting-show d-flex">

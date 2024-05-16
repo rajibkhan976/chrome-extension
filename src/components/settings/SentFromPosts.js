@@ -61,7 +61,7 @@ const SentFromPosts = () => {
     const settingsType = 9;
     const [sendFrndReqGroupName, setSendFrndReqGroupName] = useState("");
     const [acceptReqGroupName, setAcceptReqGroupName] = useState("");
-    const [stats, setStats] = useState({queueCount : 0, memberCount : 0, source: "post" });
+    const [stats, setStats] = useState({ queueCount: 0, memberCount: 0, source: "post" });
 
 
     // FETCH SETTINGS DATA..
@@ -90,7 +90,7 @@ const SentFromPosts = () => {
                 setIsRunnable(true);
                 const showCount = await helper.getDatafromStorage("showCount");
                 console.log("showCount :: ", showCount);
-                if(showCount && showCount.source === "post")
+                if (showCount && showCount.source === "post")
                     setStats(showCount)
             }
             else if (runningStatus === "pause") {
@@ -729,17 +729,24 @@ const SentFromPosts = () => {
                             <div className="setting-content">
                                 <h6>Look up for given</h6>
                                 <div className="fb-requirements">
-                                    <ul className="reactions">
-                                        {/* <li><LikeReaction /></li>
-                                        <li><LoveReaction /></li> */}
-                                        {settingSyncApiPayload?.reaction && settingSyncApiPayload?.reaction_type && settingSyncApiPayload?.reaction_type.length && settingSyncApiPayload?.reaction_type?.map((item, index) => (
-                                            <li key={index} style={{ height: '18px', width: '18px' }}>
-                                                {getIconComponent(item)}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                    <span>{settingSyncApiPayload?.reaction && settingSyncApiPayload?.comment && "& "}</span>
-                                    {settingSyncApiPayload?.comment && <span>Comments</span>}
+                                    {settingSyncApiPayload?.reaction || settingSyncApiPayload?.comment ? (
+                                        <>
+                                            <ul>
+                                                {settingSyncApiPayload?.reaction &&
+                                                    settingSyncApiPayload?.reaction_type &&
+                                                    settingSyncApiPayload?.reaction_type.length &&
+                                                    settingSyncApiPayload?.reaction_type?.map((item, index) => (
+                                                        <li key={index} style={{ height: '18px', width: '18px' }}>
+                                                            {getIconComponent(item)}
+                                                        </li>
+                                                    ))}
+                                            </ul>
+                                            <span>{settingSyncApiPayload?.reaction && settingSyncApiPayload?.comment && ' & '}</span>
+                                            {settingSyncApiPayload?.comment && <span>Comments</span>}
+                                        </>
+                                    ) : (
+                                        'N/A'
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -749,7 +756,7 @@ const SentFromPosts = () => {
                             </figure>
                             <div className="setting-content">
                                 <h6>Gender</h6>
-                                <p>{settingSyncApiPayload?.gender_filter_value}</p>
+                                <p>{settingSyncApiPayload?.gender_filter ? settingSyncApiPayload?.gender_filter_value : 'N/A'}</p>
                             </div>
                         </div>
                         <div className="setting-show d-flex">
@@ -758,7 +765,22 @@ const SentFromPosts = () => {
                             </figure>
                             <div className="setting-content">
                                 <h6>Country</h6>
-                                <p>{settingSyncApiPayload?.tier_filter_value}</p>
+                                <p>
+                                    {settingSyncApiPayload?.tier_filter || settingSyncApiPayload?.country_filter_value?.length ? (
+                                        <>
+                                            <p>{settingSyncApiPayload?.tier_filter_value}</p>
+                                            {settingSyncApiPayload?.country_filter_value?.length > 0 && ''}
+                                            {settingSyncApiPayload?.country_filter_value?.map((value, index) => (
+                                                <React.Fragment key={index}>
+                                                    {value}
+                                                    {index < settingSyncApiPayload.country_filter_value.length - 1 ? ', ' : ''}
+                                                </React.Fragment>
+                                            ))}
+                                        </>
+                                    ) : (
+                                        'N/A'
+                                    )}
+                                </p>
                             </div>
                         </div>
                         <div className="setting-show d-flex">

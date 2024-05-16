@@ -119,7 +119,7 @@ const AutomationRunner = ({ setrunningScript, setRequestActive, statistics, sour
       >
         <p className="result-view">
           {" "}
-          <a href={PORTAL_URL + "/friends/pending-request"} target="_blank">
+          <a href={PORTAL_URL + "/friends/friends-queue"} target="_blank">
             <span>View your results</span>
             <span className="result-view-icon"><BoxOutIcon /></span>
           </a>{" "}

@@ -436,7 +436,6 @@ const GroupsRequestForm = ({
         };
 
         setFormSetup(newObj);
-        generateFormElements();
     };
 
     /**
@@ -1135,7 +1134,7 @@ const GroupsRequestForm = ({
 
     // DISABLE INPUT FIELDS HERE..
     const considerDisabledInput = (apiPayloadState, mainElement) => {
-        return !apiPayloadState[mainElement?.name];
+        return !apiPayloadState[mainElement?.name] ? true : false;
     };
 
     //////////:::::Generating General::::://////////////
@@ -1475,6 +1474,7 @@ const GroupsRequestForm = ({
                                         : "fr-input-basic"
                                 }
                                 value={element.value}
+                                placeholder={"10"}
                                 onChange={(e) => {
                                     if (element.name === "tier_filter_value") {
                                         fillInputChange(e.target.value, element);
