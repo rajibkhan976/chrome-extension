@@ -1662,8 +1662,8 @@ const GroupsRequestForm = ({
                             </div>
 
                             {/* CHECK BUTTON TO ADDING TAGS */}
-                            <span
-                                className={`btn-selectInput btn-right ${element.value.length === 0 ||
+                            <button
+                                className={`btn btn-selectInput btn-right ${element.value.length === 0 ||
                                     element.valueArr.length === 0 ||
                                     !element.valid ||
                                     element.options.filter((el) => el.label === element.value)
@@ -1672,7 +1672,9 @@ const GroupsRequestForm = ({
                                     ? ""
                                     : ""
                                     }`}
-                                onClick={() => {
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    
                                     if (
                                         element.value.length === 0 ||
                                         element.valueArr.length === 0
@@ -1688,7 +1690,7 @@ const GroupsRequestForm = ({
                                 disabled={considerDisabledInput(settingApiPayload, mainEl)}
                             >
                                 <CheckIcon />
-                            </span>
+                            </button>
                         </div>
                     );
 
