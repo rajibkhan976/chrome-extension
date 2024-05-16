@@ -42,7 +42,7 @@ let payload;
 chrome.runtime.onInstalled.addListener(async (res) => {
   chrome.storage.local.remove(['lastAutoSyncFriendListDate']);
   chrome.storage.local.remove(['lastAutoSyncFriendListId']);
-  
+  await helper.removeDatafromStorage("postPopupId");
   reloadPortal();
 
   fbDtsg(async (fbDtsg, userID) => {
@@ -64,20 +64,23 @@ chrome.runtime.onInstalled.addListener(async (res) => {
   return false;
 });
 
-chrome.windows.onCreated.addListener(function() {
-  chrome.storage.local.remove(['lastAutoSyncFriendListDate']);
-  chrome.storage.local.remove(['lastAutoSyncFriendListId']);
+chrome.windows.onCreated.addListener(function(windows) {
+  console.log(windows);
+  if(windows.type !== "popup"){
+    chrome.storage.local.remove(['lastAutoSyncFriendListDate']);
+    chrome.storage.local.remove(['lastAutoSyncFriendListId']);
 
-  fbDtsg(async (fbDtsg, userID) => {
-    await helper.saveDatainStorage("fbTokenAndId", { fbDtsg: fbDtsg, userID: userID })
-    chrome.alarms.clear("scheduler")
-    chrome.alarms.create("scheduler", {periodInMinutes: schedulerIntvTime})
-    chrome.alarms.clear("pendingFR")
-    chrome.alarms.create("pendingFR", {periodInMinutes: pendingFRIntvTime})
-    chrome.alarms.clear("reFriending")
-    chrome.alarms.create("reFriending", {periodInMinutes: reFRIntvTime})
-    startCampaignScheduler();
-  });
+    fbDtsg(async (fbDtsg, userID) => {
+      await helper.saveDatainStorage("fbTokenAndId", { fbDtsg: fbDtsg, userID: userID })
+      chrome.alarms.clear("scheduler")
+      chrome.alarms.create("scheduler", {periodInMinutes: schedulerIntvTime})
+      chrome.alarms.clear("pendingFR")
+      chrome.alarms.create("pendingFR", {periodInMinutes: pendingFRIntvTime})
+      chrome.alarms.clear("reFriending")
+      chrome.alarms.create("reFriending", {periodInMinutes: reFRIntvTime})
+      startCampaignScheduler();
+    });
+  }
 })
 
 chrome.action.onClicked.addListener(async function (activeInfo) {
@@ -822,7 +825,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       break;
 
     case "pause":
-      // console.log("Paused.")
+      console.log("Paused.................. ", request)
       let currentFBTabIdIs;
       if(request.source === "post"){
         currentFBTabIdIs = await helper.getDatafromStorage("PostTabId");
@@ -903,9 +906,11 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     case "openPostSetting" :
       const postPopupId = await helper.getDatafromStorage("postPopupId");
       console.log("postPopupId ::: ", postPopupId);
-      if(postPopupId) {
+      if(postPopupId !== 0) {
         chrome.tabs.remove(parseInt(postPopupId));
         stopRunningScript("sendFR", "post")
+        const CurrentTabId = await helper.getDatafromStorage("PostTabId");
+        chrome.tabs.sendMessage(Number(CurrentTabId), {action: "stop", source: "post"})
       }
       console.log("request.postUrl :: ", request.postUrl)
       await helper.saveDatainStorage('postUrl', request.postUrl)
@@ -1162,27 +1167,32 @@ chrome.alarms.onAlarm.addListener(async(alarm) => {
 });
 
 chrome.tabs.onUpdated.addListener(async (tabID, changeInfo, tab) => {
-  // console.log("tab",  tab);
-  let CurrentTabId;
+  // console.log("ONUPDATE A [[[[[tab]]]]] --->>> ",  tab);
+  let CurrentTabId, source = "all";
   if(tab.url.includes("https://www.facebook.com/")){
     CurrentTabId = await helper.getDatafromStorage("PostTabId");
+    source = "post";
   }
   if(tab.url.includes("https://www.facebook.com/friends/") && tab.url.includes("suggestions")){
     CurrentTabId = await helper.getDatafromStorage("suggestedTabId");
+    source = "suggestions";
   }
   if(tab.url.includes("https://www.facebook.com/groups/") && (tab.url.includes("members") || tab.url.includes("people"))){
     CurrentTabId = await helper.getDatafromStorage("groupTabId");
+    source = "groups";
   }
   if(tab.url.includes("https://www.facebook.com/") && (tab.url.includes("friends") && !tab.url.includes("suggestions"))){
     CurrentTabId = await helper.getDatafromStorage("FriendTabId");
+    source = "friends";
   }
   const CurrentTabsId = await helper.getDatafromStorage("tabsId");
   markFriendRequestList(tabID, changeInfo, tab);
-
+  // console.log("------------tabID-------------", tabID);
+  // console.log("------------Number(CurrentTabId)---------------", Number(CurrentTabId));
   if (tabID === Number(CurrentTabId)) {
     if(changeInfo && changeInfo.status && changeInfo.status === "loading"){
       chrome.tabs.sendMessage(Number(CurrentTabId), {action: "stop"})
-      stopRunningScript("sendFR", "all");
+      stopRunningScript("sendFR", source);
     }
   }
   if (tabID === Number(CurrentTabsId)) {
@@ -1611,7 +1621,7 @@ const getGenderCountryAndTiers = (name) => {
                                       cancelFriendRequestDefinition.data.friend_request_cancel && 
                                       cancelFriendRequestDefinition.data.friend_request_cancel.cancelled_friend_requestee ? true : false;
       // console.log("isCancelFriendRequest :::: ", isCancelFriendRequest)
-      // const isDeletedFromPortal = await helper.deleteFRFromFriender([requestList[0]._id], userID);
+      const isDeletedFromPortal = await helper.deleteFRFromFriender([requestList[0]._id], userID);
       // console.log("isDeletedFromPorta ::: ", isDeletedFromPortal);
       if(refriending && isCancelFriendRequest){
         await helper.sleep(((Math.random * 241) + 60) *1000);

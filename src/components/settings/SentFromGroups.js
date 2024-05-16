@@ -505,12 +505,15 @@ const SentFromGroups = () => {
         } else {
 
             try {
-                await axios.post(`${process.env.REACT_APP_SAVE_FRIEND_REQUEST_SETTINGS}`, payload, {
+                const settingRes= await axios.post(`${process.env.REACT_APP_SAVE_FRIEND_REQUEST_SETTINGS}`, payload, {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: fr_token,
                     },
                 });
+                console.log("settingRes : ", settingRes._id, settingRes)
+                if(settingRes._id)
+                    payload = {...payload, settingsId : settingRes._id}
 
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")

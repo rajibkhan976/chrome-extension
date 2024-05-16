@@ -19,11 +19,12 @@ const getDatafromStorage = (key) => {
             // console.log("type of " + key + " : " + typeof res[key]);
             resolve(res[key]);
           } else {
-            if (key == "FRSendCount" || key == "profile_viewed") resolve(0);
+            if (key == "FRSendCount" || key == "profile_viewed" || key == "postPopupId") resolve(0)
+            else if(key == 'messageQueue') resolve([])
             else resolve({});
           }
         } else {
-          if (key == "FRSendCount" || key == "profile_viewed") resolve(0);
+          if (key == "FRSendCount" || key == "profile_viewed" || key == "postPopupId") resolve(0)
           else if(key == 'messageQueue') resolve([])
           else resolve({});
         }
