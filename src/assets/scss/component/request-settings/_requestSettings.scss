@@ -189,10 +189,12 @@
 .fr-setting-cell {
     border-bottom: 1px solid #313137;
     padding-block: 10px;
+    z-index: 9;
+    position: relative;
 
     &.group-disabled {
         // pointer-events: none;
-        z-index: 99;
+        z-index: 9;
 
         > *:not(.tooltip-container) {
             opacity: 0.5;
@@ -233,6 +235,10 @@
     &:nth-child(6) {
         border-bottom: none;
     }
+}
+
+.fr-setting-cell:hover ~ .fr-setting-cell {
+    z-index: 0;
 }
 
 .fr-cell-header {

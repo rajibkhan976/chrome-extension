@@ -1123,6 +1123,12 @@ const GroupsRequestForm = ({
                 // console.log('here', y);
                 y = event.target.clientHeight - 35
             }
+
+            // console.log('event >>>', event);
+            if (y <= event.target.clientTop) {
+                // console.log('here', y);
+                y = event.target.clientTop
+            }
         setTooltipPosition({ x, y });
         // setIsTooltipVisible(true);
     };
