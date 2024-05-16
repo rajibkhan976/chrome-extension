@@ -365,6 +365,7 @@ const GroupsRequestForm = ({
     };
 
 
+    // CURRRENTLY THE CHECKBOX OF TOGGLE IS THIS HANDLER..
     const headerCheckModif = (element) => {
         let elementPlaceholder = { ...element };
         let formSetPlaceholder = { ...formSetup };
@@ -839,7 +840,7 @@ const GroupsRequestForm = ({
         } else {
             reactionState = reactionState.filter(icon => icon !== iconName);
         }
-        
+
         setSelectedReactionIcon(reactionState);
 
         const newObj = {
@@ -948,7 +949,7 @@ const GroupsRequestForm = ({
         generateFormElements();
     };
 
-    
+
     /**
      * INCREASE OR DECREASE VALLUE STEP WISE HERE..
      * @param {*} ele 
@@ -1112,81 +1113,6 @@ const GroupsRequestForm = ({
         generateFormElements();
     };
 
-
-    //////////////////////////////////advance setting handles/////////////////
-    // const adnvcCheckHandle = (ele) => {
-    //     const newObj = {
-    //         ...advcFormAssets,
-    //         fields: advcFormAssets.fields.map((item) => {
-    //             if (item.label === ele.label) {
-    //                 return {
-    //                     ...item,
-    //                     isActive: !ele.isActive,
-    //                 };
-    //             } else {
-    //                 return item;
-    //             }
-    //         }),
-    //     };
-
-    //     setAdvcFormAssets(newObj);
-    //     generateAdvncForm();
-    // };
-
-
-    // const advInputChange = (value, ele) => {
-    //     const newObj = {
-    //         ...advcFormAssets,
-    //         fields: advcFormAssets.fields.map((item) => {
-    //             if (item.fieldOptions) {
-    //                 return {
-    //                     ...item,
-    //                     fieldOptions: item.fieldOptions.map((itemCh) => {
-    //                         if (ele.type === itemCh.type && ele.label === itemCh.label) {
-    //                             itemCh.value = value;
-    //                         }
-    //                         return itemCh;
-    //                     }),
-    //                 };
-    //             } else {
-    //                 return {
-    //                     ...item,
-    //                 };
-    //             }
-    //         }),
-    //     };
-
-    //     setAdvcFormAssets(newObj);
-    //     generateAdvncForm();
-    // };
-
-
-    // const advSelectChange = (value, ele) => {
-    //     const newObj = {
-    //         ...advcFormAssets,
-    //         fields: advcFormAssets.fields.map((item) => {
-    //             if (item.fieldOptions) {
-    //                 return {
-    //                     ...item,
-    //                     fieldOptions: item.fieldOptions.map((itemCh) => {
-    //                         if (ele.type === itemCh.type && ele.label === itemCh.label) {
-    //                             itemCh.selectValue = value;
-    //                         }
-    //                         return itemCh;
-    //                     }),
-    //                 };
-    //             } else {
-    //                 return {
-    //                     ...item,
-    //                 };
-    //             }
-    //         }),
-    //     };
-
-    //     setAdvcFormAssets(newObj);
-    //     generateAdvncForm();
-    // };
-
     // HANDLE MOUSE MOVE ON TOOLTIP MOVING WITH CURSOR
     const handleMouseMove = (event) => {
         const { offsetX, offsetY, movementX, movementY } = event.nativeEvent;
@@ -1195,116 +1121,10 @@ const GroupsRequestForm = ({
         // setIsTooltipVisible(true);
     };
 
-    // const generateAdvncForm = () => {
-    //     const generateAdvncFormElemnts = (element, idx) => {
-    //         switch (element.type) {
-    //             case "select":
-    //                 return (
-    //                     <div className="fr-advsetting-el-container" key={idx}>
-    //                         {element.label && <label>{element.label}</label>}
-    //                         <div className="fr-advsetting-el-body">
-    //                             <select
-    //                                 value={element.value}
-    //                                 onChange={(e) => {
-    //                                     advSelectChange(e.target.value, element);
-    //                                 }}
-    //                                 className={`fr-advsetting-el-${element.type}`}
-    //                             >
-    //                                 {element?.options?.map((item, index) => {
-    //                                     return (
-    //                                         <option value={item.value} key={"fr-select" + index}>
-    //                                             {item.label}
-    //                                         </option>
-    //                                     );
-    //                                 })}
-    //                             </select>
-    //                         </div>
-    //                     </div>
-    //                 );
-    //             case "inputSelect":
-    //                 return (
-    //                     <div className="fr-advsetting-el-container" key={idx}>
-    //                         {element.label && <label>{element.label}</label>}
-    //                         <div className="fr-advsetting-el-body">
-    //                             <div className={`fr-advsetting-el-${element.type}`}>
-    //                                 <input
-    //                                     maxlength="6"
-    //                                     type="number"
-    //                                     value={element.value}
-    //                                     onChange={(e) => {
-    //                                         advInputChange(e.target.value, element);
-    //                                     }}
-    //                                     autoFocus
-    //                                 />
-    //                                 <select
-    //                                     value={element.selectValue}
-    //                                     onChange={(e) => {
-    //                                         advSelectChange(e.target.value, element);
-    //                                     }}
-    //                                 >
-    //                                     {element.options.map((item, index) => {
-    //                                         return (
-    //                                             <option
-    //                                                 value={item.selectValue}
-    //                                                 key={"fr-select" + index}
-    //                                             >
-    //                                                 {item.label}
-    //                                             </option>
-    //                                         );
-    //                                     })}
-    //                                 </select>
-    //                             </div>
-
-    //                             {element.suffix && element.suffix}
-    //                         </div>
-    //                     </div>
-    //                 );
-    //             case "input":
-    //                 return (
-    //                     <div className="fr-advsetting-el-container" key={idx}>
-    //                         {element.label && <label>{element.label}</label>}
-    //                         <div className={`fr-advsetting-el-body`}>
-    //                             <input
-    //                                 className={`fr-advsetting-el-${element.type}`}
-    //                                 value={element.value}
-    //                                 type={"number"}
-    //                                 onChange={(e) => {
-    //                                     advInputChange(e.target.value, element);
-    //                                 }}
-    //                             />
-    //                             {element.suffix && element.suffix}
-    //                         </div>
-    //                     </div>
-    //                 );
-    //             default:
-    //                 return <></>;
-    //         }
-    //     };
-
-    //     return advcFormAssets.fields.map((fromItem, idx) => {
-    //         return (
-    //             <div className="fr-advsetting-container">
-    //                 <div className="fr-advsetting-cell" key={idx}>
-    //                     <div className="fr-advsetting-left">
-    //                         <Checkbox
-    //                             onCheckChange={() => adnvcCheckHandle(fromItem)}
-    //                             isChecked={fromItem.isActive}
-    //                         />
-    //                     </div>
-    //                     <div className="fr-advsetting-right">
-    //                         <h5>{fromItem.label}</h5>
-    //                         {fromItem.fieldOptions &&
-    //                             fromItem.isActive &&
-    //                             fromItem.fieldOptions.map((item, idx) => {
-    //                                 return generateAdvncFormElemnts(item, idx);
-    //                             })}
-    //                     </div>
-    //                 </div>
-    //             </div>
-    //         );
-    //     });
-    // };
-
+    // DISABLE INPUT FIELDS HERE..
+    const considerDisabledInput = (apiPayloadState, mainElement) => {
+        return !apiPayloadState[mainElement?.name];
+    };
 
     //////////:::::Generating General::::://////////////
     const generateFormElements = () => {
@@ -1318,6 +1138,7 @@ const GroupsRequestForm = ({
                             ${element.isLabeled ? "fr-req-fieldset" : ""} 
                             ${element?.isHalfWidth ? 'fr-req-half-width' : ''}
                             ${mainEl?.disabled ? 'fr-req-el-disabled' : ''}
+                            ${considerDisabledInput(settingApiPayload, mainEl) ? 'input-output-disabled' : ''}
                             `}
                         >
                             {element.isLabeled ? <label>{element.inLabel}</label> : ""}
@@ -1327,11 +1148,7 @@ const GroupsRequestForm = ({
                                     `}
                                 value={element.value}
                                 // {element&&element.opti on.length>0?disabled}
-                                disabled={
-                                    element && element.options && element.options.length <= 0
-                                        ? true
-                                        : false
-                                }
+                                disabled={considerDisabledInput(settingApiPayload, mainEl)}
                                 onChange={(e) => selectValueChange(e.target.value, element)}
                             >
                                 {element.options.map((item, idx) => (
@@ -1374,6 +1191,7 @@ const GroupsRequestForm = ({
                                 ${!element.valid ? "not_valid" : ""} 
                                 ${element?.isHalfWidth ? 'fr-req-half-width' : ''}
                                 ${mainEl?.disabled ? 'fr-req-el-disabled' : ''}
+                                ${considerDisabledInput(settingApiPayload, mainEl) ? 'input-output-disabled' : ''}
                             `}
                         >
                             {element.isLabeled ? <label>{element.inLabel}</label> : ""}
@@ -1385,16 +1203,18 @@ const GroupsRequestForm = ({
                                         ? "disable"
                                         : ""
                                     }`}
-                                disabled={
-                                    element && element.options && element.options.length <= 0
-                                        ? true
-                                        : false
-                                }
+                                // disabled={
+                                //     element && element.options && element.options.length <= 0
+                                //         ? true
+                                //         : false
+                                // }
+                                disabled={considerDisabledInput(settingApiPayload, mainEl)}
                             >
                                 <CustomSelectBox
                                     needSearchBar={true}
                                     element={element}
                                     onClickOption={handleCustomSelectClick}
+                                    disabled={considerDisabledInput(settingApiPayload, mainEl)}
                                 />
                             </div>
 
@@ -1438,6 +1258,7 @@ const GroupsRequestForm = ({
                             <div className={`fr-req-element fr-req-el-${element.type} ${mainEl?.disabled ? 'fr-req-el-disabled' : ''}`}>
                                 {element.options.map((optionCheckbox, el) => (
                                     <>
+                                    {console.log("optionCheckbox -- ", optionCheckbox)}
                                         <label className="fr-ext-radio-ui fr-radio-req fr-ext-checkbox-ui checkbox-container f-1" key={el}>
                                             <input
                                                 type="checkbox"
@@ -1529,7 +1350,7 @@ const GroupsRequestForm = ({
                 case "radio":
                     return (
                         <>
-                            <div className={`fr-req-element fr-req-el-${element.type}`}>
+                            <div className={`fr-req-element fr-req-el-${element.type} ${considerDisabledInput(settingApiPayload, mainEl) ? 'input-output-disabled' : ''}`}>
                                 {element.options.map((optionRadio, el) => (
                                     <>
                                         <label className="fr-ext-radio fr-radio-req" key={el}>
@@ -1538,6 +1359,7 @@ const GroupsRequestForm = ({
                                                 name={element.name}
                                                 defaultChecked={optionRadio.text === element.value}
                                                 onChange={() => radioOptionChange(element, optionRadio)}
+                                                disabled={considerDisabledInput(settingApiPayload, mainEl)}
                                             />
                                             <span className="fr-ext-radio-ui">
                                                 <span className="fr-ext-radio-text">
@@ -1569,6 +1391,7 @@ const GroupsRequestForm = ({
                                                 name={element.name}
                                                 defaultChecked={optionRadio.text === element.value}
                                                 onChange={() => radioOptionChange(element, optionRadio)}
+                                                disabled={considerDisabledInput(settingApiPayload, mainEl)}
                                             />
                                             <span className="fr-ext-radioSml-ui">
                                                 <span className="fr-ext-radioSml-text">
@@ -1607,6 +1430,7 @@ const GroupsRequestForm = ({
                                 }
                                 value={element.value}
                                 onChange={(e) => inputValueChange(element, e.target.value)}
+                                disabled={considerDisabledInput(settingApiPayload, mainEl)}
                                 onKeyPress={handleKeyPress}
                             />
                             {!element.valid && (
@@ -1623,6 +1447,7 @@ const GroupsRequestForm = ({
                                 ${!element.valid ? "not_valid" : ""} 
                                 ${element?.isHalfWidth ? "fr-req-half-width" : ""}
                                 ${mainEl?.disabled ? 'fr-req-el-disabled' : ''}
+                                ${considerDisabledInput(settingApiPayload, mainEl) ? 'input-output-disabled' : ''}
                             `}
                         >
                             {element.isLabeled ? <label>{element.inLabel}</label> : ""}
@@ -1654,6 +1479,7 @@ const GroupsRequestForm = ({
                                         e.preventDefault();
                                     }
                                 }}
+                                disabled={considerDisabledInput(settingApiPayload, mainEl)}
                             // onKeyPress={handleKeyPress}
                             />
                             <div className="input-arrows">
@@ -1681,8 +1507,10 @@ const GroupsRequestForm = ({
                 case "fillinputCF":
                     return (
                         <div
-                            className={`fr-req-element fr-req-el-${element.type} ${element.isLabeled ? "fr-req-fieldset" : ""
-                                } ${!element.valid ? "not_valid" : ""}`}
+                            className={`fr-req-element fr-req-el-${element.type} 
+                                ${element.isLabeled ? "fr-req-fieldset" : ""} 
+                                ${!element.valid ? "not_valid" : ""}
+                            `}
                         >
                             {element.isLabeled ? <label>{element.inLabel}</label> : ""}
 
@@ -1730,6 +1558,7 @@ const GroupsRequestForm = ({
                                 ${element.isLabeled ? "fr-req-fieldset" : ""} 
                                 ${!element.valid ? "not_valid" : ""}
                                 ${mainEl?.disabled ? 'fr-req-el-disabled' : ''}
+                                ${considerDisabledInput(settingApiPayload, mainEl) ? 'input-output-disabled' : ''}
                             `}
                         >
                             <div className="d-flex keywords-label-wrapper">
@@ -1793,6 +1622,7 @@ const GroupsRequestForm = ({
                             className={`fr-req-element fr-req-el-${element.type} 
                                 ${element.isLabeled ? "fr-req-fieldset" : ""}
                                 ${mainEl?.disabled ? 'fr-req-el-disabled' : ''}
+                                ${considerDisabledInput(settingApiPayload, mainEl) ? 'input-output-disabled' : ''}
                             `}
                         >
                             {element.isLabeled ? <label>{element.inLabel}</label> : ""}
@@ -1809,6 +1639,7 @@ const GroupsRequestForm = ({
                                     value={element.value}
                                     placeholder="Type.."
                                     onChange={(e) => fillInputChange(e.target.value, element)}
+                                    disabled={considerDisabledInput(settingApiPayload, mainEl)}
                                 />
                                 {
                                     <CustomSelect
@@ -1838,10 +1669,11 @@ const GroupsRequestForm = ({
                                     }
                                     saveKeyWordsHandle(element);
                                 }}
-                                disabled={
-                                    element.options.filter((el) => el.label === element.value)
-                                        .length > 0
-                                }
+                                // disabled={
+                                //     element.options.filter((el) => el.label === element.value)
+                                //         .length > 0
+                                // }
+                                disabled={considerDisabledInput(settingApiPayload, mainEl)}
                             >
                                 <CheckIcon />
                             </span>

@@ -70,8 +70,8 @@ const SentFromGroups = () => {
                 setIsRunnable(false)
                 setEditType(null);
             }
-            const allGroups = await fetchMesssageGroups();
-            injectAGroupsOptionToFormSettings(allGroups.data.data)
+            // const allGroups = await fetchMesssageGroups();
+            // injectAGroupsOptionToFormSettings(allGroups.data.data)
         })()
     }, [])
 
@@ -187,7 +187,8 @@ const SentFromGroups = () => {
     // }, []);
 
 
-
+    // THIS WILL RESPONSIBLE FOR EVERYTIME DATA FETCHING UPDATING SO DON'T USE FOR ANY OTHER WORKS..
+    // USE ANOTHER USE_EFFECT INSTEAD OF THIS ONE PLEASE
     useEffect(() => {
         // console.log("i am re rendered......");
         (async () => {
@@ -456,7 +457,6 @@ const SentFromGroups = () => {
                         Authorization: fr_token,
                     },
                 });
-<<<<<<< Updated upstream
 
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
@@ -469,16 +469,6 @@ const SentFromGroups = () => {
                     else {
                         chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })
                     }
-=======
-                console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
-                const runningStatus = await helper.getDatafromStorage("runAction_group")
-                await helper.saveDatainStorage("runAction_group", "running");
-                if(runningStatus === "pause"){
-                    chrome.runtime.sendMessage({action:"reSendFriendRequestInGroup", response : updatePayload, source:"groups"})
-                }
-                else {
-                    chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
->>>>>>> Stashed changes
                 }
                 // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
 

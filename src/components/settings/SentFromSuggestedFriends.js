@@ -71,7 +71,6 @@ const SentFromSuggestedFriends = () => {
     //     }
     // }, [editType, formSetup]);
 
-
     useEffect(() => {
         // console.log("i am re rendered......");
         (async () => {
@@ -87,6 +86,17 @@ const SentFromSuggestedFriends = () => {
                 setIsRunnable(false)
                 setEditType(null);
             }
+            // const allGroups = await fetchMesssageGroups();
+            // injectAGroupsOptionToFormSettings(allGroups.data.data)
+        })()
+    }, []);
+
+
+    // THIS WILL RESPONSIBLE FOR EVERYTIME DATA FETCHING UPDATING SO DON'T USE FOR ANY OTHER WORKS..
+    // USE ANOTHER USE_EFFECT INSTEAD OF THIS ONE PLEASE
+    useEffect(() => {
+        // console.log("i am re rendered......");
+        (async () => {
             const allGroups = await fetchMesssageGroups();
             injectAGroupsOptionToFormSettings(allGroups.data.data)
         })()
@@ -226,7 +236,7 @@ const SentFromSuggestedFriends = () => {
             requestSuggestedFrndsAndFrndsOfFrndsFormSettings && setFormSetup(requestSuggestedFrndsAndFrndsOfFrndsFormSettings);
             requestFormAdvncSettings && setAdvcFormAssets(requestFormAdvncSettings);
         })();
-    }, []);
+    }, [editType]);
 
 
 

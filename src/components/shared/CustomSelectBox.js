@@ -3,7 +3,7 @@ import useOutSideClick from "../../helper/useOutSideClick";
 import { CrossWhite, DropDownIcon, NotFoundIcon, SearchIcon } from "../../assets/icons/Icons";
 import { utils } from "../../helper/utils";
 
-function CustomSelectBox({ element, onClickOption, className = "", needSearchBar = false, barWitdh = "100%" }) {
+function CustomSelectBox({ element, onClickOption, className = "", needSearchBar = false, barWitdh = "100%", disabled = false }) {
     const [currentOptions, SetcurrentOptions] = useState(element.options);
     const selectedOption = element.options.filter((item) => item.value === element.value);
     const [searchVal, setSearchVal] = useState("");
@@ -42,7 +42,7 @@ function CustomSelectBox({ element, onClickOption, className = "", needSearchBar
                     <DropDownIcon />
                 </span>
             </span>
-            {isComponentVisible && (
+            {isComponentVisible && !disabled && (
                 <ul>
                     {needSearchBar &&
                         <div className="custom-select-list-search">

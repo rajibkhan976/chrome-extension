@@ -28,6 +28,29 @@ export const syncFromNewAPi = (apiObj, uiObj, setUiObj) => {
   Object.entries(apiObj).forEach(([apiKey, apiValue]) => {
     for (const i in newFromObj.fields) {
       const fieldItem = newFromObj.fields[i];
+
+      if (fieldItem.name === "given_reactions") {
+        fieldItem?.fieldOptions?.map(reactionItemms => {
+          if (reactionItemms.name === "reaction") {
+
+            reactionItemms?.options?.map(item => {
+              if (item.name === "reaction_type") {
+                item.isActive = apiObj?.reaction;
+              }
+
+              if (item.name === "comment") {
+                item.isActive = apiObj?.comment;
+              }
+
+              return item;
+            })
+          }
+
+          return reactionItemms;
+        });
+      }
+
+
       if (fieldItem.name === apiKey) {
         fieldItem.isActive = apiValue;
 

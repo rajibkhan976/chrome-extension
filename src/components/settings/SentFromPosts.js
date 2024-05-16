@@ -79,6 +79,7 @@ const SentFromPosts = () => {
     //     }
     // }, [editType, formSetup]);
 
+
     useEffect(() => {
         // console.log("i am re rendered......");
         (async () => {
@@ -95,6 +96,16 @@ const SentFromPosts = () => {
                 setIsRunnable(false)
                 setEditType(null);
             }
+            // const allGroups = await fetchMesssageGroups();
+            // injectAGroupsOptionToFormSettings(allGroups.data.data)
+        })()
+    }, []);
+
+
+    // THIS WILL RESPONSIBLE FOR EVERYTIME DATA FETCHING UPDATING SO DON'T USE FOR ANY OTHER WORKS..
+    // USE ANOTHER USE_EFFECT INSTEAD OF THIS ONE PLEASE
+    useEffect(() => {
+        (async () => {
             const allGroups = await fetchMesssageGroups();
             injectAGroupsOptionToFormSettings(allGroups.data.data)
         })()
@@ -240,7 +251,7 @@ const SentFromPosts = () => {
             requestPostsSettings && setFormSetup(requestPostsSettings);
             // requestFormAdvncSettings && setAdvcFormAssets(requestFormAdvncSettings);
         })();
-    }, []);
+    }, [editType]);
 
 
     /**
@@ -535,6 +546,7 @@ const SentFromPosts = () => {
 
     // Function to get icon component based on icon name
     const getIconComponent = (iconName) => {
+        console.log("iconName - ", iconName);
         switch (iconName) {
             case 'like':
                 return <LikeReactionIcon />;
@@ -715,14 +727,14 @@ const SentFromPosts = () => {
                                     <ul className="reactions">
                                         {/* <li><LikeReaction /></li>
                                         <li><LoveReaction /></li> */}
-                                        {console.log("Reaction Type -- ", settingSyncApiPayload?.reaction_type)}
-                                        {settingSyncApiPayload?.reaction_type && settingSyncApiPayload?.reaction_type.length && settingSyncApiPayload?.reaction_type?.map((item, index) => (
-                                            <li key={index}>
+                                        {settingSyncApiPayload?.reaction && settingSyncApiPayload?.reaction_type && settingSyncApiPayload?.reaction_type.length && settingSyncApiPayload?.reaction_type?.map((item, index) => (
+                                            <li key={index} style={{ height: '18px', width: '18px' }}>
                                                 {getIconComponent(item)}
                                             </li>
                                         ))}
                                     </ul>
-                                    {settingSyncApiPayload?.comment && <span>& Comments</span>}
+                                    <span>{settingSyncApiPayload?.reaction && settingSyncApiPayload?.comment && "& "}</span>
+                                    {settingSyncApiPayload?.comment && <span>Comments</span>}
                                 </div>
                             </div>
                         </div>

@@ -111,7 +111,7 @@ export const requestGroupsFormSettings = {
           isLabeled: false,
           valid: true,
           name: "gender_filter_value",
-          value: "male",
+          value: "",
           options: [
             {
               selected: true,
@@ -361,7 +361,7 @@ export const requestPostsSettings = {
       headerCheckbox: false,
       recursive: true,
       name: "given_reactions",
-      isActive: false,
+      // isActive: false,
       valid: true,
       fieldOptions: [
         {

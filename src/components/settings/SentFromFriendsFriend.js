@@ -71,7 +71,6 @@ const SentFromFriendsFriend = () => {
     //     }
     // }, [editType, formSetup]);
 
-
     useEffect(() => {
         // console.log("i am re rendered......");
         (async () => {
@@ -87,6 +86,16 @@ const SentFromFriendsFriend = () => {
                 setIsRunnable(false)
                 setEditType(null);
             }
+            // const allGroups = await fetchMesssageGroups();
+            // injectAGroupsOptionToFormSettings(allGroups.data.data)
+        })()
+    }, []);
+
+
+    // THIS WILL RESPONSIBLE FOR EVERYTIME DATA FETCHING UPDATING SO DON'T USE FOR ANY OTHER WORKS..
+    // USE ANOTHER USE_EFFECT INSTEAD OF THIS ONE PLEASE
+    useEffect(() => {
+        (async () => {
             const allGroups = await fetchMesssageGroups();
             injectAGroupsOptionToFormSettings(allGroups.data.data)
         })()
@@ -226,7 +235,7 @@ const SentFromFriendsFriend = () => {
             requestSuggestedFrndsAndFrndsOfFrndsFormSettings && setFormSetup(requestSuggestedFrndsAndFrndsOfFrndsFormSettings);
             requestFormAdvncSettings && setAdvcFormAssets(requestFormAdvncSettings);
         })();
-    }, []);
+    }, [editType]);
 
 
 
@@ -362,7 +371,6 @@ const SentFromFriendsFriend = () => {
                         Authorization: fr_token,
                     },
                 });
-<<<<<<< Updated upstream
 
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
@@ -384,18 +392,6 @@ const SentFromFriendsFriend = () => {
 
                 if (!silentSave) {
                     setOpenSuccessNotification(true);
-=======
-                
-                console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
-                
-                const runningStatus = await helper.getDatafromStorage("runAction_friend")
-                await helper.saveDatainStorage("runAction_friend", "running");
-                if(runningStatus === "pause"){
-                    chrome.runtime.sendMessage({action:"reSendFriendRequestInGroup", response : updatePayload, source:"friends"})
-                }
-                else {
-                    chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
->>>>>>> Stashed changes
                 }
 
             } catch (error) {
@@ -675,7 +671,20 @@ const SentFromFriendsFriend = () => {
                             </figure>
                             <div className="setting-content">
                                 <h6>Mutual friend(s)</h6>
-                                <p>{<span className="comparator-icon"><LessThanEquals /></span>}{'10'}</p>
+                                {/* <p>{<span className="comparator-icon"><LessThanEquals /></span>}{'10'}</p> */}
+                                <p>
+                                    {
+                                        settingSyncApiPayload?.lookup_for_mutual_friend_condition === "<"
+                                            ? (
+                                                <span className="comparator-icon"><LessThanEquals /></span>
+                                            )
+                                            :
+                                            (
+                                                <span className="comparator-icon" style={{ textDecoration: 'underline' }}>{">"}</span>
+                                            )
+                                    }
+                                    {settingSyncApiPayload?.mutual_friend_value}
+                                </p>
                             </div>
                         </div>
                         <div className="setting-show d-flex">
