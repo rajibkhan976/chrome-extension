@@ -562,6 +562,10 @@ label.fr-ext-checkbox {
 .fr-req-el-selectInput .btn-selectInput {
     height: 30px;
     width: 50px;
+
+    &.disable {
+        pointer-events: none;
+    }
 }
 
 .custom-select {

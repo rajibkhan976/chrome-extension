@@ -1669,12 +1669,12 @@ const GroupsRequestForm = ({
                                     element.options.filter((el) => el.label === element.value)
                                         .length > 0
                                     // ? "disable"
-                                    ? ""
+                                    ? "disable"
                                     : ""
                                     }`}
                                 onClick={(e) => {
                                     e.preventDefault();
-                                    
+
                                     if (
                                         element.value.length === 0 ||
                                         element.valueArr.length === 0
