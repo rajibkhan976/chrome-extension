@@ -36,6 +36,7 @@ export const syncFromNewAPi = (apiObj, uiObj, setUiObj) => {
             reactionItemms?.options?.map(item => {
               if (item.name === "reaction_type") {
                 item.isActive = apiObj?.reaction;
+                item.value = apiObj?.reaction_type;
               }
 
               if (item.name === "comment") {
@@ -253,6 +254,22 @@ export const checkValidity = (dataObj, setdata) => {
       valid = false;
       data.fields[fidx].valid = false;
       reason = "Please choose the look up interval atleast 3 min."
+    }
+
+    if (data.fields[fidx].name === "lookup_for_mutual_friend") {
+      data.fields[fidx]?.fieldOptions?.map(option => {
+        if (option?.name === "mutual_friend_value") {
+          if (option?.value === "" || option?.value?.length < 1) {
+            option.valid = false;
+            valid = false;
+          }
+
+          if (parseInt(option?.value) <= 0) {
+            option.valid = false;
+            valid = false;
+          }
+        }
+      });
     }
 
     if (data.fields[fidx].headerCheckbox) {

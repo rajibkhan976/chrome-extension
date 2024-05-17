@@ -53,7 +53,7 @@ const SentFromFriendsFriend = () => {
     const settingsType = 11;
     const [sendFrndReqGroupName, setSendFrndReqGroupName] = useState("");
     const [acceptReqGroupName, setAcceptReqGroupName] = useState("");
-    const [stats, setStats] = useState({queueCount : 0, memberCount : 0, source: "friends" });
+    const [stats, setStats] = useState({ queueCount: 0, memberCount: 0, source: "friends" });
 
 
     // FETCH SETTINGS DATA..
@@ -78,11 +78,11 @@ const SentFromFriendsFriend = () => {
             const runningStatus = await helper.getDatafromStorage("runAction_friend");
             if (runningStatus === "running") {
                 setIsRunnable(true);
-            const showCount = await helper.getDatafromStorage("showCount");
-            console.log("showCount :: ", showCount);
-            if(showCount && showCount.source === "friends")
-                setStats(showCount)
-        }
+                const showCount = await helper.getDatafromStorage("showCount");
+                console.log("showCount :: ", showCount);
+                if (showCount && showCount.source === "friends")
+                    setStats(showCount)
+            }
             else if (runningStatus === "pause") {
                 setEditType("basic");
                 setIsRunnable(false)
@@ -91,10 +91,81 @@ const SentFromFriendsFriend = () => {
                 setIsRunnable(false)
                 setEditType(null);
             }
-            // const allGroups = await fetchMesssageGroups();
-            // injectAGroupsOptionToFormSettings(allGroups.data.data)
+
+            const allGroups = await fetchMesssageGroups();
+            await helper.saveDatainStorage('settingMsgGroups', allGroups.data.data);
+            injectAGroupsOptionToFormSettings(allGroups.data.data)
+            syncData();
         })()
     }, []);
+
+
+    const syncData = async () => {
+        setIsLoding(true);
+        const runningStatus = await helper.getDatafromStorage("runAction_friend");
+        const runningSettings = await helper.getDatafromStorage("frndsOfFrndsSettingsPayload");
+
+        if (runningStatus === "pause" || runningStatus === "running") {
+            if (runningSettings) {
+                let curr_settingObj = runningSettings;
+                // curr_settingObj = { ...curr_settingObj, is_settings_stop: false }
+                setSettingApiPayload(curr_settingObj);
+                setSettingSyncApiPayload(curr_settingObj);
+                syncFromNewAPi(curr_settingObj, formSetup, setFormSetup);
+                setGroupName(curr_settingObj?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
+                setGroupName(curr_settingObj?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
+
+                setIsLoding(false);
+            }
+
+        } else {
+            // getting frndReq settings 8 means for group settings..
+            getFrndReqSet(settingsType)
+                .then((res) => {
+                    const apiObj = res.data.data;
+                    // console.log("The api of friend req set>>>///||||\\\\:::", apiObj);
+                    setFriendReqSet(apiObj[0]);
+                    if (apiObj?.length > 0) {
+                        syncPayload(apiObj[0], { ...settingApiPayload, is_settings_stop: false }, setSettingApiPayload);
+                        removeEle(apiObj[0], removeforBasic).then((response) => {
+                            const apiCoreResponse = apiObj[0];
+
+                            (async () => {
+                                if (apiCoreResponse?._id) {
+                                    await helper.saveDatainStorage('frndsOfFrndsSettingId', { settingsId: apiCoreResponse?._id });
+                                    response.settingsId = apiCoreResponse?._id;
+                                }
+                            })();
+
+                            syncFromNewAPi(response, formSetup, setFormSetup);
+                            setSettingSyncApiPayload(response);
+                            // setSettingApiPayload(response);
+                            setIsLoding(false);
+                            setGroupName(response?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
+                            setGroupName(response?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
+                        });
+                        // generateFormElements();
+                    } else {
+                        setIsLoding(false);
+                    }
+                })
+                .catch((err) => {
+                    // console.log("Error happened in Setting api call:::", err);
+                });
+        }
+
+        // if (props.settingPage === "setSettingsForGroup") {
+        //     setRequestActive("groups");
+        //     setIsRunnable(true);
+
+        //     // console.log("runningStatus ::: ", runningStatus);
+        //     if (runningStatus === "running") {
+        //         // console.log("runningrunningrunning", requestActive);
+        //         setrunningScript(true);
+        //     }
+        // }
+        requestSuggestedFrndsAndFrndsOfFrndsFormSettings && setFormSetup(requestSuggestedFrndsAndFrndsOfFrndsFormSettings);
+    }
 
 
     // THIS WILL RESPONSIBLE FOR EVERYTIME DATA FETCHING UPDATING SO DON'T USE FOR ANY OTHER WORKS..
@@ -102,6 +173,7 @@ const SentFromFriendsFriend = () => {
     useEffect(() => {
         (async () => {
             const allGroups = await fetchMesssageGroups();
+            await helper.saveDatainStorage('settingMsgGroups', allGroups.data.data);
             injectAGroupsOptionToFormSettings(allGroups.data.data)
         })()
 
@@ -175,72 +247,8 @@ const SentFromFriendsFriend = () => {
             });
 
         ///Fetching data of friend request setting fron api
-        (async () => {
-            setIsLoding(true);
-            const runningStatus = await helper.getDatafromStorage("runAction_friend");
-            const runningSettings = await helper.getDatafromStorage("frndsOfFrndsSettingsPayload");
-
-            if (runningStatus === "pause" || runningStatus === "running") {
-                if (runningSettings) {
-                    let curr_settingObj = JSON.parse(runningSettings);
-                    curr_settingObj = { ...curr_settingObj, is_settings_stop: false }
-
-                    setSettingApiPayload(curr_settingObj);
-                    setSettingSyncApiPayload(curr_settingObj);
-                    syncFromNewAPi(curr_settingObj, formSetup, setFormSetup);
-                    setIsLoding(false);
-                }
-
-            } else {
-                // getting frndReq settings 8 means for group settings..
-                getFrndReqSet(settingsType)
-                    .then((res) => {
-                        const apiObj = res.data.data;
-                        // console.log("The api of friend req set>>>///||||\\\\:::", apiObj);
-                        setFriendReqSet(apiObj[0]);
-                        if (apiObj?.length > 0) {
-                            syncPayload(apiObj[0], { ...settingApiPayload, is_settings_stop: false }, setSettingApiPayload);
-                            removeEle(apiObj[0], removeforBasic).then((response) => {
-                                const apiCoreResponse = apiObj[0];
-
-                                (async () => {
-                                    if (apiCoreResponse?._id) {
-                                        await helper.saveDatainStorage('frndsOfFrndsSettingId', { settingsId: apiCoreResponse?._id });
-                                        response.settingsId = apiCoreResponse?._id;
-                                    }
-                                })();
-
-                                syncFromNewAPi(response, formSetup, setFormSetup);
-                                setSettingSyncApiPayload(response);
-                                // setSettingApiPayload(response);
-                                setIsLoding(false);
-                                setGroupName(response?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
-                                setGroupName(response?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
-                            });
-                            // generateFormElements();
-                        } else {
-                            setIsLoding(false);
-                        }
-                    })
-                    .catch((err) => {
-                        console.log("Error happened in Setting api call:::", err);
-                    });
-            }
-
-            // if (props.settingPage === "setSettingsForGroup") {
-            //     setRequestActive("groups");
-            //     setIsRunnable(true);
-
-            //     // console.log("runningStatus ::: ", runningStatus);
-            //     if (runningStatus === "running") {
-            //         // console.log("runningrunningrunning", requestActive);
-            //         setrunningScript(true);
-            //     }
-            // }
-            requestSuggestedFrndsAndFrndsOfFrndsFormSettings && setFormSetup(requestSuggestedFrndsAndFrndsOfFrndsFormSettings);
-            requestFormAdvncSettings && setAdvcFormAssets(requestFormAdvncSettings);
-        })();
-    }, [editType]);
+        syncData();
+    }, [editType, isRunnable]);
 
 
 
@@ -425,8 +433,8 @@ const SentFromFriendsFriend = () => {
                     },
                 });
                 console.log("settingRes : ", settingRes._id, settingRes)
-                if(settingRes._id)
-                    payload = {...payload, settingsId : settingRes._id}
+                if (settingRes._id)
+                    payload = { ...payload, settingsId: settingRes._id }
 
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
@@ -681,17 +689,21 @@ const SentFromFriendsFriend = () => {
                                 <h6>Mutual friend(s)</h6>
                                 {/* <p>{<span className="comparator-icon"><LessThanEquals /></span>}{'10'}</p> */}
                                 <p>
-                                    {
-                                        settingSyncApiPayload?.lookup_for_mutual_friend_condition === "<"
-                                            ? (
-                                                <span className="comparator-icon"><LessThanEquals /></span>
-                                            )
-                                            :
-                                            (
-                                                <span className="comparator-icon" style={{ textDecoration: 'underline' }}>{">"}</span>
-                                            )
+                                    {settingSyncApiPayload?.lookup_for_mutual_friend ?
+                                        <>
+                                            {settingSyncApiPayload?.lookup_for_mutual_friend_condition === "<"
+                                                ? (
+                                                    <span className="comparator-icon"><LessThanEquals /></span>
+                                                )
+                                                :
+                                                (
+                                                    <span className="comparator-icon" style={{ textDecoration: 'underline' }}>{">"}</span>
+                                                )}
+                                            {settingSyncApiPayload?.mutual_friend_value}
+                                        </>
+                                        :
+                                        'N/A'
                                     }
-                                    {settingSyncApiPayload?.mutual_friend_value}
                                 </p>
                             </div>
                         </div>
@@ -711,16 +723,16 @@ const SentFromFriendsFriend = () => {
                             <div className="setting-content">
                                 <h6>Country</h6>
                                 <p>
-                                    {settingSyncApiPayload?.tier_filter || settingSyncApiPayload?.country_filter_value?.length ? (
+                                    {settingSyncApiPayload?.country_filter_enabled ? (
                                         <>
                                             <p>{settingSyncApiPayload?.tier_filter_value}</p>
-                                            {settingSyncApiPayload?.country_filter_value?.length > 0 && ''}
-                                            {settingSyncApiPayload?.country_filter_value?.map((value, index) => (
+                                            {/* {settingSyncApiPayload?.country_filter_value?.length > 0 && ''} */}
+                                            {settingSyncApiPayload?.country_filter_value?.length ? settingSyncApiPayload?.country_filter_value?.map((value, index) => (
                                                 <React.Fragment key={index}>
                                                     {value}
                                                     {index < settingSyncApiPayload.country_filter_value.length - 1 ? ', ' : ''}
                                                 </React.Fragment>
-                                            ))}
+                                            )) : ''}
                                         </>
                                     ) : (
                                         'N/A'

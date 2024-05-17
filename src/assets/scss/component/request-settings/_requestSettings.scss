@@ -844,5 +844,11 @@ label.fr-ext-checkbox {
 
 .input-output-disabled {
     pointer-events: none;
-    opacity: .5;
+    opacity: 0.5;
+}
+
+.error-msg-new {
+    margin-top: 35px !important;
+    font-size: 10px;
+    position: fixed !important;
 }

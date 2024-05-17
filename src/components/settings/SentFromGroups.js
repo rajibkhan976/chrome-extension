@@ -75,121 +75,93 @@ const SentFromGroups = () => {
                 setIsRunnable(false)
                 setEditType(null);
             }
-            // const allGroups = await fetchMesssageGroups();
-            // injectAGroupsOptionToFormSettings(allGroups.data.data)
+
+            const allGroups = await fetchMesssageGroups();
+            await helper.saveDatainStorage('settingMsgGroups', allGroups.data.data);
+            injectAGroupsOptionToFormSettings(allGroups.data.data)
+            syncData();
         })()
     }, [])
 
-    // useEffect(()=>{
-    //     console.log("isRunnable _____________> ", isRunnable);
-    // }, [isRunnable])
+    
+    const syncData = async () => {
+        setIsLoding(true);
+        const runningStatus = await helper.getDatafromStorage("runAction");
+        const runningSettings = await helper.getDatafromStorage(
+            // "curr_reqSettings"
+            "groupSettingsPayload"
+        );
 
-    // FETCH SETTINGS DATA FROM LOCAL STORAGE..
-    const fetchSetingsLocalData = async () => {
-        return await helper.getDatafromStorage('groupSettingsPayload');
-    };
-
-    const fetchSettingsAPIData = async () => {
-        const fr_token = await helper.getDatafromStorage("fr_token");
-        const fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
-
-        if (fr_token && fbTokenAndId?.userID) {
-            const bodyObj = {
-                "fbUserId": fbTokenAndId?.userID,
-                "settingsType": settingsType
+        if (runningStatus === "pause" || runningStatus === "running") {
+            if (runningSettings) {
+                let curr_settingObj = runningSettings;
+                // curr_settingObj = { ...curr_settingObj, is_settings_stop: false }
+                setSettingApiPayload(curr_settingObj);
+                setSettingSyncApiPayload(curr_settingObj);
+                syncFromNewAPi(curr_settingObj, formSetup, setFormSetup);
+                setGroupName(curr_settingObj?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
+                setGroupName(curr_settingObj?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
+                setIsLoding(false);
             }
 
-            const response = await axios.post(`${process.env.REACT_APP_GET_FRIEND_REQUEST_URL}`, bodyObj, {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: fr_token,
-                },
-            });
+        } else {
+            // getting frndReq settings 8 means for group settings..
+            getFrndReqSet(settingsType)
+                .then((res) => {
+                    const apiObj = res.data.data;
+                    // console.log("The api of friend req set>>>///||||\\\\:::", apiObj);
+                    setFriendReqSet(apiObj[0]);
+                    if (apiObj?.length > 0) {
+                        syncPayload(apiObj[0], { ...settingApiPayload, is_settings_stop: false }, setSettingApiPayload);
+                        removeEle(apiObj[0], removeforBasic).then((response) => {
+                            const apiCoreResponse = apiObj[0];
 
-            const responseData = response?.data;
+                            (async () => {
+                                if (apiCoreResponse?._id) {
+                                    await helper.saveDatainStorage('groupSettingsId', { settingsId: apiCoreResponse?._id });
+                                    response.settingsId = apiCoreResponse?._id;
+                                }
+                            })();
 
-            if (responseData?.data[0]) {
-                const payload = responseData?.data[0];
-                // console.log("payload -- ", payload);
-                setSettingSyncApiPayload(payload);
-                setSettingApiPayload(payload);
+                            // (async () => {
+                            //     const localData = await fetchSetingsLocalData();
 
-                if (payload?._id) {
-                    await helper.saveDatainStorage('groupSettingsId', { settingsId: payload?._id });
-                    payload.settingsId = payload?._id;
-                    delete payload._id;
-                }
+                            //     if (localData) {
+                            //         setSettingSyncApiPayload(localData);
+                            //         setSettingApiPayload(localData);
+                            //     }
+                            // })();
 
-                return payload;
-            }
-
-            return response;
+                            syncFromNewAPi(response, formSetup, setFormSetup);
+                            setSettingSyncApiPayload(response);
+                            // setSettingApiPayload(response);
+                            setIsLoding(false);
+                            setGroupName(response?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
+                            setGroupName(response?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
+                        });
+                        // generateFormElements();
+                    } else {
+                        setIsLoding(false);
+                    }
+                })
+                .catch((err) => {
+                    console.log("Error happened in Setting api call:::", err);
+                });
         }
 
-        return false;
+        // if (props.settingPage === "setSettingsForGroup") {
+        //     setRequestActive("groups");
+        //     setIsRunnable(true);
+
+        //     // console.log("runningStatus ::: ", runningStatus);
+        //     if (runningStatus === "running") {
+        //         // console.log("runningrunningrunning", requestActive);
+        //         setrunningScript(true);
+        //     }
+        // }
+        requestGroupsFormSettings && setFormSetup(requestGroupsFormSettings);
+        // requestFormAdvncSettings && setAdvcFormAssets(requestFormAdvncSettings);
     };
-
-
-
-    // FETCH SETTINGS DATA..
-    // useEffect(() => {
-    //     if (editType !== "basic") {
-    //         (async () => {
-    //             const runningSettings = await helper.getDatafromStorage("groupSettingsPayload");
-
-    //             if (runningSettings) {
-    //                 setSettingApiPayload(runningSettings);
-    //                 setSettingSyncApiPayload(runningSettings);
-    //                 syncFromApi(runningSettings, formSetup, setFormSetup);
-    //                 setIsLoding(false);
-    //             }
-    //         })();
-    //     }
-    // }, [editType, formSetup]);
-
-    // useEffect(() => {
-    //     (async () => {
-    //         const fr_token = await helper.getDatafromStorage("fr_token");
-    //         const groupsResponse = await axios.get(`${process.env.REACT_APP_FETCH_MESSAGE_GROUPS}`, {
-    //             headers: {
-    //                 "Content-Type": "application/json",
-    //                 Authorization: fr_token,
-    //             },
-    //         });
-
-    //         const responseData = groupsResponse?.data;
-
-    //         if (responseData?.data && responseData?.data?.length) {
-    //             // only take the group_name from the response
-    //             const groupSelects = responseData?.data?.map((item) => ({
-    //                 selected: false,
-    //                 label: item.group_name,
-    //                 value: item._id,
-    //             }));
-    //             // HAVE TO CHANGE FORMsETUP TO ARRAY..
-    //             const placeholderForm = { ...formSetup };
-
-    //             const newObj = {
-    //                 ...placeholderForm,
-    //                 fields: placeholderForm?.fields?.map((formItem) => {
-    //                     return {
-    //                         ...formItem,
-    //                         fieldOptions: formItem?.fieldOptions?.map((option) => {
-    //                             if (option?.name === "send_message_when_friend_request_sent_message_group_id" ||
-    //                                 option?.name === "send_message_when_friend_request_accepted_message_group_id"
-    //                             ) {
-    //                                 option.options = groupSelects;
-    //                             }
-    //                             return option;
-    //                         })
-    //                     };
-    //                 })
-    //             };
-
-    //             setFormSetup(newObj);
-    //         }
-    //     })();
-    // }, []);
 
 
     // THIS WILL RESPONSIBLE FOR EVERYTIME DATA FETCHING UPDATING SO DON'T USE FOR ANY OTHER WORKS..
@@ -198,6 +170,7 @@ const SentFromGroups = () => {
         // console.log("i am re rendered......");
         (async () => {
             const allGroups = await fetchMesssageGroups();
+            await helper.saveDatainStorage('settingMsgGroups', allGroups.data.data);
             injectAGroupsOptionToFormSettings(allGroups.data.data)
         })()
 
@@ -271,85 +244,19 @@ const SentFromGroups = () => {
             });
 
         ///Fetching data of friend request setting fron api
-        (async () => {
-            setIsLoding(true);
-            const runningStatus = await helper.getDatafromStorage("runAction");
-            const runningSettings = await helper.getDatafromStorage(
-                // "curr_reqSettings"
-                "groupSettingsPayload"
-            );
+        syncData();
+    }, [editType, isRunnable]);
 
-            if (runningStatus === "pause" || runningStatus === "running") {
-                if (runningSettings) {
-                    let curr_settingObj = JSON.parse(runningSettings);
-                    curr_settingObj = { ...curr_settingObj, is_settings_stop: false }
-                    setSettingApiPayload(curr_settingObj);
-                    setSettingSyncApiPayload(curr_settingObj);
-                    syncFromNewAPi(curr_settingObj, formSetup, setFormSetup);
-                    setIsLoding(false);
-                }
-
-            } else {
-                // getting frndReq settings 8 means for group settings..
-                getFrndReqSet(settingsType)
-                    .then((res) => {
-                        const apiObj = res.data.data;
-                        // console.log("The api of friend req set>>>///||||\\\\:::", apiObj);
-                        setFriendReqSet(apiObj[0]);
-                        if (apiObj?.length > 0) {
-                            syncPayload(apiObj[0], { ...settingApiPayload, is_settings_stop: false }, setSettingApiPayload);
-                            removeEle(apiObj[0], removeforBasic).then((response) => {
-                                const apiCoreResponse = apiObj[0];
-
-                                (async () => {
-                                    if (apiCoreResponse?._id) {
-                                        await helper.saveDatainStorage('groupSettingsId', { settingsId: apiCoreResponse?._id });
-                                        response.settingsId = apiCoreResponse?._id;
-                                    }
-                                })();
-
-                                // (async () => {
-                                //     const localData = await fetchSetingsLocalData();
-
-                                //     if (localData) {
-                                //         setSettingSyncApiPayload(localData);
-                                //         setSettingApiPayload(localData);
-                                //     }
-                                // })();
-
-                                syncFromNewAPi(response, formSetup, setFormSetup);
-                                setSettingSyncApiPayload(response);
-                                // setSettingApiPayload(response);
-                                setIsLoding(false);
-                                setGroupName(response?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
-                                setGroupName(response?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
-                            });
-                            // generateFormElements();
-                        } else {
-                            setIsLoding(false);
-                        }
-                    })
-                    .catch((err) => {
-                        console.log("Error happened in Setting api call:::", err);
-                    });
-            }
-
-            // if (props.settingPage === "setSettingsForGroup") {
-            //     setRequestActive("groups");
-            //     setIsRunnable(true);
-
-            //     // console.log("runningStatus ::: ", runningStatus);
-            //     if (runningStatus === "running") {
-            //         // console.log("runningrunningrunning", requestActive);
-            //         setrunningScript(true);
-            //     }
-            // }
-            requestGroupsFormSettings && setFormSetup(requestGroupsFormSettings);
-            // requestFormAdvncSettings && setAdvcFormAssets(requestFormAdvncSettings);
-        })();
+    // FETCH SETTINGS DATA..
+    useEffect(() => {
+        if (editType !== "basic") {
+            (async () => {
+                const localData = await fetchSetingsLocalData();
+                // console.log("Local Data -- ", localData);
+                setSettingSyncApiPayload(localData);
+            })();
+        }
     }, [editType]);
-
-
 
     /**
      * 
@@ -386,6 +293,13 @@ const SentFromGroups = () => {
             setFormSetup(newObj);
         }
     };
+
+
+    // FETCH SETTINGS DATA FROM LOCAL STORAGE..
+    const fetchSetingsLocalData = async () => {
+        return await helper.getDatafromStorage('groupSettingsPayload');
+    };
+
 
 
     /**
@@ -505,15 +419,15 @@ const SentFromGroups = () => {
         } else {
 
             try {
-                const settingRes= await axios.post(`${process.env.REACT_APP_SAVE_FRIEND_REQUEST_SETTINGS}`, payload, {
+                const settingRes = await axios.post(`${process.env.REACT_APP_SAVE_FRIEND_REQUEST_SETTINGS}`, payload, {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: fr_token,
                     },
                 });
                 console.log("settingRes : ", settingRes._id, settingRes)
-                if(settingRes._id)
-                    payload = {...payload, settingsId : settingRes._id}
+                if (settingRes._id)
+                    payload = { ...payload, settingsId: settingRes._id }
 
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
@@ -784,16 +698,16 @@ const SentFromGroups = () => {
                                 <h6>Country</h6>
                                 {/* <p>{'Tier 3'}</p> */}
                                 <p>
-                                    {settingSyncApiPayload?.tier_filter || settingSyncApiPayload?.country_filter_value?.length ? (
+                                    {settingSyncApiPayload?.country_filter_enabled ? (
                                         <>
                                             <p>{settingSyncApiPayload?.tier_filter_value}</p>
-                                            {settingSyncApiPayload?.country_filter_value?.length > 0 && ''}
-                                            {settingSyncApiPayload?.country_filter_value?.map((value, index) => (
+                                            {/* {settingSyncApiPayload?.country_filter_value?.length > 0 && ''} */}
+                                            {settingSyncApiPayload?.country_filter_value?.length ? settingSyncApiPayload?.country_filter_value?.map((value, index) => (
                                                 <React.Fragment key={index}>
                                                     {value}
                                                     {index < settingSyncApiPayload.country_filter_value.length - 1 ? ', ' : ''}
                                                 </React.Fragment>
-                                            ))}
+                                            )) : ''}
                                         </>
                                     ) : (
                                         'N/A'

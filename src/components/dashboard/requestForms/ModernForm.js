@@ -144,6 +144,23 @@ const GroupsRequestForm = ({
     // const [isTooltipVisible, setIsTooltipVisible] = useState(false);
 
     useEffect(() => {
+        if (formSetup) {
+            formSetup?.fields?.map(field => {
+                if (field?.name === "given_reactions") {
+                    if (field?.fieldOptions && field?.fieldOptions?.length && field?.fieldOptions[0]) {
+                        field?.fieldOptions[0]?.options && field?.fieldOptions[0]?.options?.length && field?.fieldOptions[0]?.options?.map(option => {
+                            if (option?.name === "reaction_type") {
+                                // UPDATE THE REACTION STATE..
+                                setSelectedReactionIcon(option?.value);
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    }, [formSetup]);
+
+    useEffect(() => {
         (async () => {
             const isPauedThenRun = await helper.getDatafromStorage("runAction");
             // console.log("isPauedThenRun ::: ", isPauedThenRun)
@@ -160,6 +177,43 @@ const GroupsRequestForm = ({
         resetToDefaultSetting();
         // }
     }, [isPaused]);
+
+
+    /**
+   * 
+   * @param {*} groupsArr 
+   */
+    const injectAGroupsOptionToFormSettings = (groupsArr) => {
+        if (groupsArr.length > 0) {
+            // console.log("hii data respwWWW>>>:", resdata);
+            let formSetPlaceholder = { ...formSetup };
+
+            const newObj = {
+                ...formSetPlaceholder,
+                fields: formSetPlaceholder.fields.map((item) => {
+                    return {
+                        ...item,
+                        fieldOptions: item.name !== "send_message_when_friend_request_sent" && item.name !== "send_message_when_friend_request_accepted" ? item.fieldOptions : item.fieldOptions.map((itemCh) => {
+                            // console.log("Got itemch name....>", itemCh.name);
+                            // console.log("groups array", groupsArr);
+                            itemCh.options = [];
+                            groupsArr.forEach((item) => {
+                                itemCh.options.push({
+                                    //selected: false,
+                                    label: item.group_name,
+                                    value: item._id,
+                                    id: item._id,
+                                });
+
+                            });
+                            return itemCh;
+                        }),
+                    };
+                }),
+            };
+            setFormSetup(newObj);
+        }
+    };
 
 
     const onEditChange = () => {
@@ -405,26 +459,6 @@ const GroupsRequestForm = ({
                                         country_filter: false,
                                     }));
                                 }
-                            }
-                            if (itemCh.valueArr) {
-                                itemCh.valueArr = [];
-                                itemCh.valid = true;
-                                setSettingApiPayload((prevState) => ({
-                                    ...prevState,
-                                    [itemCh.name]: [],
-                                }));
-                            }
-                        } else {
-                            itemCh.valid = true;
-                            if (itemCh.valueArr) {
-                                itemCh.valueArr = [];
-                                setSettingApiPayload((prevState) => ({
-                                    ...prevState,
-                                    [itemCh.name]: [],
-                                }));
-                            }
-                            if (itemCh.value) {
-                                itemCh.value = "";
                             }
                         }
 
@@ -889,6 +923,10 @@ const GroupsRequestForm = ({
                         if (itemCh.name === "mutual_friend_value") {
                             itemCh.value = value;
 
+                            if (value !== "" || parseInt(value) > 0) {
+                                itemCh.valid = true;
+                            }
+
                             setSettingApiPayload(prevState => ({
                                 ...prevState,
                                 mutual_friend_value: value
@@ -969,6 +1007,11 @@ const GroupsRequestForm = ({
                         if (item?.name === "mutual_friend_value") {
                             const currValue = parseInt(ele.value)
                             item.value = type === "+" ? currValue + 1 : currValue - 1;
+
+                            if (item.value < 0) {
+                                item.value = 0;
+                                currValue = 0;
+                            }
 
                             setSettingApiPayload((prevState) => ({
                                 ...prevState,
@@ -1117,17 +1160,17 @@ const GroupsRequestForm = ({
         const { offsetX, offsetY, movementX, movementY } = event.nativeEvent;
         let x = (offsetX - movementX) + 20, y = (offsetY - movementY) + 30;
         // console.log(':::::::', event.target.classList?.substring);
-        
-            if (y > event.target.clientHeight) {
-                // console.log('here', y);
-                y = event.target.clientHeight - 35
-            }
 
-            // console.log('event >>>', event);
-            if (y <= event.target.clientTop) {
-                // console.log('here', y);
-                y = event.target.clientTop
-            }
+        if (y > event.target.clientHeight) {
+            // console.log('here', y);
+            y = event.target.clientHeight - 35
+        }
+
+        // console.log('event >>>', event);
+        if (y <= event.target.clientTop) {
+            // console.log('here', y);
+            y = event.target.clientTop
+        }
         setTooltipPosition({ x, y });
         // setIsTooltipVisible(true);
     };
@@ -1269,7 +1312,7 @@ const GroupsRequestForm = ({
                             <div className={`fr-req-element fr-req-el-${element.type} ${mainEl?.disabled ? 'fr-req-el-disabled' : ''}`}>
                                 {element.options.map((optionCheckbox, el) => (
                                     <>
-                                    {console.log("optionCheckbox -- ", optionCheckbox)}
+                                        {console.log("optionCheckbox -- ", optionCheckbox)}
                                         <label className="fr-ext-radio-ui fr-radio-req fr-ext-checkbox-ui checkbox-container f-1" key={el}>
                                             <input
                                                 type="checkbox"
@@ -1511,7 +1554,7 @@ const GroupsRequestForm = ({
                                 </button>
                             </div>
                             {!element.valid && (
-                                <p className="error-msg">Field can't be empty or '0'!</p>
+                                <p className="error-msg error-msg-new">Can't be empty or '0'!</p>
                             )}
                         </div>
                     );
@@ -1522,6 +1565,7 @@ const GroupsRequestForm = ({
                             className={`fr-req-element fr-req-el-${element.type} 
                                 ${element.isLabeled ? "fr-req-fieldset" : ""} 
                                 ${!element.valid ? "not_valid" : ""}
+                                ${considerDisabledInput(settingApiPayload, mainEl) ? 'input-output-disabled' : ''}
                             `}
                         >
                             {element.isLabeled ? <label>{element.inLabel}</label> : ""}
@@ -1720,6 +1764,7 @@ const GroupsRequestForm = ({
 
                     <header className="fr-cell-header">
                         <h5 className={`fr-cell-header-title`}>
+                            {/* {console.log("formCell 0- ", formCell)} */}
                             {formCell.headerCheckbox && (
                                 <span className={`${formCell?.disabled ? 'fr-req-el-disabled' : ''}`}>
                                     <Checkbox

@@ -15,7 +15,8 @@ const Checkbox = ({
         <label className='fr-ext-checkbox'>
             <input
                 type="checkbox"
-                defaultChecked={isChecked}
+                defaultChecked={isChecked} 
+                checked={isChecked}
                 onChange={handleCheckChange}
                 disabled={isDisabled}
             />

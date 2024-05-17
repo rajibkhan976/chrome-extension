@@ -101,10 +101,83 @@ const SentFromPosts = () => {
                 setIsRunnable(false)
                 setEditType(null);
             }
-            // const allGroups = await fetchMesssageGroups();
-            // injectAGroupsOptionToFormSettings(allGroups.data.data)
+
+            const allGroups = await fetchMesssageGroups();
+            await helper.saveDatainStorage('settingMsgGroups', allGroups.data.data);
+            injectAGroupsOptionToFormSettings(allGroups.data.data)
+            syncData();
         })()
     }, []);
+
+    const syncData = async () => {
+        setIsLoding(true);
+        const runningStatus = await helper.getDatafromStorage("runAction_post");
+        const runningSettings = await helper.getDatafromStorage("postSettingsPayload");
+
+        if (runningStatus === "pause" || runningStatus === "running") {
+            if (runningSettings) {
+                // let curr_settingObj = JSON.parse(runningSettings);
+                let curr_settingObj = runningSettings;
+                curr_settingObj = { ...curr_settingObj, is_settings_stop: false }
+
+                setSettingApiPayload(curr_settingObj);
+                setSettingSyncApiPayload(curr_settingObj);
+                // syncFromApi(curr_settingObj, formSetup, setFormSetup);
+                syncFromNewAPi(curr_settingObj, formSetup, setFormSetup);
+                setIsLoding(false);
+            }
+
+        } else {
+            // getting frndReq settings 9 means for post settings..
+            getFrndReqSet(settingsType)
+                .then((res) => {
+                    const apiObj = res.data.data;
+                    // console.log("The api of friend req set>>>///||||\\\\:::", apiObj);
+                    setFriendReqSet(apiObj[0]);
+                    if (apiObj?.length > 0) {
+                        syncPayload(apiObj[0], { ...settingApiPayload, is_settings_stop: false }, setSettingApiPayload);
+                        removeEle(apiObj[0], removeforBasic).then((response) => {
+                            const apiCoreResponse = apiObj[0];
+
+                            (async () => {
+                                if (apiCoreResponse?._id) {
+                                    await helper.saveDatainStorage("postSettingId", {
+                                        settingsId: apiCoreResponse?._id,
+                                    });
+                                    response.settingsId = apiCoreResponse?._id;
+                                }
+                            })();
+
+                            // syncFromApi(response, formSetup, setFormSetup);
+                            syncFromNewAPi(response, formSetup, setFormSetup);
+                            setSettingSyncApiPayload(response);
+                            // setSettingApiPayload(response);
+                            setIsLoding(false);
+                            setGroupName(response?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
+                            setGroupName(response?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
+                        });
+                        // generateFormElements();
+                    } else {
+                        setIsLoding(false);
+                    }
+                })
+                .catch((err) => {
+                    console.log("Error happened in Setting api call:::", err);
+                });
+        }
+
+        // if (props.settingPage === "setSettingsForGroup") {
+        //     setRequestActive("groups");
+        //     setIsRunnable(true);
+
+        //     // console.log("runningStatus ::: ", runningStatus);
+        //     if (runningStatus === "running") {
+        //         // console.log("runningrunningrunning", requestActive);
+        //         setrunningScript(true);
+        //     }
+        // }
+        requestPostsSettings && setFormSetup(requestPostsSettings);
+    };
 
 
     // THIS WILL RESPONSIBLE FOR EVERYTIME DATA FETCHING UPDATING SO DON'T USE FOR ANY OTHER WORKS..
@@ -186,77 +259,9 @@ const SentFromPosts = () => {
             });
 
         ///Fetching data of friend request setting fron api
-        (async () => {
-            setIsLoding(true);
-            const runningStatus = await helper.getDatafromStorage("runAction_post");
-            const runningSettings = await helper.getDatafromStorage("postSettingsPayload");
+        syncData();
 
-            if (runningStatus === "pause" || runningStatus === "running") {
-                if (runningSettings) {
-                    // let curr_settingObj = JSON.parse(runningSettings);
-                    let curr_settingObj = runningSettings;
-                    curr_settingObj = { ...curr_settingObj, is_settings_stop: false }
-
-                    setSettingApiPayload(curr_settingObj);
-                    setSettingSyncApiPayload(curr_settingObj);
-                    // syncFromApi(curr_settingObj, formSetup, setFormSetup);
-                    syncFromNewAPi(curr_settingObj, formSetup, setFormSetup);
-                    setIsLoding(false);
-                }
-
-            } else {
-                // getting frndReq settings 9 means for post settings..
-                getFrndReqSet(settingsType)
-                    .then((res) => {
-                        const apiObj = res.data.data;
-                        // console.log("The api of friend req set>>>///||||\\\\:::", apiObj);
-                        setFriendReqSet(apiObj[0]);
-                        if (apiObj?.length > 0) {
-                            syncPayload(apiObj[0], { ...settingApiPayload, is_settings_stop: false }, setSettingApiPayload);
-                            removeEle(apiObj[0], removeforBasic).then((response) => {
-                                const apiCoreResponse = apiObj[0];
-
-                                (async () => {
-                                    if (apiCoreResponse?._id) {
-                                        await helper.saveDatainStorage("postSettingId", {
-                                            settingsId: apiCoreResponse?._id,
-                                        });
-                                        response.settingsId = apiCoreResponse?._id;
-                                    }
-                                })();
-
-                                // syncFromApi(response, formSetup, setFormSetup);
-                                syncFromNewAPi(response, formSetup, setFormSetup);
-                                setSettingSyncApiPayload(response);
-                                // setSettingApiPayload(response);
-                                setIsLoding(false);
-                                setGroupName(response?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
-                                setGroupName(response?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
-                            });
-                            // generateFormElements();
-                        } else {
-                            setIsLoding(false);
-                        }
-                    })
-                    .catch((err) => {
-                        console.log("Error happened in Setting api call:::", err);
-                    });
-            }
-
-            // if (props.settingPage === "setSettingsForGroup") {
-            //     setRequestActive("groups");
-            //     setIsRunnable(true);
-
-            //     // console.log("runningStatus ::: ", runningStatus);
-            //     if (runningStatus === "running") {
-            //         // console.log("runningrunningrunning", requestActive);
-            //         setrunningScript(true);
-            //     }
-            // }
-            requestPostsSettings && setFormSetup(requestPostsSettings);
-            // requestFormAdvncSettings && setAdvcFormAssets(requestFormAdvncSettings);
-        })();
-    }, [editType]);
+    }, [editType, isRunnable]);
 
 
     /**
@@ -294,6 +299,17 @@ const SentFromPosts = () => {
             setFormSetup(newObj);
         }
     };
+
+    // FETCH SETTINGS DATA..
+    useEffect(() => {
+        if (editType !== "basic") {
+            (async () => {
+                const localData = await fetchSetingsLocalData();
+                // console.log("Local Data -- ", localData);
+                setSettingSyncApiPayload(localData);
+            })();
+        }
+    }, [editType]);
 
     /**
    * GETTING THE GROUP NAME BY ID AND SET TO STATE
@@ -436,8 +452,8 @@ const SentFromPosts = () => {
                     },
                 });
                 console.log("settingRes : ", settingRes._id, settingRes)
-                if(settingRes._id)
-                    payload = {...payload, settingsId : settingRes._id}
+                if (settingRes._id)
+                    payload = { ...payload, settingsId: settingRes._id }
 
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
@@ -769,16 +785,16 @@ const SentFromPosts = () => {
                             <div className="setting-content">
                                 <h6>Country</h6>
                                 <p>
-                                    {settingSyncApiPayload?.tier_filter || settingSyncApiPayload?.country_filter_value?.length ? (
+                                    {settingSyncApiPayload?.country_filter_enabled ? (
                                         <>
                                             <p>{settingSyncApiPayload?.tier_filter_value}</p>
-                                            {settingSyncApiPayload?.country_filter_value?.length > 0 && ''}
-                                            {settingSyncApiPayload?.country_filter_value?.map((value, index) => (
+                                            {/* {settingSyncApiPayload?.country_filter_value?.length > 0 && ''} */}
+                                            {settingSyncApiPayload?.country_filter_value?.length ? settingSyncApiPayload?.country_filter_value?.map((value, index) => (
                                                 <React.Fragment key={index}>
                                                     {value}
                                                     {index < settingSyncApiPayload.country_filter_value.length - 1 ? ', ' : ''}
                                                 </React.Fragment>
-                                            ))}
+                                            )) : ''}
                                         </>
                                     ) : (
                                         'N/A'
