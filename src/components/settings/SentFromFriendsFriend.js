@@ -702,7 +702,7 @@ const SentFromFriendsFriend = () => {
                                             {settingSyncApiPayload?.mutual_friend_value}
                                         </>
                                         :
-                                        'N/A'
+                                        (<span className='na-not-found-data'>N/A</span>)
                                     }
                                 </p>
                             </div>
@@ -713,7 +713,7 @@ const SentFromFriendsFriend = () => {
                             </figure>
                             <div className="setting-content">
                                 <h6>Gender</h6>
-                                <p>{settingSyncApiPayload?.gender_filter ? settingSyncApiPayload?.gender_filter_value : 'N/A'}</p>
+                                <p>{settingSyncApiPayload?.gender_filter ? settingSyncApiPayload?.gender_filter_value : (<span className='na-not-found-data'>N/A</span>)}</p>
                             </div>
                         </div>
                         <div className="setting-show d-flex">
@@ -734,9 +734,7 @@ const SentFromFriendsFriend = () => {
                                                 </React.Fragment>
                                             )) : ''}
                                         </>
-                                    ) : (
-                                        'N/A'
-                                    )}
+                                    ) : (<span className='na-not-found-data'>N/A</span>)}
                                 </p>
                             </div>
                         </div>
@@ -748,7 +746,7 @@ const SentFromFriendsFriend = () => {
                             </figure>
                             <div className="setting-content">
                                 <h6>Selected message for sent friend request</h6>
-                                <p>{sendFrndReqGroupName ? sendFrndReqGroupName : ''}</p>
+                                <p>{settingSyncApiPayload?.send_message_when_friend_request_sent ? (sendFrndReqGroupName ? sendFrndReqGroupName : '') : (<span className='na-not-found-data'>N/A</span>)}</p>
                             </div>
                         </div>
                         <div className="setting-show d-flex">
@@ -757,7 +755,7 @@ const SentFromFriendsFriend = () => {
                             </figure>
                             <div className="setting-content">
                                 <h6>Selected message for accepted friend request</h6>
-                                <p>{acceptReqGroupName ? acceptReqGroupName : ''}</p>
+                                <p>{settingSyncApiPayload?.send_message_when_friend_request_accepted ? (acceptReqGroupName ? acceptReqGroupName : '') : (<span className='na-not-found-data'>N/A</span>)}</p>
                             </div>
                         </div>
                     </div>

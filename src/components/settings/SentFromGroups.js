@@ -687,7 +687,7 @@ const SentFromGroups = () => {
                             <div className="setting-content">
                                 <h6>Gender</h6>
                                 {/* <p>{'Male'}</p> */}
-                                <p>{settingSyncApiPayload?.gender_filter ? settingSyncApiPayload?.gender_filter_value : 'N/A'}</p>
+                                <p>{settingSyncApiPayload?.gender_filter ? settingSyncApiPayload?.gender_filter_value : (<span className='na-not-found-data'>N/A</span>)}</p>
                             </div>
                         </div>
                         <div className="setting-show d-flex">
@@ -710,7 +710,7 @@ const SentFromGroups = () => {
                                             )) : ''}
                                         </>
                                     ) : (
-                                        'N/A'
+                                        <span className='na-not-found-data'>N/A</span>
                                     )}
                                 </p>
                             </div>
@@ -745,9 +745,9 @@ const SentFromGroups = () => {
                                 </div> */}
 
                                 <div className='key-content'>
-                                    {settingSyncApiPayload?.selected_keywords?.map((item, id) => {
+                                    {settingSyncApiPayload?.keyword ? settingSyncApiPayload?.selected_keywords?.map((item, id) => {
                                         return <span className='key' key={id}>{item}</span>
-                                    })}
+                                    }) : (<span className='na-not-found-data'>N/A</span>)}
                                 </div>
                             </div>
                         </div>
@@ -766,9 +766,9 @@ const SentFromGroups = () => {
                                 </div> */}
 
                                 <div className='key-content'>
-                                    {settingSyncApiPayload?.selected_negative_keywords?.map((item, id) => {
+                                    {settingSyncApiPayload?.negative_keyword ? settingSyncApiPayload?.selected_negative_keywords?.map((item, id) => {
                                         return <span className='key' key={id}>{item}</span>
-                                    })}
+                                    }) : (<span className='na-not-found-data'>N/A</span>)}
                                 </div>
                             </div>
                         </div>
@@ -780,7 +780,7 @@ const SentFromGroups = () => {
                             </figure>
                             <div className="setting-content">
                                 <h6>Selected message for sent friend request</h6>
-                                <p>{sendFrndReqGroupName ? sendFrndReqGroupName : ''}</p>
+                                <p>{settingSyncApiPayload?.send_message_when_friend_request_sent ? (sendFrndReqGroupName ? sendFrndReqGroupName : '') : (<span className='na-not-found-data'>N/A</span>)}</p>
                             </div>
                         </div>
                         <div className="setting-show d-flex">
@@ -789,7 +789,7 @@ const SentFromGroups = () => {
                             </figure>
                             <div className="setting-content">
                                 <h6>Selected message for accepted friend request</h6>
-                                <p>{acceptReqGroupName ? acceptReqGroupName : ''}</p>
+                                <p>{settingSyncApiPayload?.send_message_when_friend_request_accepted ? (acceptReqGroupName ? acceptReqGroupName : '') : (<span className='na-not-found-data'>N/A</span>)}</p>
                             </div>
                         </div>
                     </div>
