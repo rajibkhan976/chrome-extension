@@ -1312,7 +1312,7 @@ const GroupsRequestForm = ({
                             <div className={`fr-req-element fr-req-el-${element.type} ${mainEl?.disabled ? 'fr-req-el-disabled' : ''}`}>
                                 {element.options.map((optionCheckbox, el) => (
                                     <>
-                                        {console.log("optionCheckbox -- ", optionCheckbox)}
+                                        {/* {console.log("optionCheckbox -- ", optionCheckbox)} */}
                                         <label className="fr-ext-radio-ui fr-radio-req fr-ext-checkbox-ui checkbox-container f-1" key={el}>
                                             <input
                                                 type="checkbox"
@@ -1350,47 +1350,68 @@ const GroupsRequestForm = ({
                                 <section id="reaction-icons-section" className="d-flex f-align-center">
 
                                     <span>Choose: </span>
-                                    {console.log("API payload -- ", settingApiPayload, settingApiPayload?.reaction_type?.includes('like'))}
+                                    {/* {console.log("API payload -- ", settingApiPayload, settingApiPayload?.reaction_type?.includes('like'))} */}
 
                                     <div className="fr-reaction-icons f-1">
                                         <label>
-                                            <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "like", element)} />
+                                            <input 
+                                                type="checkbox" 
+                                                checked={settingApiPayload?.reaction_type?.includes('like')}
+                                                onChange={(event) => handleReactionIconChange(event, "like", element)} />
                                             <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('like') ? 'currently-using-icon' : ''}`}>
                                                 <LikeReactionIcon />
                                             </span>
                                         </label>
                                         <label>
-                                            <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "love", element)} />
+                                            <input 
+                                                type="checkbox" 
+                                                checked={settingApiPayload?.reaction_type?.includes('love')}
+                                                onChange={(event) => handleReactionIconChange(event, "love", element)} />
                                             <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('love') ? 'currently-using-icon' : ''}`}>
                                                 <LoveReactionIcon />
                                             </span>
                                         </label>
                                         <label>
-                                            <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "care", element)} />
+                                            <input 
+                                                type="checkbox" 
+                                                checked={settingApiPayload?.reaction_type?.includes('care')}
+                                                onChange={(event) => handleReactionIconChange(event, "care", element)} />
                                             <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('care') ? 'currently-using-icon' : ''}`}>
                                                 <CareReactionIcon />
                                             </span>
                                         </label>
                                         <label>
-                                            <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "haha", element)} />
+                                            <input 
+                                                type="checkbox" 
+                                                checked={settingApiPayload?.reaction_type?.includes('haha')}
+                                                onChange={(event) => handleReactionIconChange(event, "haha", element)} />
                                             <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('haha') ? 'currently-using-icon' : ''}`}>
                                                 <HahaReactionIcon />
                                             </span>
                                         </label>
                                         <label>
-                                            <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "wow", element)} />
+                                            <input 
+                                                type="checkbox" 
+                                                checked={settingApiPayload?.reaction_type?.includes('wow')}
+                                                onChange={(event) => handleReactionIconChange(event, "wow", element)} />
                                             <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('wow') ? 'currently-using-icon' : ''}`}>
                                                 <WowReactionIcon />
                                             </span>
                                         </label>
                                         <label>
-                                            <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "sad", element)} />
+                                            <input 
+                                                type="checkbox" 
+                                                checked={settingApiPayload?.reaction_type?.includes('sad')}
+                                                onChange={(event) => handleReactionIconChange(event, "sad", element)} />
                                             <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('sad') ? 'currently-using-icon' : ''}`}>
                                                 <SadReactionIcon />
                                             </span>
                                         </label>
                                         <label>
-                                            <input type="checkbox" onChange={(event) => handleReactionIconChange(event, "angry", element)} />
+                                            <input 
+                                                type="checkbox" 
+                                                checked={settingApiPayload?.reaction_type?.includes('angry')}
+                                                onChange={(event) => handleReactionIconChange(event, "angry", element)} />
                                             <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('angry') ? 'currently-using-icon' : ''}`}>
                                                 <AngryReactionIcon />
                                             </span>
