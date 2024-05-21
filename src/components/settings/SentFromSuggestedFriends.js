@@ -493,6 +493,11 @@ const SentFromSuggestedFriends = () => {
             payload.mutual_friend_value = `${payload.mutual_friend_value}`;
         }
 
+        if (!payload?.country_filter_enabled) {
+            payload.country_filter = false;
+            payload.tier_filter = false;
+        }
+
         // Checkpoint validation..
         const validity = checkValidity(formSetup, setFormSetup);
 
@@ -530,6 +535,11 @@ const SentFromSuggestedFriends = () => {
 
         if (payload?.mutual_friend_value) {
             payload.mutual_friend_value = `${payload.mutual_friend_value}`;
+        }
+
+        if (!payload?.country_filter_enabled) {
+            payload.country_filter = false;
+            payload.tier_filter = false;
         }
 
         // Checkpoint validation..

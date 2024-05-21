@@ -1519,7 +1519,7 @@ const GroupsRequestForm = ({
                         <div
                             className={`fr-req-element fr-req-el-${element.type} 
                                 ${element.isLabeled ? "fr-req-lebel" : ""}  
-                                ${!element.valid ? "not_valid" : ""} 
+                                ${(!element.valid && mainEl?.name === "lookup_for_mutual_friend" && mainEl?.isActive) ? "not_valid" : ""} 
                                 ${element?.isHalfWidth ? "fr-req-half-width" : ""}
                                 ${mainEl?.disabled ? 'fr-req-el-disabled' : ''}
                                 ${considerDisabledInput(settingApiPayload, mainEl) ? 'input-output-disabled' : ''}
@@ -1574,7 +1574,8 @@ const GroupsRequestForm = ({
                                     <ChevronDownArrowIcon size={15} />
                                 </button>
                             </div>
-                            {!element.valid && (
+
+                            {!element.valid && (mainEl?.name === "lookup_for_mutual_friend" && mainEl?.isActive) && (
                                 <p className="error-msg error-msg-new">Can't be empty or '0'!</p>
                             )}
                         </div>

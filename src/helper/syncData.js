@@ -259,14 +259,18 @@ export const checkValidity = (dataObj, setdata) => {
     if (data.fields[fidx].name === "lookup_for_mutual_friend") {
       data.fields[fidx]?.fieldOptions?.map(option => {
         if (option?.name === "mutual_friend_value") {
-          if (option?.value === "" || option?.value?.length < 1) {
-            option.valid = false;
-            valid = false;
-          }
+          const isActiveSetting = data?.fields[fidx]?.isActive;
 
-          if (parseInt(option?.value) <= 0) {
-            option.valid = false;
-            valid = false;
+          if (isActiveSetting) {
+            if (option?.value === "" || option?.value?.length < 1) {
+              option.valid = false;
+              valid = false;
+            }
+
+            if (parseInt(option?.value) <= 0) {
+              option.valid = false;
+              valid = false;
+            }
           }
         }
       });

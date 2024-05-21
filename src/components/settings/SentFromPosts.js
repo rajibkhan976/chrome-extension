@@ -516,6 +516,11 @@ const SentFromPosts = () => {
             payload.mutual_friend_value = `${payload.mutual_friend_value}`;
         }
 
+        if (!payload?.country_filter_enabled) {
+            payload.country_filter = false;
+            payload.tier_filter = false;
+        }
+
         // Checkpoint validation..
         const validity = checkValidity(formSetup, setFormSetup);
 
@@ -537,8 +542,6 @@ const SentFromPosts = () => {
     // SAVING THE API PAYLOAD TO SERVER
     const handleSaveSettings = async () => {
         // Have to send payload to save via API from here..
-        console.log("CLIENT PAYLOAD HERE -- ", settingApiPayload);
-
         const fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
 
         const payload = {
@@ -555,6 +558,10 @@ const SentFromPosts = () => {
             payload.mutual_friend_value = `${payload.mutual_friend_value}`;
         }
 
+        if (!payload?.country_filter_enabled) {
+            payload.country_filter = false;
+            payload.tier_filter = false;
+        }
 
         // Checkpoint validation..
         const validity = checkValidity(formSetup, setFormSetup);
