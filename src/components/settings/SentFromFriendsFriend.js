@@ -320,6 +320,15 @@ const SentFromFriendsFriend = () => {
                 }
             };
         })();
+    };
+
+    /**
+     * CAPITALIZED TEXT
+     * @param {*} string 
+     * @returns 
+     */
+    const capitalizeFirstLetter = (string) => {
+        return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
 
@@ -721,7 +730,7 @@ const SentFromFriendsFriend = () => {
                             </figure>
                             <div className="setting-content">
                                 <h6>Gender</h6>
-                                <p>{settingSyncApiPayload?.gender_filter ? settingSyncApiPayload?.gender_filter_value : (<span className='na-not-found-data'>N/A</span>)}</p>
+                                <p>{settingSyncApiPayload?.gender_filter ? capitalizeFirstLetter(settingSyncApiPayload?.gender_filter_value) : (<span className='na-not-found-data'>N/A</span>)}</p>
                             </div>
                         </div>
                         <div className="setting-show d-flex">
@@ -733,16 +742,18 @@ const SentFromFriendsFriend = () => {
                                 <p>
                                     {settingSyncApiPayload?.country_filter_enabled ? (
                                         <>
-                                            <p>{settingSyncApiPayload?.tier_filter_value}</p>
+                                            {settingSyncApiPayload?.tier_filter ? settingSyncApiPayload?.tier_filter_value : ''}
                                             {/* {settingSyncApiPayload?.country_filter_value?.length > 0 && ''} */}
-                                            {settingSyncApiPayload?.country_filter_value?.length ? settingSyncApiPayload?.country_filter_value?.map((value, index) => (
+                                            {settingSyncApiPayload?.country_filter && settingSyncApiPayload?.country_filter_value?.length ? settingSyncApiPayload?.country_filter_value?.map((value, index) => (
                                                 <React.Fragment key={index}>
                                                     {value}
                                                     {index < settingSyncApiPayload.country_filter_value.length - 1 ? ', ' : ''}
                                                 </React.Fragment>
                                             )) : ''}
                                         </>
-                                    ) : (<span className='na-not-found-data'>N/A</span>)}
+                                    ) :
+                                        (<span className='na-not-found-data'>N/A</span>)
+                                    }
                                 </p>
                             </div>
                         </div>

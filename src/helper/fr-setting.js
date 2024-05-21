@@ -111,7 +111,7 @@ export const requestGroupsFormSettings = {
           isLabeled: false,
           valid: true,
           name: "gender_filter_value",
-          value: "",
+          value: "male",
           options: [
             {
               selected: true,
@@ -441,7 +441,7 @@ export const requestPostsSettings = {
           isLabeled: false,
           valid: true,
           name: "gender_filter_value",
-          // value: "male",
+          value: "male",
           options: [
             {
               selected: true,
@@ -773,7 +773,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
           isLabeled: false,
           valid: true,
           name: "gender_filter_value",
-          // value: "male",
+          value: "male",
           options: [
             {
               selected: true,
