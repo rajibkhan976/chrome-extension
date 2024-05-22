@@ -376,6 +376,7 @@ export const requestPostsSettings = {
               isActive: false,
               name: 'reaction_type',
               value: [],
+              valid: true,
             },
             {
               text: "Comment",
@@ -604,6 +605,7 @@ export const requestPostsSettings = {
       recursive: true,
       isActive: false,
       valid: true,
+      value: "",
       fieldOptions: [
         {
           type: "customSelect",
@@ -611,23 +613,7 @@ export const requestPostsSettings = {
           valid: true,
           name: "send_message_when_friend_request_sent_message_group_id",
           value: "Select message",
-          options: [
-            {
-              selected: true,
-              label: "message 1",
-              value: "message_1",
-            },
-            {
-              selected: false,
-              label: "message 2",
-              value: "message_2",
-            },
-            {
-              selected: false,
-              label: "message 3",
-              value: "message_3",
-            },
-          ],
+          options: [],
         },
       ],
     },
@@ -639,6 +625,7 @@ export const requestPostsSettings = {
       recursive: true,
       isActive: false,
       valid: true,
+      value: "",
       fieldOptions: [
         {
           type: "customSelect",
@@ -646,23 +633,7 @@ export const requestPostsSettings = {
           valid: true,
           name: "send_message_when_friend_request_accepted_message_group_id",
           value: "Select message",
-          options: [
-            {
-              selected: true,
-              label: "message 1",
-              value: "message_1",
-            },
-            {
-              selected: false,
-              label: "message 2",
-              value: "message_2",
-            },
-            {
-              selected: false,
-              label: "message 3",
-              value: "message_3",
-            }
-          ]
+          options: []
         }
       ]
     },
@@ -943,23 +914,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
           valid: true,
           name: "send_message_when_friend_request_sent_message_group_id",
           value: "Select message",
-          options: [
-            {
-              selected: true,
-              label: "message 1",
-              value: "message_1",
-            },
-            {
-              selected: false,
-              label: "message 2",
-              value: "message_2",
-            },
-            {
-              selected: false,
-              label: "message 3",
-              value: "message_3",
-            },
-          ],
+          options: [],
         },
       ],
     },
@@ -978,23 +933,7 @@ export const requestSuggestedFrndsAndFrndsOfFrndsFormSettings = {
           valid: true,
           name: "send_message_when_friend_request_accepted_message_group_id",
           value: "Select message",
-          options: [
-            {
-              selected: true,
-              label: "message 1",
-              value: "message_1",
-            },
-            {
-              selected: false,
-              label: "message 2",
-              value: "message_2",
-            },
-            {
-              selected: false,
-              label: "message 3",
-              value: "message_3",
-            }
-          ]
+          options: []
         }
       ]
     },

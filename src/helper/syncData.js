@@ -20,6 +20,12 @@ const FindData = (child, parent, level) => {
   }
 };
 
+/**
+ * SETTINGS SYNC FOR MODERN FORM AND NEWLY ADDED..
+ * @param {*} apiObj 
+ * @param {*} uiObj 
+ * @param {*} setUiObj 
+ */
 export const syncFromNewAPi = (apiObj, uiObj, setUiObj) => {
   const newFromObj = { ...uiObj };
 
@@ -28,6 +34,18 @@ export const syncFromNewAPi = (apiObj, uiObj, setUiObj) => {
   Object.entries(apiObj).forEach(([apiKey, apiValue]) => {
     for (const i in newFromObj.fields) {
       const fieldItem = newFromObj.fields[i];
+
+      if (fieldItem.name === "lookup_for_mutual_friend") {
+        fieldItem?.fieldOptions?.map(field => {
+          if (field?.name === "mutual_friend_value") {
+            if (apiObj?.mutual_friend_value?.trim() === "") {
+              field.value = "10";
+            }
+
+            return field;
+          }
+        });
+      }
 
       if (fieldItem.name === "given_reactions") {
         fieldItem?.fieldOptions?.map(reactionItemms => {
@@ -236,6 +254,13 @@ const FindValidInRec = (data) => {
   }
 };
 
+
+/**
+ * CHECK VALIDATION FUNCTION
+ * @param {*} dataObj 
+ * @param {*} setdata 
+ * @returns 
+ */
 export const checkValidity = (dataObj, setdata) => {
   //console.log("direct data obj:____>>", dataObj);
   let time = 0;
@@ -244,16 +269,60 @@ export const checkValidity = (dataObj, setdata) => {
   let data = { ...dataObj };
 
   for (const fidx in data.fields) {
-    // if(data.fields[fidx].label==="Request Limit"){
-    //  console.log("this reccccccc",FindValidInRec(data.fields[fidx]));
-    // }
-    // if (data.fields[fidx].label === "Look up interval")
-    //   time = data.fields[fidx].fieldOptions[0].value;
-    if (data.fields[fidx].label === "Send message" && data.fields[fidx].isActive && (time === "auto" || time < 3)) {
-      // console.log("data.fields[fidx].label ::: ", data.fields[fidx])
-      valid = false;
-      data.fields[fidx].valid = false;
-      reason = "Please choose the look up interval atleast 3 min."
+
+    if (data.fields[fidx].name === "send_message_when_friend_request_sent") {
+      data.fields[fidx].fieldOptions?.map(option => {
+        if (option?.name === "send_message_when_friend_request_sent_message_group_id") {
+          if (data?.fields[fidx]?.isActive === true && option?.options?.length <= 0 || option?.value === "") {
+            // option.valid = false;
+            valid = false;
+          }
+
+          const foundMessageGroup = option.options.find(item => item.value === option.value);
+
+          // undefined if no any groups
+          if (data?.fields[fidx]?.isActive === true && option?.options?.length > 0 && foundMessageGroup === undefined) {
+            option.valid = false;
+            valid = false;
+          }
+        }
+      });
+    }
+
+
+    if (data.fields[fidx].name === "send_message_when_friend_request_accepted") {
+      data.fields[fidx].fieldOptions?.map(option => {
+        if (option?.name === "send_message_when_friend_request_accepted_message_group_id") {
+          if (data?.fields[fidx]?.isActive === true && option?.options?.length <= 0 || option?.value === "") {
+            // option.valid = false;
+            valid = false;
+          }
+
+          const foundMessageGroup = option.options.find(item => item.value === option.value);
+
+          // undefined if no any groups
+          if (data?.fields[fidx]?.isActive === true && option?.options?.length > 0 && foundMessageGroup === undefined) {
+            option.valid = false;
+            valid = false;
+          }
+        }
+      });
+    }
+
+
+    if (data.fields[fidx].name === "given_reactions") {
+      data.fields[fidx]?.fieldOptions?.map(option => {
+        if (option?.name === "reaction") {
+          option?.options?.map(reaction => {
+            if (reaction?.name === "reaction_type") {
+              if (reaction.isActive === true && reaction.value?.length === 0) {
+                reaction.valid = false;
+                valid = false;
+              }
+            }
+          })
+        }
+      })
     }
 
     if (data.fields[fidx].name === "lookup_for_mutual_friend") {

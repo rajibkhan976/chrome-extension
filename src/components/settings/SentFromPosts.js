@@ -9,7 +9,7 @@ import {
 } from '../../helper/fr-setting';
 import ModernForm from '../dashboard/requestForms/ModernForm';
 import { Bolt, CheckIcon, GenderIcon, KeywordsIcon, MessageSettingIcon, SkipAdmin, TierIcon, LikeReaction, LoveReaction } from '../shared/SVGAsset';
-import { LookupSocialIcon, EditSingleIcon, TickIcon, ServerSuccess, ServerError } from '../../assets/icons/Icons';
+import { LookupSocialIcon, EditSingleIcon, TickIcon, ServerSuccess, ServerError, MutualFriendsIcon, LessThanEquals } from '../../assets/icons/Icons';
 import AutomationStats from '../shared/AutomationStats';
 import { getFrndReqSet, getKeyWords, getProfileSettings, PostFriendResSet, saveFrndReqSettings, updateFrndReqSettings } from "../../service/FriendRequest";
 import helper from '../../extensionScript/helper';
@@ -537,6 +537,14 @@ const SentFromPosts = () => {
             return false;
         }
 
+        console.log("PAYLAOD CHEKCING - ", payload);
+
+        if ((!payload?.reaction || payload?.reaction_type?.length === 0) && !payload?.comment) {
+            setOpenNotificationMsg("For runnable action, please select atleast one reaction or comment!");
+            setOpenErrorNotification(true);
+            return false;
+        }
+
         // Write Extension run code for this runFrienderHandle() function..
         runFrinderHandle();
         setIsRunnable(true);
@@ -785,6 +793,32 @@ const SentFromPosts = () => {
                         </div>
                         <div className="setting-show d-flex">
                             <figure>
+                                <MutualFriendsIcon />
+                            </figure>
+                            <div className="setting-content">
+                                <h6>Mutual friend(s)</h6>
+                                {/* <p>{<span className="comparator-icon"><LessThanEquals /></span>}{'10'}</p> */}
+                                <p>
+                                    {settingSyncApiPayload?.lookup_for_mutual_friend ?
+                                        <>
+                                            {settingSyncApiPayload?.lookup_for_mutual_friend_condition === "<"
+                                                ? (
+                                                    <span className="comparator-icon"><LessThanEquals /></span>
+                                                )
+                                                :
+                                                (
+                                                    <span className="comparator-icon" style={{ textDecoration: 'underline' }}>{">"}</span>
+                                                )}
+                                            {settingSyncApiPayload?.mutual_friend_value}
+                                        </>
+                                        :
+                                        (<span className='na-not-found-data'>N/A</span>)
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        <div className="setting-show d-flex">
+                            <figure>
                                 <GenderIcon />
                             </figure>
                             <div className="setting-content">
@@ -817,19 +851,7 @@ const SentFromPosts = () => {
                                 </p>
                             </div>
                         </div>
-                        <div className="setting-show d-flex">
-                            <figure>
-                                <SkipAdmin />
-                            </figure>
-                            <div className="setting-content">
-                                <h6>Skip Admin</h6>
-                                {!settingSyncApiPayload?.skip_admin ? (
-                                    <p>No</p>
-                                ) : (
-                                    <p>Yes</p>
-                                )}
-                            </div>
-                        </div>
+                      
                     </div>
                     <div className="setting-col d-flex d-flex-column">
                         <div className="setting-show d-flex">

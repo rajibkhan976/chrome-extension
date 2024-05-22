@@ -10,6 +10,9 @@ function CustomSelectBox({ element, onClickOption, className = "", needSearchBar
     const { clickedRef, isComponentVisible, setIsComponentVisible } =
         useOutSideClick(false);
 
+
+        console.log("ELEMENT OPTIONS --- ", selectedOption);
+
     useEffect(() => {
         if (!isComponentVisible) {
             handleSearch("");
@@ -37,7 +40,7 @@ function CustomSelectBox({ element, onClickOption, className = "", needSearchBar
                     element.options && element.options.length > 0 && setIsComponentVisible(!isComponentVisible);
                 }}
                 style={{ width: barWitdh }}>
-                <p>{element && element.value && element.options && selectedOption.length > 0 && element.value.length > 0 ? utils.truncateText(selectedOption[0].label) : "Select"}</p>
+                <p>{element && element.value && element.options && selectedOption.length > 0 && element.value.length > 0 ? utils.truncateText(selectedOption[0].label) : "Select message group"}</p>
                 <span className="custom-selectBox-drop">
                     <DropDownIcon />
                 </span>

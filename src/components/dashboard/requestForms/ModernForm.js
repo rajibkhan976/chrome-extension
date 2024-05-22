@@ -160,6 +160,17 @@ const GroupsRequestForm = ({
         }
     }, [formSetup]);
 
+
+    useEffect(() => {
+        console.log("SETTING - ", settingApiPayload);
+        if (settingApiPayload?.mutual_friend_value === '') {
+            setSettingApiPayload(prevData => ({
+                ...prevData,
+                mutual_friend_value: "10",
+            }));
+        }
+    }, [settingApiPayload]);
+
     useEffect(() => {
         (async () => {
             const isPauedThenRun = await helper.getDatafromStorage("runAction");
@@ -228,7 +239,6 @@ const GroupsRequestForm = ({
     };
 
     const stepInputIncrementHandle = (element) => {
-        console.log("element - ", element);
         if (element.name === "tier_filter_value") {
             fillInputChangeStepwise(element, "+");
         } else {
@@ -649,10 +659,6 @@ const GroupsRequestForm = ({
      * @param {*} ele
      */
     const handleCustomSelectClick = (value, ele) => {
-        // console.log("valuw,.,.,.,.,<><><>", value);
-
-        //const optionObj = JSON.parse(value);
-
         let formSetPlaceholder = { ...formSetup };
         const newObj = {
             ...formSetPlaceholder,
@@ -994,7 +1000,6 @@ const GroupsRequestForm = ({
      */
     const inputValueChangeStepWise = (ele, type) => {
         // if (value - 1 < 1 && type !== "+") return;
-
         let formSetPlaceholder = { ...formSetup };
 
         const newObjPlaceholder = {
@@ -1005,12 +1010,17 @@ const GroupsRequestForm = ({
                     fieldOptions: formItem?.fieldOptions?.map(item => {
                         // console.log("Item - ", item);
                         if (item?.name === "mutual_friend_value") {
-                            const currValue = parseInt(ele.value)
+                            let currValue = parseInt(ele.value)
                             item.value = type === "+" ? currValue + 1 : currValue - 1;
 
                             if (item.value < 0) {
                                 item.value = 0;
                                 currValue = 0;
+                            }
+
+                            if (isNaN(item.value) || item.value === "") {
+                                item.value = 1;
+                                currValue = 1;
                             }
 
                             setSettingApiPayload((prevState) => ({
@@ -1242,7 +1252,7 @@ const GroupsRequestForm = ({
                         <div
                             className={`fr-req-element fr-req-el-${element.type} 
                                 ${element.isLabeled ? "fr-req-fieldset" : ""}
-                                ${!element.valid ? "not_valid" : ""} 
+                                ${(mainEl?.name === "send_message_when_friend_request_sent" || mainEl?.name === "send_message_when_friend_request_accepted") && mainEl?.isActive && !element.valid ? "not_valid" : ""} 
                                 ${element?.isHalfWidth ? 'fr-req-half-width' : ''}
                                 ${mainEl?.disabled ? 'fr-req-el-disabled' : ''}
                                 ${considerDisabledInput(settingApiPayload, mainEl) ? 'input-output-disabled' : ''}
@@ -1272,11 +1282,13 @@ const GroupsRequestForm = ({
                                 />
                             </div>
 
-                            {!element.valid && (
-                                <p className="error-msg">Field can't be empty or '0'!</p>
+                            {(mainEl?.name === "send_message_when_friend_request_sent" || mainEl?.name === "send_message_when_friend_request_accepted") && mainEl?.isActive && !element.valid && (
+                                <p className="error-msg">Field can't be empty!</p>
                             )}
 
-                            {(element.name === "send_message_when_friend_request_sent_message_group_id" ||
+                            {(mainEl?.name === "send_message_when_friend_request_sent" && !mainEl?.isActive) ||
+                            (mainEl?.name === "send_message_when_friend_request_accepted" && !mainEl?.isActive) ||
+                            (element.name === "send_message_when_friend_request_sent_message_group_id" ||
                                 element.name === "send_message_when_friend_request_accepted_message_group_id") &&
                                 element &&
                                 element.options &&
@@ -1354,8 +1366,8 @@ const GroupsRequestForm = ({
 
                                     <div className="fr-reaction-icons f-1">
                                         <label>
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 checked={settingApiPayload?.reaction_type?.includes('like')}
                                                 onChange={(event) => handleReactionIconChange(event, "like", element)} />
                                             <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('like') ? 'currently-using-icon' : ''}`}>
@@ -1363,8 +1375,8 @@ const GroupsRequestForm = ({
                                             </span>
                                         </label>
                                         <label>
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 checked={settingApiPayload?.reaction_type?.includes('love')}
                                                 onChange={(event) => handleReactionIconChange(event, "love", element)} />
                                             <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('love') ? 'currently-using-icon' : ''}`}>
@@ -1372,8 +1384,8 @@ const GroupsRequestForm = ({
                                             </span>
                                         </label>
                                         <label>
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 checked={settingApiPayload?.reaction_type?.includes('care')}
                                                 onChange={(event) => handleReactionIconChange(event, "care", element)} />
                                             <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('care') ? 'currently-using-icon' : ''}`}>
@@ -1381,8 +1393,8 @@ const GroupsRequestForm = ({
                                             </span>
                                         </label>
                                         <label>
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 checked={settingApiPayload?.reaction_type?.includes('haha')}
                                                 onChange={(event) => handleReactionIconChange(event, "haha", element)} />
                                             <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('haha') ? 'currently-using-icon' : ''}`}>
@@ -1390,8 +1402,8 @@ const GroupsRequestForm = ({
                                             </span>
                                         </label>
                                         <label>
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 checked={settingApiPayload?.reaction_type?.includes('wow')}
                                                 onChange={(event) => handleReactionIconChange(event, "wow", element)} />
                                             <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('wow') ? 'currently-using-icon' : ''}`}>
@@ -1399,8 +1411,8 @@ const GroupsRequestForm = ({
                                             </span>
                                         </label>
                                         <label>
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 checked={settingApiPayload?.reaction_type?.includes('sad')}
                                                 onChange={(event) => handleReactionIconChange(event, "sad", element)} />
                                             <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('sad') ? 'currently-using-icon' : ''}`}>
@@ -1408,8 +1420,8 @@ const GroupsRequestForm = ({
                                             </span>
                                         </label>
                                         <label>
-                                            <input 
-                                                type="checkbox" 
+                                            <input
+                                                type="checkbox"
                                                 checked={settingApiPayload?.reaction_type?.includes('angry')}
                                                 onChange={(event) => handleReactionIconChange(event, "angry", element)} />
                                             <span className={`fr-reaction-icon ${settingApiPayload?.reaction_type?.includes('angry') ? 'currently-using-icon' : ''}`}>
@@ -1418,6 +1430,10 @@ const GroupsRequestForm = ({
                                         </label>
                                     </div>
                                 </section>
+                            )}
+
+                            {!element?.options[0]?.valid && element?.options[0]?.value?.length === 0 && element?.options[0]?.isActive === true && (
+                                <p className="error-msg error-msg-reaction">Please select any reaction or uncheck reaction!</p>
                             )}
                         </>
                     );
@@ -1561,7 +1577,7 @@ const GroupsRequestForm = ({
                             <div className="input-arrows">
                                 <button
                                     className="btn inline-btn btn-transparent"
-                                    onMouseDown={() => stepInputIncrementHandle(element)}
+                                    onClick={() => stepInputIncrementHandle(element)}
                                 // onClick={() => inputValueChangeStepWise(element,"+")}
                                 >
                                     <ChevronUpArrowIcon size={15} />
@@ -1634,7 +1650,7 @@ const GroupsRequestForm = ({
                         <div
                             className={`fr-req-element fr-req-el-${element.type} 
                                 ${element.isLabeled ? "fr-req-fieldset" : ""} 
-                                ${!element.valid ? "not_valid" : ""}
+                                ${(!element.valid && (mainEl?.name === "keyword" || mainEl?.name === "negative_keyword") && mainEl?.isActive) ? "not_valid" : ""}
                                 ${mainEl?.disabled ? 'fr-req-el-disabled' : ''}
                                 ${considerDisabledInput(settingApiPayload, mainEl) ? 'input-output-disabled' : ''}
                             `}
@@ -1688,7 +1704,7 @@ const GroupsRequestForm = ({
                                 </div>
                             </div>
 
-                            {!element.valid && (
+                            {(!element.valid && (mainEl?.name === "keyword" || mainEl?.name === "negative_keyword") && mainEl?.isActive) && (
                                 <p className="error-msg">Invalid Empty Field!!</p>
                             )}
                         </div>
