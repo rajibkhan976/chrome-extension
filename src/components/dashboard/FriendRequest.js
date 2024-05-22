@@ -330,10 +330,10 @@ const FriendRequest = (props) => {
                             Open any facebook group.
                           </li>
                           <li>
-                            Then open <strong>People</strong> tab
+                            Then open<strong>People</strong>tab
                           </li>
                           <li>
-                            Then open the <strong>Extension</strong>
+                            Then open the<strong>Extension</strong>
                           </li>
                         </ul>
                         </div>
@@ -366,10 +366,10 @@ const FriendRequest = (props) => {
                             Go to a <strong></strong>post
                           </li>
                           <li>
-                          Click on the <strong>three dots</strong> of the post
+                          Click on the<strong>three dots</strong>of the post
                           </li>
                           <li>
-                          Then click on <strong>Run Friender</strong>
+                          Then click on<strong>Run Friender</strong>
                           </li>
                         </ul>
                         </div>
@@ -402,7 +402,7 @@ const FriendRequest = (props) => {
                           Open facebook
                           </li>
                           <li>
-                            Than open facebook <strong>Suggested friends</strong> tab
+                            Than open facebook<strong>Suggested friends</strong>tab
                           </li>
                           <li>
                             Then run <strong>Friender</strong>
@@ -438,10 +438,10 @@ const FriendRequest = (props) => {
                             Open any facebook group.
                           </li>
                           <li>
-                            Then open <strong>People</strong> tab
+                            Then open<strong>People</strong>tab
                           </li>
                           <li>
-                            Then open the <strong>Extension</strong>
+                            Then open the<strong>Extension</strong>
                           </li>
                         </ul>
                         </div>

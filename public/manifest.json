@@ -53,8 +53,7 @@
     "scripting",
     "storage",
     "declarativeNetRequest",
-    "alarms",
-    "windows"
+    "alarms"
   ],
   "host_permissions": [
     "https://www.messenger.com/*",

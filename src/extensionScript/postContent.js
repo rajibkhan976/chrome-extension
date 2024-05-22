@@ -1,4 +1,5 @@
 import selectors from "./selector";
+import helper from "./helper";
 const $ = require("jquery");
 // const selectors = require("./selector.js");
 // const ariaLabel = selectors.ariaLabel;
@@ -16,14 +17,17 @@ let clickedObj = null,
 let savePostMenuItem =
 `<div class="friender savePost schedulerTrigger x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou xe8uvvx x1hl2dhg xggy1nq x1o1ewxj x3x9cwd x1e5q0jg x13rtm0m x87ps6o x1lku1pv x1a2a7pz xjyslct x9f619 x1ypdohk x78zum5 x1q0g3np x2lah0s x1w4qvff x13mpval xdj266r xat24cr x1n2onr6 x16tdsg8 x1ja2u2z x6s0dn4 x1y1aw1k x1sxyh0" role="menuitem" tabindex="-1">
                         <div class="x6s0dn4 xoi2r2e x78zum5 xl56j7k xq8finb xcrj56b x1ua1ozc">
-                            <i data-visualcompletion="css-img" class="x1b0d499 xep6ejk" style="background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAwFBMVEUAAABhW/9fWf9aVfVYU/VgW/9hW/9gW/9XU/ZXU/RgW/9gW/9gW/9XUvRXU/RgW/9XUvNXUvNbV/lgW/8V1rcV27cZyro4VNA4VtA/OtVPc+9STe5SdPJTaPJXUvNYVPVZU/VbVvNbV/lcV/NcV/pfWv5fW/5gW/9gXPphXP9oY/+GgvaJhveKh/+hn/ihqe6joe+opf2ppvyrqPiuq/y3tP/S0fzY1/za2P/f3v3n5//08/709P/39/78/P////8+SfssAAAAFHRSTlMAKiszNLS2t8HC7e7v8vL2+P7+/u/UC28AAAABYktHRD8+YzB1AAAAjUlEQVQYGQXB20rDQBQAwNmzJ62XRl8D9f//rNAHwZKikNuuM0Xk6Qq4rXsrMU4AuM85TKC+D/HdTX85gPg4s/XBkFeQZ31ph+E1geTxYA+J36W88DneN2tPtF4LEdATtRasR4PEW2t4ziDgEgAEuFQAcQMF4MgVtF0Ha4lxQtsamJ9F1NMXfen87Nv+DxViNU4/HML/AAAAAElFTkSuQmCC); background-position: 0px -108px; background-size: auto; width: 20px; height: 20px; background-repeat: no-repeat; display: inline-block;"></i>
+                        <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12.5911 16.7618C12.2493 15.5392 11.496 14.4588 10.4481 13.6882C9.40026 12.9177 8.11636 12.5 6.79556 12.5C5.47475 12.5 4.19085 12.9177 3.14299 13.6882C2.09512 14.4588 1.34185 15.5391 1 16.7618M15.7956 6.75L15.7956 12.5M18.7956 9.625L12.7956 9.625M10.7956 4.83333C10.7956 6.95042 9.00469 8.66667 6.79555 8.66667C4.58642 8.66667 2.79555 6.95042 2.79555 4.83333C2.79555 2.71624 4.58642 1 6.79555 1C9.00469 1 10.7956 2.71624 10.7956 4.83333Z" stroke="white" stroke-width="1.6" stroke-linecap="round"/>
+                        </svg>                        
                         </div>
                         <div class="x6s0dn4 x78zum5 x1q0g3np x1iyjqo2 x1qughib xeuugli">
                             <div class="x78zum5 xdt5ytf xz62fqu x16ldp7u">
                                 <div class="xu06os2 x1ok221b">
                                     <span class="friender_savePost  x193iq5w xeuugli x13faqbe x1vvkbs x10flsy6 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x4zkp8e x41vudc x6prxxf xvq8zen xk50ysn xzsf02u x1yc453h" dir="auto">
-                                        Use Friender
+                                        Run Friender
                                     </span>
+                                    <p class="postPara">Add to friend queue.</p>
                                 </div>
                         </div>
                         <div class="x1o1ewxj x3x9cwd x1e5q0jg x13rtm0m x1ey2m1c xds687c xg01cxk x47corl x10l6tqk x17qophe x13vifvy x1ebt8du x19991ni x1dhq9h" data-visualcompletion="ignore">
@@ -33,7 +37,10 @@ let savePostMenuItem =
 
 // post_count = document.querySelectorAll(selectors.ariaLabel).length;
 
-function doInit() {
+async function doInit() {
+  const frToken = await helper.getDatafromStorage("fr_token")
+    if(helper.isEmptyObj(frToken)) return;
+    console.log("frToken ::: ", frToken);
     //To Intial the post added checking and our menu button as well.
     post_count = $(selectors.ariaLabel.toString()).length;
     // console.log("post count ::: ", post_count);
@@ -175,7 +182,7 @@ function addCFmenuLink(postBodyEl, menueItems) {
             'a[role="link"]'
             );
             console.log("allUrlsOfPsts ::::::::::::::: ", allUrlsOfPsts);
-            let i = allUrlsOfPsts.length - 1;
+            let i = allUrlsOfPsts.length - 2;
             if(allUrlsOfPsts.length === 0){
               post_body = $($($(postBodyEl).find(`div.html-div`)[0]).find(`div.html-div`)[0]).children().eq(2);
               console.log(post_body);
@@ -185,6 +192,7 @@ function addCFmenuLink(postBodyEl, menueItems) {
               console.log("allUrlsOfPsts ::::::: 2 :::::::: ", allUrlsOfPsts);
               i = 0;
             }
+            console.log("allUrlsOfPsts[i] :::: ", allUrlsOfPsts[i]);
             allUrlsOfPsts[i].dispatchEvent(
             new FocusEvent("focusin", {
                 view: window,
@@ -201,10 +209,11 @@ function addCFmenuLink(postBodyEl, menueItems) {
                     console.log("post URL ::::::::::::::::::::::: ", postUrl);
                 }
                 chrome.runtime.sendMessage({"action" :  "openPostSetting", "postUrl" : postUrl})
-            }, 500);
+            }, 1000);
         },500)
       });
   }
+
   function onElementHeightChange(elm, callback) {
     var lastHeight = elm.clientHeight,
       newHeight;
@@ -220,13 +229,15 @@ function addCFmenuLink(postBodyEl, menueItems) {
     })();
   }
 
-//   document.addEventListener("DOMContentLoaded", function(event) { 
-    setTimeout(()=>{
+  $(document).ready(async()=>{
     console.log("--------------------------- dom loaded -------------------------------");
+    const frToken = await helper.getDatafromStorage("fr_token");
+    if(helper.isEmptyObj(frToken)) return;
+    console.log("frToken ::: ", frToken);
     doInit();
   
     onElementHeightChange(document.body, function () {
       // console.log("Body height changes");
       doInit();
     });
-  }, 1000);
+  });

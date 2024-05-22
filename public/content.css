@@ -92,3 +92,23 @@
     transform: translate(24%,0%);
   }
 
+.savePost {
+  padding: 10px 16px !important;
+}
+.savePost svg {
+  filter: invert(1) !important;
+}
+.friender_savePost {
+  display: block !important;
+  line-height: 19.1px;
+  text-align: left;
+}
+.postPara {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16.37px;
+  color: #A1A5AB !important;
+  text-align: left;
+  margin-top: 3px;
+  margin-bottom: 0 !important;
+}

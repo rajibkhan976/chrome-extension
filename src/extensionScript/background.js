@@ -754,12 +754,58 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         }
       })
       break;
+    case "shouldfrienderRun":
+      // console.log("request ::::::::::: ", request, sender);
+      chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
+        // console.log("tabs ::::::::::: ", tabs);
+        if(request.source === "groups"){
+          if (tabs[0].url.includes("groups") && (tabs[0].url.includes("members") || tabs[0].url.includes("people"))) {
+            // console.log("url [groups] ::: ", tabs[0].url);
+            chrome.runtime.sendMessage({...request, res : true});
+          }
+          else 
+            chrome.runtime.sendMessage({...request, res : false});
+        }
+        if(request.source === "suggestions"){
+          if(tabs && tabs.length && tabs[0].url.includes("https://www.facebook.com/friends/") &&
+          (tabs[0].url.includes("suggestions") )) {
+            console.log("url [suggestions] ::: ", tabs[0].url);
+            chrome.runtime.sendMessage({...request, res : true});
+          }
+          else 
+            chrome.runtime.sendMessage({...request, res : false});
+        }
+        if(request.source === "friends"){
+          if(tabs && tabs.length && tabs[0].url.includes("https://www.facebook.com/") &&
+          (tabs[0].url.includes("friends") && !tabs[0].url.includes("suggestions") )) {
+            console.log("url [friends] ::: ", tabs[0].url);
+            chrome.runtime.sendMessage({...request, res : true});
+          }
+          else 
+            chrome.runtime.sendMessage({...request, res : false});
+        }
+      })
+      chrome.tabs.query({ currentWindow: false, active: true }, (tabs) => {
+        if(tabs[0] && tabs[0].favIconUrl && tabs[0].favIconUrl === "")
+          tabs.shift()
+        if(request.source === "post"){
+          if(tabs && tabs.length && tabs[0].url.includes("https://www.facebook.com") && !tabs[0].url.includes("suggestions") 
+            && !tabs[0].url.includes("friends") && !tabs[0].url.includes("groups")) {
+          console.log("url [post] ::: ", tabs[0].url);
+            chrome.runtime.sendMessage({...request, res : true});
+          }
+          else 
+            chrome.runtime.sendMessage({...request, res : false});
+        }
+      })
+    break;
+    
 
     case "checkTabUrl":
       chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-        console.log("tabs ::::::::::: ", tabs);
+        // console.log("tabs ::::::::::: ", tabs);
         if (tabs[0].url.includes("groups") && (tabs[0].url.includes("members") || tabs[0].url.includes("people"))) {
-          console.log("url ::: ", tabs[0].url);
+          // console.log("url ::: ", tabs[0].url);
           // chrome.alarms.create("setSettingsForGroup", { when: Date.now() })
           setTimeout(()=>{
             chrome.runtime.sendMessage({ action: "setSettingsForGroup" });
@@ -826,7 +872,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       break;
 
     case "pause":
-      console.log("Paused.................. ", request)
+      // console.log("Paused.................. ", request)
       let currentFBTabIdIs;
       if(request.source === "post"){
         currentFBTabIdIs = await helper.getDatafromStorage("PostTabId");

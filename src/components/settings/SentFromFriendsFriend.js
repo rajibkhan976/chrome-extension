@@ -54,6 +54,7 @@ const SentFromFriendsFriend = () => {
     const [sendFrndReqGroupName, setSendFrndReqGroupName] = useState("");
     const [acceptReqGroupName, setAcceptReqGroupName] = useState("");
     const [stats, setStats] = useState({ queueCount: 0, memberCount: 0, source: "friends" });
+    const [shouldfrienderRun, setShouldfrienderRun] = useState(true);
 
 
     // FETCH SETTINGS DATA..
@@ -71,10 +72,17 @@ const SentFromFriendsFriend = () => {
     //         })();
     //     }
     // }, [editType, formSetup]);
-
+    
+    chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+        if(request.action === "shouldfrienderRun"){
+            console.log("request log -------------------> ", request, request.res);
+            setShouldfrienderRun(request.res)
+        }
+    })
     useEffect(() => {
         // console.log("i am re rendered......");
         (async () => {
+            await chrome.runtime.sendMessage({action : "shouldfrienderRun", source : "friends"});
             const runningStatus = await helper.getDatafromStorage("runAction_friend");
             if (runningStatus === "running") {
                 setIsRunnable(true);
@@ -84,11 +92,16 @@ const SentFromFriendsFriend = () => {
                     setStats(showCount)
             }
             else if (runningStatus === "pause") {
-                setEditType("basic");
+                const savedPage = await helper.getDatafromStorage('save_friends');
+                if(savedPage === false)
+                    setEditType("basic");
+                else
+                    setEditType(null);
                 setIsRunnable(false)
             }
             else {
                 setIsRunnable(false)
+                await helper.saveDatainStorage('save_friends', true)
                 setEditType(null);
             }
 
@@ -361,6 +374,7 @@ const SentFromFriendsFriend = () => {
         console.log(" ==== [ STOP FRIENDER ] ==== ");
         await helper.saveDatainStorage("runAction_friend", "")
         chrome.runtime.sendMessage({ action: "stop", source: "friends" })
+        await helper.saveDatainStorage('save_friends', true)
         setEditType(null);
         setIsRunnable(false);
     };
@@ -370,6 +384,7 @@ const SentFromFriendsFriend = () => {
         console.log(" ==== [ PAUSED AND RETURN EDIT SCREEN ] ==== ");
         await helper.saveDatainStorage("runAction_friend", "pause")
         chrome.runtime.sendMessage({ action: "pause", source: "friends" })
+        await helper.saveDatainStorage('save_friends', false)
         setEditType("basic");
         setIsRunnable(false);
     };
@@ -409,6 +424,7 @@ const SentFromFriendsFriend = () => {
                 }
 
                 setReadyToBack(true);
+                await helper.saveDatainStorage('save_friends', true)
                 setEditType(null);
                 setIsEditing(false);
 
@@ -420,6 +436,7 @@ const SentFromFriendsFriend = () => {
                 console.log("ERROR WHILE UPDATE SETTINGS - ", error);
                 setOpenNotificationMsg("Can not update the settings!");
                 setOpenErrorNotification(true);
+                await helper.saveDatainStorage('save_friends', false)
                 setEditType("basic");
                 setIsEditing(true);
             }
@@ -441,10 +458,11 @@ const SentFromFriendsFriend = () => {
                         Authorization: fr_token,
                     },
                 });
-                console.log("settingRes : ", settingRes._id, settingRes)
+                console.log("settingRes : ", settingRes._id, settingRes.data, settingRes.data.data)
                 if (settingRes._id)
                     payload = { ...payload, settingsId: settingRes._id }
-
+                else if(settingRes.data.data)
+                    payload = { ...payload, settingsId: settingRes.data.data }
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
 
@@ -460,6 +478,7 @@ const SentFromFriendsFriend = () => {
                 }
 
                 setReadyToBack(true);
+                await helper.saveDatainStorage('save_friends', true)
                 setEditType(null);
                 setIsEditing(false);
 
@@ -471,6 +490,7 @@ const SentFromFriendsFriend = () => {
                 console.log("ERROR WHILE SAVE SETTINGS - ", error);
                 setOpenNotificationMsg("Can not save the settings!");
                 setOpenErrorNotification(true);
+                await helper.saveDatainStorage('save_friends', false)
                 setEditType("basic");
                 setIsEditing(true);
             }
@@ -574,8 +594,6 @@ const SentFromFriendsFriend = () => {
                             <button
                                 className="btn btn-edit inline-btn"
                                 onClick={(event) => {
-                                    // setEditType(null);
-                                    // setIsEditing(false);
                                     handleSaveSettings(event);
                                 }}
                             >
@@ -584,7 +602,8 @@ const SentFromFriendsFriend = () => {
                             :
                             <button
                                 className="btn btn-edit inline-btn"
-                                onClick={() => {
+                                onClick={async() => {
+                                    await helper.saveDatainStorage('save_friends', false)
                                     setEditType("basic");
                                     setIsEditing(true);
                                 }}
@@ -596,7 +615,7 @@ const SentFromFriendsFriend = () => {
                     <button
                         className="btn btn-run inline-btn"
                         onClick={handleRunFrienderAction}
-                        disabled={isRunnable}
+                        disabled={isRunnable || !shouldfrienderRun}
                     >
                         <Bolt /> Run Friender
                     </button>

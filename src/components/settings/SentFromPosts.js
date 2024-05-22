@@ -62,6 +62,7 @@ const SentFromPosts = () => {
     const [sendFrndReqGroupName, setSendFrndReqGroupName] = useState("");
     const [acceptReqGroupName, setAcceptReqGroupName] = useState("");
     const [stats, setStats] = useState({ queueCount: 0, memberCount: 0, source: "post" });
+    const [shouldfrienderRun, setShouldfrienderRun] = useState(true);
 
 
     // FETCH SETTINGS DATA..
@@ -79,11 +80,17 @@ const SentFromPosts = () => {
     //         })();
     //     }
     // }, [editType, formSetup]);
-
+    chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+        if(request.action === "shouldfrienderRun"){
+            // console.log("request log -------------------> ", request, request.res);
+            setShouldfrienderRun(request.res)
+        }
+    })
 
     useEffect(() => {
         // console.log("i am re rendered......");
         (async () => {
+            await chrome.runtime.sendMessage({action : "shouldfrienderRun", source : "post"});
             const runningStatus = await helper.getDatafromStorage("runAction_post");
             if (runningStatus === "running") {
                 console.log("yeah, running.");
@@ -94,11 +101,16 @@ const SentFromPosts = () => {
                     setStats(showCount)
             }
             else if (runningStatus === "pause") {
-                setEditType("basic");
+                    const savedPage = await helper.getDatafromStorage('save_post');
+                    if(savedPage === false)
+                        setEditType("basic");
+                    else
+                        setEditType(null);
                 setIsRunnable(false)
             }
             else {
                 setIsRunnable(false)
+                await helper.saveDatainStorage('save_post', true)
                 setEditType(null);
             }
 
@@ -371,7 +383,7 @@ const SentFromPosts = () => {
 
     // RUN FRIENDER HANDLE FUNCTION..
     const runFrinderHandle = async () => {
-        console.log("run friender");
+        // console.log("run friender");
     };
 
     // STOP RUN THE FRIENDER HANDLER..
@@ -379,12 +391,14 @@ const SentFromPosts = () => {
         console.log(" ==== [ STOP FRIENDER ] ==== ");
         await helper.saveDatainStorage("runAction_post", "");
         chrome.runtime.sendMessage({ action: "stop", source: "post" })
+        await helper.saveDatainStorage('save_post', true)
         setEditType(null);
         setIsRunnable(false);
     };
 
     // PAUSE SENDING FR AND EDIT HANDLE FUNCTION..
     const pauseSendingPRAndEdit = async () => {
+        await helper.saveDatainStorage('save_post', false)
         console.log(" ==== [ PAUSED AND RETURN EDIT SCREEN ] ==== ");
         await helper.saveDatainStorage("runAction_post", "pause");
         chrome.runtime.sendMessage({ action: "pause", source: "post" })
@@ -428,6 +442,7 @@ const SentFromPosts = () => {
                 }
 
                 setReadyToBack(true);
+                await helper.saveDatainStorage('save_post', true)
                 setEditType(null);
                 setIsEditing(false);
 
@@ -439,6 +454,7 @@ const SentFromPosts = () => {
                 console.log("ERROR WHILE UPDATE SETTINGS - ", error);
                 setOpenNotificationMsg("Can not update the settings!");
                 setOpenErrorNotification(true);
+                await helper.saveDatainStorage('save_post', false)
                 setEditType("basic");
                 setIsEditing(true);
             }
@@ -460,9 +476,11 @@ const SentFromPosts = () => {
                         Authorization: fr_token,
                     },
                 });
-                console.log("settingRes : ", settingRes._id, settingRes)
+                console.log("settingRes : ", settingRes._id, settingRes.data, settingRes.data.data)
                 if (settingRes._id)
                     payload = { ...payload, settingsId: settingRes._id }
+                else if(settingRes.data.data)
+                    payload = { ...payload, settingsId: settingRes.data.data }
 
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
@@ -479,6 +497,7 @@ const SentFromPosts = () => {
                 }
 
                 setReadyToBack(true);
+                await helper.saveDatainStorage('save_post', true)
                 setEditType(null);
                 setIsEditing(false);
 
@@ -490,6 +509,7 @@ const SentFromPosts = () => {
                 console.log("ERROR WHILE SAVE SETTINGS - ", error);
                 setOpenNotificationMsg("Can not save the settings!");
                 setOpenErrorNotification(true);
+                await helper.saveDatainStorage('save_post', false)
                 setEditType("basic");
                 setIsEditing(true);
             }
@@ -594,7 +614,7 @@ const SentFromPosts = () => {
 
     // Function to get icon component based on icon name
     const getIconComponent = (iconName) => {
-        console.log("iconName - ", iconName);
+        // console.log("iconName - ", iconName);
         switch (iconName) {
             case 'like':
                 return <LikeReactionIcon />;
@@ -650,8 +670,9 @@ const SentFromPosts = () => {
                             :
                             <button
                                 className="btn btn-edit inline-btn"
-                                onClick={() => {
-                                    setEditType("basic");
+                                onClick={async() => {
+                                await helper.saveDatainStorage('save_post', false)
+                                setEditType("basic");
                                     setIsEditing(true);
                                 }}
                             >
@@ -662,7 +683,7 @@ const SentFromPosts = () => {
                     <button
                         className="btn btn-run inline-btn"
                         onClick={handleRunFrienderAction}
-                        disabled={isRunnable}
+                        disabled={isRunnable || !shouldfrienderRun}
                     >
                         <Bolt /> Run Friender
                     </button>

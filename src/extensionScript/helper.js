@@ -68,6 +68,7 @@ const removeDatafromStorage = async (key) => {
 };
 
 const isEmptyObj = function (obj) {
+  // console.log("is empty ? ", obj);
   for (var key in obj) {
     if (obj.hasOwnProperty(key)) return false;
   }

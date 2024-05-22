@@ -122,12 +122,12 @@ export const syncFromNewAPi = (apiObj, uiObj, setUiObj) => {
                 // itemCh.value = apiValue;
               }
 
-              console.log("returned the value - ", itemCh);
+              // console.log("returned the value - ", itemCh);
               return itemCh;
             }),
           };
 
-          console.log("NewObj - ", newObj);
+          // console.log("NewObj - ", newObj);
           newFromObj.fields[i] = newObj;
         }
       }
@@ -142,7 +142,7 @@ export const syncFromApi = (apiObj, uiObj, setUiObj) => {
   // console.log("sycning started......before obj", uiObj);
   const newFromObj = { ...uiObj };
 
-  console.log("API keys and ui Obj - ", apiObj, uiObj);
+  // console.log("API keys and ui Obj - ", apiObj, uiObj);
 
   Object.entries(apiObj).forEach(([apiKey, apiValue]) => {
     for (const i in newFromObj.fields) {
@@ -208,7 +208,7 @@ export const syncFromApi = (apiObj, uiObj, setUiObj) => {
       }
     }
   });
-  console.log(">>>>+++=====---=========;;;;newFromObj end ????", newFromObj);
+  // console.log(">>>>+++=====---=========;;;;newFromObj end ????", newFromObj);
   setUiObj(newFromObj);
   // var endTime = performance.now();
   // console.log(

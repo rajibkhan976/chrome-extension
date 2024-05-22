@@ -54,7 +54,7 @@ const AutomationRunner = ({ setrunningScript, setRequestActive, statistics, sour
     (async () => {
       
       const showCount = await helper.getDatafromStorage("showCount");
-      console.log("showCount :: local storage :::::::: ", showCount);
+      // console.log("showCount :: local storage :::::::: ", showCount);
       if(showCount && showCount.source === source)
           setStats(showCount)
       const frsentcount = await helper.getDatafromStorage("FRSendCount");

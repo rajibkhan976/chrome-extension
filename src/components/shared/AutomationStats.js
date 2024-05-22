@@ -44,15 +44,15 @@ const AutomationStats = (props) => {
   );
 
 useEffect(()=>{
-  console.log("stats ---------------------->> ", stats);
+  // console.log("stats ---------------------->> ", stats);
 }, [stats])
 
   useEffect(() => {
     (async () => {
-      console.log("Automation stats ====================> ", props);
+      // console.log("Automation stats ====================> ", props);
       
       const showCount = await helper.getDatafromStorage("showCount");
-      console.log("showCount :: local storage :::::::: ", showCount);
+      // console.log("showCount :: local storage :::::::: ", showCount);
       if(showCount && showCount.source === source)
           setStats(showCount)
       const frsentcount = await helper.getDatafromStorage("FRSendCount");

@@ -17,10 +17,7 @@ let memberContact = {},
     groupSettings = {},
     groupName ="",
     profileMysettings = {};
-
-    const comment = true;
-    let reaction = true;
-    const reactions = {
+const reactions = {
         "like":"1635855486666999", 
         "love":"1678524932434102", 
         "care":"613557422527858", 
@@ -565,7 +562,6 @@ const proceedOneByOne = async ( source ) => {
 const validatePayload = async ( payload, source ) => {
     // console.log(payload);
     if(shoudIstop) return;
-    queueCount++;
     let isEligible = true
     if (isEligible && groupSettings.gender_filter) {
         if (
@@ -762,7 +758,7 @@ const validatePayload = async ( payload, source ) => {
         }
         // console.log(payload);
         const response = await common.storeInFRQS(payload);
-        
+        queueCount++;
         chrome.runtime.sendMessage({action : "showCount", paylaod : {queueCount : queueCount, memberCount : memberCount, source: source }})
         await helper.saveDatainStorage("showCount", {queueCount : queueCount, memberCount : memberCount, source: source })
     }
