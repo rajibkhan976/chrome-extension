@@ -210,7 +210,8 @@ const syncFriendList = async (fbUserId, sendResponseExternal = null) => {
     chrome.storage.local.set({ lastAutoSyncFriendListId: fbUserId });
     sendMessageToPortalScript({action: "fr_isSyncing", content: "active", type: "cookie"});
   });
-  syncFriendLength((request)=>{
+  syncFriendLength();
+  ((request)=>{
     // console.log("request ::: ", request)
     checkTabsActivation("fr_sync");
     chrome.tabs.create(
@@ -228,7 +229,7 @@ const syncFriendList = async (fbUserId, sendResponseExternal = null) => {
         });
       }
     );
-  });
+  })()
 }
 
 const checkTabsActivation = async (opener) => {
