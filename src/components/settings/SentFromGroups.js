@@ -521,7 +521,7 @@ const SentFromGroups = () => {
         }
 
         if (payload?.mutual_friend_value) {
-            payload.mutual_friend_value = `${payload.mutual_friend_value}`;
+            payload.mutual_friend_value = payload.mutual_friend_value.toString();
         }
 
         if (!payload?.country_filter_enabled) {
@@ -565,7 +565,7 @@ const SentFromGroups = () => {
         }
 
         if (payload?.mutual_friend_value) {
-            payload.mutual_friend_value = `${payload.mutual_friend_value}`;
+            payload.mutual_friend_value = payload.mutual_friend_value.toString();
         }
 
         if (!payload?.country_filter_enabled) {

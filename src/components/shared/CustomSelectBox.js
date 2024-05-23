@@ -3,15 +3,13 @@ import useOutSideClick from "../../helper/useOutSideClick";
 import { CrossWhite, DropDownIcon, NotFoundIcon, SearchIcon } from "../../assets/icons/Icons";
 import { utils } from "../../helper/utils";
 
+
 function CustomSelectBox({ element, onClickOption, className = "", needSearchBar = false, barWitdh = "100%", disabled = false }) {
     const [currentOptions, SetcurrentOptions] = useState(element.options);
     const selectedOption = element.options.filter((item) => item.value === element.value);
     const [searchVal, setSearchVal] = useState("");
     const { clickedRef, isComponentVisible, setIsComponentVisible } =
         useOutSideClick(false);
-
-
-        console.log("ELEMENT OPTIONS --- ", selectedOption);
 
     useEffect(() => {
         if (!isComponentVisible) {
@@ -39,7 +37,8 @@ function CustomSelectBox({ element, onClickOption, className = "", needSearchBar
                 onClick={() => {
                     element.options && element.options.length > 0 && setIsComponentVisible(!isComponentVisible);
                 }}
-                style={{ width: barWitdh }}>
+                style={{ width: barWitdh }}
+            >
                 <p>{element && element.value && element.options && selectedOption.length > 0 && element.value.length > 0 ? utils.truncateText(selectedOption[0].label) : "Select message group"}</p>
                 <span className="custom-selectBox-drop">
                     <DropDownIcon />

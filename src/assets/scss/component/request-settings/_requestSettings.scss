@@ -237,8 +237,16 @@
     }
 }
 
-.fr-setting-cell:hover ~ .fr-setting-cell {
+// .fr-setting-cell:hover ~ .fr-setting-cell {
+//     z-index: 0;
+// }
+
+.fr-content-cell-grid:has(.custom-selectBox ul) .fr-setting-cell:has(.custom-selectBox ul)~.fr-setting-cell {
     z-index: 0;
+}
+
+.fr-setting-cell.group-disabled {
+    z-index: 10;
 }
 
 .fr-cell-header {

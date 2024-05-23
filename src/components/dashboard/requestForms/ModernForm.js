@@ -691,6 +691,8 @@ const GroupsRequestForm = ({
         setFormSetup(newObj);
         generateFormElements();
     };
+
+
     const fillInputChange = (value, ele) => {
         let formSetPlaceholder = { ...formSetup };
         // console.log("e keke ke", e);
@@ -1013,9 +1015,9 @@ const GroupsRequestForm = ({
                             let currValue = parseInt(ele.value)
                             item.value = type === "+" ? currValue + 1 : currValue - 1;
 
-                            if (item.value < 0) {
-                                item.value = 0;
-                                currValue = 0;
+                            if (item.value <= 0 || currValue <= 0) {
+                                item.value = 1;
+                                currValue = 1;
                             }
 
                             if (isNaN(item.value) || item.value === "") {
@@ -1025,7 +1027,7 @@ const GroupsRequestForm = ({
 
                             setSettingApiPayload((prevState) => ({
                                 ...prevState,
-                                [ele.name]: type === "+" ? currValue + 1 : currValue - 1,
+                                [ele.name]: item.value.toString(),
                             }));
                         }
                         return item;
@@ -1143,6 +1145,7 @@ const GroupsRequestForm = ({
     };
 
 
+    // CLEAR ALL KEYWORDS BUTTONS ACTION
     const clearKeyWordsHandle = (ele) => {
         let formSetPlaceholder = { ...formSetup };
 
@@ -1155,6 +1158,11 @@ const GroupsRequestForm = ({
                         if (ele.name === itemCh.name) {
                             itemCh.valueArr = [];
                             itemCh.value = "";
+
+                            setSettingApiPayload(prevData => ({
+                                ...prevData,
+                                [ele.name]: [],
+                            }));
                         }
                         return itemCh;
                     }),
@@ -1169,20 +1177,16 @@ const GroupsRequestForm = ({
     const handleMouseMove = (event) => {
         const { offsetX, offsetY, movementX, movementY } = event.nativeEvent;
         let x = (offsetX - movementX) + 20, y = (offsetY - movementY) + 30;
-        // console.log(':::::::', event.target.classList?.substring);
 
         if (y > event.target.clientHeight) {
-            // console.log('here', y);
             y = event.target.clientHeight - 35
         }
 
-        // console.log('event >>>', event);
         if (y <= event.target.clientTop) {
-            // console.log('here', y);
             y = event.target.clientTop
         }
+
         setTooltipPosition({ x, y });
-        // setIsTooltipVisible(true);
     };
 
     // DISABLE INPUT FIELDS HERE..
