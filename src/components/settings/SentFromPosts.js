@@ -63,6 +63,7 @@ const SentFromPosts = () => {
     const [acceptReqGroupName, setAcceptReqGroupName] = useState("");
     const [stats, setStats] = useState({ queueCount: 0, memberCount: 0, source: "post" });
     const [shouldfrienderRun, setShouldfrienderRun] = useState(true);
+    const [settingsID, setSettingsID] = useState(null);
 
 
     // FETCH SETTINGS DATA..
@@ -81,7 +82,7 @@ const SentFromPosts = () => {
     //     }
     // }, [editType, formSetup]);
     chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-        if(request.action === "shouldfrienderRun"){
+        if (request.action === "shouldfrienderRun") {
             // console.log("request log -------------------> ", request, request.res);
             setShouldfrienderRun(request.res)
         }
@@ -90,7 +91,7 @@ const SentFromPosts = () => {
     useEffect(() => {
         // console.log("i am re rendered......");
         (async () => {
-            await chrome.runtime.sendMessage({action : "shouldfrienderRun", source : "post"});
+            await chrome.runtime.sendMessage({ action: "shouldfrienderRun", source: "post" });
             const runningStatus = await helper.getDatafromStorage("runAction_post");
             if (runningStatus === "running") {
                 console.log("yeah, running.");
@@ -101,11 +102,11 @@ const SentFromPosts = () => {
                     setStats(showCount)
             }
             else if (runningStatus === "pause") {
-                    const savedPage = await helper.getDatafromStorage('save_post');
-                    if(savedPage === false)
-                        setEditType("basic");
-                    else
-                        setEditType(null);
+                const savedPage = await helper.getDatafromStorage('save_post');
+                if (savedPage === false)
+                    setEditType("basic");
+                else
+                    setEditType(null);
                 setIsRunnable(false)
             }
             else {
@@ -136,6 +137,15 @@ const SentFromPosts = () => {
                 setSettingSyncApiPayload(curr_settingObj);
                 // syncFromApi(curr_settingObj, formSetup, setFormSetup);
                 syncFromNewAPi(curr_settingObj, formSetup, setFormSetup);
+
+                if (curr_settingObj?.send_message_when_friend_request_accepted_message_group_id) {
+                    setGroupName(curr_settingObj?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
+                }
+
+                if (curr_settingObj?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName) {
+                    setGroupName(curr_settingObj?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
+                }
+
                 setIsLoding(false);
             }
 
@@ -153,10 +163,11 @@ const SentFromPosts = () => {
 
                             (async () => {
                                 if (apiCoreResponse?._id) {
-                                    await helper.saveDatainStorage("postSettingId", {
-                                        settingsId: apiCoreResponse?._id,
-                                    });
+                                    // await helper.saveDatainStorage("postSettingId", {
+                                    //     settingsId: apiCoreResponse?._id,
+                                    // });
                                     response.settingsId = apiCoreResponse?._id;
+                                    setSettingsID(apiCoreResponse?._id);
                                 }
                             })();
 
@@ -165,8 +176,14 @@ const SentFromPosts = () => {
                             setSettingSyncApiPayload(response);
                             // setSettingApiPayload(response);
                             setIsLoding(false);
-                            setGroupName(response?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
-                            setGroupName(response?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
+
+                            if (response?.send_message_when_friend_request_accepted_message_group_id) {
+                                setGroupName(response?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
+                            }
+
+                            if (response?.send_message_when_friend_request_sent_message_group_id) {
+                                setGroupName(response?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
+                            }
                         });
                         // generateFormElements();
                     } else {
@@ -332,7 +349,7 @@ const SentFromPosts = () => {
         (async () => {
             const fr_token = await helper.getDatafromStorage("fr_token");
 
-            if (groupId && groupId !== 'undefined' || groupId !== undefined) {
+            if (groupId && (groupId !== 'undefined' || groupId !== undefined) && groupId !== null && groupId !== '') {
                 try {
                     const response = await axios.get(`${process.env.REACT_APP_FETCH_MESSAGE_GROUP}/${groupId}`, {
                         headers: {
@@ -354,7 +371,7 @@ const SentFromPosts = () => {
             };
         })();
     };
-   
+
     /**
      * CAPITALIZED TEXT
      * @param {*} string 
@@ -410,12 +427,12 @@ const SentFromPosts = () => {
     // SAVE / UPDATE TO API..
     const saveToAPI = async (payload, silentSave = false, isRunnable = null) => {
         const fr_token = await helper.getDatafromStorage("fr_token");
-        const postSettingId = await helper.getDatafromStorage("postSettingId");
+        // const postSettingId = await helper.getDatafromStorage("postSettingId");
 
-        if (postSettingId?.settingsId) {
+        if (settingsID) {
             const updatePayload = {
                 ...payload,
-                settingsId: postSettingId?.settingsId,
+                settingsId: settingsID,
             };
 
             try {
@@ -479,7 +496,7 @@ const SentFromPosts = () => {
                 console.log("settingRes : ", settingRes._id, settingRes.data, settingRes.data.data)
                 if (settingRes._id)
                     payload = { ...payload, settingsId: settingRes._id }
-                else if(settingRes.data.data)
+                else if (settingRes.data.data)
                     payload = { ...payload, settingsId: settingRes.data.data }
 
                 if (isRunnable === "RUN") {
@@ -578,6 +595,8 @@ const SentFromPosts = () => {
 
     // SAVING THE API PAYLOAD TO SERVER
     const handleSaveSettings = async () => {
+        console.log("I AM SAVING...");
+
         // Have to send payload to save via API from here..
         const fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
 
@@ -609,6 +628,10 @@ const SentFromPosts = () => {
 
         await helper.saveDatainStorage('postSettingsPayload', payload);
         await saveToAPI(payload);
+
+        // SYNC API FETCH DATA..
+        syncData();
+        console.log("I AM SAVED.");
     };
 
 
@@ -670,9 +693,9 @@ const SentFromPosts = () => {
                             :
                             <button
                                 className="btn btn-edit inline-btn"
-                                onClick={async() => {
-                                await helper.saveDatainStorage('save_post', false)
-                                setEditType("basic");
+                                onClick={async () => {
+                                    await helper.saveDatainStorage('save_post', false)
+                                    setEditType("basic");
                                     setIsEditing(true);
                                 }}
                             >
@@ -854,7 +877,7 @@ const SentFromPosts = () => {
                             </figure>
                             <div className="setting-content">
                                 <h6>Country</h6>
-                                  <p>
+                                <p>
                                     {settingSyncApiPayload?.country_filter_enabled ? (
                                         <>
                                             {settingSyncApiPayload?.tier_filter ? settingSyncApiPayload?.tier_filter_value : ''}
@@ -872,7 +895,7 @@ const SentFromPosts = () => {
                                 </p>
                             </div>
                         </div>
-                      
+
                     </div>
                     <div className="setting-col d-flex d-flex-column">
                         <div className="setting-show d-flex">

@@ -115,7 +115,7 @@ useEffect(()=>{
         </div>
         <div className="progress-infos request-sent">
           <h4>{stats.queueCount}</h4>
-          <p>Friend request sent</p>
+          <p>Added to friend queue</p>
         </div>
       </div>
 

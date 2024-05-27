@@ -55,9 +55,10 @@ const SentFromGroups = () => {
     const [acceptReqGroupName, setAcceptReqGroupName] = useState("");
     const [stats, setStats] = useState({ queueCount: 0, memberCount: 0, source: "groups" });
     const [shouldfrienderRun, setShouldfrienderRun] = useState(true);
+    const [settingsID, setSettingsID] = useState(null);
 
     chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-        if(request.action === "shouldfrienderRun"){
+        if (request.action === "shouldfrienderRun") {
             // console.log("request log -------------------> ", request, request.res);
             setShouldfrienderRun(request.res)
         }
@@ -65,7 +66,7 @@ const SentFromGroups = () => {
 
     useEffect(() => {
         (async () => {
-            await chrome.runtime.sendMessage({action : "shouldfrienderRun", source : "groups"});
+            await chrome.runtime.sendMessage({ action: "shouldfrienderRun", source: "groups" });
             // console.log("groups.................")
             const runningStatus = await helper.getDatafromStorage("runAction_group");
             // console.log("runningStatus :::************************ ", runningStatus);
@@ -78,7 +79,7 @@ const SentFromGroups = () => {
             }
             else if (runningStatus === "pause") {
                 const savedPage = await helper.getDatafromStorage('save_groups');
-                if(savedPage === false)
+                if (savedPage === false)
                     setEditType("basic");
                 else
                     setEditType(null);
@@ -113,8 +114,17 @@ const SentFromGroups = () => {
                 setSettingApiPayload(curr_settingObj);
                 setSettingSyncApiPayload(curr_settingObj);
                 syncFromNewAPi(curr_settingObj, formSetup, setFormSetup);
-                setGroupName(curr_settingObj?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
-                setGroupName(curr_settingObj?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
+
+                console.log("SETTINGS_ID FETCH LOCAL PAYLOAD - ", curr_settingObj);
+
+                if (curr_settingObj?.send_message_when_friend_request_accepted_message_group_id) {
+                    setGroupName(curr_settingObj?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
+                }
+
+                if (curr_settingObj?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName) {
+                    setGroupName(curr_settingObj?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
+                }
+
                 setIsLoding(false);
             }
 
@@ -132,8 +142,9 @@ const SentFromGroups = () => {
 
                             (async () => {
                                 if (apiCoreResponse?._id) {
-                                    await helper.saveDatainStorage('groupSettingsId', { settingsId: apiCoreResponse?._id });
+                                    // await helper.saveDatainStorage('groupSettingsId', { settingsId: apiCoreResponse?._id });
                                     response.settingsId = apiCoreResponse?._id;
+                                    setSettingsID(apiCoreResponse?._id);
                                 }
                             })();
 
@@ -150,8 +161,14 @@ const SentFromGroups = () => {
                             setSettingSyncApiPayload(response);
                             // setSettingApiPayload(response);
                             setIsLoding(false);
-                            setGroupName(response?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
-                            setGroupName(response?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
+
+                            if (response?.send_message_when_friend_request_accepted_message_group_id) {
+                                setGroupName(response?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
+                            }
+
+                            if (response?.send_message_when_friend_request_sent_message_group_id) {
+                                setGroupName(response?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
+                            }
                         });
                         // generateFormElements();
                     } else {
@@ -325,7 +342,7 @@ const SentFromGroups = () => {
         (async () => {
             const fr_token = await helper.getDatafromStorage("fr_token");
 
-            if (groupId && groupId !== 'undefined' || groupId !== undefined) {
+            if (groupId && (groupId !== 'undefined' || groupId !== undefined) && groupId !== null && groupId !== '') {
                 try {
                     const response = await axios.get(`${process.env.REACT_APP_FETCH_MESSAGE_GROUP}/${groupId}`, {
                         headers: {
@@ -387,12 +404,12 @@ const SentFromGroups = () => {
     // SAVE / UPDATE TO API..
     const saveToAPI = async (payload, silentSave = false, isRunnable = null) => {
         const fr_token = await helper.getDatafromStorage("fr_token");
-        const groupSettingsId = await helper.getDatafromStorage("groupSettingsId");
+        // const groupSettingsId = await helper.getDatafromStorage("groupSettingsId");
 
-        if (groupSettingsId?.settingsId) {
+        if (settingsID) {
             const updatePayload = {
                 ...payload,
-                settingsId: groupSettingsId?.settingsId,
+                settingsId: settingsID,
             };
 
             try {
@@ -453,10 +470,12 @@ const SentFromGroups = () => {
                         Authorization: fr_token,
                     },
                 });
+
                 console.log("settingRes : ", settingRes._id, settingRes.data, settingRes.data.data)
+
                 if (settingRes._id)
                     payload = { ...payload, settingsId: settingRes._id }
-                else if(settingRes.data.data)
+                else if (settingRes.data.data)
                     payload = { ...payload, settingsId: settingRes.data.data }
 
                 if (isRunnable === "RUN") {
@@ -549,9 +568,9 @@ const SentFromGroups = () => {
 
     // SAVING THE API PAYLOAD TO SERVER
     const handleSaveSettings = async () => {
-        // Have to send payload to save via API from here..
-        console.log("CLIENT PAYLOAD HERE -- ", settingApiPayload);
+        console.log("I AM SAVING...");
 
+        // Have to send payload to save via API from here..
         const fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
 
         const payload = {
@@ -582,6 +601,10 @@ const SentFromGroups = () => {
 
         await helper.saveDatainStorage('groupSettingsPayload', payload);
         await saveToAPI(payload);
+
+        // SYNC API FETCH DATA..
+        syncData();
+        console.log("I AM SAVED.");
     };
 
 
@@ -603,7 +626,7 @@ const SentFromGroups = () => {
                             :
                             <button
                                 className="btn btn-edit inline-btn"
-                                onClick={async() => {
+                                onClick={async () => {
                                     await helper.saveDatainStorage('save_groups', false)
                                     setEditType("basic");
                                     setIsEditing(true);
@@ -706,7 +729,7 @@ const SentFromGroups = () => {
                     setIsLoding={setIsLoding}
                     settingApiPayload={settingApiPayload}
                     setSettingApiPayload={setSettingApiPayload}
-                    settingsType={8}
+                    settingsType={settingsType}
                     modalOpen={modalOpen}
                     setModalOpen={setModalOpen}
                     handleSaveSettings={handleSaveSettings}

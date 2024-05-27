@@ -169,6 +169,14 @@ const GroupsRequestForm = ({
                 mutual_friend_value: "10",
             }));
         }
+
+        if (settingApiPayload?.gender_filter_value === '') {
+            setSettingApiPayload(prevData => ({
+                ...prevData,
+                gender_filter_value: "male",
+            }));
+        }
+
     }, [settingApiPayload]);
 
     useEffect(() => {

@@ -273,7 +273,7 @@ export const checkValidity = (dataObj, setdata) => {
     if (data.fields[fidx].name === "send_message_when_friend_request_sent") {
       data.fields[fidx].fieldOptions?.map(option => {
         if (option?.name === "send_message_when_friend_request_sent_message_group_id") {
-          if (data?.fields[fidx]?.isActive === true && option?.options?.length <= 0 || option?.value === "") {
+          if (data?.fields[fidx]?.isActive === true && (option?.options?.length <= 0 || option?.value === "")) {
             // option.valid = false;
             valid = false;
           }
@@ -281,7 +281,7 @@ export const checkValidity = (dataObj, setdata) => {
           const foundMessageGroup = option.options.find(item => item.value === option.value);
 
           // undefined if no any groups
-          if (data?.fields[fidx]?.isActive === true && option?.options?.length > 0 && foundMessageGroup === undefined) {
+          if (data?.fields[fidx]?.isActive === true && (option?.options?.length > 0 && foundMessageGroup === undefined)) {
             option.valid = false;
             valid = false;
           }
@@ -293,7 +293,7 @@ export const checkValidity = (dataObj, setdata) => {
     if (data.fields[fidx].name === "send_message_when_friend_request_accepted") {
       data.fields[fidx].fieldOptions?.map(option => {
         if (option?.name === "send_message_when_friend_request_accepted_message_group_id") {
-          if (data?.fields[fidx]?.isActive === true && option?.options?.length <= 0 || option?.value === "") {
+          if (data?.fields[fidx]?.isActive === true && (option?.options?.length <= 0 || option?.value === "")) {
             // option.valid = false;
             valid = false;
           }
@@ -301,7 +301,7 @@ export const checkValidity = (dataObj, setdata) => {
           const foundMessageGroup = option.options.find(item => item.value === option.value);
 
           // undefined if no any groups
-          if (data?.fields[fidx]?.isActive === true && option?.options?.length > 0 && foundMessageGroup === undefined) {
+          if (data?.fields[fidx]?.isActive === true && (option?.options?.length > 0 && foundMessageGroup === undefined)) {
             option.valid = false;
             valid = false;
           }
@@ -330,7 +330,7 @@ export const checkValidity = (dataObj, setdata) => {
         if (option?.name === "mutual_friend_value") {
           const isActiveSetting = data?.fields[fidx]?.isActive;
 
-          if (isActiveSetting) {
+          if (isActiveSetting === true) {
             if (option?.value === "" || option?.value?.length < 1) {
               option.valid = false;
               valid = false;
@@ -345,73 +345,44 @@ export const checkValidity = (dataObj, setdata) => {
       });
     }
 
-    if (data.fields[fidx].headerCheckbox) {
-      if (data.fields[fidx].isActive) {
-        if (data.fields[fidx].recursive) {
-          const recValue = FindValidInRec(data.fields[fidx]);
-          if (recValue.unValid) {
-            valid = false;
-            //console.log(recValue);
-            data.fields[fidx] = recValue.obj;
-          }
-        } else {
-          for (const chidx in data.fields[fidx].fieldOptions) {
-            if (data.fields[fidx].name === "country_filter_enabled") {
-              if (data.fields[fidx].fieldOptions[0].value === "Tier Level") {
-                if (
-                  data.fields[fidx].fieldOptions[chidx].name ===
-                  "tier_filter_value" &&
-                  data.fields[fidx].fieldOptions[chidx]?.value.length === 0
-                ) {
-                  valid = false;
-                  data.fields[fidx].fieldOptions[chidx].valid = false;
-                }
-              } else if (
-                data.fields[fidx].fieldOptions[0].value === "Country Level"
-              ) {
-                if (
-                  data.fields[fidx].fieldOptions[chidx].name ===
-                  "country_filter_value" &&
-                  data.fields[fidx].fieldOptions[chidx].valueArr.length === 0
-                ) {
-                  valid = false;
-                  data.fields[fidx].fieldOptions[chidx].valid = false;
-                }
-              }
-            } else {
-              if (
-                data.fields[fidx].fieldOptions[chidx].valueArr &&
-                data.fields[fidx].fieldOptions[chidx].valueArr.length === 0
-              ) {
-                valid = false;
-                data.fields[fidx].fieldOptions[chidx].valid = false;
-              }
-            }
-          }
-        }
-      }
-    } else {
-      if (data.fields[fidx].recursive) {
-        if (
-          data.fields[fidx].fieldOptions[0].value === "Limited"
-        ) {
+    for (const chidx in data.fields[fidx].fieldOptions) {
+      if (data.fields[fidx].isActive === true && data.fields[fidx].name === "country_filter_enabled") {
 
-          const recValue = FindValidInRec(data.fields[fidx]);
-          if (recValue.unValid) {
+        if (data.fields[fidx].fieldOptions[0].value === "Tier Level") {
+
+          if (data.fields[fidx].fieldOptions[chidx].name === "tier_filter_value" &&
+            data.fields[fidx].fieldOptions[chidx]?.value.length === 0
+          ) {
             valid = false;
-            //console.log(recValue);
-            //data.fields[fidx] = recValue.obj;
+            data.fields[fidx].fieldOptions[chidx].valid = false;
+          }
+
+        } else if (
+          data.fields[fidx].fieldOptions[0].value === "Country Level"
+        ) {
+          if (data.fields[fidx].isActive === true &&
+            data.fields[fidx].fieldOptions[chidx].name === "country_filter_value" &&
+            data.fields[fidx].fieldOptions[chidx].valueArr.length === 0
+          ) {
+            valid = false;
+            data.fields[fidx].fieldOptions[chidx].valid = false;
           }
         }
-      } else {
-        for (const chidx in data.fields[fidx].fieldOptions) {
-          if (!data.fields[fidx].fieldOptions[chidx].valid) {
-            valid = false;
-          }
+
+      }
+
+      else {
+        if (data.fields[fidx].isActive === true &&
+          data.fields[fidx].fieldOptions[chidx].valueArr &&
+          data.fields[fidx].fieldOptions[chidx].valueArr.length === 0
+        ) {
+          valid = false;
+          data.fields[fidx].fieldOptions[chidx].valid = false;
         }
       }
     }
   }
+
   setdata(data);
   return { valid: valid, errReason: reason };
 };

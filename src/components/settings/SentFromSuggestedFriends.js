@@ -55,9 +55,11 @@ const SentFromSuggestedFriends = () => {
     const [acceptReqGroupName, setAcceptReqGroupName] = useState("");
     const [stats, setStats] = useState({ queueCount: 0, memberCount: 0, source: "source" });
     const [shouldfrienderRun, setShouldfrienderRun] = useState(true);
+    const [settingsID, setSettingsID] = useState(null);
+
 
     chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-        if(request.action === "shouldfrienderRun"){
+        if (request.action === "shouldfrienderRun") {
             console.log("request log -------------------> ", request, request.res);
             setShouldfrienderRun(request.res)
         }
@@ -66,7 +68,7 @@ const SentFromSuggestedFriends = () => {
     useEffect(() => {
         // console.log("i am re rendered......");
         (async () => {
-            chrome.runtime.sendMessage({action : "shouldfrienderRun", source : "suggestions"});
+            chrome.runtime.sendMessage({ action: "shouldfrienderRun", source: "suggestions" });
             const runningStatus = await helper.getDatafromStorage("runAction_suggestions");
             if (runningStatus === "running") {
                 setIsRunnable(true);
@@ -77,7 +79,7 @@ const SentFromSuggestedFriends = () => {
             }
             else if (runningStatus === "pause") {
                 const savedPage = await helper.getDatafromStorage('save_suggestions');
-                if(savedPage === false)
+                if (savedPage === false)
                     setEditType("basic");
                 else
                     setEditType(null);
@@ -108,8 +110,19 @@ const SentFromSuggestedFriends = () => {
                 setSettingApiPayload(curr_settingObj);
                 setSettingSyncApiPayload(curr_settingObj);
                 syncFromNewAPi(curr_settingObj, formSetup, setFormSetup);
-                setGroupName(curr_settingObj?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
-                setGroupName(curr_settingObj?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
+
+
+                console.log("SETTINGS_ID FETCH LOCAL PAYLOAD - ", curr_settingObj);
+
+
+                if (curr_settingObj?.send_message_when_friend_request_accepted_message_group_id) {
+                    setGroupName(curr_settingObj?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
+                }
+
+                if (curr_settingObj?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName) {
+                    setGroupName(curr_settingObj?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
+                }
+
                 setIsLoding(false);
             }
 
@@ -127,8 +140,9 @@ const SentFromSuggestedFriends = () => {
 
                             (async () => {
                                 if (apiCoreResponse?._id) {
-                                    await helper.saveDatainStorage('suggestedFrndsSettingId', { settingsId: apiCoreResponse?._id });
+                                    // await helper.saveDatainStorage('suggestedFrndsSettingId', { settingsId: apiCoreResponse?._id });
                                     response.settingsId = apiCoreResponse?._id;
+                                    setSettingsID(apiCoreResponse?._id);
                                 }
                             })();
 
@@ -136,8 +150,14 @@ const SentFromSuggestedFriends = () => {
                             setSettingSyncApiPayload(response);
                             // setSettingApiPayload(response);
                             setIsLoding(false);
-                            setGroupName(response?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
-                            setGroupName(response?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
+
+                            if (response?.send_message_when_friend_request_accepted_message_group_id) {
+                                setGroupName(response?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
+                            }
+
+                            if (response?.send_message_when_friend_request_sent_message_group_id) {
+                                setGroupName(response?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
+                            }
                         });
                         // generateFormElements();
                     } else {
@@ -293,7 +313,7 @@ const SentFromSuggestedFriends = () => {
         (async () => {
             const fr_token = await helper.getDatafromStorage("fr_token");
 
-            if (groupId && groupId !== 'undefined' || groupId !== undefined) {
+            if (groupId && (groupId !== 'undefined' || groupId !== undefined) && groupId !== null && groupId !== '') {
                 try {
                     const response = await axios.get(`${process.env.REACT_APP_FETCH_MESSAGE_GROUP}/${groupId}`, {
                         headers: {
@@ -374,12 +394,13 @@ const SentFromSuggestedFriends = () => {
     // SAVE / UPDATE TO API..
     const saveToAPI = async (payload, silentSave = false, isRunnable) => {
         const fr_token = await helper.getDatafromStorage("fr_token");
-        const suggestedSettingsId = await helper.getDatafromStorage("suggestedFrndsSettingId");
+        // const suggestedSettingsId = await helper.getDatafromStorage("suggestedFrndsSettingId");
+ 
 
-        if (suggestedSettingsId?.settingsId) {
+        if (settingsID) {
             const updatePayload = {
                 ...payload,
-                settingsId: suggestedSettingsId?.settingsId,
+                settingsId: settingsID,
             };
 
             try {
@@ -442,7 +463,7 @@ const SentFromSuggestedFriends = () => {
                 console.log("settingRes : ", settingRes._id, settingRes.data, settingRes.data.data)
                 if (settingRes._id)
                     payload = { ...payload, settingsId: settingRes._id }
-                else if(settingRes.data.data)
+                else if (settingRes.data.data)
                     payload = { ...payload, settingsId: settingRes.data.data }
 
                 if (isRunnable === "RUN") {
@@ -531,9 +552,9 @@ const SentFromSuggestedFriends = () => {
 
     // SAVING THE API PAYLOAD TO SERVER
     const handleSaveSettings = async () => {
-        // Have to send payload to save via API from here..
-        console.log("CLIENT PAYLOAD HERE -- ", settingApiPayload);
+        console.log("I AM SAVING...");
 
+        // Have to send payload to save via API from here..
         const fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
 
         const payload = {
@@ -564,6 +585,10 @@ const SentFromSuggestedFriends = () => {
 
         await helper.saveDatainStorage('suggestedFrndsSettingsPayload', payload);
         await saveToAPI(payload);
+
+        // SYNC API FETCH DATA..
+        syncData();
+        console.log("I AM SAVED.");
     };
 
 
