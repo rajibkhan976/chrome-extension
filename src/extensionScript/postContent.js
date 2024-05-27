@@ -40,7 +40,7 @@ let savePostMenuItem =
 async function doInit() {
   const frToken = await helper.getDatafromStorage("fr_token")
     if(helper.isEmptyObj(frToken)) return;
-    console.log("frToken ::: ", frToken);
+    // console.log("frToken ::: ", frToken);
     //To Intial the post added checking and our menu button as well.
     post_count = $(selectors.ariaLabel.toString()).length;
     // console.log("post count ::: ", post_count);
@@ -182,7 +182,7 @@ function addCFmenuLink(postBodyEl, menueItems) {
             'a[role="link"]'
             );
             console.log("allUrlsOfPsts ::::::::::::::: ", allUrlsOfPsts);
-            let i = allUrlsOfPsts.length - 2;
+            let i = allUrlsOfPsts.length - 1;
             if(allUrlsOfPsts.length === 0){
               post_body = $($($(postBodyEl).find(`div.html-div`)[0]).find(`div.html-div`)[0]).children().eq(2);
               console.log(post_body);
@@ -200,17 +200,40 @@ function addCFmenuLink(postBodyEl, menueItems) {
                 cancelable: true,
             })
             );
-            // var postUrl = $(allUrlsOfPsts[allUrlsOfPsts.length - 1]).attr("href");
             setTimeout(function () {
-                var postUrl = $(allUrlsOfPsts[i]).attr("href");
+                let postUrl = $(allUrlsOfPsts[i]).attr("href");
                 console.log("post URL ::::::::::::::::::::::: ", postUrl);
-                if(!postUrl.includes("https://www.facebook.com")){
-                    postUrl = "https://www.facebook.com" + postUrl
+                if(postUrl === "#"){
+                  i = allUrlsOfPsts.length - 2;
+                  console.log("allUrlsOfPsts[i] :::: ", allUrlsOfPsts[i]);
+                  allUrlsOfPsts[i].dispatchEvent(
+                  new FocusEvent("focusin", {
+                      view: window,
+                      bubbles: true,
+                      cancelable: true,
+                  })
+                  );
+                  setTimeout(()=>{
+                    postUrl = $(allUrlsOfPsts[i]).attr("href");
                     console.log("post URL ::::::::::::::::::::::: ", postUrl);
+                    if(!postUrl.includes("https://www.facebook.com")){
+                        postUrl = "https://www.facebook.com" + postUrl
+                        console.log("post URL ::::::::::::::::::::::: ", postUrl);
+                    }
+                    chrome.runtime.sendMessage({"action" :  "openPostSetting", "postUrl" : postUrl})
+                  }, 500)
                 }
-                chrome.runtime.sendMessage({"action" :  "openPostSetting", "postUrl" : postUrl})
-            }, 1000);
-        },500)
+                else{
+                  postUrl = $(allUrlsOfPsts[i]).attr("href");
+                  console.log("post URL ::::::::::::::::::::::: ", postUrl);
+                  if(!postUrl.includes("https://www.facebook.com")){
+                      postUrl = "https://www.facebook.com" + postUrl
+                      console.log("post URL ::::::::::::::::::::::: ", postUrl);
+                  }
+                  chrome.runtime.sendMessage({"action" :  "openPostSetting", "postUrl" : postUrl})
+                }
+            }, 500);
+        },200)
       });
   }
 
@@ -233,7 +256,7 @@ function addCFmenuLink(postBodyEl, menueItems) {
     console.log("--------------------------- dom loaded -------------------------------");
     const frToken = await helper.getDatafromStorage("fr_token");
     if(helper.isEmptyObj(frToken)) return;
-    console.log("frToken ::: ", frToken);
+    // console.log("frToken ::: ", frToken);
     doInit();
   
     onElementHeightChange(document.body, function () {

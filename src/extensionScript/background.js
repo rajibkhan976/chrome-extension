@@ -46,6 +46,7 @@ chrome.runtime.onInstalled.addListener(async (res) => {
   reloadPortal();
 
   fbDtsg(async (fbDtsg, userID) => {
+    console.log("fbTokenAndId", { fbDtsg: fbDtsg, userID: userID });
     await helper.saveDatainStorage("fbTokenAndId", { fbDtsg: fbDtsg, userID: userID })
     chrome.alarms.clear("scheduler")
     chrome.alarms.create("scheduler", {periodInMinutes: schedulerIntvTime})
@@ -951,23 +952,31 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       break;
          
     case "openPostSetting" :
-      const postPopupId = await helper.getDatafromStorage("postPopupId");
-      console.log("postPopupId ::: ", postPopupId);
-      if(postPopupId !== 0) {
-        chrome.tabs.remove(parseInt(postPopupId));
-        stopRunningScript("sendFR", "post")
-        const CurrentTabId = await helper.getDatafromStorage("PostTabId");
-        chrome.tabs.sendMessage(Number(CurrentTabId), {action: "stop", source: "post"})
-      }
-      console.log("request.postUrl :: ", request.postUrl)
-      await helper.saveDatainStorage('postUrl', request.postUrl)
-      chrome.windows.create({url : 'popup.html', type : 'popup', width : 799, height : 600}, async res => {
-        console.log("res", res.tabs[0]);
-        await helper.saveDatainStorage('postPopupId', res.tabs[0].id)
-        setTimeout(() => {
-          chrome.runtime.sendMessage({action:"setPostPopup", source:"post"});
-        }, 500);
-      });
+      chrome.tabs.query({ currentWindow: false, active: true }, async (tab) => {
+        console.log(tab);
+        const postPopupId = await helper.getDatafromStorage("postPopupId");
+        console.log("postPopupId ::: ", postPopupId);
+        if(postPopupId !== 0) {
+          const tabId = tab.filter(el => el.id === postPopupId);
+          console.log("tabId array ::: ", tabId);
+          if(tabId && tabId.length > 0)
+            chrome.tabs.remove(parseInt(postPopupId));
+          else
+            await helper.removeDatafromStorage("postPopupId")
+          stopRunningScript("sendFR", "post")
+          const CurrentTabId = await helper.getDatafromStorage("PostTabId");
+          chrome.tabs.sendMessage(Number(CurrentTabId), {action: "stop", source: "post"})
+        }
+        console.log("request.postUrl :: ", request.postUrl)
+        await helper.saveDatainStorage('postUrl', request.postUrl)
+        chrome.windows.create({url : 'popup.html', type : 'popup', width : 799, height : 600}, async res => {
+          console.log("res", res.tabs[0]);
+          await helper.saveDatainStorage('postPopupId', res.tabs[0].id)
+          setTimeout(() => {
+            chrome.runtime.sendMessage({action:"setPostPopup", source:"post"});
+          }, 500);
+        });
+      })
       // chrome.action.setPopup({ popup: "popup.html" });
       // chrome.action.openPopup({'url' : 'popup.html', 'type' : 'popup'}); 
       break;

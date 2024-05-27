@@ -905,7 +905,8 @@ const fetchFrQueueSetting= async (fb_user_id)=>{
 
 }
 const storeFrQueueSetting= async (payload)=>{
-  const apiurl=`${process.env.REACT_APP_APP_STORE_FR_QUEUE_SETTING}`;
+  console.log("process.env.REACT_APP_APP_STORE_FR_QUEUE_SETTING ::: ", process.env.REACT_APP_APP_STORE_FR_QUEUE_SETTING);
+  const apiurl=process.env.REACT_APP_APP_STORE_FR_QUEUE_SETTING;
   const requestOptions={
     method:"POST",
     headers:{
