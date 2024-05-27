@@ -2932,6 +2932,7 @@ const runFriendRequestQueue = async () => {
         const settingEligibility =  profileSettingCheck(userFBDetails.userID,friendFBId);
          if(friendShipStatus.is_data_found || !settingEligibility ){
           console.log("USER IS ALREADY PRESENT IN YOUR FR LIST ::");
+          chrome.tabs.remove(create.tabId);
           throw new Error("The user is already present in Feind list");
          }
          await helper.sleep(500);
