@@ -21,7 +21,10 @@ const AutomationRunner = ({ setrunningScript, setRequestActive, statistics, sour
         case "profile_viewed":
           // setProfileViewed(request.profile_viewed);
           break;
-
+        case "close" : 
+        // console.log("Close the tabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+        window.close();
+        break;
 
         case "stop":
           // setModalOpen(false);

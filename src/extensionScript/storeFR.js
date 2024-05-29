@@ -84,6 +84,8 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             shoudIstop = true;
             if (request.source !== "post")
                 window.location.reload();
+            else
+                chrome.runtime.sendMessage({action:"close"})
             break;
         case "pause":
             shoudIstop = true;
@@ -110,36 +112,70 @@ const getEssentialsForGraphApi = async (source, action, settings, targetId = nul
     if (action === "start") {
         console.log("starting-----------------------------------------------------------------");
         await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: source })
+         // get important info from DOM SCRIPT
+        if (source === "friends" ) { 
+            chrome.runtime.sendMessage({ action: "FetchEssentials", source: source, url: window.location.href });
+            return;
+        }
+        if (source === "groups") {
+            const groupNameInterval = setInterval(async () => {
+                const groupNameDiv = document.querySelector(selectors.main_component).querySelector(selectors.group_name)
+                // console.log("groupNameDiv ::: ", groupNameDiv);
+                if (groupNameDiv !== null) {
+                    clearInterval(groupNameInterval)
+                    groupName = groupNameDiv.textContent;
+                    // console.log("group name ::: ", groupName);
+                    let countSection = document.querySelector(('div[aria-label="Group navigation"][role="navigation"]'));
+                    console.log("count Section in left side ----> ", countSection)
+                    if (!countSection)
+                        countSection = document.querySelector('div[role="main"]')
+                    console.log("count Section in upper side ----> ", countSection)
+                    const groupLeft = countSection.querySelector('span:not([dir="auto"])').querySelector('a').getAttribute('href')
+                    sourceUrl = "https://www.facebook.com" + groupLeft;
+                    console.log("sourceUrl : ", sourceUrl);
+                    await startStoringContactInfo(source, checkAndSaveAllData);
+                }
+            }, 500)
+            return;
+        }
+        if (targetId)
+            if (source === "post") {
+                feedbackTargetID = targetId
+                sourceUrl = await helper.getDatafromStorage('postUrl');
+            }
     }
 
-    // get important info from DOM SCRIPT
-    if (source === "friends" ) { 
-        chrome.runtime.sendMessage({ action: "FetchEssentials", source: source, url: window.location.href });
-        return;
-    }
-    if (source === "groups") {
-        // const groupNameInterval = setInterval(() => {
-        const groupNameDiv = document.querySelector(selectors.main_component).querySelector(selectors.group_name)
-        // console.log("groupNameDiv ::: ", groupNameDiv);
-        if (groupNameDiv !== null) {
-            // clearInterval(groupNameInterval)
-            groupName = groupNameDiv.textContent;
-            let countSection = document.querySelector(('div[aria-label="Group navigation"][role="navigation"]'));
-            console.log("count Section in left side ----> ", countSection)
-            if (!countSection)
-                countSection = document.querySelector('div[role="main"]')
-            console.log("count Section in upper side ----> ", countSection)
-            const groupLeft = countSection.querySelector('span:not([dir="auto"])').querySelector('a').getAttribute('href')
-            console.log("https://www.facebook.com" + groupLeft)
-            sourceUrl = "https://www.facebook.com" + groupLeft;
-            // console.log("group name ::: ", groupName);
-        }
-    }
-    if (targetId)
-        if (source === "post") {
-            feedbackTargetID = targetId
-            sourceUrl = await helper.getDatafromStorage('postUrl');
-        }
+    // // get important info from DOM SCRIPT
+    // if (source === "friends" ) { 
+    //     chrome.runtime.sendMessage({ action: "FetchEssentials", source: source, url: window.location.href });
+    //     return;
+    // }
+    // if (source === "groups") {
+    //         const groupNameInterval = setInterval(async () => {
+    //         const groupNameDiv = document.querySelector(selectors.main_component).querySelector(selectors.group_name)
+    //         // console.log("groupNameDiv ::: ", groupNameDiv);
+    //         if (groupNameDiv !== null) {
+    //             clearInterval(groupNameInterval)
+    //             groupName = groupNameDiv.textContent;
+    //             let countSection = document.querySelector(('div[aria-label="Group navigation"][role="navigation"]'));
+    //             console.log("count Section in left side ----> ", countSection)
+    //             if (!countSection)
+    //                 countSection = document.querySelector('div[role="main"]')
+    //             console.log("count Section in upper side ----> ", countSection)
+    //             const groupLeft = countSection.querySelector('span:not([dir="auto"])').querySelector('a').getAttribute('href')
+    //             console.log("https://www.facebook.com" + groupLeft)
+    //             sourceUrl = "https://www.facebook.com" + groupLeft;
+    //             // console.log("group name ::: ", groupName);
+    //             await startStoringContactInfo(source, checkAndSaveAllData);
+    //             return;
+    //         }
+    //     }, 500)
+    // }
+    // if (targetId)
+    //     if (source === "post") {
+    //         feedbackTargetID = targetId
+    //         sourceUrl = await helper.getDatafromStorage('postUrl');
+    //     }
 
     // start fetching
     await startStoringContactInfo(source, checkAndSaveAllData)
@@ -206,17 +242,18 @@ const startStoringContactInfo = async (source, callback) => {
             Dynamiccontacts = await getContactList(source, page_info ? (page_info.end_cursor ? page_info.end_cursor : null) : null);
             // console.log("Dynamiccontacts :::---::: ", Dynamiccontacts);
             Dynamiccontacts = await arrangeArray(Dynamiccontacts, source);
-            if (Dynamiccontacts.length === 0) {
+            if (Dynamiccontacts && Dynamiccontacts.length === 0) {
                 const runningStatus = await helper.getDatafromStorage("runAction_" + source);
                 if (runningStatus === "running")
                     await helper.saveDatainStorage("runAction_" + source, "");
             }
             // console.log("Dynamiccontacts ::: ",  Dynamiccontacts);
-            contacts = [...contacts, ...Dynamiccontacts]
-            Dynamiccontacts.length = 0;
+            if(Dynamiccontacts && Dynamiccontacts.length > 0) contacts = [...contacts, ...Dynamiccontacts]
+            else chrome.runtime.sendMessage({action:"close"})
+            if(Dynamiccontacts) Dynamiccontacts.length = 0;
         }
     }
-    // console.log("contacts ::: ", contacts);
+    console.log("contacts ::: ", contacts);
     if (contacts && contacts.length) {
         console.log("calling from from startStoringContactInfo");
         contactLength = contactLength + contacts.length;
@@ -226,7 +263,9 @@ const startStoringContactInfo = async (source, callback) => {
         shoudIstop = true;
         if (source !== "post")
             window.location.reload();
-    }
+        else 
+            chrome.runtime.sendMessage({action:"close"})
+        }
 }
 
 const makePayload = async (source, cursor = null) => {

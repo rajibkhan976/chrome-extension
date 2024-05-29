@@ -344,11 +344,10 @@ chrome.runtime.onMessageExternal.addListener(async function (
       );
       break;
     case "frienderLogout":
-      console.log("friedner loggout")
       checkTabsActivation("fr_sync");
       chrome.storage.local.remove("fr_token")
       chrome.storage.local.remove("fr_debug_mode")
-      stopRunningScript();
+      stopRunningScript("sendFR", "all");
       removeTab("tabsId")
       break;
     case "unfriend" :     
@@ -390,21 +389,30 @@ chrome.runtime.onMessageExternal.addListener(async function (
           chrome.alarm.clear(alarm[i].name);
         }
       }
-
-      let currentFBTabId;
-      if(request.source === "post"){
-        currentFBTabId = await helper.getDatafromStorage("PostTabId");
+      const runAction_group = await helper.getDatafromStorage("runAction_group");
+      const runAction_post = await helper.getDatafromStorage("runAction_post");
+      const runAction_friend = await helper.getDatafromStorage("runAction_friend");
+      const runAction_suggestions = await helper.getDatafromStorage("runAction_suggestions");
+      if(runAction_group === "running"){
+        const gFBTabId = await helper.getDatafromStorage("groupTabId");
+        if(gFBTabId) 
+          chrome.tabs.reload(parseInt(gFBTabId));
       }
-      if(request.source === "suggestions"){
-        currentFBTabId = await helper.getDatafromStorage("suggestedTabId");
+      if(runAction_post === "running"){
+        const pFBTabId = await helper.getDatafromStorage("PostTabId");
+        if(pFBTabId) 
+          chrome.tabs.reload(parseInt(pFBTabId));
       }
-      if(request.source === "groups"){
-        currentFBTabId = await helper.getDatafromStorage("groupTabId");
+      if(runAction_friend === "running"){
+        const fFBTabId = await helper.getDatafromStorage("FriendTabId");
+        if(fFBTabId) 
+          chrome.tabs.reload(parseInt(fFBTabId));
       }
-      if(request.source === "friends"){
-        currentFBTabId = await helper.getDatafromStorage("FriendTabId");
+      if(runAction_suggestions === "running"){
+        const sFBTabId = await helper.getDatafromStorage("suggestedTabId");
+        if(sFBTabId) 
+          chrome.tabs.reload(parseInt(sFBTabId));
       }
-      chrome.tabs.sendMessage(Number(currentFBTabId), {"action" : "stop"});
       break;
     case "deletePendingFR" : 
     // console.log("Delete All.................", request)
@@ -814,12 +822,10 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             chrome.tabs.onUpdated.removeListener(listener);
               const responseEssentials = await chrome.tabs.sendMessage(tabs.id, request);
               console.log("responseEssentials :::::::::::: ", responseEssentials)
-              // chrome.tabs.remove(parseInt(tabs.id));
+              chrome.tabs.remove(parseInt(tabs.id));
               let activetab;
               if(request.source === "friends" )
                 activetab = await helper.getDatafromStorage("FriendTabId");
-              if(request.source === "groups" )
-                activetab = await helper.getDatafromStorage("groupTabId")
               chrome.tabs.sendMessage(parseInt(activetab), {...request, responseEssentials:responseEssentials});
           }
         });
@@ -1319,6 +1325,7 @@ chrome.tabs.onRemoved.addListener(async (tabID, removeInfo) => {
 })
 
 const stopRunningScript = async (action = "sendFR", source) => {
+  chrome.runtime.sendMessage({action:"close"})
   if (action === "sendFR") {
     switch(source){
       case "groups" :
@@ -1339,20 +1346,18 @@ const stopRunningScript = async (action = "sendFR", source) => {
         break;
       case "all" : 
         await helper.removeDatafromStorage("runAction_group");
-        await helper.removeDatafromStorage("runAction_post");
-        await helper.removeDatafromStorage("runAction_friend");
-        await helper.removeDatafromStorage("runAction_suggestions");
-        await helper.saveDatainStorage("showCount", {queueCount : 0, memberCount : 0, source: "friends" })
         await helper.saveDatainStorage("showCount", {queueCount : 0, memberCount : 0, source: "groups" })
+        await helper.removeDatafromStorage("runAction_post");
         await helper.saveDatainStorage("showCount", {queueCount : 0, memberCount : 0, source: "post" })
+        await helper.removeDatafromStorage("runAction_friend");
+        await helper.saveDatainStorage("showCount", {queueCount : 0, memberCount : 0, source: "friends" })
+        await helper.removeDatafromStorage("runAction_suggestions");
         await helper.saveDatainStorage("showCount", {queueCount : 0, memberCount : 0, source: "suggestions" })
+      // }
         break;
       default : 
         break;
     }
-    // await helper.removeDatafromStorage("runAction");
-    // await helper.removeDatafromStorage("FRSendCount");
-    // await helper.removeDatafromStorage("profile_viewed");
   }
   if (action === "syncFriends") {
     // await helper.removeDatafromStorage("friendLength");

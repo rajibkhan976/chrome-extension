@@ -53,8 +53,8 @@ const logoutButtonInterval = setInterval(async () => {
 }, 500);
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-    console.log("----------------------------***************-----------------------------------------", request);
     if(request.action === "FetchEssentials"){
+    console.log("----------------------------***************-----------------------------------------", request);
     switch (request.source) {
         case "friends":   
             const content = document.body.innerHTML;
