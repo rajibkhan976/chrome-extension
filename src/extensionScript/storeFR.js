@@ -3,10 +3,10 @@ import selectors from "./selector";
 import common from "./commonScript";
 import helper from "./helper";
 let fb_api_req_friendly_name, variables, doc_id, fbDtsg, userID, id, contactId;
-let memberContact = {},
+let
     Dynamiccontacts = [],
     contacts = [],
-    page_info = {has_next_page:true},
+    page_info = { has_next_page: true },
     memberCount = 0,
     queueCount = 0,
     shoudIstop = false,
@@ -15,6 +15,7 @@ let memberContact = {},
     groupSettings = {},
     groupName = "",
     sourceUrl = "",
+    contactLength = 0,
     contactsWithGenderDetails = [];
 const reactions = {
     "like": "1635855486666999",
@@ -34,17 +35,19 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             shoudIstop = false;
             getEssentialsForGraphApi(request.source, request.action, request.response)
             break;
-            case "start":
+        case "start":
             console.log("Lest start -----------------");
             getEssentialsForGraphApi(request.source, request.action, request.response, request.feedbackTargetID)
             break;
         case "getGenderCountryAndTier":
-            memberContact = { ...memberContact, gender: request.responsePayload.gender, country: request.responsePayload.countryName, tier: request.responsePayload.Tiers }
+            // console.log("member contact ::: ", request.memberContact)
+            const memberContact = { ...{ ...request }.memberContact, gender: request.responsePayload.gender, country: request.responsePayload.countryName, tier: request.responsePayload.Tiers }
+            // console.log("member contact ::: ", memberContact)
             contactsWithGenderDetails = [...contactsWithGenderDetails, memberContact];
-            if(contacts.length === 0)
-                storeWouldbeFriends(contactsWithGenderDetails, request.source)
-            // console.log("memberContact ::: ", memberContact);
-            // validatePayload(memberContact, request.source);
+            if (contactLength === contactsWithGenderDetails.length) {
+                contactLength = contactLength - contactsWithGenderDetails.length;
+                storeWouldbeFriends(contactsWithGenderDetails, request.source);
+            }
             break;
         case "getFeedbackTargetID":
             if (request.source === "post") {
@@ -57,21 +60,21 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                     match_token = match_token[0].replaceAll(",", "")
                     match_token = `{${match_token}}}`
                     match_token = JSON.parse(match_token);
-                    console.log(match_token);
+                    // console.log(match_token);
                     feedbackTargetID = match_token.feedback.id;
-                    console.log(feedbackTargetID);
+                    console.log("feedbackTargetID : ", feedbackTargetID);
                 }
                 else {
                     // console.log("55555555555555555555",match_token);
                     console.log(match_token[0]);
                     match_token = match_token[0].slice(0, match_token.length - 2);
                     match_token = `${match_token}}}`
-                    console.log(match_token);
+                    // console.log(match_token);
                     match_token = match_token
                     match_token = JSON.parse(match_token);
-                    console.log(match_token);
+                    // console.log(match_token);
                     feedbackTargetID = match_token.feedback.id;
-                    console.log(feedbackTargetID);
+                    // console.log(feedbackTargetID);
                 }
                 sendResponse(feedbackTargetID)
             }
@@ -85,6 +88,14 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         case "pause":
             shoudIstop = true;
             break;
+        case "FetchEssentials":
+            console.log("request from FetchEssentials :::: ", request);
+            if (request.source === "friends") {
+                contactId = request.responseEssentials.contactId;
+                sessionToken = request.responseEssentials.sessionToken;
+            }
+            await startStoringContactInfo(request.source, checkAndSaveAllData)
+            break;
         default:
             break;
     }
@@ -94,51 +105,35 @@ const getEssentialsForGraphApi = async (source, action, settings, targetId = nul
     let fbTokenAndId = await helper.getDatafromStorage("fbTokenAndId");
     fbDtsg = fbTokenAndId.fbDtsg
     userID = fbTokenAndId.userID
-    console.log("fbTokenAndId ::: ", fbTokenAndId)
+    // console.log("fbTokenAndId ::: ", fbTokenAndId)
     groupSettings = settings
     if (action === "start") {
         console.log("starting-----------------------------------------------------------------");
         await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: source })
     }
-    
+
     // get important info from DOM SCRIPT
-    if (source === "friends") {
-        const content = document.body.innerHTML;
-        const match = content.match(/"userID":"(\d+)"/);
-        if (match) {
-            contactId = match[0].split(':')[1];
-            contactId = contactId.length > 0 ? contactId.replaceAll(`"`, "") : "NA";
-            console.log(contactId);
-        }
-        let match_token = content.match(/"collection":{"app_section":{"id":"[^},]*\}/);
-        console.log(match_token)
-        if (match_token) {
-            // console.log(match_token[0]);
-            sessionToken = match_token[0];
-            sessionToken = `{${sessionToken}}}`;
-            sessionToken = JSON.parse(sessionToken);
-            sessionToken = sessionToken.collection.app_section.id
-            // console.log(sessionToken);
-        }
+    if (source === "friends" ) { 
+        chrome.runtime.sendMessage({ action: "FetchEssentials", source: source, url: window.location.href });
+        return;
     }
     if (source === "groups") {
-        const groupNameInterval = setInterval(() => {
-            const groupNameDiv = document.querySelector(selectors.main_component).querySelector(selectors.group_name)
-            // console.log("groupNameDiv ::: ", groupNameDiv);
-            if (groupNameDiv !== null) {
-                clearInterval(groupNameInterval)
-                groupName = groupNameDiv.textContent;
-                let countSection = document.querySelector(('div[aria-label="Group navigation"][role="navigation"]'));
-                console.log("count Section in left side ----> ", countSection)
-                if(!countSection)
-                    countSection = document.querySelector('div[role="main"]')
-                console.log("count Section in upper side ----> ", countSection)
-                const groupLeft = countSection.querySelector('span:not([dir="auto"])').querySelector('a').getAttribute('href')
-                console.log("https://www.facebook.com" + groupLeft)
-                sourceUrl = "https://www.facebook.com" + groupLeft;
-                // console.log("group name ::: ", groupName);
-            }
-        }, 500)
+        // const groupNameInterval = setInterval(() => {
+        const groupNameDiv = document.querySelector(selectors.main_component).querySelector(selectors.group_name)
+        // console.log("groupNameDiv ::: ", groupNameDiv);
+        if (groupNameDiv !== null) {
+            // clearInterval(groupNameInterval)
+            groupName = groupNameDiv.textContent;
+            let countSection = document.querySelector(('div[aria-label="Group navigation"][role="navigation"]'));
+            console.log("count Section in left side ----> ", countSection)
+            if (!countSection)
+                countSection = document.querySelector('div[role="main"]')
+            console.log("count Section in upper side ----> ", countSection)
+            const groupLeft = countSection.querySelector('span:not([dir="auto"])').querySelector('a').getAttribute('href')
+            console.log("https://www.facebook.com" + groupLeft)
+            sourceUrl = "https://www.facebook.com" + groupLeft;
+            // console.log("group name ::: ", groupName);
+        }
     }
     if (targetId)
         if (source === "post") {
@@ -147,7 +142,7 @@ const getEssentialsForGraphApi = async (source, action, settings, targetId = nul
         }
 
     // start fetching
-    startStoringContactInfo(source, checkAndSaveAllData)
+    await startStoringContactInfo(source, checkAndSaveAllData)
 }
 
 const startStoringContactInfo = async (source, callback) => {
@@ -158,7 +153,7 @@ const startStoringContactInfo = async (source, callback) => {
             if (groupSettings.comment && !groupSettings.reaction) {
                 if (page_info && page_info.has_next_page === false) {
                     const runningStatus = await helper.getDatafromStorage("runAction_post");
-                    if(runningStatus === "running")
+                    if (runningStatus === "running")
                         await helper.saveDatainStorage("runAction_post", "");
                     return;
                 }
@@ -170,7 +165,7 @@ const startStoringContactInfo = async (source, callback) => {
                         groupSettings.reaction_type.shift();
                         if (groupSettings.reaction_type.length === 0) {
                             groupSettings.reaction = false;
-                            if (groupSettings.comment) page_info = {has_next_page: true}
+                            if (groupSettings.comment) page_info = { has_next_page: true }
                             if (groupSettings.comment) {
                                 console.log("reactions are finished run comment");
                                 return
@@ -180,51 +175,57 @@ const startStoringContactInfo = async (source, callback) => {
                     }
                     else if (groupSettings.reaction && groupSettings.reaction_type && groupSettings.reaction_type.length === 0) {
                         groupSettings.reaction = false;
-                        if (groupSettings.comment) page_info = {has_next_page: true}
+                        if (groupSettings.comment) page_info = { has_next_page: true }
                         if (groupSettings.comment) {
                             console.log("reactions are finished run comment");
                             return
                         }
-                        else{
+                        else {
                             const runningStatus = await helper.getDatafromStorage("runAction_post");
-                            if(runningStatus === "running")
+                            if (runningStatus === "running")
                                 await helper.saveDatainStorage("runAction_post", "");
-                            };
-                            return;
+                        };
+                        return;
                     }
                 }
             }
         }
         console.log("groupSettings.reaction ::: ", groupSettings.reaction);
         console.log("groupSettings.reaction_type ::: ", groupSettings.reaction_type);
-        if (!groupSettings.comment && !groupSettings.reaction){
+        if (!groupSettings.comment && !groupSettings.reaction) {
             const runningStatus = await helper.getDatafromStorage("runAction_post");
-            if(runningStatus === "running")
+            if (runningStatus === "running")
                 await helper.saveDatainStorage("runAction_post", "");
             return;
         }
     }
-    if (page_info && page_info.has_next_page){
+    if (page_info && page_info.has_next_page) {
         console.log("startStoringContactInfo");
         // console.log("contacts ::: ", contacts);
         if (Dynamiccontacts.length === 0) {
             Dynamiccontacts = await getContactList(source, page_info ? (page_info.end_cursor ? page_info.end_cursor : null) : null);
             // console.log("Dynamiccontacts :::---::: ", Dynamiccontacts);
             Dynamiccontacts = await arrangeArray(Dynamiccontacts, source);
-            if(Dynamiccontacts.length === 0){
+            if (Dynamiccontacts.length === 0) {
                 const runningStatus = await helper.getDatafromStorage("runAction_" + source);
-                if(runningStatus === "running")
+                if (runningStatus === "running")
                     await helper.saveDatainStorage("runAction_" + source, "");
             }
-            console.log("Dynamiccontacts ::: ",  Dynamiccontacts);
+            // console.log("Dynamiccontacts ::: ",  Dynamiccontacts);
             contacts = [...contacts, ...Dynamiccontacts]
             Dynamiccontacts.length = 0;
         }
     }
-    console.log("contacts ::: ", contacts);
-    if (contacts && contacts.length){
+    // console.log("contacts ::: ", contacts);
+    if (contacts && contacts.length) {
         console.log("calling from from startStoringContactInfo");
+        contactLength = contactLength + contacts.length;
         callback(source)
+    } else {
+        await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: source })
+        shoudIstop = true;
+        if (source !== "post")
+            window.location.reload();
     }
 }
 
@@ -243,7 +244,9 @@ const makePayload = async (source, cursor = null) => {
             }
             break;
         case "groups":
-            const groupID = window.location.href.split('/')[4];
+            // console.log("sourceUrl ", sourceUrl);
+            const groupID = sourceUrl.split('/')[4];
+            // console.log("groupId ", groupID);
             fb_api_req_friendly_name = "GroupsCometMembersRootQuery"
             if (cursor) {
                 variables = { "count": 10, "cursor": cursor, "groupID": groupID, "recruitingGroupFilterNonCompliant": false, "scale": 1.5, "id": groupID }
@@ -306,7 +309,7 @@ const makePayload = async (source, cursor = null) => {
 };
 
 const getContactList = async (source, cursor = null) => {
-    console.log("cursor in get contact list ::: ", cursor);
+    // console.log("cursor in get contact list ::: ", cursor);
     if (shoudIstop) return;
     const payload = await makePayload(source, cursor)
     if (shoudIstop) return;
@@ -327,13 +330,13 @@ const getContactList = async (source, cursor = null) => {
     // if(memberlist.includes(""))
     if (shoudIstop) return;
     memberlist = await helper.makeParsable(memberlist)
-    console.log(memberlist);
+    // console.log(memberlist);
     if (source === "suggestions") {
         memberlist = memberlist && memberlist.data && memberlist.data.viewer
         page_info = memberlist && memberlist.people_you_may_know && memberlist.people_you_may_know.page_info;
         memberlist = memberlist && memberlist.people_you_may_know && memberlist.people_you_may_know.edges;
         // console.log("memberlist ::: ", memberlist);
-        console.log("page_info ::: ", page_info);
+        // console.log("page_info ::: ", page_info);
     }
     if (source === "friends") {
         if (cursor) {
@@ -378,8 +381,9 @@ const getContactList = async (source, cursor = null) => {
             page_info = memberlist &&
                 memberlist.new_members &&
                 memberlist.new_members.page_info;
+            let member_edges = memberlist.group_admin_profiles.edges;
             if (!groupSettings.skip_admin) {
-                memberArr = [...memberArr, memberlist.group_admin_profiles.edges]
+                memberArr = [...memberArr, ...member_edges]
             }
             memberArr = [...memberArr, ...memberlist.new_members.edges]
             if (memberlist.paginated_member_sections[0] && memberlist.paginated_member_sections[0].__typename === "GroupContributorsSection")
@@ -410,14 +414,14 @@ const getContactList = async (source, cursor = null) => {
             else {
                 console.log("*is node = null ?????????????????");
                 groupSettings.reaction_type.shift();
-                page_info = {has_next_page: false}
+                page_info = { has_next_page: false }
                 return;
             }
         }
         if (groupSettings.reaction && groupSettings.comment) {
             if (groupSettings.reaction_type.length === 0 && groupSettings.comment) {
                 groupSettings.reaction = false;
-                page_info = {has_next_page: false}
+                page_info = { has_next_page: false }
                 return;
             } else {
                 memberlist = memberlist && memberlist.data && memberlist.data.node
@@ -429,7 +433,7 @@ const getContactList = async (source, cursor = null) => {
                 else {
                     console.log(":is node = null ?????????????????");
                     groupSettings.reaction_type.shift();
-                    page_info = {has_next_page: false}
+                    page_info = { has_next_page: false }
                     return;
                 }
             }
@@ -488,8 +492,9 @@ const arrangeArray = async (response, source) => {
                     "friendProfilePicture": response[el].node.profile_picture.uri,
                     "mutual_friend": response[el].node.social_context.text.split(" mutual ")[0] === "" ? 0 : response[el].node.social_context.text.split(" mutual ")[0],
                     "sourceUrl": window.location.href,
-                    "SourceName": "Request from suggested friends.",
-                    "profile_viewed": memberCount++
+                    "sourceName": "Request from suggested friends.",
+                    "profile_viewed": memberCount,
+                    "finalSource": source
                 }]
             }
             if (source === "friends") {
@@ -500,11 +505,11 @@ const arrangeArray = async (response, source) => {
                     "friendProfilePicture": response[el].node.image.uri,
                     "mutual_friend": response[el].node.subtitle_text.text.split(" mutual ")[0] === "" ? 0 : response[el].node.subtitle_text.text.split(" mutual ")[0],
                     "sourceUrl": window.location.href,
-                    "sourceName" : "Request from friends of friend.",
+                    "sourceName": "Request from friends of friend.",
                     "SourceName": "Friends of friends",
                     "time_saved": "",
                     "finalSource": source,
-                    "profile_viewed": memberCount++
+                    "profile_viewed": memberCount
                 }]
             }
             if (source === "groups") {
@@ -514,9 +519,9 @@ const arrangeArray = async (response, source) => {
                     "friendProfileUrl": response[el].node.url,
                     "friendProfilePicture": response[el].node.profile_picture.uri,
                     "time_saved": "",
-                    "sourceUrl" : sourceUrl,
-                    "sourceName" : groupName,
-                    "profile_viewed": memberCount++,
+                    "sourceUrl": sourceUrl,
+                    "sourceName": groupName,
+                    "profile_viewed": memberCount,
                     "finalSource": source,
                     "groupKeywords": [response[el].node.name,
                     response[el].join_status_text ? response[el].join_status_text.text : "",
@@ -545,7 +550,7 @@ const arrangeArray = async (response, source) => {
                         "friendProfilePicture": response[el].node.author.profile_picture_depth_0.uri,
                         "groupKeywords": [response[el].node.author.name, response[el].node.body.text],
                         "sourceUrl": sourceUrl,
-                        "profile_viewed": memberCount++,
+                        "profile_viewed": memberCount,
                         "time_saved": "",
                         "finalSource": source,
                         "sourceName": "Request from post comments"
@@ -558,16 +563,17 @@ const arrangeArray = async (response, source) => {
                         "friendProfileUrl": response[el].node.url,
                         "friendProfilePicture": response[el].node.profile_picture.uri,
                         "mutual_friend": response[el].node.mutual_friends.count,
-                        "profile_viewed": memberCount++,
-                        "sourceUrl" : sourceUrl,
+                        "profile_viewed": memberCount,
+                        "sourceUrl": sourceUrl,
                         "time_saved": "",
+                        "finalSource": source,
                         "sourceName": "Request from post reaction"
-                }]
+                    }]
                 }
             }
         }
         if (response.length - 1 == el) {
-            setTimeout(()=>{
+            setTimeout(() => {
                 console.log("calling from from getContact List setTimeOut");
                 startStoringContactInfo(source, checkAndSaveAllData)
             }, helper.getRandomInteger(1, 3) * 1000)
@@ -576,33 +582,36 @@ const arrangeArray = async (response, source) => {
     }
 }
 
-const checkAndSaveAllData = async (source) =>{
+const checkAndSaveAllData = async (source) => {
     chrome.runtime.sendMessage({ action: "showCount", paylaod: { queueCount: queueCount, memberCount: memberCount, source: source } })
-    if (!groupSettings.gender_filter || !groupSettings.country_filter_enabled) {
+    await helper.saveDatainStorage("showCount", { queueCount: queueCount, memberCount: memberCount, source: source })
+    if (!groupSettings.gender_filter && !groupSettings.country_filter_enabled) {
         storeWouldbeFriends(contacts, source);
     }
-    else {        
-        memberContact = contacts[0];
-        await chrome.runtime.sendMessage({ action: "getGenderCountryAndTier", name: contacts[0].friendName, source: source });
-        memberContact.shift();
+    else {
+        if (contacts.length > 0) {
+            // console.log("memberContact ::: ", contacts[0]);
+            await chrome.runtime.sendMessage({ action: "getGenderCountryAndTier", name: contacts[0].friendName, source: source, memberContact: contacts[0] });
+            contacts.shift();
+            await checkAndSaveAllData(source)
+        }
     }
 }
 
 const storeWouldbeFriends = async (facebook_contacts, source) => {
-    console.log("groupSettings")
     const paylaod = {
-            "fb_user_id": userID,
-            "settingsId": groupSettings.settingsId,
-            "settingsType": groupSettings.settings_type,
-            "facebook_contacts": [...facebook_contacts]
+        "fb_user_id": userID,
+        "settingsId": groupSettings.settingsId,
+        "settingsType": groupSettings.settings_type,
+        "facebook_contacts": [...facebook_contacts]
     }
     console.log("paylaod fpr req to store it in FRQS ------> ", paylaod);
     contacts.length = 0;
+    contactsWithGenderDetails.length = 0;
     const respOfFRQS = await common.storeInFRQS(paylaod);
-    console.log("respOfFRQS ::: ", respOfFRQS)
-    if(respOfFRQS.message === "Records created.")
-        chrome.runtime.sendMessage({ action: "showCount", paylaod: { queueCount: queueCount, memberCount: memberCount + respOfFRQS.record_count, source: source } })
-    else
-        chrome.runtime.sendMessage({ action: "showCount", paylaod: { queueCount: queueCount, memberCount: memberCount + 0, source: source } })
+    // console.log("respOfFRQS ::: ", respOfFRQS)
+    queueCount = queueCount + respOfFRQS.record_count
+    chrome.runtime.sendMessage({ action: "showCount", paylaod: { queueCount: queueCount, memberCount: memberCount, source: source } })
+    await helper.saveDatainStorage("showCount", { queueCount: queueCount, memberCount: memberCount, source: source })
 }
 

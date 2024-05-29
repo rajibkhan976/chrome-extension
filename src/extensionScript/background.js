@@ -801,6 +801,31 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       })
     break;
     
+    case "FetchEssentials" : 
+    chrome.tabs.create(
+      { url: request.url, active: false, pinned: true, selected: false },
+      (tabs) => {
+        // console.log("Syncing tab ::::::::::::", tab)
+        chrome.tabs.onUpdated.addListener(async function listener(
+          tabId,
+          info
+        ) {
+          if (info.status === "complete" && tabId === tabs.id) {
+            chrome.tabs.onUpdated.removeListener(listener);
+              const responseEssentials = await chrome.tabs.sendMessage(tabs.id, request);
+              console.log("responseEssentials :::::::::::: ", responseEssentials)
+              // chrome.tabs.remove(parseInt(tabs.id));
+              let activetab;
+              if(request.source === "friends" )
+                activetab = await helper.getDatafromStorage("FriendTabId");
+              if(request.source === "groups" )
+                activetab = await helper.getDatafromStorage("groupTabId")
+              chrome.tabs.sendMessage(parseInt(activetab), {...request, responseEssentials:responseEssentials});
+          }
+        });
+      }
+    );
+      break;
 
     case "checkTabUrl":
       chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
@@ -891,11 +916,11 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       break;
 
     case "getGenderCountryAndTier":
-                              // console.log("request ::: ", request);
+                              console.log("request ::: ", request);
+                              // const resp = {...request}
+                              // console.log("resp ::: ", resp);
                               const genderCountryAndTier = await getGenderCountryAndTiers(request.name);
                               // console.log("genderCountryAndTier ::: ", genderCountryAndTier);
-                              // sendResponse( genderCountryAndTier );
-                                // if(request.from){
                                 let genderTabId;
                                 if(request.source === "post"){
                                   genderTabId = await helper.getDatafromStorage("PostTabId");
@@ -911,7 +936,6 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                                 }
                                 console.log("tabsID :: ", genderTabId, Number(genderTabId))
                                 chrome.tabs.sendMessage(Number(genderTabId), {...request, "responsePayload" : genderCountryAndTier});
-                              // }
                               break;
 
     case "getGenderCountryAndTierForIncoming":

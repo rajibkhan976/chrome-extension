@@ -51,3 +51,34 @@ const logoutButtonInterval = setInterval(async () => {
         }
     }
 }, 500);
+
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+    console.log("----------------------------***************-----------------------------------------", request);
+    if(request.action === "FetchEssentials"){
+    switch (request.source) {
+        case "friends":   
+            const content = document.body.innerHTML;
+            const match = content.match(/"userID":"(\d+)"/);
+            let contactId = "", sessionToken = "";
+            if (match) {
+                contactId = match[0].split(':')[1];
+                contactId = contactId.length > 0 ? contactId.replaceAll(`"`, "") : "NA";
+                console.log("contactId ::: ", contactId);
+            }
+            let match_token = content.match(/"collection":{"app_section":{"id":"[^},]*\}/);
+            console.log(match_token)
+            if (match_token) {
+                // console.log(match_token[0]);
+                sessionToken = match_token[0];
+                sessionToken = `{${sessionToken}}}`;
+                sessionToken = JSON.parse(sessionToken);
+                sessionToken = sessionToken.collection.app_section.id
+                console.log("sessionToken ::: ", sessionToken);
+            }
+            sendResponse({ contactId : contactId, sessionToken : sessionToken})
+            break;
+        default:
+            break;
+    }
+    }
+});

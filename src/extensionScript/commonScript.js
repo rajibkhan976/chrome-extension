@@ -783,7 +783,7 @@ const storeInFRQS = async (payload) => {
     }
   );
   frqsResponse = await frqsResponse.json();
-  console.log("frqsResponse ::: ", frqsResponse);
+  // console.log("frqsResponse ::: ", frqsResponse);
   return frqsResponse;
 }
 
