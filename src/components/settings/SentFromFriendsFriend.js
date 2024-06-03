@@ -116,7 +116,7 @@ const SentFromFriendsFriend = () => {
 
     const syncData = async () => {
         setIsLoding(true);
-        const runningStatus = await helper.getDatafromStorage("runAction_friend");
+        const runningStatus = await helper.getDatafromStorage("runAction");
         const runningSettings = await helper.getDatafromStorage("frndsOfFrndsSettingsPayload");
 
         if (runningStatus === "pause" || runningStatus === "running") {
@@ -128,6 +128,13 @@ const SentFromFriendsFriend = () => {
                 syncFromNewAPi(curr_settingObj, formSetup, setFormSetup);
 
                 console.log("SETTINGS_ID LOCAL PAYLOAD - ", curr_settingObj);
+
+                if (curr_settingObj?._id) {
+                    // await helper.saveDatainStorage('groupSettingsId', { settingsId: apiCoreResponse?._id });
+                    curr_settingObj.settingsId = curr_settingObj?._id;
+                    setSettingsID(curr_settingObj?._id);
+                }
+                
 
                 if (curr_settingObj?.send_message_when_friend_request_accepted_message_group_id) {
                     setGroupName(curr_settingObj?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
@@ -411,11 +418,12 @@ const SentFromFriendsFriend = () => {
 
 
     // SAVE / UPDATE TO API..
-    const saveToAPI = async (payload, silentSave = false, isRunnable = null) => {
+    const saveToAPI = async (payload, silentSave = false, isRunnable = null, willUpdate = false) => {
         const fr_token = await helper.getDatafromStorage("fr_token");
         // const frndsOfFrndsSettingId = await helper.getDatafromStorage("frndsOfFrndsSettingId");
+        const runningStatus = await helper.getDatafromStorage("runAction_friend")
 
-        if (settingsID) {
+        if (runningStatus === "pause" || (willUpdate && settingsID !== null)) {
             const updatePayload = {
                 ...payload,
                 settingsId: settingsID,
@@ -432,14 +440,15 @@ const SentFromFriendsFriend = () => {
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
 
-                    const runningStatus = await helper.getDatafromStorage("runAction_friend")
+                    // const runningStatus = await helper.getDatafromStorage("runAction_friend")
                     await helper.saveDatainStorage("runAction_friend", "running");
-                    if (runningStatus === "pause") {
+
+                    // if (runningStatus === "pause") {
                         chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: updatePayload, source: "friends" })
-                    }
-                    else {
-                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: updatePayload })
-                    }
+                    // }
+                    // else {
+                        // chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: updatePayload })
+                    // }
                     // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
                 }
 
@@ -488,12 +497,13 @@ const SentFromFriendsFriend = () => {
 
                     const runningStatus = await helper.getDatafromStorage("runAction_friend")
                     await helper.saveDatainStorage("runAction_friend", "running");
-                    if (runningStatus === "pause") {
+
+                    // if (runningStatus === "pause") {
                         chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: payload, source: "friends" })
-                    }
-                    else {
-                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })
-                    }
+                    // }
+                    // else {
+                    //     chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })
+                    // }
                     // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : payload})
                 }
 
@@ -564,6 +574,9 @@ const SentFromFriendsFriend = () => {
         await saveToAPI(payload, true, "RUN");
         // console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
         // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup"})
+
+        // SYNC API FETCH DATA..
+        syncData();
     };
 
 
@@ -601,11 +614,11 @@ const SentFromFriendsFriend = () => {
 
 
         await helper.saveDatainStorage('frndsOfFrndsSettingsPayload', payload);
-        await saveToAPI(payload);
+        await saveToAPI(payload, false, null, true);
 
         // SYNC API FETCH DATA..
         syncData();
-        console.log("I AM SAVED.");
+        // console.log("I AM SAVED.");
     };
 
 

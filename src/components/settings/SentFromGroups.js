@@ -94,7 +94,7 @@ const SentFromGroups = () => {
             const allGroups = await fetchMesssageGroups();
             await helper.saveDatainStorage('settingMsgGroups', allGroups.data.data);
             injectAGroupsOptionToFormSettings(allGroups.data.data)
-            syncData();
+            // syncData();
         })()
     }, [])
 
@@ -114,6 +114,12 @@ const SentFromGroups = () => {
                 setSettingApiPayload(curr_settingObj);
                 setSettingSyncApiPayload(curr_settingObj);
                 syncFromNewAPi(curr_settingObj, formSetup, setFormSetup);
+
+                if (curr_settingObj?._id) {
+                    // await helper.saveDatainStorage('groupSettingsId', { settingsId: apiCoreResponse?._id });
+                    curr_settingObj.settingsId = curr_settingObj?._id;
+                    setSettingsID(curr_settingObj?._id);
+                }
 
                 console.log("SETTINGS_ID FETCH LOCAL PAYLOAD - ", curr_settingObj);
 
@@ -402,11 +408,12 @@ const SentFromGroups = () => {
     };
 
     // SAVE / UPDATE TO API..
-    const saveToAPI = async (payload, silentSave = false, isRunnable = null) => {
+    const saveToAPI = async (payload, silentSave = false, isRunnable = null, willUpdate = false) => {
         const fr_token = await helper.getDatafromStorage("fr_token");
         // const groupSettingsId = await helper.getDatafromStorage("groupSettingsId");
+        const runningStatus = await helper.getDatafromStorage("runAction_group")
 
-        if (settingsID) {
+        if (runningStatus === "pause" || (willUpdate && settingsID !== null)) {
             const updatePayload = {
                 ...payload,
                 settingsId: settingsID,
@@ -422,15 +429,15 @@ const SentFromGroups = () => {
 
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
-                    const runningStatus = await helper.getDatafromStorage("runAction_group")
+                    //  const runningStatus = await helper.getDatafromStorage("runAction_group")
                     await helper.saveDatainStorage("runAction_group", "running");
 
-                    if (runningStatus === "pause") {
-                        chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: updatePayload, source: "groups" })
-                    }
-                    else {
-                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: updatePayload })
-                    }
+                    // if (runningStatus === "pause") {
+                    chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: updatePayload, source: "groups" })
+                    // }
+                    // else {
+                    //     chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: updatePayload })
+                    // }
 
                 }
                 // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
@@ -484,12 +491,12 @@ const SentFromGroups = () => {
 
                     await helper.saveDatainStorage("runAction_group", "running");
 
-                    if (runningStatus === "pause") {
-                        chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: payload, source: "groups" })
-                    }
-                    else {
-                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })
-                    }
+                    // if (runningStatus === "pause") {
+                    chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: payload, source: "groups" })
+                    // }
+                    // else {
+                    //     chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })
+                    // }
                     // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : payload})
                 }
 
@@ -563,6 +570,9 @@ const SentFromGroups = () => {
         await saveToAPI(payload, true, "RUN");
         // console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
         // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup"})
+
+        // SYNC API FETCH DATA..
+        syncData();
     };
 
 
@@ -600,11 +610,10 @@ const SentFromGroups = () => {
         }
 
         await helper.saveDatainStorage('groupSettingsPayload', payload);
-        await saveToAPI(payload);
+        await saveToAPI(payload, false, null, true);
 
         // SYNC API FETCH DATA..
         syncData();
-        console.log("I AM SAVED.");
     };
 
 

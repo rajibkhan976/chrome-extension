@@ -100,7 +100,7 @@ const SentFromSuggestedFriends = () => {
 
     const syncData = async () => {
         setIsLoding(true);
-        const runningStatus = await helper.getDatafromStorage("runAction_suggestions");
+        const runningStatus = await helper.getDatafromStorage("runAction");
         const runningSettings = await helper.getDatafromStorage("suggestedFrndsSettingsPayload");
 
         if (runningStatus === "pause" || runningStatus === "running") {
@@ -392,12 +392,13 @@ const SentFromSuggestedFriends = () => {
 
 
     // SAVE / UPDATE TO API..
-    const saveToAPI = async (payload, silentSave = false, isRunnable) => {
+    const saveToAPI = async (payload, silentSave = false, isRunnable = null, willUpdate = false) => {
         const fr_token = await helper.getDatafromStorage("fr_token");
         // const suggestedSettingsId = await helper.getDatafromStorage("suggestedFrndsSettingId");
+        const runningStatus = await helper.getDatafromStorage("runAction_suggestions")
  
 
-        if (settingsID) {
+        if (runningStatus === "pause" || (willUpdate && settingsID !== null)) {
             const updatePayload = {
                 ...payload,
                 settingsId: settingsID,
@@ -414,14 +415,15 @@ const SentFromSuggestedFriends = () => {
 
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====", updatePayload)
-                    const runningStatus = await helper.getDatafromStorage("runAction_suggestions")
+                    // const runningStatus = await helper.getDatafromStorage("runAction_suggestions")
                     await helper.saveDatainStorage("runAction_suggestions", "running");
-                    if (runningStatus === "pause") {
+
+                    // if (runningStatus === "pause") {
                         chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: updatePayload, source: "suggestions" })
-                    }
-                    else {
-                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: updatePayload })
-                    }
+                    // }
+                    // else {
+                        // chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: updatePayload })
+                    // }
                     // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
                 }
 
@@ -469,13 +471,15 @@ const SentFromSuggestedFriends = () => {
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====", payload)
                     const runningStatus = await helper.getDatafromStorage("runAction_suggestions")
+
                     await helper.saveDatainStorage("runAction_suggestions", "running");
-                    if (runningStatus === "pause") {
+
+                    // if (runningStatus === "pause") {
                         chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: payload, source: "suggestions" })
-                    }
-                    else {
-                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })
-                    }
+                    // }
+                    // else {
+                        // chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })
+                    // }
                 }
 
                 setReadyToBack(true);
@@ -584,7 +588,7 @@ const SentFromSuggestedFriends = () => {
         }
 
         await helper.saveDatainStorage('suggestedFrndsSettingsPayload', payload);
-        await saveToAPI(payload);
+        await saveToAPI(payload, false, null, true);
 
         // SYNC API FETCH DATA..
         syncData();
