@@ -17,6 +17,7 @@ let Dynamiccontacts = [],
 	groupName = "",
 	sourceUrl = "",
 	contactLength = 0,
+    genderCounter = 0,
 	contactsWithGenderDetails = [];
 
 const reactions = {
@@ -42,6 +43,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             getEssentialsForGraphApi(request.source, request.action, request.response, request.feedbackTargetID)
             break;
         case "getGenderCountryAndTier":
+            genderCounter = genderCounter + 1;
             // console.log("member contact ::: ", request.memberContact)
             const memberContact = { ...{ ...request }.memberContact, gender: request.responsePayload.gender, country: request.responsePayload.countryName, tier: request.responsePayload.Tiers }
             // console.log("member contact ::: ", memberContact)
@@ -49,6 +51,11 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             if (contactLength === contactsWithGenderDetails.length) {
                 contactLength = contactLength - contactsWithGenderDetails.length;
                 storeWouldbeFriends(contactsWithGenderDetails, request.source);
+            }
+            else if(genderCounter === 10){
+                contactLength = contactLength - genderCounter;
+                storeWouldbeFriends(contactsWithGenderDetails, request.source, genderCounter);
+                genderCounter = 0
             }
             break;
         case "getFeedbackTargetID":
@@ -237,14 +244,16 @@ const startStoringContactInfo = async (source, callback) => {
         contactLength = contactLength + contacts.length;
         callback(source)
     } else {
-        await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: source })
-        shoudIstop = true;
-        if (source !== "post")
-            window.location.reload();
-        // console.log("--------------------------*** Reload ***-------------------------------------------");
-        else 
-            chrome.runtime.sendMessage({action:"close"})
+        if (!page_info || !page_info.has_next_page) {
+            await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: source })
+            shoudIstop = true;
+            if (source !== "post")
+                window.location.reload();
+            // console.log("--------------------------*** Reload ***-------------------------------------------");
+            else 
+                chrome.runtime.sendMessage({action:"close"})
         }
+    }
 }
 
 const makePayload = async (source, cursor = null) => {
@@ -668,7 +677,8 @@ const checkAndSaveAllData = async (source) => {
 	}
 };
 
-const storeWouldbeFriends = async (facebook_contacts, source) => {
+const storeWouldbeFriends = async (facebook_contacts, source, contactNumber = null) => {
+    console.log("contactNumber ::: ", contactNumber);
 	const paylaod = {
 		fb_user_id: userID,
 		settingsId: groupSettings.settingsId,
@@ -677,9 +687,13 @@ const storeWouldbeFriends = async (facebook_contacts, source) => {
 	};
 
 	console.log("paylaod fpr req to store it in FRQS ------> ", paylaod);
-
-	contacts.length = 0;
-	contactsWithGenderDetails.length = 0;
+    if(contactNumber){
+        contacts.splice(0, contactNumber)
+        contactsWithGenderDetails.splice(0, contactNumber)
+    }else{
+        contacts.length = 0;
+        contactsWithGenderDetails.length = 0;
+    }
 	const respOfFRQS = await common.storeInFRQS(paylaod);
 
 	// console.log("respOfFRQS ::: ", respOfFRQS)
