@@ -135,9 +135,17 @@ function addCFmenuLink(postBodyEl, menueItems) {
     var isThisAds = false;
   
     Array.prototype.forEach.call(menueItems, (child) => {
+      // console.log("child ::: ", child);
+      // console.log("child [0] ::: ", child[0]);
+      // console.log("child text ::: ", child.textContent);
+      // console.log("child small text ::: ", child.textContent.toLowerCase());
+      // console.log("child trimed ::: ", child.textContent.toLowerCase().trim());
       if (
         $(child)[0].textContent.toLowerCase().trim() ===
-        "why am i seeing this ad?".toLowerCase().trim()
+        "why am i seeing this ad?".toLowerCase().trim() || 
+        $(child)[0].textContent.toLowerCase().trim() === "hidesee fewer posts like this." ||
+        $(child)[0].textContent.toLowerCase().trim().includes("why am i seeing these friend suggestions?".toLowerCase().trim()) ||
+        $(child)[0].textContent.toLowerCase().trim() === "view profile".toLowerCase().trim()
       ) {
         isThisAds = true;
       }
