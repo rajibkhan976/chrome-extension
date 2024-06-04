@@ -64,6 +64,17 @@ chrome.runtime.onInstalled.addListener(async (res) => {
   }
   return false;
 });
+chrome.windows.onRemoved.addListener(async(windowId) => {
+  console.log('res on removed a window ::::::: ', windowId);
+  const postPopupWindowId = await helper.getDatafromStorage("windowId");
+  console.log("Post popup Id ::: ", postPopupWindowId, windowId, );
+  if(parseInt(postPopupWindowId) === windowId){
+    const postTabId = await helper.getDatafromStorage("PostTabId");
+    console.log("postTabId : ", postTabId);
+    chrome.tabs.sendMessage(parseInt(postTabId), {action : "stop", source: "post"})
+  }
+},{active : true, currentWindow : true}
+)
 
 chrome.windows.onCreated.addListener(function(windows) {
   console.log(windows);
@@ -1002,6 +1013,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         chrome.windows.create({url : 'popup.html', type : 'popup', width : 799, height : 600}, async res => {
           console.log("res", res.tabs[0]);
           await helper.saveDatainStorage('postPopupId', res.tabs[0].id)
+          await helper.saveDatainStorage('windowId', res.tabs[0].windowId)
           setTimeout(() => {
             chrome.runtime.sendMessage({action:"setPostPopup", source:"post"});
           }, 500);

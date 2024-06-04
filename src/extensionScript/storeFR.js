@@ -6,28 +6,28 @@ import helper from "./helper";
 
 let fb_api_req_friendly_name, variables, doc_id, fbDtsg, userID, id, contactId;
 let Dynamiccontacts = [],
-	contacts = [],
-	page_info = { has_next_page: true },
-	memberCount = 0,
-	queueCount = 0,
-	shoudIstop = false,
-	sessionToken = "",
-	feedbackTargetID = "",
-	groupSettings = {},
-	groupName = "",
-	sourceUrl = "",
-	contactLength = 0,
+    contacts = [],
+    page_info = { has_next_page: true },
+    memberCount = 0,
+    queueCount = 0,
+    shoudIstop = false,
+    sessionToken = "",
+    feedbackTargetID = "",
+    groupSettings = {},
+    groupName = "",
+    sourceUrl = "",
+    contactLength = 0,
     genderCounter = 0,
-	contactsWithGenderDetails = [];
+    contactsWithGenderDetails = [];
 
 const reactions = {
-	like: "1635855486666999",
-	love: "1678524932434102",
-	care: "613557422527858",
-	haha: "115940658764963",
-	angry: "444813342392137",
-	wow: "478547315650144",
-	sad: "908563459236466",
+    like: "1635855486666999",
+    love: "1678524932434102",
+    care: "613557422527858",
+    haha: "115940658764963",
+    angry: "444813342392137",
+    wow: "478547315650144",
+    sad: "908563459236466",
 };
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
@@ -52,7 +52,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                 contactLength = contactLength - contactsWithGenderDetails.length;
                 storeWouldbeFriends(contactsWithGenderDetails, request.source);
             }
-            else if(genderCounter === 10){
+            else if (genderCounter === 10) {
                 contactLength = contactLength - genderCounter;
                 storeWouldbeFriends(contactsWithGenderDetails, request.source, genderCounter);
                 genderCounter = 0
@@ -94,7 +94,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             if (request.source !== "post")
                 window.location.reload();
             else
-                chrome.runtime.sendMessage({action:"close"})
+                chrome.runtime.sendMessage({ action: "close" })
             break;
         case "pause":
             shoudIstop = true;
@@ -121,8 +121,8 @@ const getEssentialsForGraphApi = async (source, action, settings, targetId = nul
     if (action === "start") {
         console.log("starting-----------------------------------------------------------------");
         await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: source })
-         // get important info from DOM SCRIPT
-        if (source === "friends" ) { 
+        // get important info from DOM SCRIPT
+        if (source === "friends") {
             chrome.runtime.sendMessage({ action: "FetchEssentials", source: source, url: window.location.href });
             return;
         }
@@ -138,8 +138,14 @@ const getEssentialsForGraphApi = async (source, action, settings, targetId = nul
                     console.log("count Section in left side ----> ", countSection)
                     if (!countSection)
                         countSection = document.querySelector(selectors.groupHeader);
+                    if (!countSection)
+                        countSection = document.querySelector('div[role="main"]')
                     console.log("count Section in upper side ----> ", countSection)
-                    const groupLeft = countSection.querySelector('span:not([dir="auto"])').querySelector('a').getAttribute('href')
+                    let groupLeft = countSection.querySelector('div:not([class])').querySelector('span:not([dir="auto"])')
+                    if (groupLeft)
+                        groupLeft = groupLeft.querySelector('a').getAttribute('href')
+                    else
+                        groupLeft = countSection.querySelectorAll('div:not([class])')[1].querySelector('span:not([dir="auto"])').querySelector('a').getAttribute('href');
                     sourceUrl = "https://www.facebook.com" + groupLeft;
                     console.log("sourceUrl : ", sourceUrl);
                     await startStoringContactInfo(source, checkAndSaveAllData);
@@ -165,7 +171,7 @@ const startStoringContactInfo = async (source, callback) => {
         if (contacts.length === 0) {
             if (groupSettings.comment && !groupSettings.reaction) {
                 if (page_info && page_info.has_next_page === false) {
-                    chrome.runtime.sendMessage({action:"close"})
+                    chrome.runtime.sendMessage({ action: "close" })
                     const runningStatus = await helper.getDatafromStorage("runAction_post");
                     if (runningStatus === "running")
                         await helper.saveDatainStorage("runAction_post", "");
@@ -184,7 +190,7 @@ const startStoringContactInfo = async (source, callback) => {
                                 console.log("reactions are finished run comment");
                             }
                             else {
-                                chrome.runtime.sendMessage({action:"close"})
+                                chrome.runtime.sendMessage({ action: "close" })
                                 return;
                             }
                         }
@@ -196,7 +202,7 @@ const startStoringContactInfo = async (source, callback) => {
                             console.log("reactions are finished run comment");
                         }
                         else {
-                            chrome.runtime.sendMessage({action:"close"})
+                            chrome.runtime.sendMessage({ action: "close" })
                             const runningStatus = await helper.getDatafromStorage("runAction_post");
                             if (runningStatus === "running")
                                 await helper.saveDatainStorage("runAction_post", "");
@@ -209,7 +215,7 @@ const startStoringContactInfo = async (source, callback) => {
         console.log("groupSettings.reaction ::: ", groupSettings.reaction);
         console.log("groupSettings.reaction_type ::: ", groupSettings.reaction_type);
         if (!groupSettings.comment && !groupSettings.reaction) {
-            chrome.runtime.sendMessage({action:"close"})
+            chrome.runtime.sendMessage({ action: "close" })
             const runningStatus = await helper.getDatafromStorage("runAction_post");
             if (runningStatus === "running")
                 await helper.saveDatainStorage("runAction_post", "");
@@ -219,7 +225,7 @@ const startStoringContactInfo = async (source, callback) => {
     if (page_info && page_info.has_next_page) {
         console.log("startStoringContactInfo");
         // console.log("contacts ::: ", contacts);
-        if (Dynamiccontacts.length === 0) {
+        if (!Dynamiccontacts || Dynamiccontacts.length === 0) {
             Dynamiccontacts = await getContactList(source, page_info ? (page_info.end_cursor ? page_info.end_cursor : null) : null);
             // console.log("Dynamiccontacts :::---::: ", Dynamiccontacts);
             Dynamiccontacts = await arrangeArray(Dynamiccontacts, source);
@@ -229,15 +235,15 @@ const startStoringContactInfo = async (source, callback) => {
                     await helper.saveDatainStorage("runAction_" + source, "");
             }
             // console.log("Dynamiccontacts ::: ",  Dynamiccontacts);
-            if(Dynamiccontacts && Dynamiccontacts.length > 0) contacts = [...contacts, ...Dynamiccontacts]
-            else chrome.runtime.sendMessage({action:"close"})
-            if(Dynamiccontacts) Dynamiccontacts.length = 0;
+            if (Dynamiccontacts && Dynamiccontacts.length > 0) contacts = [...contacts, ...Dynamiccontacts]
+            else chrome.runtime.sendMessage({ action: "close" })
+            if (Dynamiccontacts) Dynamiccontacts.length = 0;
         }
     }
     else
         if (source !== "post")
             window.location.reload();
-    
+
     console.log("contacts ::: ", contacts);
     if (contacts && contacts.length) {
         console.log("calling from from startStoringContactInfo");
@@ -250,8 +256,8 @@ const startStoringContactInfo = async (source, callback) => {
             if (source !== "post")
                 window.location.reload();
             // console.log("--------------------------*** Reload ***-------------------------------------------");
-            else 
-                chrome.runtime.sendMessage({action:"close"})
+            else
+                chrome.runtime.sendMessage({ action: "close" })
         }
     }
 }
@@ -301,19 +307,19 @@ const makePayload = async (source, cursor = null) => {
                 if (groupSettings.reaction) {
                     variables = { "count": 10, "cursor": cursor, "feedbackTargetID": feedbackTargetID, "reactionID": reactions[groupSettings.reaction_type[0]], "scale": 1, "id": feedbackTargetID }
                 }
-                if(groupSettings.comment && !groupSettings.reaction){
+                if (groupSettings.comment && !groupSettings.reaction) {
                     doc_id = "25897526923194259"
-                    variables = { 
-                    "commentsAfterCount": -1,
-                    "commentsAfterCursor":page_info.end_cursor,
-                    "commentsBeforeCount": null, 
-                    "commentsBeforeCursor": null, 
-                    "commentsIntentToken": "RANKED_UNFILTERED_CHRONOLOGICAL_REPLIES_INTENT_V1", 
-                    "feedLocation": "DEDICATED_COMMENTING_SURFACE", 
-                    "focusCommentID": null, 
-                    "scale": 1, 
-                    "useDefaultActor": false, 
-                    "id": feedbackTargetID 
+                    variables = {
+                        "commentsAfterCount": -1,
+                        "commentsAfterCursor": page_info.end_cursor,
+                        "commentsBeforeCount": null,
+                        "commentsBeforeCursor": null,
+                        "commentsIntentToken": "RANKED_UNFILTERED_CHRONOLOGICAL_REPLIES_INTENT_V1",
+                        "feedLocation": "DEDICATED_COMMENTING_SURFACE",
+                        "focusCommentID": null,
+                        "scale": 1,
+                        "useDefaultActor": false,
+                        "id": feedbackTargetID
                     };
                 }
             }
@@ -325,12 +331,12 @@ const makePayload = async (source, cursor = null) => {
                 if (groupSettings.comment && !groupSettings.reaction) {
                     doc_id = 7473574026083162;
                     variables = {
-                        "commentsIntentToken": "RANKED_UNFILTERED_CHRONOLOGICAL_REPLIES_INTENT_V1", 
-                        "feedLocation": "DEDICATED_COMMENTING_SURFACE", 
-                        "feedbackSource": 110, 
-                        "focusCommentID": null, 
-                        "scale": 1, 
-                        "useDefaultActor": false, 
+                        "commentsIntentToken": "RANKED_UNFILTERED_CHRONOLOGICAL_REPLIES_INTENT_V1",
+                        "feedLocation": "DEDICATED_COMMENTING_SURFACE",
+                        "feedbackSource": 110,
+                        "focusCommentID": null,
+                        "scale": 1,
+                        "useDefaultActor": false,
                         "id": feedbackTargetID
                     }
                 }
@@ -353,9 +359,9 @@ const makePayload = async (source, cursor = null) => {
         doc_id: doc_id
     }
 
-	// let getList = await getContactList(payload, source);
-	// console.log(getList);
-	return payload;
+    // let getList = await getContactList(payload, source);
+    // console.log(getList);
+    return payload;
 };
 
 const getContactList = async (source, cursor = null) => {
@@ -459,59 +465,61 @@ const getContactList = async (source, cursor = null) => {
             //             "__relay_internal__pv__CometUFIShareActionMigrationrelayprovider":true,
             //             "__relay_internal__pv__CometUFIReactionsEnableShortNamerelayprovider":false
             //         };
-                //     doc_id = "7527185634030792"
-                //     startStoringContactInfo(source, checkAndSaveAllData)
-                //     return;
-                // }
+            //     doc_id = "7527185634030792"
+            //     startStoringContactInfo(source, checkAndSaveAllData)
+            //     return;
+            // }
             memberlist = memberlist && memberlist.data && memberlist.data.node &&
                 memberlist.data.node.comment_rendering_instance_for_feed_location &&
                 memberlist.data.node.comment_rendering_instance_for_feed_location.comments
 
-			page_info = memberlist && memberlist.page_info;
-			memberlist = memberlist.edges;
-		}
-		if (groupSettings.reaction && !groupSettings.comment) {
-			memberlist = memberlist && memberlist.data && memberlist.data.node;
-			if (memberlist !== null) {
-				memberlist = memberlist && memberlist.reactors;
-				page_info = memberlist && memberlist.page_info;
-				memberlist = memberlist.edges;
-			} else {
-				console.log("*is node = null ?????????????????");
-				groupSettings.reaction_type.shift();
-				page_info = { has_next_page: false };
-				return;
-			}
-		}
-		if (groupSettings.reaction && groupSettings.comment) {
-			if (groupSettings.reaction_type.length === 0 && groupSettings.comment) {
-				groupSettings.reaction = false;
-				page_info = { has_next_page: false };
-				return;
-			} else {
-				memberlist = memberlist && memberlist.data && memberlist.data.node;
-				if (memberlist !== null) {
-					memberlist = memberlist && memberlist.reactors;
-					page_info = memberlist && memberlist.page_info;
-					memberlist = memberlist.edges;
-				} else {
-					console.log(":is node = null ?????????????????");
-					groupSettings.reaction_type.shift();
-					page_info = { has_next_page: false };
-					return;
-				}
-			}
-		}
-	}
-	if (shoudIstop) return;
-	// console.log("memberlist ::: ", memberlist);
-	return memberlist;
+            page_info = memberlist && memberlist.page_info;
+            memberlist = memberlist.edges;
+        }
+        if (groupSettings.reaction && !groupSettings.comment) {
+            memberlist = memberlist && memberlist.data && memberlist.data.node;
+            if (memberlist !== null) {
+                memberlist = memberlist && memberlist.reactors;
+                page_info = memberlist && memberlist.page_info;
+                memberlist = memberlist.edges;
+            } else {
+                console.log("*is node = null ?????????????????");
+                groupSettings.reaction_type.shift();
+                page_info = { has_next_page: false };
+                return;
+            }
+        }
+        if (groupSettings.reaction && groupSettings.comment) {
+            if (groupSettings.reaction_type.length === 0 && groupSettings.comment) {
+                groupSettings.reaction = false;
+                page_info = { has_next_page: false };
+                return;
+            } else {
+                memberlist = memberlist && memberlist.data && memberlist.data.node;
+                if (memberlist !== null) {
+                    memberlist = memberlist && memberlist.reactors;
+                    page_info = memberlist && memberlist.page_info;
+                    memberlist = memberlist.edges;
+                } else {
+                    console.log(":is node = null ?????????????????");
+                    groupSettings.reaction_type.shift();
+                    page_info = { has_next_page: false };
+                    return;
+                }
+            }
+        }
+    }
+    if (shoudIstop) return;
+    // console.log("memberlist ::: ", memberlist);
+    return memberlist;
 };
 
 const arrangeArray = async (response, source) => {
     if (shoudIstop) return;
     let arr = [], can_request = "";
     // console.log("response  --------------> ", response);
+    if(!response || response.length === 0)
+        return arr;
     for (let el in response) {
         if (shoudIstop) return;
         memberCount++;
@@ -647,77 +655,77 @@ const arrangeArray = async (response, source) => {
 }
 
 const checkAndSaveAllData = async (source) => {
-	chrome.runtime.sendMessage({
-		action: "showCount",
-		paylaod: {
-			queueCount: queueCount,
-			memberCount: memberCount,
-			source: source,
-		},
-	});
-	await helper.saveDatainStorage("showCount", {
-		queueCount: queueCount,
-		memberCount: memberCount,
-		source: source,
-	});
-	if (!groupSettings.gender_filter && !groupSettings.country_filter_enabled) {
-		storeWouldbeFriends(contacts, source);
-	} else {
-		if (contacts.length > 0) {
-			// console.log("memberContact ::: ", contacts[0]);
-			await chrome.runtime.sendMessage({
-				action: "getGenderCountryAndTier",
-				name: contacts[0].friendName,
-				source: source,
-				memberContact: contacts[0],
-			});
-			contacts.shift();
-			await checkAndSaveAllData(source);
-		}
-	}
+    chrome.runtime.sendMessage({
+        action: "showCount",
+        paylaod: {
+            queueCount: queueCount,
+            memberCount: memberCount,
+            source: source,
+        },
+    });
+    await helper.saveDatainStorage("showCount", {
+        queueCount: queueCount,
+        memberCount: memberCount,
+        source: source,
+    });
+    if (!groupSettings.gender_filter && !groupSettings.country_filter_enabled) {
+        storeWouldbeFriends(contacts, source);
+    } else {
+        if (contacts.length > 0) {
+            // console.log("memberContact ::: ", contacts[0]);
+            await chrome.runtime.sendMessage({
+                action: "getGenderCountryAndTier",
+                name: contacts[0].friendName,
+                source: source,
+                memberContact: contacts[0],
+            });
+            contacts.shift();
+            await checkAndSaveAllData(source);
+        }
+    }
 };
 
 const storeWouldbeFriends = async (facebook_contacts, source, contactNumber = null) => {
     console.log("contactNumber ::: ", contactNumber);
-	const paylaod = {
-		fb_user_id: userID,
-		settingsId: groupSettings.settingsId,
-		settingsType: groupSettings.settings_type,
-		facebook_contacts: [...facebook_contacts],
-	};
+    const paylaod = {
+        fb_user_id: userID,
+        settingsId: groupSettings.settingsId,
+        settingsType: groupSettings.settings_type,
+        facebook_contacts: [...facebook_contacts],
+    };
 
-	console.log("paylaod fpr req to store it in FRQS ------> ", paylaod);
-    if(contactNumber){
+    console.log("paylaod fpr req to store it in FRQS ------> ", paylaod);
+    if (contactNumber) {
         contacts.splice(0, contactNumber)
         contactsWithGenderDetails.splice(0, contactNumber)
-    }else{
+    } else {
         contacts.length = 0;
         contactsWithGenderDetails.length = 0;
     }
-	const respOfFRQS = await common.storeInFRQS(paylaod);
+    const respOfFRQS = await common.storeInFRQS(paylaod);
 
-	// console.log("respOfFRQS ::: ", respOfFRQS)
+    // console.log("respOfFRQS ::: ", respOfFRQS)
 
-	queueCount = queueCount + respOfFRQS.record_count;
+    queueCount = queueCount + respOfFRQS.record_count;
 
-	if (queueCount > 0) {
-        chrome.runtime.sendMessage({action : "fr_queue_success"})
-	}
+    if (queueCount > 0) {
+        chrome.runtime.sendMessage({ action: "fr_queue_success" })
+    }
 
-	chrome.runtime.sendMessage({
-		action: "showCount",
-		paylaod: {
-			queueCount: queueCount,
-			memberCount: memberCount,
-			source: source,
-		},
-	});
+    chrome.runtime.sendMessage({
+        action: "showCount",
+        paylaod: {
+            queueCount: queueCount,
+            memberCount: memberCount,
+            source: source,
+        },
+    });
 
-	await helper.saveDatainStorage("showCount", {
-		queueCount: queueCount,
-		memberCount: memberCount,
-		source: source,
-	});
+    await helper.saveDatainStorage("showCount", {
+        queueCount: queueCount,
+        memberCount: memberCount,
+        source: source,
+    });
 };
 
 
@@ -725,12 +733,12 @@ const storeWouldbeFriends = async (facebook_contacts, source, contactNumber = nu
 
 
 
-// { "commentsIntentToken": "RANKED_UNFILTERED_CHRONOLOGICAL_REPLIES_INTENT_V1", 
-// "feedLocation": "DEDICATED_COMMENTING_SURFACE", 
-// "feedbackSource": 110, 
-// "focusCommentID": null, 
-// "scale": 1, 
-// "useDefaultActor": false, 
+// { "commentsIntentToken": "RANKED_UNFILTERED_CHRONOLOGICAL_REPLIES_INTENT_V1",
+// "feedLocation": "DEDICATED_COMMENTING_SURFACE",
+// "feedbackSource": 110,
+// "focusCommentID": null,
+// "scale": 1,
+// "useDefaultActor": false,
 // "id": "ZmVlZGJhY2s6Nzg3NDU3NTUzOTI1OTM1NA==" }
 // 7473574026083162
 
