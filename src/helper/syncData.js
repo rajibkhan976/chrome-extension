@@ -29,7 +29,7 @@ const FindData = (child, parent, level) => {
 export const syncFromNewAPi = (apiObj, uiObj, setUiObj) => {
   const newFromObj = { ...uiObj };
 
-  console.log("API keys and ui Obj NEW - ", apiObj, uiObj);
+  // console.log("API keys and ui Obj NEW - ", apiObj, uiObj);
 
   Object.entries(apiObj).forEach(([apiKey, apiValue]) => {
     for (const i in newFromObj.fields) {
@@ -73,7 +73,7 @@ export const syncFromNewAPi = (apiObj, uiObj, setUiObj) => {
       if (fieldItem.name === apiKey) {
         fieldItem.isActive = apiValue;
 
-        console.log("newFormObj - before - ", newFromObj.fields[i], fieldItem, i);
+        // console.log("newFormObj - before - ", newFromObj.fields[i], fieldItem, i);
 
         newFromObj.fields[i] = fieldItem;
         break;
@@ -133,7 +133,7 @@ export const syncFromNewAPi = (apiObj, uiObj, setUiObj) => {
       }
     }
   });
-  console.log("NEWWW ", newFromObj);
+  // console.log("NEWWW ", newFromObj);
   setUiObj(newFromObj);
 };
 

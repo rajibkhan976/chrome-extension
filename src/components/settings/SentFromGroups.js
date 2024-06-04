@@ -101,7 +101,7 @@ const SentFromGroups = () => {
 
     const syncData = async () => {
         setIsLoding(true);
-        const runningStatus = await helper.getDatafromStorage("runAction");
+        const runningStatus = await helper.getDatafromStorage("runAction_group");
         const runningSettings = await helper.getDatafromStorage(
             // "curr_reqSettings"
             "groupSettingsPayload"
@@ -409,10 +409,11 @@ const SentFromGroups = () => {
 
     // SAVE / UPDATE TO API..
     const saveToAPI = async (payload, silentSave = false, isRunnable = null, willUpdate = false) => {
+        console.log("isRunnable ::: ", isRunnable);
         const fr_token = await helper.getDatafromStorage("fr_token");
         // const groupSettingsId = await helper.getDatafromStorage("groupSettingsId");
         const runningStatus = await helper.getDatafromStorage("runAction_group")
-
+        console.log("runningStatus :::: ", runningStatus);
         if (runningStatus === "pause" || (willUpdate && settingsID !== null)) {
             const updatePayload = {
                 ...payload,
@@ -478,7 +479,7 @@ const SentFromGroups = () => {
                     },
                 });
 
-                console.log("settingRes : ", settingRes._id, settingRes.data, settingRes.data.data)
+                console.log("settingRes in save : ", settingRes._id, settingRes.data, settingRes.data.data)
 
                 if (settingRes._id)
                     payload = { ...payload, settingsId: settingRes._id }
@@ -487,12 +488,12 @@ const SentFromGroups = () => {
 
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
-                    const runningStatus = await helper.getDatafromStorage("runAction_group")
+                    // const runningStatus = await helper.getDatafromStorage("runAction_group")
 
                     await helper.saveDatainStorage("runAction_group", "running");
-
+                    console.log("<<<---------------------------------reSendFriendRequestInGroup ------------------------->>>");
                     // if (runningStatus === "pause") {
-                    chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: payload, source: "groups" })
+                    chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload, source: "groups" })
                     // }
                     // else {
                     //     chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })

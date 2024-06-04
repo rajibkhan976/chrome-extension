@@ -594,7 +594,7 @@ const getProfileInfo = (callback = null) => {
     });
 };
 
-export const sendMessageToPortalScript = async (request) => {
+const sendMessageToPortalScript = async (request) => {
   const [tab] = await chrome.tabs.query({title: "Friender", url: process.env.REACT_APP_APP_URL + "/*" });
   // console.log("send msg",request.action, request.content)
   // console.log("send msg to the tab :: ",tab)
@@ -1010,6 +1010,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       // chrome.action.setPopup({ popup: "popup.html" });
       // chrome.action.openPopup({'url' : 'popup.html', 'type' : 'popup'}); 
       break;
+    case "fr_queue_success" : 
+      sendMessageToPortalScript({type: "postmessage", content: "fr_queue_success"});
+    break;
     default : break;
   }
 })

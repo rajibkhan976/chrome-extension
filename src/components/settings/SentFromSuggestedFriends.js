@@ -475,7 +475,7 @@ const SentFromSuggestedFriends = () => {
                     await helper.saveDatainStorage("runAction_suggestions", "running");
 
                     // if (runningStatus === "pause") {
-                        chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: payload, source: "suggestions" })
+                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload, source: "suggestions" })
                     // }
                     // else {
                         // chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })

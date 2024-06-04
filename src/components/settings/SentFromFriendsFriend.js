@@ -499,7 +499,7 @@ const SentFromFriendsFriend = () => {
                     await helper.saveDatainStorage("runAction_friend", "running");
 
                     // if (runningStatus === "pause") {
-                        chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: payload, source: "friends" })
+                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload, source: "friends" })
                     // }
                     // else {
                     //     chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })

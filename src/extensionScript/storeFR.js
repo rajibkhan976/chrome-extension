@@ -2,7 +2,7 @@
 import selectors from "./selector";
 import common from "./commonScript";
 import helper from "./helper";
-import { sendMessageToPortalScript } from "./background";
+// import { sendMessageToPortalScript } from "./background";
 
 let fb_api_req_friendly_name, variables, doc_id, fbDtsg, userID, id, contactId;
 let Dynamiccontacts = [],
@@ -687,10 +687,7 @@ const storeWouldbeFriends = async (facebook_contacts, source) => {
 	queueCount = queueCount + respOfFRQS.record_count;
 
 	if (queueCount > 0) {
-		sendMessageToPortalScript({
-			type: "postmessage",
-			content: "fr_queue_success",
-		});
+        chrome.runtime.sendMessage({action : "fr_queue_success"})
 	}
 
 	chrome.runtime.sendMessage({
