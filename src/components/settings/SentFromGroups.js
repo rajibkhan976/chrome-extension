@@ -26,6 +26,7 @@ import {
 import { removeforBasic } from '../dashboard/FriendRequest';
 import { fetchMesssageGroups } from '../../service/messages/MessagesServices';
 import ServerMessages from '../shared/ServerMessages';
+import Modal from '../shared/Modal';
 
 
 
@@ -56,6 +57,8 @@ const SentFromGroups = () => {
     const [stats, setStats] = useState({ queueCount: 0, memberCount: 0, source: "groups" });
     const [shouldfrienderRun, setShouldfrienderRun] = useState(true);
     const [settingsID, setSettingsID] = useState(null);
+    const [stopFrnderModalOpen, setStopFrnderModalOpen] = useState(false);
+
 
     chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         if (request.action === "shouldfrienderRun") {
@@ -94,7 +97,7 @@ const SentFromGroups = () => {
             const allGroups = await fetchMesssageGroups();
             await helper.saveDatainStorage('settingMsgGroups', allGroups.data.data);
             injectAGroupsOptionToFormSettings(allGroups.data.data)
-            // syncData();
+            syncData();
         })()
     }, [])
 
@@ -117,11 +120,8 @@ const SentFromGroups = () => {
 
                 if (curr_settingObj?._id) {
                     // await helper.saveDatainStorage('groupSettingsId', { settingsId: apiCoreResponse?._id });
-                    curr_settingObj.settingsId = curr_settingObj?._id;
                     setSettingsID(curr_settingObj?._id);
                 }
-
-                console.log("SETTINGS_ID FETCH LOCAL PAYLOAD - ", curr_settingObj);
 
                 if (curr_settingObj?.send_message_when_friend_request_accepted_message_group_id) {
                     setGroupName(curr_settingObj?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
@@ -147,6 +147,8 @@ const SentFromGroups = () => {
                             const apiCoreResponse = apiObj[0];
 
                             (async () => {
+                                await helper.saveDatainStorage('groupSettingsPayload', apiCoreResponse);
+
                                 if (apiCoreResponse?._id) {
                                     // await helper.saveDatainStorage('groupSettingsId', { settingsId: apiCoreResponse?._id });
                                     response.settingsId = apiCoreResponse?._id;
@@ -389,12 +391,14 @@ const SentFromGroups = () => {
 
     // STOP RUN THE FRIENDER HANDLER..
     const stopFrinderHandle = async () => {
-        console.log(" ==== [ STOP FRIENDER ] ==== ");
-        await helper.saveDatainStorage("runAction_group", "")
-        chrome.runtime.sendMessage({ action: "stop", source: "groups" })
-        await helper.saveDatainStorage('save_groups', true)
-        setEditType(null);
-        setIsRunnable(false);
+        setStopFrnderModalOpen(true);
+        
+        // console.log(" ==== [ STOP FRIENDER ] ==== ");
+        // await helper.saveDatainStorage("runAction_group", "")
+        // chrome.runtime.sendMessage({ action: "stop", source: "groups" })
+        // await helper.saveDatainStorage('save_groups', true)
+        // setEditType(null);
+        // setIsRunnable(false);
     };
 
     // PAUSE SENDING FR AND EDIT HANDLE FUNCTION..
@@ -414,19 +418,29 @@ const SentFromGroups = () => {
         // const groupSettingsId = await helper.getDatafromStorage("groupSettingsId");
         const runningStatus = await helper.getDatafromStorage("runAction_group")
         console.log("runningStatus :::: ", runningStatus);
+
         if (runningStatus === "pause" || (willUpdate && settingsID !== null)) {
             const updatePayload = {
                 ...payload,
                 settingsId: settingsID,
             };
 
+            if (updatePayload?._id) {
+                delete updatePayload._id;
+            }
+
             try {
-                await axios.post(`${process.env.REACT_APP_UPDATE_FRIEND_REQUEST_SETTINGS}`, updatePayload, {
+                const updatedResponse = await axios.post(`${process.env.REACT_APP_UPDATE_FRIEND_REQUEST_SETTINGS}`, updatePayload, {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: fr_token,
                     },
                 });
+
+                if (updatedResponse && updatedResponse?.data) {
+                    await helper.saveDatainStorage('groupSettingsPayload', updatedResponse?.data?.data);
+                    setSettingsID(updatedResponse?.data?.data?._id);
+                }
 
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
@@ -472,6 +486,10 @@ const SentFromGroups = () => {
         } else {
 
             try {
+                if (payload?._id) {
+                    delete payload._id;
+                }
+
                 const settingRes = await axios.post(`${process.env.REACT_APP_SAVE_FRIEND_REQUEST_SETTINGS}`, payload, {
                     headers: {
                         "Content-Type": "application/json",
@@ -480,6 +498,11 @@ const SentFromGroups = () => {
                 });
 
                 console.log("settingRes in save : ", settingRes._id, settingRes.data, settingRes.data.data)
+
+                if (settingRes && settingRes?.data) {
+                    setSettingsID(settingRes?.data?.data);
+                    await helper.saveDatainStorage('groupSettingsPayload', {...payload, _id: settingRes?.data?.data});
+                }
 
                 if (settingRes._id)
                     payload = { ...payload, settingsId: settingRes._id }
@@ -567,7 +590,7 @@ const SentFromGroups = () => {
         runFrinderHandle();
         setIsRunnable(true);
 
-        await helper.saveDatainStorage('groupSettingsPayload', payload);
+        // await helper.saveDatainStorage('groupSettingsPayload', payload);
         await saveToAPI(payload, true, "RUN");
         // console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
         // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup"})
@@ -610,7 +633,7 @@ const SentFromGroups = () => {
             return false;
         }
 
-        await helper.saveDatainStorage('groupSettingsPayload', payload);
+        // await helper.saveDatainStorage('groupSettingsPayload', payload);
         await saveToAPI(payload, false, null, true);
 
         // SYNC API FETCH DATA..
@@ -789,20 +812,6 @@ const SentFromGroups = () => {
                                 </p>
                             </div>
                         </div>
-                        <div className="setting-show d-flex">
-                            <figure>
-                                <SkipAdmin />
-                            </figure>
-                            <div className="setting-content">
-                                <h6>Skip Admin</h6>
-                                {/* <p>{'Yes'}</p> */}
-                                {!settingSyncApiPayload?.skip_admin ? (
-                                    <p>No</p>
-                                ) : (
-                                    <p>Yes</p>
-                                )}
-                            </div>
-                        </div>
                     </div>
                     <div className="setting-col d-flex d-flex-column">
                         <div className="setting-show d-flex setting-keywords">
@@ -866,6 +875,20 @@ const SentFromGroups = () => {
                                 <p>{settingSyncApiPayload?.send_message_when_friend_request_accepted ? (acceptReqGroupName ? acceptReqGroupName : '') : (<span className='na-not-found-data'>N/A</span>)}</p>
                             </div>
                         </div>
+                        <div className="setting-show d-flex">
+                            <figure>
+                                <SkipAdmin />
+                            </figure>
+                            <div className="setting-content">
+                                <h6>Skip sending friend request to admin(s)</h6>
+                                {/* <p>{'Yes'}</p> */}
+                                {!settingSyncApiPayload?.skip_admin ? (
+                                    <p>No</p>
+                                ) : (
+                                    <p>Yes</p>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </>
             )
@@ -894,6 +917,35 @@ const SentFromGroups = () => {
 
     return (
         <>
+            <Modal
+                modalType="delete-type"
+                modalIcon={"Icon"}
+                headerText={
+                    "Stop adding in Friend Queue"
+                }
+                bodyText={"This will stop adding friends in Friend Queue. Are you sure you want to stop this run?"}
+                open={stopFrnderModalOpen}
+                setOpen={setStopFrnderModalOpen}
+                ModalFun={() => {
+                    (async () => {
+                        console.log(" ==== [ STOP FRIENDER ] ==== ");
+                        await helper.saveDatainStorage("runAction_group", "")
+                        chrome.runtime.sendMessage({ action: "stop", source: "groups" })
+                        await helper.saveDatainStorage('save_groups', true)
+                        setEditType(null);
+                        setIsRunnable(false);
+                    })();
+
+                    setStopFrnderModalOpen(false);
+                }}
+                btnText={"Yes, stop"}
+                cancelBtnTxt={"Close"}
+                resetFn={() => {
+                    setStopFrnderModalOpen(false);
+                }}
+                stopBtnClass={'btn-stop-friender'}
+            />
+
             <InnherHeader
                 goBackTo="/"
                 subHeaderText="Groups"

@@ -26,6 +26,7 @@ import {
 import { removeforBasic } from '../dashboard/FriendRequest';
 import { fetchMesssageGroups } from '../../service/messages/MessagesServices';
 import ServerMessages from '../shared/ServerMessages';
+import Modal from '../shared/Modal';
 
 
 
@@ -56,6 +57,8 @@ const SentFromFriendsFriend = () => {
     const [stats, setStats] = useState({ queueCount: 0, memberCount: 0, source: "friends" });
     const [shouldfrienderRun, setShouldfrienderRun] = useState(true);
     const [settingsID, setSettingsID] = useState(null);
+    const [stopFrnderModalOpen, setStopFrnderModalOpen] = useState(false);
+
 
 
     // FETCH SETTINGS DATA..
@@ -73,9 +76,9 @@ const SentFromFriendsFriend = () => {
     //         })();
     //     }
     // }, [editType, formSetup]);
-    
+
     chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-        if(request.action === "shouldfrienderRun"){
+        if (request.action === "shouldfrienderRun") {
             console.log("request log -------------------> ", request, request.res);
             setShouldfrienderRun(request.res)
         }
@@ -83,7 +86,7 @@ const SentFromFriendsFriend = () => {
     useEffect(() => {
         // console.log("i am re rendered......");
         (async () => {
-            await chrome.runtime.sendMessage({action : "shouldfrienderRun", source : "friends"});
+            await chrome.runtime.sendMessage({ action: "shouldfrienderRun", source: "friends" });
             const runningStatus = await helper.getDatafromStorage("runAction_friend");
             if (runningStatus === "running") {
                 setIsRunnable(true);
@@ -94,7 +97,7 @@ const SentFromFriendsFriend = () => {
             }
             else if (runningStatus === "pause") {
                 const savedPage = await helper.getDatafromStorage('save_friends');
-                if(savedPage === false)
+                if (savedPage === false)
                     setEditType("basic");
                 else
                     setEditType(null);
@@ -134,12 +137,12 @@ const SentFromFriendsFriend = () => {
                     curr_settingObj.settingsId = curr_settingObj?._id;
                     setSettingsID(curr_settingObj?._id);
                 }
-                
+
 
                 if (curr_settingObj?.send_message_when_friend_request_accepted_message_group_id) {
                     setGroupName(curr_settingObj?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
                 }
-                
+
                 if (curr_settingObj?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName) {
                     setGroupName(curr_settingObj?.send_message_when_friend_request_sent_message_group_id, setSendFrndReqGroupName);
                 }
@@ -173,9 +176,9 @@ const SentFromFriendsFriend = () => {
 
                             setIsLoding(false);
 
-                            
+
                             console.log("SETTINGS_ID FETCH API PAYLOAD - ", response);
-                            
+
                             if (response?.send_message_when_friend_request_accepted_message_group_id) {
                                 setGroupName(response?.send_message_when_friend_request_accepted_message_group_id, setAcceptReqGroupName);
                             }
@@ -398,12 +401,14 @@ const SentFromFriendsFriend = () => {
 
     // STOP RUN THE FRIENDER HANDLER..
     const stopFrinderHandle = async () => {
-        console.log(" ==== [ STOP FRIENDER ] ==== ");
-        await helper.saveDatainStorage("runAction_friend", "")
-        chrome.runtime.sendMessage({ action: "stop", source: "friends" })
-        await helper.saveDatainStorage('save_friends', true)
-        setEditType(null);
-        setIsRunnable(false);
+        setStopFrnderModalOpen(true);
+
+        // console.log(" ==== [ STOP FRIENDER ] ==== ");
+        // await helper.saveDatainStorage("runAction_friend", "")
+        // chrome.runtime.sendMessage({ action: "stop", source: "friends" })
+        // await helper.saveDatainStorage('save_friends', true)
+        // setEditType(null);
+        // setIsRunnable(false);
     };
 
     // PAUSE SENDING FR AND EDIT HANDLE FUNCTION..
@@ -444,10 +449,10 @@ const SentFromFriendsFriend = () => {
                     await helper.saveDatainStorage("runAction_friend", "running");
 
                     // if (runningStatus === "pause") {
-                        chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: updatePayload, source: "friends" })
+                    chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: updatePayload, source: "friends" })
                     // }
                     // else {
-                        // chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: updatePayload })
+                    // chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: updatePayload })
                     // }
                     // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
                 }
@@ -490,7 +495,7 @@ const SentFromFriendsFriend = () => {
                 console.log("settingRes : ", settingRes._id, settingRes.data, settingRes.data.data)
                 if (settingRes._id)
                     payload = { ...payload, settingsId: settingRes._id }
-                else if(settingRes.data.data)
+                else if (settingRes.data.data)
                     payload = { ...payload, settingsId: settingRes.data.data }
                 if (isRunnable === "RUN") {
                     console.log("==== RUN FRIENDER ACTION CLICKED NOW ====")
@@ -499,7 +504,7 @@ const SentFromFriendsFriend = () => {
                     await helper.saveDatainStorage("runAction_friend", "running");
 
                     // if (runningStatus === "pause") {
-                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload, source: "friends" })
+                    chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload, source: "friends" })
                     // }
                     // else {
                     //     chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })
@@ -640,7 +645,7 @@ const SentFromFriendsFriend = () => {
                             :
                             <button
                                 className="btn btn-edit inline-btn"
-                                onClick={async() => {
+                                onClick={async () => {
                                     await helper.saveDatainStorage('save_friends', false)
                                     setEditType("basic");
                                     setIsEditing(true);
@@ -861,6 +866,35 @@ const SentFromFriendsFriend = () => {
 
     return (
         <>
+            <Modal
+                modalType="delete-type"
+                modalIcon={"Icon"}
+                headerText={
+                    "Stop adding in Friend Queue"
+                }
+                bodyText={"This will stop adding friends in Friend Queue. Are you sure you want to stop this run?"}
+                open={stopFrnderModalOpen}
+                setOpen={setStopFrnderModalOpen}
+                ModalFun={() => {
+                    (async () => {
+                        console.log(" ==== [ STOP FRIENDER ] ==== ");
+                        await helper.saveDatainStorage("runAction_friend", "")
+                        chrome.runtime.sendMessage({ action: "stop", source: "friends" })
+                        await helper.saveDatainStorage('save_friends', true)
+                        setEditType(null);
+                        setIsRunnable(false);
+                    })();
+
+                    setStopFrnderModalOpen(false);
+                }}
+                btnText={"Yes, stop"}
+                cancelBtnTxt={"Close"}
+                resetFn={() => {
+                    setStopFrnderModalOpen(false);
+                }}
+                stopBtnClass={'btn-stop-friender'}
+            />
+
             <InnherHeader
                 goBackTo="/"
                 subHeaderText="Friends friend settings"

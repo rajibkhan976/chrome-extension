@@ -26,6 +26,7 @@ import {
 import { removeforBasic } from '../dashboard/FriendRequest';
 import { fetchMesssageGroups } from '../../service/messages/MessagesServices';
 import ServerMessages from '../shared/ServerMessages';
+import Modal from '../shared/Modal';
 
 
 
@@ -56,6 +57,7 @@ const SentFromSuggestedFriends = () => {
     const [stats, setStats] = useState({ queueCount: 0, memberCount: 0, source: "source" });
     const [shouldfrienderRun, setShouldfrienderRun] = useState(true);
     const [settingsID, setSettingsID] = useState(null);
+    const [stopFrnderModalOpen, setStopFrnderModalOpen] = useState(false);
 
 
     chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
@@ -371,12 +373,14 @@ const SentFromSuggestedFriends = () => {
 
     // STOP RUN THE FRIENDER HANDLER..
     const stopFrinderHandle = async () => {
-        console.log(" ==== [ STOP FRIENDER ] ==== ");
-        await helper.saveDatainStorage("runAction_suggestions", "");
-        chrome.runtime.sendMessage({ action: "stop", source: "suggestions" })
-        await helper.saveDatainStorage('save_suggestions', true)
-        setEditType(null);
-        setIsRunnable(false);
+        setStopFrnderModalOpen(true);
+        
+        // console.log(" ==== [ STOP FRIENDER ] ==== ");
+        // await helper.saveDatainStorage("runAction_suggestions", "");
+        // chrome.runtime.sendMessage({ action: "stop", source: "suggestions" })
+        // await helper.saveDatainStorage('save_suggestions', true)
+        // setEditType(null);
+        // setIsRunnable(false);
     };
 
     // PAUSE SENDING FR AND EDIT HANDLE FUNCTION..
@@ -396,7 +400,7 @@ const SentFromSuggestedFriends = () => {
         const fr_token = await helper.getDatafromStorage("fr_token");
         // const suggestedSettingsId = await helper.getDatafromStorage("suggestedFrndsSettingId");
         const runningStatus = await helper.getDatafromStorage("runAction_suggestions")
- 
+
 
         if (runningStatus === "pause" || (willUpdate && settingsID !== null)) {
             const updatePayload = {
@@ -419,10 +423,10 @@ const SentFromSuggestedFriends = () => {
                     await helper.saveDatainStorage("runAction_suggestions", "running");
 
                     // if (runningStatus === "pause") {
-                        chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: updatePayload, source: "suggestions" })
+                    chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: updatePayload, source: "suggestions" })
                     // }
                     // else {
-                        // chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: updatePayload })
+                    // chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: updatePayload })
                     // }
                     // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", response : updatePayload})
                 }
@@ -475,10 +479,10 @@ const SentFromSuggestedFriends = () => {
                     await helper.saveDatainStorage("runAction_suggestions", "running");
 
                     // if (runningStatus === "pause") {
-                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload, source: "suggestions" })
+                    chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload, source: "suggestions" })
                     // }
                     // else {
-                        // chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })
+                    // chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload })
                     // }
                 }
 
@@ -838,6 +842,35 @@ const SentFromSuggestedFriends = () => {
 
     return (
         <>
+            <Modal
+                modalType="delete-type"
+                modalIcon={"Icon"}
+                headerText={
+                    "Stop adding in Friend Queue"
+                }
+                bodyText={"This will stop adding friends in Friend Queue. Are you sure you want to stop this run?"}
+                open={stopFrnderModalOpen}
+                setOpen={setStopFrnderModalOpen}
+                ModalFun={() => {
+                    (async () => {
+                        console.log(" ==== [ STOP FRIENDER ] ==== ");
+                        await helper.saveDatainStorage("runAction_suggestions", "");
+                        chrome.runtime.sendMessage({ action: "stop", source: "suggestions" })
+                        await helper.saveDatainStorage('save_suggestions', true)
+                        setEditType(null);
+                        setIsRunnable(false);
+                    })();
+
+                    setStopFrnderModalOpen(false);
+                }}
+                btnText={"Yes, stop"}
+                cancelBtnTxt={"Close"}
+                resetFn={() => {
+                    setStopFrnderModalOpen(false);
+                }}
+                stopBtnClass={'btn-stop-friender'}
+            />
+
             <InnherHeader
                 goBackTo="/"
                 subHeaderText="Suggested friends settings"

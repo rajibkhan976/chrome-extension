@@ -123,3 +123,8 @@
   padding: 11px 35px;
   width: 95px;
 }
+
+.btn-stop-friender {
+  @extend .btn-new-stop;
+  padding: 11px 23px;
+}

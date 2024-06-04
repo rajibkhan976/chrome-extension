@@ -1,6 +1,18 @@
 import React from 'react'
 
-function Modal({ headerText, modalIcon, bodyText, modalType, open, setOpen, btnText, ModalFun, cancelBtnTxt, resetFn }) {
+function Modal({
+  headerText,
+  modalIcon,
+  bodyText,
+  modalType,
+  open,
+  setOpen,
+  btnText,
+  ModalFun,
+  cancelBtnTxt,
+  resetFn,
+  stopBtnClass = null,
+}) {
 
   return (
     <div className='modal-background' style={{ display: open ? "block" : "none" }}>
@@ -34,7 +46,7 @@ function Modal({ headerText, modalIcon, bodyText, modalType, open, setOpen, btnT
               onClick={() => resetFn ? resetFn() : setOpen(false)}>
               {cancelBtnTxt ? cancelBtnTxt : 'Close'}
             </button>
-            <button className="btn-stop unfriend btn-new-stop" onClick={() => { ModalFun() }}>{btnText}</button>
+            <button className={`btn-stop unfriend btn-new-stop ${stopBtnClass ? stopBtnClass : ''}`} onClick={() => { ModalFun() }}>{btnText}</button>
           </div>
         </div>
       </div>

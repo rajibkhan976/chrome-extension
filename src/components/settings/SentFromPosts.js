@@ -35,6 +35,7 @@ import {
     AngryReactionIcon
 } from '../../assets/icons/reactionIcons';
 import ServerMessages from '../shared/ServerMessages';
+import Modal from '../shared/Modal';
 
 
 const SentFromPosts = () => {
@@ -64,6 +65,7 @@ const SentFromPosts = () => {
     const [stats, setStats] = useState({ queueCount: 0, memberCount: 0, source: "post" });
     const [shouldfrienderRun, setShouldfrienderRun] = useState(true);
     const [settingsID, setSettingsID] = useState(null);
+    const [stopFrnderModalOpen, setStopFrnderModalOpen] = useState(false);
 
 
     // FETCH SETTINGS DATA..
@@ -405,12 +407,14 @@ const SentFromPosts = () => {
 
     // STOP RUN THE FRIENDER HANDLER..
     const stopFrinderHandle = async () => {
-        console.log(" ==== [ STOP FRIENDER ] ==== ");
-        await helper.saveDatainStorage("runAction_post", "");
-        chrome.runtime.sendMessage({ action: "stop", source: "post" })
-        await helper.saveDatainStorage('save_post', true)
-        setEditType(null);
-        setIsRunnable(false);
+        setStopFrnderModalOpen(true);
+
+        // console.log(" ==== [ STOP FRIENDER ] ==== ");
+        // await helper.saveDatainStorage("runAction_post", "");
+        // chrome.runtime.sendMessage({ action: "stop", source: "post" })
+        // await helper.saveDatainStorage('save_post', true)
+        // setEditType(null);
+        // setIsRunnable(false);
     };
 
     // PAUSE SENDING FR AND EDIT HANDLE FUNCTION..
@@ -451,10 +455,10 @@ const SentFromPosts = () => {
                     await helper.saveDatainStorage("runAction_post", "running");
 
                     // if (runningStatus === "pause") {
-                        chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: updatePayload, source: "post" })
+                    chrome.runtime.sendMessage({ action: "reSendFriendRequestInGroup", response: updatePayload, source: "post" })
                     // }
                     // else {
-                        // chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: updatePayload, source: "post" })
+                    // chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: updatePayload, source: "post" })
                     // }
                     // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", source:"post", response : updatePayload})
                 }
@@ -507,10 +511,10 @@ const SentFromPosts = () => {
                     await helper.saveDatainStorage("runAction_post", "running");
 
                     // if (runningStatus === "pause") {
-                        chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload, source: "post" })
+                    chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload, source: "post" })
                     // }
                     // else {
-                        // chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload, source: "post" })
+                    // chrome.runtime.sendMessage({ action: "sendFriendRequestInGroup", response: payload, source: "post" })
                     // }
                     // chrome.runtime.sendMessage({action:"sendFriendRequestInGroup", source:"post", response : payload})
                 }
@@ -946,6 +950,35 @@ const SentFromPosts = () => {
 
     return (
         <>
+            <Modal
+                modalType="delete-type"
+                modalIcon={"Icon"}
+                headerText={
+                    "Stop adding in Friend Queue"
+                }
+                bodyText={"This will stop adding friends in Friend Queue. Are you sure you want to stop this run?"}
+                open={stopFrnderModalOpen}
+                setOpen={setStopFrnderModalOpen}
+                ModalFun={() => {
+                    (async () => {
+                        console.log(" ==== [ STOP FRIENDER ] ==== ");
+                        await helper.saveDatainStorage("runAction_post", "");
+                        chrome.runtime.sendMessage({ action: "stop", source: "post" })
+                        await helper.saveDatainStorage('save_post', true)
+                        setEditType(null);
+                        setIsRunnable(false);
+                    })();
+
+                    setStopFrnderModalOpen(false);
+                }}
+                btnText={"Yes, stop"}
+                cancelBtnTxt={"Close"}
+                resetFn={() => {
+                    setStopFrnderModalOpen(false);
+                }}
+                stopBtnClass={'btn-stop-friender'}
+            />
+
             <InnherHeader
                 goBackTo="/"
                 subHeaderText="Posts settings"
