@@ -222,26 +222,28 @@ const syncFriendList = async (fbUserId, sendResponseExternal = null) => {
     chrome.storage.local.set({ lastAutoSyncFriendListId: fbUserId });
     sendMessageToPortalScript({action: "fr_isSyncing", content: "active", type: "cookie"});
   });
-  syncFriendLength();
-  ((request)=>{
-    // console.log("request ::: ", request)
-    checkTabsActivation("fr_sync");
-    chrome.tabs.create(
-      { url: "https://www.facebook.com/me?opener=fr_sync", active: false, pinned: true, selected: false },
-      (tab) => {
-        chrome.tabs.onUpdated.addListener(async function listener(
-          tabId,
-          info
-        ) {
-          if (info.status === "complete" && tabId === tab.id) {
-            chrome.tabs.onUpdated.removeListener(listener);
-            chrome.storage.local.set({ tabsId: tab.id });
-            injectScript(tab.id, ["helper.js", "contentScript.js"]);
-          }
-        });
-      }
-    );
-  })()
+  syncFriendLength(
+    (request)=>{
+      // console.log("request ::: ", request)
+      checkTabsActivation("fr_sync");
+      chrome.tabs.create(
+        { url: "https://www.facebook.com/me?opener=fr_sync", active: false, pinned: true, selected: false },
+        (tab) => {
+          chrome.tabs.onUpdated.addListener(async function listener(
+            tabId,
+            info
+          ) {
+            if (info.status === "complete" && tabId === tab.id) {
+              chrome.tabs.onUpdated.removeListener(listener);
+              chrome.storage.local.set({ tabsId: tab.id });
+              injectScript(tab.id, ["helper.js", "contentScript.js"]);
+            }
+          });
+        }
+      );
+    }
+  );
+  
 }
 
 const checkTabsActivation = async (opener) => {
@@ -912,6 +914,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         currentFBTabId = await helper.getDatafromStorage("FriendTabId");
       }
       chrome.tabs.sendMessage(Number(currentFBTabId), request);
+      if(request.source){FrQueue_Manager()}
       break;
 
     case "pause":
@@ -930,6 +933,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         currentFBTabIdIs = await helper.getDatafromStorage("FriendTabId");
       }
       chrome.tabs.sendMessage(Number(currentFBTabIdIs), request);
+      if(request.source){FrQueue_Manager()}
       break;
 
     case "getGenderCountryAndTier":
@@ -3069,6 +3073,6 @@ const runFriendRequestQueue = async () => {
   }
 }
 //*Calling FrQueue_Manager ON serviceworker load: START :::::::::
-FrQueue_Manager();
+//FrQueue_Manager();
 
 // !Friend request queue: END  :::::::::
