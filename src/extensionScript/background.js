@@ -812,7 +812,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
           tabs.shift()
         if(request.source === "post"){
           if(tabs && tabs.length && tabs[0].url.includes("https://www.facebook.com") && !tabs[0].url.includes("suggestions") 
-            && !tabs[0].url.includes("friends") && !tabs[0].url.includes("groups")) {
+            && !tabs[0].url.includes("friends") && !(tabs[0].url.includes("groups") && (tabs[0].url.includes("members")||tabs[0].url.includes("people")))) {
           console.log("url [post] ::: ", tabs[0].url);
             chrome.runtime.sendMessage({...request, res : true});
           }
