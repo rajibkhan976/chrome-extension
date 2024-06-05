@@ -181,18 +181,23 @@ const startStoringContactInfo = async (source, callback) => {
             if (groupSettings.reaction) {
                 if (page_info && page_info.has_next_page === false) {
                     if (groupSettings.reaction && groupSettings.reaction_type && groupSettings.reaction_type.length > 0) {
-                        console.log("shifting og react type.................");
+                        console.log("shifting of react type.................");
                         groupSettings.reaction_type.shift();
                         if (groupSettings.reaction_type.length === 0) {
                             groupSettings.reaction = false;
-                            if (groupSettings.comment) page_info = { has_next_page: true }
+                            // if (groupSettings.comment) page_info = { has_next_page: true }
                             if (groupSettings.comment) {
                                 console.log("reactions are finished run comment");
+                                page_info = { has_next_page: true }
                             }
                             else {
                                 chrome.runtime.sendMessage({ action: "close" })
                                 return;
                             }
+                        }
+                        else{
+                            console.log("next reactions ::::: ", groupSettings.reaction_type);
+                            page_info.has_next_page = true;
                         }
                     }
                     else if (groupSettings.reaction && groupSettings.reaction_type && groupSettings.reaction_type.length === 0) {
@@ -227,7 +232,7 @@ const startStoringContactInfo = async (source, callback) => {
         // console.log("contacts ::: ", contacts);
         if (!Dynamiccontacts || Dynamiccontacts.length === 0) {
             Dynamiccontacts = await getContactList(source, page_info ? (page_info.end_cursor ? page_info.end_cursor : null) : null);
-            // console.log("Dynamiccontacts :::---::: ", Dynamiccontacts);
+            console.log("Dynamiccontacts :::---::: ", Dynamiccontacts);
             Dynamiccontacts = await arrangeArray(Dynamiccontacts, source);
             if (Dynamiccontacts && Dynamiccontacts.length === 0) {
                 const runningStatus = await helper.getDatafromStorage("runAction_" + source);
@@ -250,14 +255,19 @@ const startStoringContactInfo = async (source, callback) => {
         contactLength = contactLength + contacts.length;
         callback(source)
     } else {
-        if (!page_info || !page_info.has_next_page) {
-            await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: source })
-            shoudIstop = true;
-            if (source !== "post")
-                window.location.reload();
-            // console.log("--------------------------*** Reload ***-------------------------------------------");
-            else
-                chrome.runtime.sendMessage({ action: "close" })
+        if(source !== "post"){
+            if (!page_info || !page_info.has_next_page) {
+                await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: source })
+                shoudIstop = true;
+                if (source !== "post")
+                    window.location.reload();
+                // console.log("--------------------------*** Reload ***-------------------------------------------");
+                else
+                    chrome.runtime.sendMessage({ action: "close" })
+            }
+        }
+        else{
+            startStoringContactInfo(source, checkAndSaveAllData)
         }
     }
 }
@@ -382,6 +392,10 @@ const getContactList = async (source, cursor = null) => {
         }
     );
     memberlist = await memberlist.text();
+    if(source === "post" && !groupSettings.reaction && groupSettings.comment){
+        if(memberlist.includes('{"label":'))
+            memberlist = memberlist.split('{"label":')[0]
+    }
     if (shoudIstop) return;
     memberlist = await helper.makeParsable(memberlist)
     // console.log(memberlist);
@@ -451,24 +465,7 @@ const getContactList = async (source, cursor = null) => {
     }
     if (source === "post") {
         if (!groupSettings.reaction && groupSettings.comment) {
-            // if(memberlist && memberlist.data && memberlist.data.node &&
-            //     memberlist.data.node.comment_rendering_instance_for_feed_location &&
-            //     memberlist.data.node.comment_rendering_instance_for_feed_location.comments.edges &&
-            //     memberlist.data.node.comment_rendering_instance_for_feed_location.comments.edges.length === 0){
-            //         variables = {
-            //             "feedbackID":feedbackTargetID,
-            //             "feedbackSource":110,
-            //             "feedLocation":"DEDICATED_COMMENTING_SURFACE",
-            //             "scale":1,
-            //             // "storyID":"UzpfSUZTOjE6LTE4ODE4NTE5NDE5NDA3MDc4MTA6ZUp3VDYxKzFadjd2cDFOdVRHVFVsQkY3ODJUbTB0c2ZiakNLOG9rMWZGbSs2UHNCWGJGcmM1ODg1Ukg3Ti9ualV4NUxHWkYzekdvTXBtQWhNd1l4aGpTb290Vk1ibGZFbVg0eGZicDJ1Z09rWFpyUlkwb0RFMU5xSHR4QWFRWUdCbkZIYXpsZkJRWUdCbFVoYVVZM0taaVVHY0lGcVF5aUxEeGVZZ3d4UWtJTURFbW1EQXdBWTI1RGdBPT0=",
-            //             "__relay_internal__pv__CometIsAdaptiveUFIEnabledrelayprovider":false,
-            //             "__relay_internal__pv__CometUFIShareActionMigrationrelayprovider":true,
-            //             "__relay_internal__pv__CometUFIReactionsEnableShortNamerelayprovider":false
-            //         };
-            //     doc_id = "7527185634030792"
-            //     startStoringContactInfo(source, checkAndSaveAllData)
-            //     return;
-            // }
+            console.log("Comment is running");
             memberlist = memberlist && memberlist.data && memberlist.data.node &&
                 memberlist.data.node.comment_rendering_instance_for_feed_location &&
                 memberlist.data.node.comment_rendering_instance_for_feed_location.comments
@@ -509,7 +506,7 @@ const getContactList = async (source, cursor = null) => {
             }
         }
     }
-    if (shoudIstop) return;
+    // if (shoudIstop) return;
     // console.log("memberlist ::: ", memberlist);
     return memberlist;
 };
