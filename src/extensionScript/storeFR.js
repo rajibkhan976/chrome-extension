@@ -40,9 +40,12 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             break;
         case "start":
             console.log("Lest start -----------------");
+            if(request.source === "post")
+                shoudIstop = false;
             getEssentialsForGraphApi(request.source, request.action, request.response, request.feedbackTargetID)
             break;
         case "getGenderCountryAndTier":
+            if (shoudIstop) return;
             genderCounter = genderCounter + 1;
             // console.log("member contact ::: ", request.memberContact)
             const memberContact = { ...{ ...request }.memberContact, gender: request.responsePayload.gender, country: request.responsePayload.countryName, tier: request.responsePayload.Tiers }
@@ -89,6 +92,8 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             }
             break;
         case "stop":
+            console.log("************************************STOP**********************************************");
+            page_info = {has_next_page : true}
             await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: request.source })
             shoudIstop = true;
             if (request.source !== "post")
@@ -241,7 +246,7 @@ const startStoringContactInfo = async (source, callback) => {
             }
             // console.log("Dynamiccontacts ::: ",  Dynamiccontacts);
             if (Dynamiccontacts && Dynamiccontacts.length > 0) contacts = [...contacts, ...Dynamiccontacts]
-            else chrome.runtime.sendMessage({ action: "close" })
+            else if(source !== "post") chrome.runtime.sendMessage({ action: "close" })
             if (Dynamiccontacts) Dynamiccontacts.length = 0;
         }
     }
@@ -396,7 +401,6 @@ const getContactList = async (source, cursor = null) => {
         if(memberlist.includes('{"label":'))
             memberlist = memberlist.split('{"label":')[0]
     }
-    if (shoudIstop) return;
     memberlist = await helper.makeParsable(memberlist)
     // console.log(memberlist);
     if (source === "suggestions") {
@@ -489,7 +493,7 @@ const getContactList = async (source, cursor = null) => {
         if (groupSettings.reaction && groupSettings.comment) {
             if (groupSettings.reaction_type.length === 0 && groupSettings.comment) {
                 groupSettings.reaction = false;
-                page_info = { has_next_page: false };
+                page_info = { has_next_page: true };
                 return;
             } else {
                 memberlist = memberlist && memberlist.data && memberlist.data.node;
@@ -500,7 +504,7 @@ const getContactList = async (source, cursor = null) => {
                 } else {
                     console.log(":is node = null ?????????????????");
                     groupSettings.reaction_type.shift();
-                    page_info = { has_next_page: false };
+                    page_info = { has_next_page: true };
                     return;
                 }
             }

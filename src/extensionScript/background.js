@@ -1027,6 +1027,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       // chrome.action.openPopup({'url' : 'popup.html', 'type' : 'popup'}); 
       break;
     case "fr_queue_success" : 
+      console.log("postmessage in fr_queue_success in bg");
       sendMessageToPortalScript({type: "postmessage", content: "fr_queue_success"});
     break;
     default : break;
