@@ -127,7 +127,7 @@ function addCFmenuLink(postBodyEl, menueItems) {
     // console.log("menueItems ::: ", menueItems);
     Array.prototype.forEach.call(menueItems, (child, i) => {
       // console.log("child ::: ", child);
-      if ($(child).hasClass("postProfits")) {
+      if ($(child).hasClass("friender")) {
         already_exists = true;
       }
     });

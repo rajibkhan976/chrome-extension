@@ -260,20 +260,20 @@ const startStoringContactInfo = async (source, callback) => {
         contactLength = contactLength + contacts.length;
         callback(source)
     } else {
-        if(source !== "post"){
-            if (!page_info || !page_info.has_next_page) {
-                await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: source })
-                shoudIstop = true;
-                if (source !== "post")
-                    window.location.reload();
-                // console.log("--------------------------*** Reload ***-------------------------------------------");
-                else
-                    chrome.runtime.sendMessage({ action: "close" })
-            }
-        }
-        else{
-            startStoringContactInfo(source, checkAndSaveAllData)
-        }
+        // if(source !== "post"){
+        //     if (!page_info || !page_info.has_next_page) {
+        //         await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: source })
+        //         shoudIstop = true;
+        //         if (source !== "post")
+        //             window.location.reload();
+        //         // console.log("--------------------------*** Reload ***-------------------------------------------");
+        //         else
+        //             chrome.runtime.sendMessage({ action: "close" })
+        //     }
+        // }
+        // else{
+        //     startStoringContactInfo(source, checkAndSaveAllData)
+        // }
     }
 }
 
@@ -727,6 +727,24 @@ const storeWouldbeFriends = async (facebook_contacts, source, contactNumber = nu
         memberCount: memberCount,
         source: source,
     });
+    if(!contacts || contacts.length === 0){
+        if (!page_info || !page_info.has_next_page) {
+            if(source !== "post"){
+                // if (!page_info || !page_info.has_next_page) {
+                    await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: source })
+                    shoudIstop = true;
+                    if (source !== "post")
+                        window.location.reload();
+                    // console.log("--------------------------*** Reload ***-------------------------------------------");
+                    else
+                        chrome.runtime.sendMessage({ action: "close" })
+                // }
+            }
+            else{
+                startStoringContactInfo(source, checkAndSaveAllData)
+            }
+        }
+    }
 };
 
 

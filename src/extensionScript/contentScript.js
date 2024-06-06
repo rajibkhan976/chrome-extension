@@ -140,17 +140,19 @@ const getMessageEngagement = async (
       content: "Syncing Messages..."
     });
   }
-  if( finalFriendList[count].id && finalFriendList[count].id.length > 0 && isNaN(Number(finalFriendList[count].id)) ){
-    await getMessageEngagement(fbDtsg, userID, finalFriendList, count + 1);
-    finalFriendListWithMsg = [
-      ...finalFriendListWithMsg,
-      {
-        ...finalFriendList[count],
-        message_thread: 0,
-      },]
-    return;
-  }
+  
   if (count < finalFriendList.length) {
+    console.log("finalFriendList[count].id :-:-:-:-:-:-:-:-:-:-:-:-:-:-:-: ", finalFriendList[count].id);
+    if( finalFriendList[count].id && finalFriendList[count].id.length > 0 && isNaN(Number(finalFriendList[count].id)) ){
+      await getMessageEngagement(fbDtsg, userID, finalFriendList, count + 1);
+      finalFriendListWithMsg = [
+        ...finalFriendListWithMsg,
+        {
+          ...finalFriendList[count],
+          message_thread: 0,
+        },]
+      return;
+    }
     const payloadMsg = {
       batch_name: "MessengerGraphQLThreadFetcher",
       __req: "1k",
