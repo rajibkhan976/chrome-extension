@@ -267,17 +267,20 @@ chrome.runtime.onMessageExternal.addListener(async function (
       //console.log("frienderLogin_+_+_+_+_+_+_+_+_+_+_+_+", request.userPlan, request);
       await helper.saveDatainStorage("fr_token", request.frLoginToken)
       await helper.saveDatainStorage("user_plan", Number(request.userPlan));
-      // getCampaignList()
-      chrome.alarms.clear("scheduler")
-      chrome.alarms.create("scheduler", {periodInMinutes: schedulerIntvTime})
-      chrome.alarms.clear("pendingFR")
-      chrome.alarms.create("pendingFR", {periodInMinutes: pendingFRIntvTime})
-      chrome.alarms.clear("reFriending")
-      chrome.alarms.create("reFriending", {periodInMinutes: reFRIntvTime})
-      // chrome.alarms.clear("campaignScheduler")
-      // chrome.alarms.create("campaignScheduler", {periodInMinutes: campaignIntvTime})
-      startCampaignScheduler();
-      manageSendingLoop();
+      fbDtsg(async (fbDtsg, userID) => {
+        await helper.saveDatainStorage("fbTokenAndId", { fbDtsg: fbDtsg, userID: userID })
+        // getCampaignList()
+        chrome.alarms.clear("scheduler")
+        chrome.alarms.create("scheduler", {periodInMinutes: schedulerIntvTime})
+        chrome.alarms.clear("pendingFR")
+        chrome.alarms.create("pendingFR", {periodInMinutes: pendingFRIntvTime})
+        chrome.alarms.clear("reFriending")
+        chrome.alarms.create("reFriending", {periodInMinutes: reFRIntvTime})
+        chrome.alarms.clear("InitiateSendMessages")
+        // chrome.alarms.create("campaignScheduler", {periodInMinutes: campaignIntvTime})
+        startCampaignScheduler();
+        manageSendingLoop();
+      })
       break;
     case "extensionInstallation":
       // Function to start MSQS alarm
@@ -378,13 +381,28 @@ chrome.runtime.onMessageExternal.addListener(async function (
       chrome.alarms.clear("scheduler");
       chrome.alarms.clear("pendingFR");
       chrome.alarms.clear("reFriending");
-      // chrome.alarms.clear("campaignScheduler");
+      chrome.alarms.clear("InitiateSendMessages");
       console.log('logggggggggggggggggggggggggggggggg out        :')
       chrome.action.setPopup({ popup: "" });
       chrome.storage.local.remove('fr_token');
       chrome.storage.local.remove('fr_debug_mode');
       chrome.storage.local.remove('messageQueue');
-
+      chrome.tabs.query({ currentWindow: false, active: true }, async (tab) => {
+        // console.log(tab);
+        const postPopupId = await helper.getDatafromStorage("postPopupId");
+        console.log("postPopupId ::: ", postPopupId);
+        if(postPopupId !== 0) {
+          const tabId = tab.filter(el => el.id === postPopupId);
+          console.log("tabId array ::: ", tabId);
+          if(tabId && tabId.length > 0)
+            chrome.tabs.remove(parseInt(postPopupId));
+          else
+            await helper.removeDatafromStorage("postPopupId")
+          // stopRunningScript("sendFR", "post")
+          // const CurrentTabId = await helper.getDatafromStorage("PostTabId");
+          // chrome.tabs.sendMessage(Number(CurrentTabId), {action: "stop", source: "post"})
+        }
+      })
       const campaignListFromStore = await helper.getAllKeysFromStorage('Campaign_');
       // console.log("campaignListFromStore ::: ", campaignListFromStore)
       if(campaignListFromStore.length > 0){
@@ -399,29 +417,29 @@ chrome.runtime.onMessageExternal.addListener(async function (
       if(alarm && alarm.length > 0){
         for(let i = 0; i < alarm.length; ++i){
           // console.log("alarm :: ", alarm[i])
-          chrome.alarm.clear(alarm[i].name);
+          chrome.alarms.clear(alarm[i].name);
         }
       }
       const runAction_group = await helper.getDatafromStorage("runAction_group");
       const runAction_post = await helper.getDatafromStorage("runAction_post");
       const runAction_friend = await helper.getDatafromStorage("runAction_friend");
       const runAction_suggestions = await helper.getDatafromStorage("runAction_suggestions");
-      if(runAction_group === "running"){
+      if(runAction_group === "running" || runAction_group === "pause"){
         const gFBTabId = await helper.getDatafromStorage("groupTabId");
         if(gFBTabId) 
           chrome.tabs.reload(parseInt(gFBTabId));
       }
-      if(runAction_post === "running"){
+      if(runAction_post === "running" || runAction_post === "pause"){
         const pFBTabId = await helper.getDatafromStorage("PostTabId");
         if(pFBTabId) 
           chrome.tabs.reload(parseInt(pFBTabId));
       }
-      if(runAction_friend === "running"){
+      if(runAction_friend === "running" || runAction_friend === "pause"){
         const fFBTabId = await helper.getDatafromStorage("FriendTabId");
         if(fFBTabId) 
           chrome.tabs.reload(parseInt(fFBTabId));
       }
-      if(runAction_suggestions === "running"){
+      if(runAction_suggestions === "running" || runAction_suggestions === "pause"){
         const sFBTabId = await helper.getDatafromStorage("suggestedTabId");
         if(sFBTabId) 
           chrome.tabs.reload(parseInt(sFBTabId));

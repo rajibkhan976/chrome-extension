@@ -168,7 +168,9 @@ function addCFmenuLink(postBodyEl, menueItems) {
     //   console.log("hi.........................................................", $(".friender"));
   
       // addedMenue.find
-      $(".friender").click(function () {
+      $(".friender").click(async function () {
+        const frToken = await helper.getDatafromStorage("fr_token");
+        if(helper.isEmptyObj(frToken)) return;
         // console.log("hi.........................................................");
         // console.log("postBodyEl.", postBodyEl);
         // console.log("use pp is clicked 1.", $(postBodyEl).find(`div.html-div`));
