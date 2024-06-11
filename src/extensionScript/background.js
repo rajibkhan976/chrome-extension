@@ -2941,10 +2941,10 @@ if (profileMysettings &&
       // console.log("isRejectedFriends isRejected ::: ", isRejectedFriends.isRejected)
       // console.log("isRejectedFriends is_incoming ::: ", isRejectedFriends.is_incoming)
     if(profileMysettings.dont_send_friend_requests_prople_i_sent_friend_requests_they_rejected ){
-      if(isRejectedFriends && isRejectedFriends.isRejected && !isRejectedFriends.is_incoming) return false;
+      if(isRejectedFriends && isRejectedFriends.isRejected && !isRejectedFriends.is_incoming){return false;}
     }
     if(profileMysettings.dont_send_friend_requests_prople_who_send_me_friend_request_i_rejected ){
-      if(isRejectedFriends && isRejectedFriends.isRejected && isRejectedFriends.is_incoming)return false;
+      if(isRejectedFriends && isRejectedFriends.isRejected && isRejectedFriends.is_incoming){return false;}
     }
   }
 
@@ -2953,6 +2953,7 @@ if (profileMysettings &&
     console.log("isRestricted ::: ", isRestricted)
     if(isRestricted)return false;
   }
+  return true;
  }
  /** 
  * Function to send friend request by queue
@@ -2984,7 +2985,7 @@ const runFriendRequestQueue = async () => {
           "fbUserId":userFBDetails.userID,
           "friendFbId":first.friendFbId
         });
-        const settingEligibility =  profileSettingCheck(userFBDetails.userID,first.friendFbId );
+        const settingEligibility = await profileSettingCheck(userFBDetails.userID,first.friendFbId );
         if(friendShipStatus.is_data_found || !settingEligibility){
           console.log("USER IS ALREADY PRESENT IN YOUR FR LIST ::");
           throw new Error("The user is already present in Feind list");
@@ -3005,7 +3006,7 @@ const runFriendRequestQueue = async () => {
           "fbUserId":userFBDetails.userID,
           "friendFbId":friendFBId
         });
-        const settingEligibility =  profileSettingCheck(userFBDetails.userID,friendFBId);
+        const settingEligibility = await profileSettingCheck(userFBDetails.userID,friendFBId);
          if(friendShipStatus.is_data_found || !settingEligibility ){
           console.log("USER IS ALREADY PRESENT IN YOUR FR LIST ::");
           chrome.tabs.remove(create.tabId);
