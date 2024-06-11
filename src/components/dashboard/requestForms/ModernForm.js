@@ -929,6 +929,7 @@ const GroupsRequestForm = ({
     // HANDLE INPUT VALUE CHANGE ON MUTUAL FRIENDS FIELD..
     const handleValueChangeMutualFriend = (element, value) => {
         let formSetPlaceholder = { ...formSetup };
+        const newValue = value.replace(/^0+/, '');
 
         const newObj = {
             ...formSetPlaceholder,
@@ -937,15 +938,15 @@ const GroupsRequestForm = ({
                     ...formItem,
                     fieldOptions: formItem.fieldOptions?.map((itemCh) => {
                         if (itemCh.name === "mutual_friend_value") {
-                            itemCh.value = value;
+                            itemCh.value = newValue;
 
-                            if (value !== "" || parseInt(value) > 0) {
+                            if (newValue !== "" || parseInt(newValue) > 0) {
                                 itemCh.valid = true;
                             }
 
                             setSettingApiPayload(prevState => ({
                                 ...prevState,
-                                mutual_friend_value: value
+                                mutual_friend_value: newValue
                             }));
                         }
                         return itemCh;
