@@ -40,8 +40,11 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             break;
         case "start":
             console.log("Lest start -----------------");
-            if(request.source === "post")
+            if(request.source === "post"){
                 shoudIstop = false;
+                queueCount = 0;
+                memberCount = 0;
+            }
             getEssentialsForGraphApi(request.source, request.action, request.response, request.feedbackTargetID)
             break;
         case "getGenderCountryAndTier":
@@ -112,6 +115,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             }
             await startStoringContactInfo(request.source, checkAndSaveAllData)
             break;
+        case "contentAvailibility" : 
+            sendResponse(true)
+        break;
         default:
             break;
     }
@@ -240,6 +246,10 @@ const startStoringContactInfo = async (source, callback) => {
             console.log("Dynamiccontacts :::---::: ", Dynamiccontacts);
             Dynamiccontacts = await arrangeArray(Dynamiccontacts, source);
             if (Dynamiccontacts && Dynamiccontacts.length === 0) {
+                if (source !== "post")
+                    window.location.reload();
+                else
+                    startStoringContactInfo(source, checkAndSaveAllData)
                 const runningStatus = await helper.getDatafromStorage("runAction_" + source);
                 if (runningStatus === "running")
                     await helper.saveDatainStorage("runAction_" + source, "");
@@ -259,21 +269,6 @@ const startStoringContactInfo = async (source, callback) => {
         console.log("calling from from startStoringContactInfo");
         contactLength = contactLength + contacts.length;
         callback(source)
-    } else {
-        // if(source !== "post"){
-        //     if (!page_info || !page_info.has_next_page) {
-        //         await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: source })
-        //         shoudIstop = true;
-        //         if (source !== "post")
-        //             window.location.reload();
-        //         // console.log("--------------------------*** Reload ***-------------------------------------------");
-        //         else
-        //             chrome.runtime.sendMessage({ action: "close" })
-        //     }
-        // }
-        // else{
-        //     startStoringContactInfo(source, checkAndSaveAllData)
-        // }
     }
 }
 
@@ -704,12 +699,13 @@ const storeWouldbeFriends = async (facebook_contacts, source, contactNumber = nu
         contactsWithGenderDetails.length = 0;
     }
     const respOfFRQS = await common.storeInFRQS(paylaod);
+    console.log("queue count <<<<<<<<<<<<<<<<<<<<<<<<<<<---------------------------- ", queueCount, typeof queueCount)
 
-    // console.log("respOfFRQS ::: ", respOfFRQS)
+    console.log("respOfFRQS ::: ", respOfFRQS, respOfFRQS.record_count, typeof respOfFRQS.record_count)
 
     queueCount = queueCount + respOfFRQS.record_count;
-
-    if (queueCount > 0) {
+    console.log("queue count ---------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>> ", queueCount, typeof queueCount)
+    if (respOfFRQS.record_count > 0) {
         chrome.runtime.sendMessage({ action: "fr_queue_success" })
     }
 
@@ -733,12 +729,7 @@ const storeWouldbeFriends = async (facebook_contacts, source, contactNumber = nu
                 // if (!page_info || !page_info.has_next_page) {
                     await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: source })
                     shoudIstop = true;
-                    if (source !== "post")
-                        window.location.reload();
-                    // console.log("--------------------------*** Reload ***-------------------------------------------");
-                    else
-                        chrome.runtime.sendMessage({ action: "close" })
-                // }
+                    window.location.reload();
             }
             else{
                 startStoringContactInfo(source, checkAndSaveAllData)

@@ -774,15 +774,21 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                 ) {
                   if (info.status === "complete" && tabId === tabs.id) {
                     chrome.tabs.onUpdated.removeListener(listener);
-                    chrome.storage.local.set({ postTabId: tabs.id });
+                    // chrome.storage.local.set({ postTabId: tabs.id });
                     injectScript(tabs.id, ["helper.js", "storeFR.js"]);
                     setTimeout(async() => {
                       const feedbackTargetID = await chrome.tabs.sendMessage(tabs.id, {action:"getFeedbackTargetID", source:"post"});
                       console.log("FeedbackTargetID :::::::::::: ", feedbackTargetID)
                       chrome.tabs.remove(parseInt(tabs.id));
+                      const isContentAvailable = await chrome.tabs.sendMessage(tabb.id,{action : "contentAvailibility"})
+                      console.log("isContentAvailable :::: ", isContentAvailable);
+                      const PostTabId = await helper.getDatafromStorage("PostTabId");
+                      console.log("PostTabId ::: ", PostTabId);
                       await helper.saveDatainStorage("PostTabId", tabb.id);
                       console.log("----------------------------", tabb.id)
-                      injectScript(tabb.id, ["helper.js", "storeFR.js"]);
+                      console.log("----------------------------", Number(PostTabId) !== tabb.id)
+                      if(Number(PostTabId) !== tabb.id || !isContentAvailable)
+                        injectScript(tabb.id, ["helper.js", "storeFR.js"]);
                       setTimeout(() => {
                         chrome.tabs.sendMessage(tabb.id, {action:"start", source:"post", feedbackTargetID:feedbackTargetID, response : request.response});
                       }, 1000);
@@ -1028,6 +1034,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             await helper.removeDatafromStorage("postPopupId")
           stopRunningScript("sendFR", "post")
           const CurrentTabId = await helper.getDatafromStorage("PostTabId");
+          await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: "post" })
           chrome.tabs.sendMessage(Number(CurrentTabId), {action: "stop", source: "post"})
         }
         console.log("request.postUrl :: ", request.postUrl)
