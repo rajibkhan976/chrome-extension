@@ -626,13 +626,9 @@ const getProfileInfo = (callback = null) => {
 };
 
 const sendMessageToPortalScript = async (request) => {
-  const [tab] = await chrome.tabs.query({title: "Friender", url: process.env.REACT_APP_APP_URL + "/*" });
-  // console.log("send msg",request.action, request.content)
-  // console.log("send msg to the tab :: ",tab)
-  
-  if (tab) {
-    // console.log("Req to portal", request.action)
-    chrome.tabs.sendMessage(tab.id, request);
+  const [...tabs] = await chrome.tabs.query({title: "Friender", url: process.env.REACT_APP_APP_URL + "/*" });
+  for (let t = 0; t < tabs.length; t++) {
+    chrome.tabs.sendMessage(tabs[t].id, request);
   }
 }
 
