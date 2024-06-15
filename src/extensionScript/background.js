@@ -957,7 +957,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       break;
 
     case "getGenderCountryAndTier":
-                              console.log("request ::: ", request);
+                              // console.log("request ::: ", request);
                               // const resp = {...request}
                               // console.log("resp ::: ", resp);
                               const genderCountryAndTier = await getGenderCountryAndTiers(request.name);
@@ -975,7 +975,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                                 if(request.source === "friends"){
                                   genderTabId = await helper.getDatafromStorage("FriendTabId");
                                 }
-                                console.log("tabsID :: ", genderTabId, Number(genderTabId))
+                                // console.log("tabsID :: ", genderTabId, Number(genderTabId))
                                 chrome.tabs.sendMessage(Number(genderTabId), {...request, "responsePayload" : genderCountryAndTier});
                               break;
 

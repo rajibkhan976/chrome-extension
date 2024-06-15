@@ -40,7 +40,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             break;
         case "start":
             console.log("Lest start -----------------");
-            if(request.source === "post"){
+            if (request.source === "post") {
                 shoudIstop = false;
                 queueCount = 0;
                 memberCount = 0;
@@ -50,17 +50,20 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         case "getGenderCountryAndTier":
             if (shoudIstop) return;
             genderCounter = genderCounter + 1;
+            // console.log("genderCounter ::: ", genderCounter)
             // console.log("member contact ::: ", request.memberContact)
             const memberContact = { ...{ ...request }.memberContact, gender: request.responsePayload.gender, country: request.responsePayload.countryName, tier: request.responsePayload.Tiers }
             // console.log("member contact ::: ", memberContact)
             contactsWithGenderDetails = [...contactsWithGenderDetails, memberContact];
+            console.log("contactsWithGenderDetails ::: ", contactsWithGenderDetails);
             if (contactLength === contactsWithGenderDetails.length) {
+                genderCounter = 0
                 contactLength = contactLength - contactsWithGenderDetails.length;
-                storeWouldbeFriends(contactsWithGenderDetails, request.source);
+                storeWouldbeFriends(contactsWithGenderDetails, request.source, contactsWithGenderDetails.length);
             }
             else if (genderCounter === 10) {
                 contactLength = contactLength - genderCounter;
-                storeWouldbeFriends(contactsWithGenderDetails, request.source, genderCounter);
+                storeWouldbeFriends(contactsWithGenderDetails, request.source, 10);
                 genderCounter = 0
             }
             break;
@@ -85,7 +88,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                     match_token = match_token[0].slice(0, match_token.length - 2);
                     match_token = `${match_token}}}`
                     // console.log(match_token);
-                    match_token = match_token
+                    match_token = match_token;
                     match_token = JSON.parse(match_token);
                     // console.log(match_token);
                     feedbackTargetID = match_token.feedback.id;
@@ -96,7 +99,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             break;
         case "stop":
             console.log("************************************STOP**********************************************");
-            page_info = {has_next_page : true}
+            page_info = { has_next_page: true }
             await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: request.source })
             shoudIstop = true;
             if (request.source !== "post")
@@ -115,9 +118,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             }
             await startStoringContactInfo(request.source, checkAndSaveAllData)
             break;
-        case "contentAvailibility" : 
+        case "contentAvailibility":
             sendResponse(true)
-        break;
+            break;
         default:
             break;
     }
@@ -178,11 +181,11 @@ const getEssentialsForGraphApi = async (source, action, settings, targetId = nul
 const startStoringContactInfo = async (source, callback) => {
     if (shoudIstop) return;
     if (source === "post") {
-        console.log("post and contacts ::::::::::: ", contacts);
+        // console.log("post and contacts ::::::::::: ", contacts);
         if (contacts.length === 0) {
             if (groupSettings.comment && !groupSettings.reaction) {
                 if (page_info && page_info.has_next_page === false) {
-                    chrome.runtime.sendMessage({ action: "close" })
+                    // chrome.runtime.sendMessage({ action: "close" })
                     const runningStatus = await helper.getDatafromStorage("runAction_post");
                     if (runningStatus === "running")
                         await helper.saveDatainStorage("runAction_post", "");
@@ -202,13 +205,13 @@ const startStoringContactInfo = async (source, callback) => {
                                 page_info = { has_next_page: true }
                             }
                             else {
-                                chrome.runtime.sendMessage({ action: "close" })
+                                // chrome.runtime.sendMessage({ action: "close" })
                                 return;
                             }
                         }
-                        else{
+                        else {
                             console.log("next reactions ::::: ", groupSettings.reaction_type);
-                            page_info.has_next_page = true;
+                            page_info = { has_next_page: true }
                         }
                     }
                     else if (groupSettings.reaction && groupSettings.reaction_type && groupSettings.reaction_type.length === 0) {
@@ -218,7 +221,7 @@ const startStoringContactInfo = async (source, callback) => {
                             console.log("reactions are finished run comment");
                         }
                         else {
-                            chrome.runtime.sendMessage({ action: "close" })
+                            // chrome.runtime.sendMessage({ action: "close" })
                             const runningStatus = await helper.getDatafromStorage("runAction_post");
                             if (runningStatus === "running")
                                 await helper.saveDatainStorage("runAction_post", "");
@@ -228,10 +231,10 @@ const startStoringContactInfo = async (source, callback) => {
                 }
             }
         }
-        console.log("groupSettings.reaction ::: ", groupSettings.reaction);
-        console.log("groupSettings.reaction_type ::: ", groupSettings.reaction_type);
+        // console.log("groupSettings.reaction ::: ", groupSettings.reaction);
+        // console.log("groupSettings.reaction_type ::: ", groupSettings.reaction_type);
         if (!groupSettings.comment && !groupSettings.reaction) {
-            chrome.runtime.sendMessage({ action: "close" })
+            // chrome.runtime.sendMessage({ action: "close" })
             const runningStatus = await helper.getDatafromStorage("runAction_post");
             if (runningStatus === "running")
                 await helper.saveDatainStorage("runAction_post", "");
@@ -256,7 +259,7 @@ const startStoringContactInfo = async (source, callback) => {
             }
             // console.log("Dynamiccontacts ::: ",  Dynamiccontacts);
             if (Dynamiccontacts && Dynamiccontacts.length > 0) contacts = [...contacts, ...Dynamiccontacts]
-            else if(source !== "post") chrome.runtime.sendMessage({ action: "close" })
+            else if (source !== "post") chrome.runtime.sendMessage({ action: "close" })
             if (Dynamiccontacts) Dynamiccontacts.length = 0;
         }
     }
@@ -392,8 +395,8 @@ const getContactList = async (source, cursor = null) => {
         }
     );
     memberlist = await memberlist.text();
-    if(source === "post" && !groupSettings.reaction && groupSettings.comment){
-        if(memberlist.includes('{"label":'))
+    if (source === "post" && !groupSettings.reaction && groupSettings.comment) {
+        if (memberlist.includes('{"label":'))
             memberlist = memberlist.split('{"label":')[0]
     }
     memberlist = await helper.makeParsable(memberlist)
@@ -514,7 +517,7 @@ const arrangeArray = async (response, source) => {
     if (shoudIstop) return;
     let arr = [], can_request = "";
     // console.log("response  --------------> ", response);
-    if(!response || response.length === 0)
+    if (!response || response.length === 0)
         return arr;
     for (let el in response) {
         if (shoudIstop) return;
@@ -707,32 +710,93 @@ const storeWouldbeFriends = async (facebook_contacts, source, contactNumber = nu
     console.log("queue count ---------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>> ", queueCount, typeof queueCount)
     if (respOfFRQS.record_count > 0) {
         chrome.runtime.sendMessage({ action: "fr_queue_success" })
-    }
+        chrome.runtime.sendMessage({
+            action: "showCount",
+            paylaod: {
+                queueCount: queueCount,
+                memberCount: memberCount,
+                source: source,
+            },
+        });
 
-    chrome.runtime.sendMessage({
-        action: "showCount",
-        paylaod: {
+        await helper.saveDatainStorage("showCount", {
             queueCount: queueCount,
             memberCount: memberCount,
             source: source,
-        },
-    });
+        });
+    }
 
-    await helper.saveDatainStorage("showCount", {
-        queueCount: queueCount,
-        memberCount: memberCount,
-        source: source,
-    });
-    if(!contacts || contacts.length === 0){
+    if (!contacts || contacts.length === 0) {
         if (!page_info || !page_info.has_next_page) {
-            if(source !== "post"){
+            if (source !== "post") {
                 // if (!page_info || !page_info.has_next_page) {
-                    await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: source })
-                    shoudIstop = true;
-                    window.location.reload();
+                await helper.saveDatainStorage("showCount", { queueCount: 0, memberCount: 0, source: source })
+                shoudIstop = true;
+                window.location.reload();
             }
-            else{
-                startStoringContactInfo(source, checkAndSaveAllData)
+            else {
+                console.log("post and contacts ::::::::::: ", contacts);
+                if (contactsWithGenderDetails.length === 0) {
+                    if (contacts.length === 0) {
+                        if (groupSettings.comment && !groupSettings.reaction) {
+                            if (page_info && page_info.has_next_page === false) {
+                                chrome.runtime.sendMessage({ action: "close" })
+                                const runningStatus = await helper.getDatafromStorage("runAction_post");
+                                if (runningStatus === "running")
+                                    await helper.saveDatainStorage("runAction_post", "");
+                                return;
+                            }
+                        }
+                        if (groupSettings.reaction) {
+                            if (page_info && page_info.has_next_page === false) {
+                                if (groupSettings.reaction && groupSettings.reaction_type && groupSettings.reaction_type.length > 0) {
+                                    console.log("shifting of react type.................");
+                                    groupSettings.reaction_type.shift();
+                                    if (groupSettings.reaction_type.length === 0) {
+                                        groupSettings.reaction = false;
+                                        // if (groupSettings.comment) page_info = { has_next_page: true }
+                                        if (groupSettings.comment) {
+                                            console.log("reactions are finished run comment");
+                                            page_info = { has_next_page: true }
+                                        }
+                                        else {
+                                            chrome.runtime.sendMessage({ action: "close" })
+                                            return;
+                                        }
+                                    }
+                                    else {
+                                        console.log("next reactions ::::: ", groupSettings.reaction_type);
+                                        page_info = { has_next_page: true }
+                                    }
+                                }
+                                else if (groupSettings.reaction && groupSettings.reaction_type && groupSettings.reaction_type.length === 0) {
+                                    groupSettings.reaction = false;
+                                    if (groupSettings.comment) page_info = { has_next_page: true }
+                                    if (groupSettings.comment) {
+                                        console.log("reactions are finished run comment");
+                                    }
+                                    else {
+                                        chrome.runtime.sendMessage({ action: "close" })
+                                        const runningStatus = await helper.getDatafromStorage("runAction_post");
+                                        if (runningStatus === "running")
+                                            await helper.saveDatainStorage("runAction_post", "");
+                                        return;
+                                    };
+                                }
+                            }
+
+                        }
+                        console.log("groupSettings.reaction ::: ", groupSettings.reaction);
+                        console.log("groupSettings.reaction_type ::: ", groupSettings.reaction_type);
+                        if (!groupSettings.comment && !groupSettings.reaction) {
+                            chrome.runtime.sendMessage({ action: "close" })
+                            const runningStatus = await helper.getDatafromStorage("runAction_post");
+                            if (runningStatus === "running")
+                                await helper.saveDatainStorage("runAction_post", "");
+                            return;
+                        }
+                    }
+                }
             }
         }
     }
@@ -775,3 +839,6 @@ const storeWouldbeFriends = async (facebook_contacts, source, contactNumber = nu
 // }
 
 // data.node.comment_rendering_instance_for_feed_location.comments.edges[0].author.profile_picture_depth_0.uri
+
+
+//aria-label="Embed Post"
