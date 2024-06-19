@@ -2877,6 +2877,7 @@ async function isFrQueueEligibleToRun(userFbID,friendFbId) {
   }
   console.log("new frQueue setting after end LIMIT", frQueuePayload);
   await common.storeFrQueueSetting(frQueuePayload);
+  await frQueueSettingSetter({...frQueuePayload,"timeDelay":frQueSettings.timeDelay});
   return false;
 }
 /**
