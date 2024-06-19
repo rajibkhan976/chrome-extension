@@ -868,3 +868,7 @@ label.fr-ext-checkbox {
     color: red;
     font-size: 10px;
 }
+
+.fr-setting-cell:has(.custom-select ul) {
+    z-index: 10;
+}
