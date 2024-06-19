@@ -276,6 +276,7 @@
     @include theme-aware("background-color", "radio-bg");
     padding: 15px 20px;
     column-gap: 30px;
+    overflow: hidden;
 
     .setting-col {
         position: relative;
