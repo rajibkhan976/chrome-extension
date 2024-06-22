@@ -95,9 +95,9 @@
 .savePost {
   padding: 10px 16px !important;
 }
-.savePost svg {
+/* .savePost svg {
   filter: invert(1) !important;
-}
+} */
 .friender_savePost {
   display: block !important;
   line-height: 19.1px;
