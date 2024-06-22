@@ -1,9 +1,8 @@
 import selectors from "./selector";
+import common from "./commonScript";
 import helper from "./helper";
 const $ = require("jquery");
-// const selectors = require("./selector.js");
-// const ariaLabel = selectors.ariaLabel;
-// var status = false;
+const querystring = require('querystring');
 let clickedObj = null,
   status = false,
   processed_posts_count = 0,
@@ -13,7 +12,16 @@ let clickedObj = null,
   MenuItemInterval,
   popUpmenuBox = "",
   PopupMenuBox_children,
-  isEmptyObj = false;
+  isEmptyObj = false,
+  groupSettings = {},
+  addFriendList = [],
+  contactDetails = [],
+  count = 0,
+  memberCount = 0,
+  queueCount = 0,
+  postFigure;
+  let shouldIStart = true;
+
 let savePostMenuItem =
   `<div class="friender savePost schedulerTrigger x1i10hfl xjbqb8w x6umtig x1b1mbwd xaqea5y xav7gou xe8uvvx x1hl2dhg xggy1nq x1o1ewxj x3x9cwd x1e5q0jg x13rtm0m x87ps6o x1lku1pv x1a2a7pz xjyslct x9f619 x1ypdohk x78zum5 x1q0g3np x2lah0s x1w4qvff x13mpval xdj266r xat24cr x1n2onr6 x16tdsg8 x1ja2u2z x6s0dn4 x1y1aw1k x1sxyh0" role="menuitem" tabindex="-1">
                         <div class="x6s0dn4 xoi2r2e x78zum5 xl56j7k xq8finb xcrj56b x1ua1ozc">
@@ -186,84 +194,11 @@ function addCFmenuLink(postBodyEl, menueItems) {
     const frToken = await helper.getDatafromStorage("fr_token");
     if (helper.isEmptyObj(frToken)) return;
     if (isSponsored) {
-      menueItems[menueItems.length - 1].click();
-      getSponsoredLink();
+      chrome.runtime.sendMessage({ "action": "openPostSetting", "isSponsored": true })
+      postFigure = postBodyEl;
     } else {
       getpostLinkFromLink(postBodyEl);
     }
-    // console.log("hi.........................................................");
-    // console.log("postBodyEl.", postBodyEl);
-    // console.log("use pp is clicked 1.", $(postBodyEl).find(`div.html-div`));
-    // console.log("use pp is clicked 2.", $($(postBodyEl).find(`div.html-div`)[0]).find(`div.html-div`));
-    // console.log("use pp is clicked 3.", $($($(postBodyEl).find(`div.html-div`)[0]).find(`div.html-div`)[0]).children().eq(1));
-    // console.log("use pp is clicked 3.", $($($(postBodyEl).find(`div.html-div`)[0]).find(`div.html-div`)[0]).children().eq(2));
-    // let post_body = $($($(postBodyEl).find(`div.html-div`)[0]).find(`div.html-div`)[0]).children().eq(1)
-
-    // post_body[0].dispatchEvent(
-    //     new FocusEvent("focusin", {
-    //       view: window,
-    //       bubbles: true,
-    //       cancelable: true,
-    //     })
-    // );
-    // setTimeout(function () {
-
-    //     let allUrlsOfPsts = $(post_body.find(`div.html-div`)).find(
-    //     'a[role="link"]'
-    //     );
-    //     console.log("allUrlsOfPsts ::::::::::::::: ", allUrlsOfPsts);
-    //     let i = allUrlsOfPsts.length - 1;
-    //     if(allUrlsOfPsts.length === 0){
-    //       post_body = $($($(postBodyEl).find(`div.html-div`)[0]).find(`div.html-div`)[0]).children().eq(2);
-    //       console.log(post_body);
-    //       allUrlsOfPsts = $(post_body.find(`div.html-div`)).find(
-    //         'a[role="link"]'
-    //       );
-    //       console.log("allUrlsOfPsts ::::::: 2 :::::::: ", allUrlsOfPsts);
-    //       i = 0;
-    //     }
-    //     console.log("allUrlsOfPsts[i] :::: ", allUrlsOfPsts[i]);
-    //     allUrlsOfPsts[i].dispatchEvent(
-    //     new FocusEvent("focusin", {
-    //         view: window,
-    //         bubbles: true,
-    //         cancelable: true,
-    //     })
-    //     );
-    //     setTimeout(function () {
-    //         let postUrl = $(allUrlsOfPsts[i]).attr("href");
-    //         console.log("post URL ::::::::::::::::::::::: ", postUrl);
-    //         if(postUrl === "#"){
-    //           i = allUrlsOfPsts.length - 2;
-    //           console.log("allUrlsOfPsts[i] :::: ", allUrlsOfPsts[i]);
-    //           allUrlsOfPsts[i].dispatchEvent(
-    //           new FocusEvent("focusin", {
-    //               view: window,
-    //               bubbles: true,
-    //               cancelable: true,
-    //           })
-    //           );
-    //           setTimeout(()=>{
-    //             postUrl = $(allUrlsOfPsts[i]).attr("href");
-    //             console.log("post URL ::::::::::::::::::::::: ", postUrl);
-    //             if(!postUrl.includes("https://www.facebook.com")){
-    //                 postUrl = "https://www.facebook.com" + postUrl
-    //                 console.log("post URL ::::::::::::::::::::::: ", postUrl);
-    //             }
-    //             chrome.runtime.sendMessage({"action" :  "openPostSetting", "postUrl" : postUrl})
-    //           }, 500)
-    //         }
-    //         else{
-    //           postUrl = $(allUrlsOfPsts[i]).attr("href");
-    //           console.log("post URL ::::::::::::::::::::::: ", postUrl);
-    //           if(!postUrl.includes("https://www.facebook.com")){
-    //               postUrl = "https://www.facebook.com" + postUrl
-    //               console.log("post URL ::::::::::::::::::::::: ", postUrl);
-    //           }
-    //           chrome.runtime.sendMessage({"action" :  "openPostSetting", "postUrl" : postUrl})
-    //         }
-    //     }, 500);
-    // },200)
   });
 }
 
@@ -371,22 +306,241 @@ const getpostLinkFromLink = (postBodyEl) => {
 const getSponsoredLink = () => {
   const embedInterval = setInterval(() => {
     const embedPost = $('div[aria-label="Embed Post"]')
-    console.log("embed post div : ", embedPost)
+    // console.log("embed post div : ", embedPost)
     if (embedPost && embedPost.length > 0) {
       clearInterval(embedInterval);
       const embedLink = embedPost.find('input[aria-label="Sample code input"]')
-      console.log("embeded link ::: ", embedLink[0].value)
+      // console.log("embeded link ::: ", embedLink[0].value)
       var div = document.createElement('div');
       div.innerHTML = embedLink[0].value.trim();
       const iframeVal = div.firstChild;
-      console.log("value of iframe value", iframeVal);
+      // console.log("value of iframe value", iframeVal);
       let postUrl = iframeVal && iframeVal.src;
-      console.log("post URL ::: ", postUrl);
+      // console.log("post URL ::: ", postUrl);
       postUrl = postUrl.split("href=")[1].split("&")[0]
-      postUrl = postUrl.replaceAll("%3A", ":").replaceAll("%2F", "/")
-      console.log("post URL ::: ", postUrl);
+      postUrl = querystring.parse(postUrl)
+      postUrl = Object.keys(postUrl)[0];
+      // postUrl = postUrl.replaceAll("%3A", ":").replaceAll("%2F", "/")
+      // console.log("post URL ::: ", postUrl);
       $('div[aria-label="Close"]').click();
       chrome.runtime.sendMessage({ "action": "openPostSetting", "postUrl": postUrl })
     }
   }, 500)
 }
+
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+  // console.log("request : ", request);
+  switch (request.action) {
+    case "startForSponsored":
+      // shouldIStart = true;
+      groupSettings = request.response;
+      startOpenDialogues();
+      break;
+    case "getfriendId":
+      contactDetails = [...contactDetails, request.memberContact];
+      // console.log("contactDetails", contactDetails);
+      if (contactDetails.length >= 7) {
+        storeWouldbeFriends(contactDetails, contactDetails.length);
+      }
+      break;
+    default:
+      break;
+  }
+})
+
+const startOpenDialogues = () => {
+  if (groupSettings.reaction) {
+    let reactionholder = $($(postFigure).find('span[aria-label="See who reacted to this"]')).parent();
+    reactionholder = $(reactionholder).find('div[role="button"]')
+    reactionholder = reactionholder[reactionholder.length - 1]
+    // console.log("reactionholder ::: ", reactionholder);
+    if (reactionholder) {
+      // console.log($(reactionholder).find('span:not([aria-hidden="true"])'));
+      $(reactionholder).find('span:not([aria-hidden="true"])')[1].click();
+      const reactorsInterval = setInterval(() => {
+        // console.log(`$('div[role="dialog"]') =====>> >  >   >    >     >      > `, $('div[role="dialog"][aria-labelledby^=":"]'));
+        const ignoreDiv = $('div[role="dialog"][aria-labelledby^=":"]').find('div[data-visualcompletion="ignore-dynamic"]')
+        // console.log("ignoreDiv ----------> ", ignoreDiv);
+        if (ignoreDiv && ignoreDiv.length > 0) {
+          clearInterval(reactorsInterval)
+          getMembersOfReaction(ignoreDiv[0], $('div[role="dialog"][aria-labelledby^=":"]'));
+        }
+      }, 500)
+    }
+  }
+  if (!groupSettings.reaction && groupSettings.comment) {
+    getMembersFromComments()
+  }
+}
+
+const getMembersOfReaction = (ignoreDiv, dialogue) => {
+  // console.log("reaction selected from settings : ", groupSettings.reaction, groupSettings.reaction_type);
+  if (groupSettings.reaction_type.length > 0) {
+    function capitalizeFLetter(string) {
+      return (string[0].toUpperCase() +
+        string.slice(1));
+    }
+    const current_reaction = capitalizeFLetter(groupSettings.reaction_type[0])
+    // console.log(`$(ignoreDiv).find('[aria-label^=${current_reaction}]') ::::::::: `, $(ignoreDiv).find(`[aria-label^=${current_reaction}][role="tab"]`));
+    let current_reaction_div = $(ignoreDiv).find(`[aria-label^=${current_reaction}]`)
+    // console.log("current_reaction_div ::: ", current_reaction_div);
+    if (current_reaction_div && current_reaction_div.length > 0) {
+      current_reaction_div.click();
+      collectDataTillEnd(dialogue)
+    } else {
+      current_reaction_div = $(ignoreDiv).find(`[aria-haspopup="menu"][role="tab"]`)
+      // console.log("current_reaction_div in more ::: ", current_reaction_div);
+    }
+  }
+}
+
+const collectDataTillEnd = (dialogue) => {
+  const memberinterval = setInterval(() => {
+    // console.log("dialogue ::: ", $(dialogue));
+    let memberListDiv = $(dialogue).find('div[aria-label="Add friend"]:not(.selected)');
+    // console.log("memberListDiv 1 ::: ", memberListDiv);
+    memberListDiv = Object.values(memberListDiv);
+    memberListDiv.splice(memberListDiv.length - 2, 2)
+    // console.log("memberListDiv ::: ", memberListDiv);
+    if (memberListDiv && memberListDiv.length > 0 && count < 15) {
+      clearInterval(memberinterval)
+      const scrolElem = memberListDiv[memberListDiv.length - 1];
+      console.log("scrolElem ::: ", scrolElem);
+      count = 0;
+      addFriendList = [...addFriendList, ...memberListDiv];
+      halfPagescroll(scrolElem)
+
+      memberListDiv.forEach(el => {
+        if (!$(el).hasClass('selected')) {
+          $(el).addClass('selected')
+        }
+      })
+      startFetchingDetails(dialogue);
+    }
+    else {
+      count++;
+      if (count >= 15) {
+        clearInterval(memberinterval)
+      }
+    }
+  }, 1000)
+}
+
+const startFetchingDetails = async (dialogue) => {
+  // console.log("dialogue ::: ", dialogue);
+  // console.log("addFriendList ::: ", addFriendList);
+  if (addFriendList && addFriendList.length > 0) {
+    const AddFriendParent = $(addFriendList[0]).closest('div[aria-disabled="false"]');
+    // console.log("Add friend Parent ::: ", AddFriendParent);
+    const imgAnchore = $(AddFriendParent).find('a[role="link"]')
+    // console.log("imgAnchore ::: ", imgAnchore[0]);
+    const name = $(imgAnchore[0]).attr('aria-label');
+    let profileUrl = $(imgAnchore[0]).attr('href').split('__cft__')[0];
+    profileUrl = profileUrl.slice(0, profileUrl.length - 1);
+    let  friendFBId =""
+    if(profileUrl.includes('php')){
+      friendFBId = profileUrl.split("id=")[1];
+    }
+    let payload = {
+      friendName: name,
+      friendProfileUrl: profileUrl,
+      friendProfilePicture: $(imgAnchore[0]).find(`svg[aria-label="${name}"][role="img"]`).find('image').attr('xlink:href'),
+      mutual_friend: '0',
+      friendFbId : friendFBId,
+      sourceName : "Request from post",
+      "finalSource": "post",
+      "sourceUrl": "#"
+    }
+    console.log("payload ::: ", payload);
+    if(groupSettings.gender_filter || groupSettings.country_filter_enabled){
+      await chrome.runtime.sendMessage({
+        action: "getfriendId",
+        memberContact: payload,
+        filter: groupSettings.gender_filter || groupSettings.country_filter_enabled
+      });
+    }
+    else{
+      contactDetails = [...contactDetails, payload];
+      console.log("contactDetails", contactDetails);
+      if (contactDetails.length >= 7) {
+        storeWouldbeFriends(contactDetails, contactDetails.length);
+      }
+    }
+    addFriendList.shift();
+    await helper.sleep(1200)
+    await startFetchingDetails(dialogue);
+  }
+  else{
+    console.log("addFriendList sesh");
+    collectDataTillEnd(dialogue);
+
+  }
+};
+
+const halfPagescroll = (el) => {
+  return new Promise((resolve, reject) => {
+    try {
+      // console.log("invoking half page scroll")
+      el.scrollIntoView({
+        behavior: "smooth",
+      });
+
+      resolve(true);
+    } catch (err) {
+      // console.log("error", err);
+      resolve(false);
+    }
+  });
+};
+
+
+const storeWouldbeFriends = async (facebook_contacts, contactNumber = null) => {
+  console.log("facebook_contacts ::: ", facebook_contacts);
+  console.log("contactDetails ::: ", contactDetails);
+  let { userID } = await helper.getDatafromStorage("fbTokenAndId");
+  const paylaod = {
+    fb_user_id: userID,
+    settingsId: groupSettings.settingsId,
+    settingsType: groupSettings.settings_type,
+    facebook_contacts: [...facebook_contacts],
+  };
+
+  console.log("paylaod fpr req to store it in FRQS ------> ", paylaod);
+  if (contactNumber) {
+    facebook_contacts.splice(0, contactNumber)
+    contactDetails.splice(0, contactNumber)
+  }
+  const respOfFRQS = await common.storeInFRQS(paylaod);
+  console.log("queue count <<<<<<<<<<<<<<<<<<<<<<<<<<<---------------------------- ", queueCount, typeof queueCount)
+
+  console.log("respOfFRQS ::: ", respOfFRQS, respOfFRQS.record_count, typeof respOfFRQS.record_count)
+
+  queueCount = queueCount + respOfFRQS.record_count;
+  console.log("queue count ---------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>> ", queueCount, typeof queueCount)
+  if (respOfFRQS.record_count > 0) {
+    chrome.runtime.sendMessage({ action: "fr_queue_success" })
+    chrome.runtime.sendMessage({
+      action: "showCount",
+      paylaod: {
+        queueCount: queueCount,
+        memberCount: memberCount,
+        source: "post",
+      },
+    });
+
+    await helper.saveDatainStorage("showCount", {
+      queueCount: queueCount,
+      memberCount: memberCount,
+      source: "post",
+    });
+  }
+};
+
+const getMembersFromComments = () => { }
+// aria-label="See who reacted to this"
+// role="dialog"
+// aria-label="Like, 82"
+// aria-selected="false"
+// data-visualcompletion="ignore-dynamic"
+// aria-disabled="false"
+// g[mask^="url("]  image

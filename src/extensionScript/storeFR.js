@@ -18,6 +18,7 @@ let Dynamiccontacts = [],
     sourceUrl = "",
     contactLength = 0,
     genderCounter = 0,
+    counter = 0,
     contactsWithGenderDetails = [];
 
 const reactions = {
@@ -249,8 +250,8 @@ const startStoringContactInfo = async (source, callback) => {
             console.log("Dynamiccontacts :::---::: ", Dynamiccontacts);
             Dynamiccontacts = await arrangeArray(Dynamiccontacts, source);
             if (Dynamiccontacts && Dynamiccontacts.length === 0) {
-                if (source !== "post")
-                    window.location.reload();
+                if (source !== "post"){}
+                    // window.location.reload();
                 else
                     startStoringContactInfo(source, checkAndSaveAllData)
                 const runningStatus = await helper.getDatafromStorage("runAction_" + source);
@@ -259,19 +260,31 @@ const startStoringContactInfo = async (source, callback) => {
             }
             // console.log("Dynamiccontacts ::: ",  Dynamiccontacts);
             if (Dynamiccontacts && Dynamiccontacts.length > 0) contacts = [...contacts, ...Dynamiccontacts]
-            else if (source !== "post") chrome.runtime.sendMessage({ action: "close" })
+            else if (source !== "post" && Dynamiccontacts === undefined) chrome.runtime.sendMessage({ action: "close" })
             if (Dynamiccontacts) Dynamiccontacts.length = 0;
         }
     }
     else
-        if (source !== "post")
+        if (source !== "post") {
             window.location.reload();
-
+        }
     console.log("contacts ::: ", contacts);
     if (contacts && contacts.length) {
+        counter = 0;
         console.log("calling from from startStoringContactInfo");
         contactLength = contactLength + contacts.length;
         callback(source)
+    }
+    else {
+        if (source !== "post") {
+            counter = counter++;
+            if (counter > 10)
+                window.location.reload();
+        }
+        else {
+            if (!groupSettings.comment && !groupSettings.reaction)
+                chrome.runtime.sendMessage({ action: "close" })
+        }
     }
 }
 
@@ -735,9 +748,9 @@ const storeWouldbeFriends = async (facebook_contacts, source, contactNumber = nu
                 window.location.reload();
             }
             else {
-                console.log("post and contacts ::::::::::: ", contacts);
+                console.log("post and contacts ::::::::::: ", contacts, contactsWithGenderDetails);
                 if (contactsWithGenderDetails.length === 0) {
-                    if (contacts.length === 0) {
+                    if (contacts.length === 0 && Dynamiccontacts.length === 0) {
                         if (groupSettings.comment && !groupSettings.reaction) {
                             if (page_info && page_info.has_next_page === false) {
                                 chrome.runtime.sendMessage({ action: "close" })

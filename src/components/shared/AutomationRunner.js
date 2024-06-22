@@ -9,57 +9,58 @@ import { BoxOutIcon } from '../../assets/icons/Icons';
 
 const AutomationRunner = ({ setrunningScript, setRequestActive, statistics, source }) => {
   const [stats, setStats] = useState(statistics);
+  useEffect(() => {
+    chrome.runtime.onMessage.addListener(
+      async (request, sender, sendResponse) => {
+        console.log("request ::: ****************************** ", request);
+        switch (request.action) {
+          case "FRSendCount":
+            // setFRProgress(request.FriendRequestCount);
+            break;
 
-  chrome.runtime.onMessage.addListener(
-    async (request, sender, sendResponse) => {
-      console.log("request ::: ****************************** ", request);
-      switch (request.action) {
-        case "FRSendCount":
-          // setFRProgress(request.FriendRequestCount);
-          break;
+          case "profile_viewed":
+            // setProfileViewed(request.profile_viewed);
+            break;
+          case "close":
+            // console.log("Close the tabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+            window.close();
+            break;
 
-        case "profile_viewed":
-          // setProfileViewed(request.profile_viewed);
-          break;
-        case "close" : 
-        // console.log("Close the tabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
-        window.close();
-        break;
+          case "stop":
+            // setModalOpen(false);
+            setrunningScript(false);
+            setRequestActive("groups");
+            break;
 
-        case "stop":
-          // setModalOpen(false);
-          setrunningScript(false);
-          setRequestActive("groups");
-          break;
-
-        case "showCount":
-          console.log("showCount", request);
-          if(request.paylaod.source === source){
+          case "showCount":
+            console.log("showCount", request);
+            if (request.paylaod.source === source) {
               setStats(request.paylaod)
-          }
-          // if(request.payload.source === "groups"){
-          //     setStats(request.payload)
-          // }
-          // if(request.payload.source === "post"){
-          //     setStats(request.payload)
-          // }
-          // if(request.payload.source === "suggestions"){
-          //     setStats(request.payload)
-          // }
-          break;
-        default:
-          break;
+            }
+            // if(request.payload.source === "groups"){
+            //     setStats(request.payload)
+            // }
+            // if(request.payload.source === "post"){
+            //     setStats(request.payload)
+            // }
+            // if(request.payload.source === "suggestions"){
+            //     setStats(request.payload)
+            // }
+            break;
+          default:
+            break;
+        }
       }
-    }
-  );
+    );
+  }, [])
 
   useEffect(() => {
     (async () => {
-      
+
       const showCount = await helper.getDatafromStorage("showCount");
       // console.log("showCount :: local storage :::::::: ", showCount);
-      if(showCount && showCount.source === source)
-          setStats(showCount)
+      if (showCount && showCount.source === source)
+        setStats(showCount)
       const frsentcount = await helper.getDatafromStorage("FRSendCount");
       const profile_viewed = await helper.getDatafromStorage("profile_viewed");
       // console.log("frsentcount ::::::::::::: ", frsentcount)

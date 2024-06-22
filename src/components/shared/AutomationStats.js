@@ -9,52 +9,53 @@ const AutomationStats = (props) => {
   const [fRProgress, setFRProgress] = useState(0);
   const [profileViewed, setProfileViewed] = useState(0);
   const [stats, setStats] = useState(props.stats);
-  const [source]= useState(props.source ? props.source : "")
+  const [source] = useState(props.source ? props.source : "")
+  useEffect(() => {
+    chrome.runtime.onMessage.addListener(
+      async (request, sender, sendResponse) => {
+        // console.log("request ::: ***************Stats*************** ", request);
+        switch (request.action) {
+          case "FRSendCount":
+            setFRProgress(request.FriendRequestCount);
+            break;
 
-  chrome.runtime.onMessage.addListener(
-    async (request, sender, sendResponse) => {
-      console.log("request ::: ***************Stats*************** ", request);
-      switch (request.action) {
-        case "FRSendCount":
-          setFRProgress(request.FriendRequestCount);
-          break;
-
-        case "profile_viewed":
-          setProfileViewed(request.profile_viewed);
-          break;
+          case "profile_viewed":
+            setProfileViewed(request.profile_viewed);
+            break;
 
 
-        case "stop":
-          setModalOpen(false);
-          props.setrunningScript(false);
-          props.setRequestActive("groups");
-          break;
+          case "stop":
+            setModalOpen(false);
+            props.setrunningScript(false);
+            props.setRequestActive("groups");
+            break;
 
           case "showCount":
-            console.log("showCount", request, request.paylaod);
-            console.log("showCount.paylaod.source", request.paylaod.source);
-            if(request.paylaod.source === source){
-                setStats(request.paylaod)
+            // console.log("showCount", request, request.paylaod);
+            // console.log("showCount.paylaod.source", request.paylaod.source);
+            if (request.paylaod.source === source) {
+              setStats(request.paylaod)
             }
 
-        default:
-          break;
+          default:
+            break;
+        }
       }
-    }
-  );
+    );
+  }, []);
 
-useEffect(()=>{
-  // console.log("stats ---------------------->> ", stats);
-}, [stats])
+  useEffect(() => {
+    // console.log("stats ---------------------->> ", stats);
+  }, [stats])
 
   useEffect(() => {
     (async () => {
       // console.log("Automation stats ====================> ", props);
-      
+
       const showCount = await helper.getDatafromStorage("showCount");
       // console.log("showCount :: local storage :::::::: ", showCount);
-      if(showCount && showCount.source === source)
-          setStats(showCount)
+      if (showCount && showCount.source === source)
+        setStats(showCount)
       const frsentcount = await helper.getDatafromStorage("FRSendCount");
       const profile_viewed = await helper.getDatafromStorage("profile_viewed");
       // console.log("frsentcount ::::::::::::: ", frsentcount)
