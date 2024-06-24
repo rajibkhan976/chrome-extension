@@ -264,8 +264,9 @@ chrome.runtime.onMessageExternal.addListener(async function (
   // console.log("request ::::::-> ", request)
   chrome.storage.local.set({ senExternalResponse: sendResponseExternal });
   switch (request.action) {
-    case "frienderLogin":
-      //console.log("frienderLogin_+_+_+_+_+_+_+_+_+_+_+_+", request.userPlan, request);
+    case "frienderLogin" : 
+      console.log("frienderLogin_+_+_+_+_+_+_+_+_+_+_+_+", request.userPlan, request);
+      FrQueue_Manager();
       await helper.saveDatainStorage("fr_token", request.frLoginToken)
       await helper.saveDatainStorage("user_plan", Number(request.userPlan));
       fbDtsg(async (fbDtsg, userID) => {
@@ -377,8 +378,8 @@ chrome.runtime.onMessageExternal.addListener(async function (
       stopSendingLoop();
       // KIll FRQUE 
       frQue_Kill();
-
-
+      // const frQueLocalSetting =  await helper.getDatafromStorage('frQueueSentCount');
+      // await frQueueSettingSetter({...frQueLocalSetting, run_friend_queue: false});
       chrome.alarms.clear("scheduler");
       chrome.alarms.clear("pendingFR");
       chrome.alarms.clear("reFriending");
@@ -488,7 +489,7 @@ chrome.runtime.onMessageExternal.addListener(async function (
           "runningStatus": resData.frQueueRunning,
           "requestLimited": resData.requestLimited,
           "requestLimitValue": resData.requestLimitValue,
-          "timeDelay": 3,
+          "time_delay": 3,
         }
 
         FrQueue_Manager();
@@ -1327,6 +1328,23 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
       break;
     case "frQueueRunnerAlarm":
       console.log("-----------------Friend Request Queue Runner Scheduler------------------", alarm, alarm.name);
+      const userFBDetails = await helper.getDatafromStorage('fbTokenAndId');
+      if (!userFBDetails.userID) {
+        fbDtsg(async (fbDtsg, userID) => {
+          chrome.storage.local.set({
+            fbTokenAndId: { fbDtsg: fbDtsg, userID: userID },
+          });
+          if (userID) {
+            Frque_runner_checker({ fbDtsg: fbDtsg, userID: userID })
+          } else {
+            console.error("<<User ID not found from facebook>>");
+          }
+
+        });
+      } else {
+        Frque_runner_checker(userFBDetails);
+      }
+
       runFriendRequestQueue();
       break;
     case "CampaignMin":
@@ -2760,15 +2778,15 @@ const campaignToMsqs = async (campaign, indx) => {
 //*Friend request queue: START :::::::::
 async function frQueueSettingSetter(frQueSettings) {
   console.log("frQueueSettingSetter setting before ::::: ", frQueSettings);
-  let settting = {
-    "runningStatus": frQueSettings.run_friend_queue,
-    "requestLimited": frQueSettings.request_limited,
-    "requestLimitValue": frQueSettings.request_limit_value,
-    "timeDelay": frQueSettings.timeDelay,
-  }
-  console.log("New FRQUE setting set ::::: ", settting);
-  const resp = await helper.saveDatainStorage('frQueueSetting', settting);
-  return resp;
+    let settting = {
+      "runningStatus":frQueSettings.run_friend_queue,
+      "requestLimited":frQueSettings.request_limited,
+      "requestLimitValue":frQueSettings.request_limit_value ,
+      "time_delay":frQueSettings.time_delay,
+    }
+    console.log("New FRQUE setting set ::::: ", settting);
+    const resp = await helper.saveDatainStorage('frQueueSetting', settting);
+    return resp;
 }
 
 async function frQueueSentCountInit(userFbId, frQueSettings) {
@@ -2829,8 +2847,8 @@ function frQueFetchAlarm_Start() {
 function frQueFetchAlarm_Stop() {
   chrome.alarms.clear("frQueueFetchAlarm");
 }
-function frQueueRunnerAlarm_Start(timeDelay) {
-  chrome.alarms.create("frQueueRunnerAlarm", { periodInMinutes: timeDelay });
+function frQueueRunnerAlarm_Start(time_delay) {
+  chrome.alarms.create("frQueueRunnerAlarm", { periodInMinutes: time_delay });
 }
 
 function frQueueRunnerAlarm_Stop() {
@@ -2845,10 +2863,30 @@ function frQue_Kill() {
   frQueFetchAlarm_Stop()
 }
 
+const setFrqueAlarms = async (timeDelay) => {
+  chrome.alarms.get("frQueueRunnerAlarm", (alarm) => {
+      if (!alarm) {
+          chrome.alarms.create("frQueueRunnerAlarm", { periodInMinutes: timeDelay });
+          console.log(`Alarm "frQueueRunnerAlarm" created with period: ${timeDelay} minutes`);
+      } else {
+          console.log('Alarm "frQueueRunnerAlarm" already exists');
+      }
+  });
+
+  chrome.alarms.get("frQueueFetchAlarm", (alarm) => {
+      if (!alarm) {
+          chrome.alarms.create("frQueueFetchAlarm", { periodInMinutes: 60 });
+          console.log('Alarm "frQueueFetchAlarm" created with period: 60 minutes');
+      } else {
+          console.log('Alarm "frQueueFetchAlarm" already exists');
+      }
+  });
+};
+
 
 const FrQueue_Manager = async (callFromFetchAlarm = false) => {
-  const userPlan = await helper.getDatafromStorage('user_plan')
-  if (userPlan < 2) {
+  const userPlan= await helper.getDatafromStorage('user_plan')
+  if(!(userPlan > 2)){
     console.log("Free user can't use FRQUE feature");
     frQue_Kill();
     return;
@@ -2856,6 +2894,26 @@ const FrQueue_Manager = async (callFromFetchAlarm = false) => {
   console.log("%c The FRQueueManager STARTED it's process", successColor);
   const userFBDetails = await helper.getDatafromStorage('fbTokenAndId');
   //fetch api call to get the FRQUEUE Settings
+  if(!userFBDetails.userID){
+    fbDtsg((fbDtsg, userID) => {
+      chrome.storage.local.set({
+        fbTokenAndId: { fbDtsg: fbDtsg, userID: userID },
+      });
+      if(userID){
+        FrQue_Initiator({ fbDtsg: fbDtsg, userID: userID })
+      }else{
+        console.error("<<User ID not found from facebook>>");
+      }
+      
+    });
+  }else{
+    FrQue_Initiator(userFBDetails);
+  }
+ 
+}
+
+
+const FrQue_Initiator = async (userFBDetails) => {
   const settingResp = await common.fetchFrQueueSetting(userFBDetails.userID);
   const frQueSettings = settingResp.data[0];
   console.log("FR QueUE Settings", frQueSettings);
@@ -2868,17 +2926,15 @@ const FrQueue_Manager = async (callFromFetchAlarm = false) => {
     //then fetch first 100 data from api:
     const frQueueResp = await common.fetchTopPriorityFrQueueRecords(userFBDetails.userID);
     console.log("fr array api RESPONSE:>> ", frQueueResp);
-    const frQueArray = frQueueResp.data;
+    const frQueArray = frQueueResp.data.length > 0 ? frQueueResp.data : [];
     console.log("fr array api");
     console.log("frque array", frQueArray);
-    if (frQueArray.length > 0) {
       console.log(`${frQueArray.length} Items Added to FR queue storage`, frQueArray);
-      //RESET FR queue storage:
+      //*RESET FR queue storage:
       //delete all in FR queue storage
       await fRQueue.removeAll();
       //Store data in FR queue:
       let add = await fRQueue.addBulk(frQueArray);
-      const fr_token = await helper.getDatafromStorage("fr_token")
       console.log("after add", add);
       //start FR queue Runner alarm start:
       console.log("frQueueRunnerAlarm  started DELAY::: ", frQueSettings.time_delay);
@@ -2886,21 +2942,18 @@ const FrQueue_Manager = async (callFromFetchAlarm = false) => {
       //start FR queue fetch alarm start:
       console.log("frQueueFetchAlarm  started:::");
       frQueFetchAlarm_Start();
-      // runFriendRequestQueue();
 
-    } else {
-      console.log("No data in FR queue STOPPING ALARMS!!!!!");
-      frQue_Kill();
-      return;
-    }
   } else { //! if the Run false:>
     //Kill the FR queue runner
     console.log("Before kill settings ", frQueSettings)
     await frQueueSettingSetter(frQueSettings);
     console.log("KILLING FR queue AS the FR queue runner is OFF!!!!!")
-    frQue_Kill();
+    //frQue_Kill();
   }
 }
+
+// Calling FrQueue_Manager ON serviceworker load:::::::::
+//FrQueue_Manager();
 
 
 //function to check the current FR queue is eligible to run or not
@@ -2923,11 +2976,11 @@ async function isFrQueueEligibleToRun(userFbID, friendFbId) {
     "run_friend_queue": false,
     "request_limited": frQueSettings.requestLimited,
     "request_limit_value": frQueSettings.requestLimitValue,
-    "time_delay": frQueSettings.timeDelay
+    "time_delay": frQueSettings.time_delay
   }
   console.log("new frQueue setting after end LIMIT", frQueuePayload);
   await common.storeFrQueueSetting(frQueuePayload);
-  await frQueueSettingSetter({...frQueuePayload,"timeDelay":frQueSettings.timeDelay});
+  await frQueueSettingSetter(frQueuePayload);
   return false;
 }
 /**
@@ -3008,14 +3061,36 @@ const profileSettingCheck = async (userID, memberId) => {
     if (isRestricted) return false;
   }
   return true;
-}
-/** 
-* Function to send friend request by queue
-*/
-const runFriendRequestQueue = async () => {
-  const userFBDetails = await helper.getDatafromStorage('fbTokenAndId');
-  let first = await fRQueue.pullFromQueue();
-  let isEligible = await isFrQueueEligibleToRun(userFBDetails.userID, first.friendFbId);
+ }
+
+ const Frque_runner_checker = async (userFBDetails) =>{
+  const settingResp = await common.fetchFrQueueSetting(userFBDetails.userID);
+  const frQueSettings = settingResp.data[0];
+    if (frQueSettings && frQueSettings.run_friend_queue) {
+      let first = await fRQueue.pullFromQueue();
+      if(first){
+      runFriendRequestQueue(userFBDetails,first)
+      }else{
+        const frQueueResp = await common.fetchTopPriorityFrQueueRecords(userFBDetails.userID);
+        const frQueArray = frQueueResp.data;
+        if (frQueArray.length > 0) {
+          FrQueue_Manager();
+        }
+      }
+    }
+ }
+ /**
+  * Function to set friend request
+  * @param {*} userFBDetails 
+  * @param {*} first 
+  * @returns 
+  */
+const runFriendRequestQueue = async (userFBDetails,first) => {
+  if (!first || !userFBDetails.userID) {
+    console.log("No friend request in queue or user details not found");
+    return;
+  }
+  let isEligible = await isFrQueueEligibleToRun(userFBDetails.userID,first.friendFbId);
   console.log("Is eligible to run", isEligible);
   let updatePayload = {
     "q_id": first._id,
@@ -3093,7 +3168,7 @@ const runFriendRequestQueue = async () => {
       console.log("user FB details nameeeeee:::::", profileInfo);
       let updateResp;
       if (!sentFrReqResponse.status) {
-        console.log("ADD Friend Button is not There________________::");
+        console.log("GRAPH API Failed OR ADD Friend Button is not working >>>::");
         updatePayload["status"] = 0;
       } else {
         await frQueSentCountIncrement(userFBDetails.userID);
@@ -3141,12 +3216,13 @@ const runFriendRequestQueue = async () => {
     }
 
   } else {
-    console.log(":::KILLING the fr queue AS there is No data  OR NOT ELIGIBLE in local QUEUE !!!!!");
-    frQue_Kill();
+    console.log("::: << NOT >> KILLING the fr queue BUT there is No data  OR NOT ELIGIBLE in local QUEUE !!!!!");
+    //frQue_Kill();
     //stop the process
   }
 }
-//*Calling FrQueue_Manager ON serviceworker load: START :::::::::
-//FrQueue_Manager();
+
+
+
 
 // !Friend request queue: END  :::::::::
