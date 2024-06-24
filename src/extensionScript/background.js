@@ -2915,7 +2915,7 @@ const setFrqueAlarms = async (timeDelay) => {
 
 const FrQueue_Manager = async (callFromFetchAlarm = false) => {
   const userPlan= await helper.getDatafromStorage('user_plan')
-  if(!(userPlan > 2)){
+  if(!(userPlan > 1)){
     console.log("Free user can't use FRQUE feature");
     frQue_Kill();
     return;
@@ -3115,6 +3115,12 @@ const profileSettingCheck = async (userID, memberId) => {
   * @returns 
   */
 const runFriendRequestQueue = async (userFBDetails,first) => {
+  const userPlan= await helper.getDatafromStorage('user_plan')
+  if(!(userPlan > 1)){
+    console.log("Free user can't use FRQUE feature");
+    frQue_Kill();
+    return;
+  }
   if (!first || !userFBDetails.userID) {
     console.log("No friend request in queue or user details not found");
     return;
