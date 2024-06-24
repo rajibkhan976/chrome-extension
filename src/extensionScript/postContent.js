@@ -402,7 +402,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       startOpenDialogues();
       break;
     case "getfriendId":
-      if (shoudIstop) return;
+      // if (shoudIstop) return;
       contactDetails = [...contactDetails, request.memberContact];
       // console.log("contactDetails", contactDetails);
       if (contactDetails.length >= 1) {
