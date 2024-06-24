@@ -254,9 +254,9 @@ const startStoringContactInfo = async (source, callback) => {
                     // window.location.reload();
                 else
                     startStoringContactInfo(source, checkAndSaveAllData)
-                const runningStatus = await helper.getDatafromStorage("runAction_" + source);
-                if (runningStatus === "running")
-                    await helper.saveDatainStorage("runAction_" + source, "");
+                // const runningStatus = await helper.getDatafromStorage("runAction_" + source);
+                // if (runningStatus === "running")
+                //     await helper.saveDatainStorage("runAction_" + source, "");
             }
             // console.log("Dynamiccontacts ::: ",  Dynamiccontacts);
             if (Dynamiccontacts && Dynamiccontacts.length > 0) contacts = [...contacts, ...Dynamiccontacts]

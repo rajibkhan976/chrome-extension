@@ -6,6 +6,7 @@ import { ChromeStorageQueue } from './ChromeStorageQueue.js';
 import generateMessage from "./generateMessage.js";
 const APPURL = process.env.REACT_APP_APP_URL
 const settingApi = process.env.REACT_APP_SETTING_API;
+let isSponsored = false;
 // const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
 const unfriendApi = "https://www.facebook.com/ajax/profile/removefriendconfirm.php?dpr=1";
 const action_url = "https://www.facebook.com/friends/list?opener=fr_sync";
@@ -755,13 +756,13 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         }
       });
       chrome.tabs.query({ currentWindow: false, active: true }, async (tab) => {
-        // console.log("=============================================", tab)
+        console.log("=============================================", tab)
         if (request.source === "post") {
           let tabb = tab[0]
           if (tab[0].favIconUrl === undefined)
             tabb = tab[1];
           const postUrl = await helper.getDatafromStorage('postUrl');
-          const isSponsored = await helper.getDatafromStorage('isSponsored')
+          let isSponsored = await helper.getDatafromStorage('isSponsored')
           console.log("postUrl ::: ", postUrl, isSponsored)
           if (!isSponsored) {
             chrome.tabs.create(
@@ -914,55 +915,82 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 
     case "reSendFriendRequestInGroup":
       let currentTabId;
-      if (request.source === "post") {
-        currentTabId = await helper.getDatafromStorage("PostTabId");
+      isSponsored = await helper.getDatafromStorage('isSponsored')
+      if (!isSponsored) {
+        if (request.source === "post") {
+          currentTabId = await helper.getDatafromStorage("PostTabId");
+        }
+        if (request.source === "suggestions") {
+          currentTabId = await helper.getDatafromStorage("suggestedTabId");
+        }
+        if (request.source === "groups") {
+          currentTabId = await helper.getDatafromStorage("groupTabId");
+        }
+        if (request.source === "friends") {
+          currentTabId = await helper.getDatafromStorage("FriendTabId");
+        }
+          chrome.tabs.sendMessage(Number(currentTabId), request);
       }
-      if (request.source === "suggestions") {
-        currentTabId = await helper.getDatafromStorage("suggestedTabId");
+      if (isSponsored) {
+        console.log("isSponsored : ", isSponsored);
+          currentTabId = await helper.getDatafromStorage("PostTabId");
+        chrome.tabs.sendMessage(Number(currentTabId), { action: "reStartForSponsored", source: "post", response: request.response });
       }
-      if (request.source === "groups") {
-        currentTabId = await helper.getDatafromStorage("groupTabId");
-      }
-      if (request.source === "friends") {
-        currentTabId = await helper.getDatafromStorage("FriendTabId");
-      }
-      chrome.tabs.sendMessage(Number(currentTabId), request);
       break;
 
     case "stop":
+      console.log("stop the flow")
       let currentFBTabId;
-      if (request.source === "post") {
+      isSponsored = await helper.getDatafromStorage('isSponsored')
+      console.log("isSponsored ::: ", isSponsored);
+      if (!isSponsored) {
+        if (request.source === "post") {
+          currentFBTabId = await helper.getDatafromStorage("PostTabId");
+        }
+        if (request.source === "suggestions") {
+          currentFBTabId = await helper.getDatafromStorage("suggestedTabId");
+        }
+        if (request.source === "groups") {
+          currentFBTabId = await helper.getDatafromStorage("groupTabId");
+        }
+        if (request.source === "friends") {
+          currentFBTabId = await helper.getDatafromStorage("FriendTabId");
+        }
+        chrome.tabs.sendMessage(Number(currentFBTabId), request);
+      }
+      if (isSponsored) {
+        console.log("isSponsored : ", isSponsored);
         currentFBTabId = await helper.getDatafromStorage("PostTabId");
+        console.log("currentFBTabId post tab Id ::: ", currentFBTabId, Number(currentFBTabId));
+        chrome.tabs.sendMessage(Number(currentFBTabId), { action: "stopForSponsored", source: "post" });
       }
-      if (request.source === "suggestions") {
-        currentFBTabId = await helper.getDatafromStorage("suggestedTabId");
-      }
-      if (request.source === "groups") {
-        currentFBTabId = await helper.getDatafromStorage("groupTabId");
-      }
-      if (request.source === "friends") {
-        currentFBTabId = await helper.getDatafromStorage("FriendTabId");
-      }
-      chrome.tabs.sendMessage(Number(currentFBTabId), request);
       if (request.source) { FrQueue_Manager() }
       break;
 
     case "pause":
       // console.log("Paused.................. ", request)
       let currentFBTabIdIs;
-      if (request.source === "post") {
-        currentFBTabIdIs = await helper.getDatafromStorage("PostTabId");
+      isSponsored = await helper.getDatafromStorage('isSponsored')
+      if (!isSponsored) {
+        if (request.source === "post") {
+          currentFBTabIdIs = await helper.getDatafromStorage("PostTabId");
+        }
+        if (request.source === "suggestions") {
+          currentFBTabIdIs = await helper.getDatafromStorage("suggestedTabId");
+        }
+        if (request.source === "groups") {
+          currentFBTabIdIs = await helper.getDatafromStorage("groupTabId");
+        }
+        if (request.source === "friends") {
+          currentFBTabIdIs = await helper.getDatafromStorage("FriendTabId");
+        }
+        chrome.tabs.sendMessage(Number(currentFBTabIdIs), request);
       }
-      if (request.source === "suggestions") {
-        currentFBTabIdIs = await helper.getDatafromStorage("suggestedTabId");
+      if (isSponsored) {
+        console.log("isSponsored : ", isSponsored);
+          currentFBTabIdIs = await helper.getDatafromStorage("PostTabId");
+          chrome.tabs.sendMessage(Number(currentFBTabIdIs), { action: "pauseForSponsored", source: "post" });
       }
-      if (request.source === "groups") {
-        currentFBTabIdIs = await helper.getDatafromStorage("groupTabId");
-      }
-      if (request.source === "friends") {
-        currentFBTabIdIs = await helper.getDatafromStorage("FriendTabId");
-      }
-      chrome.tabs.sendMessage(Number(currentFBTabIdIs), request);
       if (request.source) { FrQueue_Manager() }
       break;
     
@@ -1082,9 +1110,10 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
           chrome.tabs.sendMessage(Number(CurrentTabId), { action: "stop", source: "post" })
         }
         console.log("request.postUrl :: ", request.postUrl)
-        if (request.postUrl)
+        if (request.postUrl){
           await helper.saveDatainStorage('postUrl', request.postUrl)
-        else
+          await helper.saveDatainStorage('isSponsored', false)
+        }else
           await helper.saveDatainStorage('isSponsored', request.isSponsored)
         chrome.windows.create({ url: 'popup.html', type: 'popup', width: 799, height: 600 }, async res => {
           console.log("res", res.tabs[0]);

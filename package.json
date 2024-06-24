@@ -50,10 +50,10 @@
     "build:beta": "./scripts/build.beta.sh",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "watch": "npm-watch `build:dev`"
+    "watch": "npm-watch build"
   },
   "watch": {
-    "build:dev": {
+    "build": {
       "patterns": [
         "src/",
         "!src/kyubiSettings.json"
