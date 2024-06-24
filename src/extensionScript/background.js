@@ -1010,12 +1010,16 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                 chrome.tabs.onUpdated.removeListener(listener);
                 setTimeout(async () => {
                 const {contactId} = await chrome.tabs.sendMessage(Number(tabs.id), {action : "getUserId"});
+                console.log("contact id ::: ",contactId);
                 chrome.tabs.remove(tabs.id)
                 const gTabId = await helper.getDatafromStorage("PostTabId");
-                if(request.filter){
-                  const genderCountryTier = await getGenderCountryAndTiers(request.memberContact.friendName);
-                  payload = { ...request, memberContact: {...request.memberContact, friendFbId : contactId ? contactId : "", gender: genderCountryTier.gender, country: genderCountryTier.countryName, tier: genderCountryTier.Tiers} }
-                }
+                console.log("gTabId ::: ", gTabId);
+                  payload = { ...request, memberContact: {...request.memberContact, friendFbId : contactId ? contactId : ""} }
+                  if(request.filter){
+                    const genderCountryTier = await getGenderCountryAndTiers(request.memberContact.friendName);
+                    payload = { ...payload, memberContact: {...request.memberContact, gender: genderCountryTier.gender, country: genderCountryTier.countryName, tier: genderCountryTier.Tiers} }
+                  }
+                console.log("payload ::: ", payload);
                 chrome.tabs.sendMessage(Number(gTabId), payload);
               }, 1000);
               }
@@ -1024,11 +1028,13 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         );
       } else{
         const gTabId = await helper.getDatafromStorage("PostTabId");
-        if(request.filter){
-          const genderCountryTier = await getGenderCountryAndTiers(request.memberContact.friendName);
-          payload = { ...request, memberContact: {...request.memberContact, gender: genderCountryTier.gender, country: genderCountryTier.countryName, tier: genderCountryTier.Tiers} }
-        }
-        chrome.tabs.sendMessage(Number(gTabId), payload);
+          console.log("gTabId ::: ", gTabId);
+            payload = { ...request}
+            if(request.filter){
+            const genderCountryTier = await getGenderCountryAndTiers(request.memberContact.friendName);
+            payload = { ...paylaod, memberContact: {...request.memberContact, gender: genderCountryTier.gender, country: genderCountryTier.countryName, tier: genderCountryTier.Tiers} }
+          }
+          chrome.tabs.sendMessage(Number(gTabId), payload);
       }
       break;
     case "getGenderCountryAndTier":

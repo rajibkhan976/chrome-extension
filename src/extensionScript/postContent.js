@@ -405,7 +405,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
       if (shoudIstop) return;
       contactDetails = [...contactDetails, request.memberContact];
       // console.log("contactDetails", contactDetails);
-      if (contactDetails.length >= 7) {
+      if (contactDetails.length >= 1) {
         if (shoudIstop) return;
         storeWouldbeFriends(contactDetails, contactDetails.length);
       }
@@ -574,9 +574,13 @@ const startFetchingDetails = async (dialogue) => {
     const AddFriendParent = $(addFriendList[0]).closest('div[aria-disabled="false"]');
     // console.log("Add friend Parent ::: ", AddFriendParent);
     const imgAnchore = $(AddFriendParent).find('a[role="link"]')
-    // console.log("imgAnchore ::: ", imgAnchore[0]);
+    console.log("imgAnchore ::: ", imgAnchore[0]);
     const name = $(imgAnchore[0]).attr('aria-label');
-    let profileUrl = $(imgAnchore[0]).attr('href').split('__cft__')[0];
+    let profileUrl = $($($(AddFriendParent).children().eq(0)).children().eq(1)).children().eq(0);
+    console.log("profile Url ::: 1 ", profileUrl);
+    profileUrl = $(profileUrl).find('a[role="link"]')
+    console.log("profile Url ::: 2 ", profileUrl);
+    profileUrl = $(profileUrl[0]).attr('href').split('__cft__')[0];
     profileUrl = profileUrl.slice(0, profileUrl.length - 1);
     let friendFBId = ""
     if (profileUrl.includes('php')) {
@@ -593,25 +597,13 @@ const startFetchingDetails = async (dialogue) => {
       "sourceUrl": "#"
     }
     console.log("payload ::: ", payload);
-    if (groupSettings.gender_filter || groupSettings.country_filter_enabled) {
+    // if (groupSettings.gender_filter || groupSettings.country_filter_enabled) {
       genDialogue = dialogue
       await chrome.runtime.sendMessage({
         action: "getfriendId",
         memberContact: payload,
         filter: groupSettings.gender_filter || groupSettings.country_filter_enabled
       });
-    }
-    else {
-      contactDetails = [...contactDetails, payload];
-      console.log("contactDetails", contactDetails);
-      if (contactDetails.length >= 7) {
-        storeWouldbeFriends(contactDetails, contactDetails.length);
-      }
-      addFriendList.shift();
-      await startFetchingDetails(dialogue);
-    }
-    // await helper.sleep(1200)
-    // await startFetchingDetails(dialogue);
   }
   else {
     if (shoudIstop) return;
