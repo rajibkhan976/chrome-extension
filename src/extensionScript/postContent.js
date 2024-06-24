@@ -442,14 +442,16 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 
 const startOpenDialogues = () => {
   if (groupSettings.reaction) {
-    let reactionholder = $($(postFigure).find('span[aria-label="See who reacted to this"]')).parent();
+    // document.querySelector('span[role="toolbar"][aria-label="See who reacted to this"]').querySelector('div[role="button"]').click()
+    let reactionholder = $(postFigure).find('span[role="toolbar"][aria-label="See who reacted to this"]');
     reactionholder = $(reactionholder).find('div[role="button"]')
-    reactionholder = reactionholder[reactionholder.length - 1]
-    // console.log("reactionholder ::: ", reactionholder);
+    reactionholder = reactionholder[0]//[reactionholder.length - 1]
+    console.log("reactionholder ::: ", reactionholder);
     if (reactionholder) {
       // console.log($(reactionholder).find('span:not([aria-hidden="true"])'));
       // console.log($(reactionholder).find('span[aria-hidden="true"]'));
-      $(reactionholder).find('span[aria-hidden="true"]')[0].click();
+      // $(reactionholder).find('span[aria-hidden="true"]')[0].click();
+      reactionholder.click();
       const reactorsInterval = setInterval(() => {
         // console.log(`$('div[role="dialog"]') =====>> >  >   >    >     >      > `, $('div[role="dialog"][aria-labelledby^=":"]'));
         const ignoreDiv = $('div[role="dialog"][aria-labelledby^=":"]').find('div[data-visualcompletion="ignore-dynamic"]')
@@ -482,6 +484,10 @@ const getMembersOfReaction = (ignoreDiv, dialogue) => {
     console.log("current_reaction_div area checked ::: ", current_reaction_div && current_reaction_div[0] && $(current_reaction_div[0]).attr("aria-checked") === "false");
     console.log("current_reaction_div aria hidden ::: ", current_reaction_div && current_reaction_div[0] && $(current_reaction_div[0]).attr("aria-hidden") === "false");
     if (shoudIstop) return;
+    // console.log("sob miliye --- > ", current_reaction_div && current_reaction_div.length > 0 && 
+    //   ($(current_reaction_div[0]).attr("aria-hidden") === "false" || 
+    //   $(current_reaction_div[0]).attr("aria-checked") === "false")
+    // );
     if (current_reaction_div && current_reaction_div.length > 0 && ($(current_reaction_div[0]).attr("aria-hidden") === "false" || $(current_reaction_div[0]).attr("aria-checked") === "false")) {
       current_reaction_div[0].click();
       collectDataTillEnd(dialogue)
@@ -517,7 +523,7 @@ const getMembersOfReaction = (ignoreDiv, dialogue) => {
 
 const collectDataTillEnd = (dialogue) => {
   const memberinterval = setInterval(async () => {
-    // console.log("dialogue ::: ", $(dialogue));
+    console.log("dialogue ::: ", $(dialogue));
     let memberListDiv = $(dialogue).find('div[aria-label="Add friend"]:not(.selected)');
     // console.log("memberListDiv 1 ::: ", memberListDiv);
     memberListDiv = Object.values(memberListDiv);
@@ -558,8 +564,11 @@ const collectDataTillEnd = (dialogue) => {
       count++;
       if (count >= 15) {
         clearInterval(memberinterval)
+        count = 0;
         groupSettings.reaction_type.shift();
+        // console.log("groupSettings.reaction_type ::::::::::: ", groupSettings.reaction_type);
         const ignoreDiv = $('div[role="dialog"][aria-labelledby^=":"]').find('div[data-visualcompletion="ignore-dynamic"]')
+        // console.log("ignoreDiv ::: ", ignoreDiv, ignoreDiv[0]);
         getMembersOfReaction(ignoreDiv[0], dialogue);
       }
     }
