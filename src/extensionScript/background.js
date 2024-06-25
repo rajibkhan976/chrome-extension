@@ -711,6 +711,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     case "sendFriendRequestInGroup":
       // console.log("request ::::::::::::::::: ", request)
       chrome.tabs.query({ currentWindow: true, active: true }, async (tab) => {
+        await helper.saveDatainStorage('isSponsored', false)
         // console.log("tabInfo ::: ", tab[0].url, tab[0].url.includes("https://www.facebook.com/groups/"), tab[0].url.includes("people"));
         if (
           tab &&

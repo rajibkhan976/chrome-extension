@@ -163,6 +163,7 @@ function addCFmenuLink(postBodyEl, menueItems) {
       "why am i seeing this ad?".toLowerCase().trim()) {
       isSponsored = true;
     }
+    // isSponsored = true; // for debugging purspose
     if (
       // $(child)[0].textContent.toLowerCase().trim() ===
       // "why am i seeing this ad?".toLowerCase().trim() || 
@@ -339,6 +340,9 @@ const checkCommentSpan = (postBodyEl) => {
   console.log("post_body ::: ", post_body);
   let coment_section = $(post_body[0]).find('[id^=":r"][role="button"]')
   console.log("coment_section  ::  ", coment_section)
+
+  // coment_section.length = 0 // for debugging purpose
+
   if (coment_section && coment_section.length > 0) {
     // coment_section = $(coment_section[0]).find('span[dir="auto]')[0]
     coment_section[0].click();
@@ -493,6 +497,17 @@ const getMembersOfReaction = (ignoreDiv, dialogue) => {
       collectDataTillEnd(dialogue)
     } else {
       // console.log(`$(current_reaction).attr("aria-hidden") ::: `, $(current_reaction_div[0]).attr("aria-hidden"));
+      let isMore = false,
+        moreBtn;
+      const allEmogiTxt = $(
+        'div[data-visualcompletion="ignore-dynamic"][role="tablist"]'
+      ).find('div[aria-hidden="false"]');
+      //   //console.log("const allEmogiTxt :::::::::::::::: ",allEmogiTxt);
+      for (let emogi of allEmogiTxt)
+        if ($(emogi).text().trim() === "More") {
+          isMore = true;
+          moreBtn = $(emogi);
+        }
       current_reaction_div = $(ignoreDiv).find(`[aria-haspopup="menu"][role="tab"]`)
       console.log("current_reaction_div in more ::: ", current_reaction_div);
       if (current_reaction_div && current_reaction_div.length > 0) {
@@ -607,12 +622,12 @@ const startFetchingDetails = async (dialogue) => {
     }
     console.log("payload ::: ", payload);
     // if (groupSettings.gender_filter || groupSettings.country_filter_enabled) {
-      genDialogue = dialogue
-      await chrome.runtime.sendMessage({
-        action: "getfriendId",
-        memberContact: payload,
-        filter: groupSettings.gender_filter || groupSettings.country_filter_enabled
-      });
+    genDialogue = dialogue
+    await chrome.runtime.sendMessage({
+      action: "getfriendId",
+      memberContact: payload,
+      filter: groupSettings.gender_filter || groupSettings.country_filter_enabled
+    });
   }
   else {
     if (shoudIstop) return;

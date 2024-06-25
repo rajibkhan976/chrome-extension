@@ -146,11 +146,11 @@ const getEssentialsForGraphApi = async (source, action, settings, targetId = nul
         if (source === "groups") {
             const groupNameInterval = setInterval(async () => {
                 const groupNameDiv = document.querySelector(selectors.main_component).querySelector(selectors.group_name)
-                // console.log("groupNameDiv ::: ", groupNameDiv);
+                console.log("groupNameDiv ::: ", groupNameDiv);
                 if (groupNameDiv !== null) {
                     clearInterval(groupNameInterval)
                     groupName = groupNameDiv.textContent;
-                    // console.log("group name ::: ", groupName);
+                    console.log("group name ::: ", groupName);
                     let countSection = document.querySelector((['div[aria-label="Group navigation"][role="navigation"]']));
                     console.log("count Section in left side ----> ", countSection)
                     if (!countSection)
