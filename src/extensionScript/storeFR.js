@@ -19,6 +19,7 @@ let Dynamiccontacts = [],
     contactLength = 0,
     genderCounter = 0,
     counter = 0,
+    alternativeForComment = false,
     contactsWithGenderDetails = [];
 
 const reactions = {
@@ -41,6 +42,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             break;
         case "start":
             console.log("Lest start -----------------");
+            alternativeForComment = false;
             if (request.source === "post") {
                 shoudIstop = false;
                 queueCount = 0;
@@ -246,12 +248,12 @@ const startStoringContactInfo = async (source, callback) => {
         console.log("startStoringContactInfo");
         // console.log("contacts ::: ", contacts);
         if (!Dynamiccontacts || Dynamiccontacts.length === 0) {
-            Dynamiccontacts = await getContactList(source, page_info ? (page_info.end_cursor ? page_info.end_cursor : null) : null);
+            Dynamiccontacts = await getContactList(source, page_info ? (page_info.end_cursor ? page_info.end_cursor : null) : null, alternativeForComment);
             console.log("Dynamiccontacts :::---::: ", Dynamiccontacts);
             Dynamiccontacts = await arrangeArray(Dynamiccontacts, source);
             if (Dynamiccontacts && Dynamiccontacts.length === 0) {
-                if (source !== "post"){}
-                    // window.location.reload();
+                if (source !== "post") { }
+                // window.location.reload();
                 else
                     startStoringContactInfo(source, checkAndSaveAllData)
                 // const runningStatus = await helper.getDatafromStorage("runAction_" + source);
@@ -288,7 +290,7 @@ const startStoringContactInfo = async (source, callback) => {
     }
 }
 
-const makePayload = async (source, cursor = null) => {
+const makePayload = async (source, cursor = null, alternative) => {
     if (shoudIstop) return;
     switch (source) {
         case "suggestions":
@@ -329,24 +331,41 @@ const makePayload = async (source, cursor = null) => {
             break;
         case "post":
             fb_api_req_friendly_name = "CometUFIReactionsDialogTabContentRefetchQuery"
+            console.log("cursor in make payload ::: ", cursor);
             if (cursor) {
                 if (groupSettings.reaction) {
                     variables = { "count": 10, "cursor": cursor, "feedbackTargetID": feedbackTargetID, "reactionID": reactions[groupSettings.reaction_type[0]], "scale": 1, "id": feedbackTargetID }
                 }
                 if (groupSettings.comment && !groupSettings.reaction) {
-                    doc_id = "25897526923194259"
-                    variables = {
-                        "commentsAfterCount": -1,
-                        "commentsAfterCursor": page_info.end_cursor,
-                        "commentsBeforeCount": null,
-                        "commentsBeforeCursor": null,
-                        "commentsIntentToken": "RANKED_UNFILTERED_CHRONOLOGICAL_REPLIES_INTENT_V1",
-                        "feedLocation": "DEDICATED_COMMENTING_SURFACE",
-                        "focusCommentID": null,
-                        "scale": 1,
-                        "useDefaultActor": false,
-                        "id": feedbackTargetID
-                    };
+                    if (alternativeForComment) {
+                        doc_id = "8249779101722878"
+                        variables = {
+                            "commentsAfterCount": -1,
+                            "commentsAfterCursor": page_info.end_cursor,
+                            "commentsBeforeCount": null,
+                            "commentsBeforeCursor": null,
+                            "commentsIntentToken": "CHRONOLOGICAL_FILTERED_INTENT_V1",
+                            "feedLocation": "PERMALINK",
+                            "focusCommentID": null,
+                            "scale": 1,
+                            "useDefaultActor": false,
+                            "id": feedbackTargetID
+                        };
+                    } else {
+                        doc_id = "25897526923194259"
+                        variables = {
+                            "commentsAfterCount": -1,
+                            "commentsAfterCursor": page_info.end_cursor,
+                            "commentsBeforeCount": null,
+                            "commentsBeforeCursor": null,
+                            "commentsIntentToken": "RANKED_UNFILTERED_CHRONOLOGICAL_REPLIES_INTENT_V1",
+                            "feedLocation": "DEDICATED_COMMENTING_SURFACE",
+                            "focusCommentID": null,
+                            "scale": 1,
+                            "useDefaultActor": false,
+                            "id": feedbackTargetID
+                        };
+                    }
                 }
             }
             else {
@@ -355,15 +374,28 @@ const makePayload = async (source, cursor = null) => {
                     variables = { "count": 10, "cursor": null, "feedbackTargetID": feedbackTargetID, "reactionID": reactions[groupSettings.reaction_type[0]], "scale": 1, "id": feedbackTargetID }
                 }
                 if (groupSettings.comment && !groupSettings.reaction) {
-                    doc_id = 7473574026083162;
-                    variables = {
-                        "commentsIntentToken": "RANKED_UNFILTERED_CHRONOLOGICAL_REPLIES_INTENT_V1",
-                        "feedLocation": "DEDICATED_COMMENTING_SURFACE",
-                        "feedbackSource": 110,
-                        "focusCommentID": null,
-                        "scale": 1,
-                        "useDefaultActor": false,
-                        "id": feedbackTargetID
+                    if (alternativeForComment) {
+                        doc_id = 8040492259346602;
+                        variables = {
+                            "commentsIntentToken": "CHRONOLOGICAL_FILTERED_INTENT_V1",
+                            "feedLocation": "PERMALINK",
+                            "feedbackSource": 110,
+                            "focusCommentID": null,
+                            "scale": 1,
+                            "useDefaultActor": false,
+                            "id": feedbackTargetID
+                        }
+                    } else {
+                        doc_id = 7473574026083162;
+                        variables = {
+                            "commentsIntentToken": "RANKED_UNFILTERED_CHRONOLOGICAL_REPLIES_INTENT_V1",
+                            "feedLocation": "DEDICATED_COMMENTING_SURFACE",
+                            "feedbackSource": 2,
+                            "focusCommentID": null,
+                            "scale": 1,
+                            "useDefaultActor": false,
+                            "id": feedbackTargetID
+                        }
                     }
                 }
             }
@@ -390,10 +422,10 @@ const makePayload = async (source, cursor = null) => {
     return payload;
 };
 
-const getContactList = async (source, cursor = null) => {
+const getContactList = async (source, cursor = null, alternative = false) => {
     // console.log("cursor in get contact list ::: ", cursor);
     if (shoudIstop) return;
-    const payload = await makePayload(source, cursor)
+    const payload = await makePayload(source, cursor, alternative)
     if (shoudIstop) return;
     let memberlist = await fetch(
         "https://www.facebook.com/api/graphql/",
@@ -484,9 +516,15 @@ const getContactList = async (source, cursor = null) => {
             memberlist = memberlist && memberlist.data && memberlist.data.node &&
                 memberlist.data.node.comment_rendering_instance_for_feed_location &&
                 memberlist.data.node.comment_rendering_instance_for_feed_location.comments
-
+            // console.log("memberlist ::: ", memberlist);
             page_info = memberlist && memberlist.page_info;
+            console.log("page_info ::: ", page_info.end_cursor);
             memberlist = memberlist.edges;
+            console.log("cursor ::: ", cursor);
+            if (memberlist.length === 0) {
+                alternativeForComment = true;
+                await getContactList(source, cursor, true)
+            }
         }
         if (groupSettings.reaction && !groupSettings.comment) {
             memberlist = memberlist && memberlist.data && memberlist.data.node;
@@ -718,8 +756,8 @@ const storeWouldbeFriends = async (facebook_contacts, source, contactNumber = nu
     console.log("queue count <<<<<<<<<<<<<<<<<<<<<<<<<<<---------------------------- ", queueCount, typeof queueCount)
 
     console.log("respOfFRQS ::: ", respOfFRQS, respOfFRQS.record_count, typeof respOfFRQS.record_count)
-
-    queueCount = queueCount + respOfFRQS.record_count;
+    const recordCount = respOfFRQS ? (respOfFRQS.record_count !== undefined || respOfFRQS.record_count !== null ? respOfFRQS.record_count : 0) : 0;
+    queueCount = queueCount + recordCount;
     console.log("queue count ---------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>> ", queueCount, typeof queueCount)
     if (respOfFRQS.record_count > 0) {
         chrome.runtime.sendMessage({ action: "fr_queue_success" })
