@@ -145,7 +145,15 @@ const getEssentialsForGraphApi = async (source, action, settings, targetId = nul
         }
         if (source === "groups") {
             const groupNameInterval = setInterval(async () => {
-                const groupNameDiv = document.querySelector(selectors.main_component).querySelector(selectors.group_name)
+                let groupNameDiv = document.querySelector(selectors.main_component).querySelector(selectors.group_name)
+                console.log("groupNameDiv ::: ", groupNameDiv);
+                if(groupNameDiv === null){
+                    groupNameDiv = document.querySelector(selectors.groupHeader).querySelector(selectors.main_component).querySelector(selectors.group_name)
+                }
+                console.log("groupNameDiv ::: ", groupNameDiv);
+                if(groupNameDiv === null){
+                    groupNameDiv = document.querySelector(selectors.groupHeader).querySelector(selectors.group_name)
+                }
                 console.log("groupNameDiv ::: ", groupNameDiv);
                 if (groupNameDiv !== null) {
                     clearInterval(groupNameInterval)
